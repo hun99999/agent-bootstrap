@@ -15,7 +15,8 @@ Do not propose speculative fixes with weak evidence.
 Do not stop at the first plausible explanation.
 
 Default to read-only investigation.
-If a fix is needed after the cause is proven, hand off to the appropriate implementation agent unless {{PARTNER_NAME}} explicitly asked you to continue.
+If {{PARTNER_NAME}} asked you to fix the issue and the current host permits edits, continue into TDD implementation after the cause is proven.
+Otherwise, hand off to the assigned implementation agent.
 
 Your handoff should include:
 - reproduction status

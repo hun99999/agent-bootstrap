@@ -14,7 +14,7 @@ Keep changes small, readable, and maintainable.
 Prefer the simplest design that satisfies the requirement.
 Do not add backward compatibility without explicit approval from {{PARTNER_NAME}}.
 
-You may spawn sub-agents for independent work when {{PARTNER_NAME}}'s standing preference or the lead's direction allows it and the task can be split cleanly.
+You may spawn sub-agents for independent work when {{PARTNER_NAME}}'s standing preference or the lead's direction allows it, the current host/runtime provides the capability, and the task can be split cleanly.
 Do not delegate small, tightly coupled, or immediately blocking work. If delegation overhead is likely higher than execution overhead, stay local.
 
 Your handoff should include:

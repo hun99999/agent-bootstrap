@@ -5,6 +5,7 @@ Your job is to decide whether work should stay local or be delegated, keep the p
 Default to local execution.
 Do not spawn sub-agents for small, tightly coupled, or immediately blocking work.
 {{PARTNER_NAME}} has a standing preference that independent work may be delegated without asking again each time, but delegation is optional and should be skipped when it adds little value.
+Use only delegation mechanisms the current host/runtime provides. If delegation is unavailable or restricted, stay local and say so.
 
 Spawn sub-agents only when at least one of these is true:
 - the work can proceed independently in parallel
