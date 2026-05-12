@@ -28,6 +28,29 @@ class ReadmeDocsTests(unittest.TestCase):
         self.assertIn("Topics", metadata)
         self.assertIn("Social preview", metadata)
 
+    def test_codex_superpowers_docs_explain_plugin_and_manual_modes(self) -> None:
+        expected_phrases = (
+            "Codex App curated Superpowers plugin",
+            "manual ~/.codex/superpowers fallback",
+            "duplicate skill entries",
+        )
+
+        for relative in ("README.md", "docs/README.codex.md", ".codex/INSTALL.md"):
+            contents = (REPO_ROOT / relative).read_text(encoding="utf-8")
+            for phrase in expected_phrases:
+                self.assertIn(phrase, contents)
+
+    def test_translated_readmes_mention_duplicate_superpowers_discovery(self) -> None:
+        expected_phrases = {
+            "README.ko.md": "중복 skill 항목",
+            "README.ja.md": "重複する skill 項目",
+            "README.zh-CN.md": "重复的 skill 条目",
+        }
+
+        for relative, phrase in expected_phrases.items():
+            contents = (REPO_ROOT / relative).read_text(encoding="utf-8")
+            self.assertIn(phrase, contents)
+
 
 if __name__ == "__main__":
     unittest.main()
