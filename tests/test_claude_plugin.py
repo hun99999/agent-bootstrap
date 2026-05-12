@@ -1,4 +1,6 @@
+import importlib.util
 import json
+import tempfile
 import unittest
 from pathlib import Path
 
@@ -8,6 +10,49 @@ MARKETPLACE_PATH = REPO_ROOT / ".claude-plugin" / "marketplace.json"
 PLUGIN_ROOT = REPO_ROOT / "plugins" / "process-first-agents"
 PLUGIN_MANIFEST_PATH = PLUGIN_ROOT / ".claude-plugin" / "plugin.json"
 PLUGIN_SETTINGS_PATH = PLUGIN_ROOT / "settings.json"
+
+
+def parse_frontmatter(markdown: str) -> dict[str, object]:
+    lines = markdown.splitlines()
+    if not lines or lines[0] != "---":
+        return {}
+
+    frontmatter: dict[str, object] = {}
+    current_key: str | None = None
+    for line in lines[1:]:
+        if line == "---":
+            return frontmatter
+        if line.startswith("  - ") and current_key is not None:
+            value = line.removeprefix("  - ")
+            current_value = frontmatter[current_key]
+            if not isinstance(current_value, list):
+                current_value = []
+                frontmatter[current_key] = current_value
+            current_value.append(value)
+            continue
+        if ": " in line:
+            key, value = line.split(": ", 1)
+            frontmatter[key] = value
+            current_key = key
+            continue
+        if line.endswith(":"):
+            key = line[:-1]
+            frontmatter[key] = []
+            current_key = key
+            continue
+        current_key = None
+
+    return frontmatter
+
+
+def load_renderer_module():
+    renderer_path = REPO_ROOT / "scripts" / "render_claude_plugin.py"
+    spec = importlib.util.spec_from_file_location("render_claude_plugin", renderer_path)
+    if spec is None or spec.loader is None:
+        raise ImportError(f"cannot load renderer module from {renderer_path}")
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
 
 
 class ClaudePluginTests(unittest.TestCase):
@@ -30,6 +75,40 @@ class ClaudePluginTests(unittest.TestCase):
         self.assertEqual(manifest["version"], "1.0.0")
         self.assertEqual(settings, {"agent": "eng-lead"})
 
+    def test_plugin_manifest_uses_hun_identity(self) -> None:
+        manifest = json.loads(PLUGIN_MANIFEST_PATH.read_text(encoding="utf-8"))
+
+        self.assertEqual(
+            manifest["author"],
+            {"name": "Hun", "email": "48903443+hun99999@users.noreply.github.com"},
+        )
+        self.assertEqual(
+            manifest["repository"],
+            "https://github.com/hun99999/agent-bootstrap",
+        )
+
+    def test_renderer_outputs_hun_identity(self) -> None:
+        renderer = load_renderer_module()
+        with tempfile.TemporaryDirectory() as temp_dir:
+            plugin_root = Path(temp_dir) / "process-first-agents"
+
+            renderer.render_plugin_bundle(REPO_ROOT, plugin_root, "Hun")
+
+            manifest = json.loads(
+                (plugin_root / ".claude-plugin" / "plugin.json").read_text(
+                    encoding="utf-8"
+                )
+            )
+
+        self.assertEqual(
+            manifest["author"],
+            {"name": "Hun", "email": "48903443+hun99999@users.noreply.github.com"},
+        )
+        self.assertEqual(
+            manifest["repository"],
+            "https://github.com/hun99999/agent-bootstrap",
+        )
+
     def test_generated_agents_have_frontmatter_and_rendered_constitution(self) -> None:
         eng_lead = (PLUGIN_ROOT / "agents" / "eng-lead.md").read_text(encoding="utf-8")
         reviewer = (PLUGIN_ROOT / "agents" / "reviewer.md").read_text(encoding="utf-8")
@@ -41,6 +120,40 @@ class ClaudePluginTests(unittest.TestCase):
         self.assertNotIn("@local.md", eng_lead)
         self.assertIn("name: reviewer", reviewer)
         self.assertIn("description: Review-only work focused on bugs and regressions", reviewer)
+
+    def test_generated_agents_have_claude_frontmatter_policy(self) -> None:
+        read_only_agents = {
+            "planner",
+            "researcher",
+            "debugger",
+            "reviewer",
+            "verifier",
+            "release-manager",
+        }
+        isolated_agents = {
+            "worker",
+            "frontend-engineer",
+            "backend-engineer",
+            "platform-engineer",
+            "data-engineer",
+            "security-engineer",
+            "integrations-engineer",
+            "performance-engineer",
+            "skill-author",
+        }
+
+        for agent_path in sorted((PLUGIN_ROOT / "agents").glob("*.md")):
+            with self.subTest(agent=agent_path.stem):
+                frontmatter = parse_frontmatter(agent_path.read_text(encoding="utf-8"))
+
+                self.assertEqual(frontmatter.get("model"), "inherit")
+                self.assertNotIn("hooks", frontmatter)
+                self.assertNotIn("mcpServers", frontmatter)
+                self.assertNotIn("permissionMode", frontmatter)
+                if agent_path.stem in read_only_agents:
+                    self.assertEqual(frontmatter["disallowedTools"], ["Write", "Edit"])
+                if agent_path.stem in isolated_agents:
+                    self.assertEqual(frontmatter["isolation"], "worktree")
 
 
 if __name__ == "__main__":
