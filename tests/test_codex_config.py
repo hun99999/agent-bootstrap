@@ -67,6 +67,9 @@ class CodexConfigPolicyTests(unittest.TestCase):
             with self.subTest(path=path.relative_to(REPO_ROOT)):
                 config = read_config(path)
 
+                self.assertNotIn('[[custom_agent]]\nagent_type = "eng-lead"\n', config)
+                self.assertNotIn('model = "gpt-5.4"\nmodel_reasoning_effort', config)
+
                 for block in custom_agent_blocks(config):
                     self.assertNotIn('model = "gpt-5.4"', block)
 
