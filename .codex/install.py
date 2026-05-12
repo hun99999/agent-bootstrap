@@ -220,16 +220,6 @@ def path_is_git_repo(path: Path) -> bool:
     return result.returncode == 0 and result.stdout.strip() == "true"
 
 
-def backup_superpowers_dir(target_root: Path, superpowers_root: Path) -> Path:
-    backup_root = (
-        target_root
-        / Path(*BACKUP_NAMESPACE)
-        / datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
-    )
-    copy_to_backup(superpowers_root, backup_root / "superpowers")
-    return backup_root
-
-
 def require_clean_superpowers_checkout(superpowers_root: Path) -> None:
     status = git_stdout("status", "--short", cwd=superpowers_root)
     if status.strip():
@@ -258,6 +248,20 @@ def require_superpowers_checkout_on_remote_head(superpowers_root: Path) -> str:
     return branch_name
 
 
+def require_superpowers_checkout_can_fast_forward(superpowers_root: Path, branch_name: str) -> None:
+    remote_ref = f"origin/{branch_name}"
+    result = subprocess.run(
+        ["git", "merge-base", "--is-ancestor", "HEAD", remote_ref],
+        cwd=superpowers_root,
+        capture_output=True,
+        text=True,
+    )
+    if result.returncode != 0:
+        raise RuntimeError(
+            f"cannot fast-forward superpowers checkout: {superpowers_root} to {remote_ref}"
+        )
+
+
 def preflight_superpowers_install(
     target_root: Path,
     agents_home: Path,
@@ -268,11 +272,19 @@ def preflight_superpowers_install(
         return
 
     superpowers_root = target_root / "superpowers"
-    if superpowers_root.exists() and path_is_git_repo(superpowers_root):
+    if superpowers_root.exists():
+        if not path_is_git_repo(superpowers_root):
+            raise RuntimeError(f"refusing to replace existing superpowers path: {superpowers_root}")
+
         current_remote = git_stdout("remote", "get-url", "origin", cwd=superpowers_root).strip()
-        if current_remote == remote:
-            require_clean_superpowers_checkout(superpowers_root)
-            require_superpowers_checkout_on_remote_head(superpowers_root)
+        if current_remote != remote:
+            raise RuntimeError(
+                f"superpowers remote mismatch: expected {remote}, found {current_remote}"
+            )
+
+        require_clean_superpowers_checkout(superpowers_root)
+        branch_name = require_superpowers_checkout_on_remote_head(superpowers_root)
+        require_superpowers_checkout_can_fast_forward(superpowers_root, branch_name)
 
     link_path = agents_home / "skills" / "superpowers"
     target = target_root / "superpowers" / "skills"
@@ -290,15 +302,13 @@ def prepare_superpowers_checkout(target_root: Path, remote: str) -> Path | None:
         return None
 
     if not path_is_git_repo(superpowers_root):
-        backup_root = backup_superpowers_dir(target_root, superpowers_root)
-        remove_existing_path(superpowers_root)
-        return backup_root
+        raise RuntimeError(f"refusing to replace existing superpowers path: {superpowers_root}")
 
     current_remote = git_stdout("remote", "get-url", "origin", cwd=superpowers_root).strip()
     if current_remote != remote:
-        backup_root = backup_superpowers_dir(target_root, superpowers_root)
-        remove_existing_path(superpowers_root)
-        return backup_root
+        raise RuntimeError(
+            f"superpowers remote mismatch: expected {remote}, found {current_remote}"
+        )
 
     require_clean_superpowers_checkout(superpowers_root)
     return None
@@ -313,17 +323,11 @@ def sync_superpowers_repo(target_root: Path, remote: str) -> tuple[Path | None, 
         git_stdout("clone", "--depth", "1", remote, str(superpowers_root))
     else:
         branch_name = require_superpowers_checkout_on_remote_head(superpowers_root)
+        require_superpowers_checkout_can_fast_forward(superpowers_root, branch_name)
         git_stdout("merge", "--ff-only", f"origin/{branch_name}", cwd=superpowers_root)
 
     commit = verify_superpowers_install(target_root, remote)
     return backup_root, commit
-
-
-def remove_existing_path(path: Path) -> None:
-    if path.is_dir() and not path.is_symlink():
-        shutil.rmtree(path)
-    else:
-        path.unlink()
 
 
 def ensure_superpowers_symlink(codex_home: Path, agents_home: Path) -> None:

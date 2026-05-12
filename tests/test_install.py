@@ -1,4 +1,5 @@
 import re
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -355,6 +356,187 @@ class InstallScriptTests(unittest.TestCase):
             self.assertIn("superpowers checkout is on", result.stderr)
             self.assertIn("expected", result.stderr)
             self.assert_legacy_codex_install_unchanged(codex_home)
+
+    def test_install_refuses_different_superpowers_remote_before_writing_managed_files(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            root = Path(tmpdir)
+            codex_home = root / ".codex"
+            agents_home = root / ".agents"
+            repo_root = self.create_legacy_codex_template_repo(root)
+            remote, working = self.create_superpowers_remote(root)
+            self.commit_superpowers_change(
+                working,
+                "skills/example/SKILL.md",
+                "version 1\n",
+                "Add initial skill",
+            )
+            first_result = self.run_installer(
+                "--partner-name",
+                "Hun",
+                "--codex-home",
+                str(codex_home),
+                "--agents-home",
+                str(agents_home),
+                "--superpowers-remote",
+                str(remote),
+                "--repo-root",
+                str(repo_root),
+            )
+            self.assertEqual(first_result.returncode, 0, msg=first_result.stderr)
+            self.assert_legacy_codex_install_unchanged(codex_home)
+            other_root = root / "other"
+            other_root.mkdir()
+            other_remote, _ = self.create_superpowers_remote(other_root)
+            superpowers_root = codex_home / "superpowers"
+            self.run_git(superpowers_root, "remote", "set-url", "origin", str(other_remote))
+            existing_commit = self.run_git(superpowers_root, "rev-parse", "HEAD").stdout.strip()
+            self.modify_legacy_codex_template_repo(repo_root)
+
+            result = self.run_installer(
+                "--partner-name",
+                "Hun",
+                "--codex-home",
+                str(codex_home),
+                "--agents-home",
+                str(agents_home),
+                "--superpowers-remote",
+                str(remote),
+                "--repo-root",
+                str(repo_root),
+            )
+
+            self.assertNotEqual(result.returncode, 0)
+            self.assertIn("superpowers remote mismatch", result.stderr)
+            self.assert_legacy_codex_install_unchanged(codex_home)
+            self.assertEqual(
+                self.run_git(superpowers_root, "remote", "get-url", "origin").stdout.strip(),
+                str(other_remote),
+            )
+            self.assertEqual(
+                self.run_git(superpowers_root, "rev-parse", "HEAD").stdout.strip(),
+                existing_commit,
+            )
+
+    def test_install_refuses_non_git_superpowers_path_before_writing_managed_files(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            root = Path(tmpdir)
+            codex_home = root / ".codex"
+            agents_home = root / ".agents"
+            repo_root = self.create_legacy_codex_template_repo(root)
+            remote, working = self.create_superpowers_remote(root)
+            self.commit_superpowers_change(
+                working,
+                "skills/example/SKILL.md",
+                "version 1\n",
+                "Add initial skill",
+            )
+            first_result = self.run_installer(
+                "--partner-name",
+                "Hun",
+                "--codex-home",
+                str(codex_home),
+                "--agents-home",
+                str(agents_home),
+                "--superpowers-remote",
+                str(remote),
+                "--repo-root",
+                str(repo_root),
+            )
+            self.assertEqual(first_result.returncode, 0, msg=first_result.stderr)
+            self.assert_legacy_codex_install_unchanged(codex_home)
+            superpowers_root = codex_home / "superpowers"
+            shutil.rmtree(superpowers_root)
+            superpowers_root.mkdir()
+            owned_file = superpowers_root / "owned.txt"
+            owned_content = "user managed\n"
+            owned_file.write_text(owned_content, encoding="utf-8")
+            self.modify_legacy_codex_template_repo(repo_root)
+
+            result = self.run_installer(
+                "--partner-name",
+                "Hun",
+                "--codex-home",
+                str(codex_home),
+                "--agents-home",
+                str(agents_home),
+                "--superpowers-remote",
+                str(remote),
+                "--repo-root",
+                str(repo_root),
+            )
+
+            self.assertNotEqual(result.returncode, 0)
+            self.assertIn("refusing to replace existing superpowers path", result.stderr)
+            self.assert_legacy_codex_install_unchanged(codex_home)
+            self.assertEqual(owned_file.read_text(encoding="utf-8"), owned_content)
+            self.assertFalse((superpowers_root / ".git").exists())
+
+    def test_install_refuses_diverged_superpowers_checkout_before_writing_managed_files(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            root = Path(tmpdir)
+            codex_home = root / ".codex"
+            agents_home = root / ".agents"
+            repo_root = self.create_legacy_codex_template_repo(root)
+            remote, working = self.create_superpowers_remote(root)
+            self.commit_superpowers_change(
+                working,
+                "skills/example/SKILL.md",
+                "version 1\n",
+                "Add initial skill",
+            )
+            first_result = self.run_installer(
+                "--partner-name",
+                "Hun",
+                "--codex-home",
+                str(codex_home),
+                "--agents-home",
+                str(agents_home),
+                "--superpowers-remote",
+                str(remote),
+                "--repo-root",
+                str(repo_root),
+            )
+            self.assertEqual(first_result.returncode, 0, msg=first_result.stderr)
+            self.assert_legacy_codex_install_unchanged(codex_home)
+            superpowers_root = codex_home / "superpowers"
+            self.run_git(superpowers_root, "config", "user.name", "Codex Tests")
+            self.run_git(superpowers_root, "config", "user.email", "codex-tests@example.com")
+            local_skill = superpowers_root / "skills" / "local" / "SKILL.md"
+            local_content = "local commit\n"
+            local_skill.parent.mkdir(parents=True)
+            local_skill.write_text(local_content, encoding="utf-8")
+            self.run_git(superpowers_root, "add", "skills/local/SKILL.md")
+            self.run_git(superpowers_root, "commit", "-m", "Add local skill")
+            local_commit = self.run_git(superpowers_root, "rev-parse", "HEAD").stdout.strip()
+            self.commit_superpowers_change(
+                working,
+                "skills/example/SKILL.md",
+                "version 2\n",
+                "Update skill",
+            )
+            self.modify_legacy_codex_template_repo(repo_root)
+
+            result = self.run_installer(
+                "--partner-name",
+                "Hun",
+                "--codex-home",
+                str(codex_home),
+                "--agents-home",
+                str(agents_home),
+                "--superpowers-remote",
+                str(remote),
+                "--repo-root",
+                str(repo_root),
+            )
+
+            self.assertNotEqual(result.returncode, 0)
+            self.assertIn("cannot fast-forward superpowers checkout", result.stderr)
+            self.assert_legacy_codex_install_unchanged(codex_home)
+            self.assertEqual(
+                self.run_git(superpowers_root, "rev-parse", "HEAD").stdout.strip(),
+                local_commit,
+            )
+            self.assertEqual(local_skill.read_text(encoding="utf-8"), local_content)
 
     def test_install_refuses_to_replace_existing_superpowers_skills_path(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
