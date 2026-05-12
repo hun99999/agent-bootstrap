@@ -17,7 +17,7 @@ def read_config(path: Path) -> str:
 def top_level_text(config: str) -> str:
     lines = []
     for line in config.splitlines():
-        if line.startswith("["):
+        if re.match(r"^\s*\[", line):
             break
         lines.append(line)
     return "\n".join(lines)
@@ -54,11 +54,15 @@ class CodexConfigPolicyTests(unittest.TestCase):
                 config = read_config(path)
                 top_level = top_level_text(config)
 
-                self.assertIn('model = "gpt-5.5"', top_level)
-                self.assertIn('model_reasoning_effort = "xhigh"', top_level)
-                self.assertIn('model_reasoning_summary = "detailed"', top_level)
-                self.assertIn('model_verbosity = "high"', top_level)
-                self.assertIn('plan_mode_reasoning_effort = "xhigh"', top_level)
+                expected_top_level_assignments = {
+                    "model": "gpt-5.5",
+                    "model_reasoning_effort": "xhigh",
+                    "model_reasoning_summary": "detailed",
+                    "model_verbosity": "high",
+                    "plan_mode_reasoning_effort": "xhigh",
+                }
+                for key, value in expected_top_level_assignments.items():
+                    self.assertTrue(has_assignment(top_level, key, value), key)
 
     def test_previous_profile_is_only_gpt_5_4_default_fallback(self) -> None:
         for path in CONFIG_PATHS:
