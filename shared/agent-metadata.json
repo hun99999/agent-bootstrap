@@ -21,11 +21,7 @@
     "opencode_mode": "subagent",
     "read_only": true,
     "claude": {
-      "model": "inherit",
-      "disallowedTools": [
-        "Write",
-        "Edit"
-      ]
+      "model": "inherit"
     }
   },
   "researcher": {
@@ -33,11 +29,7 @@
     "opencode_mode": "subagent",
     "read_only": true,
     "claude": {
-      "model": "inherit",
-      "disallowedTools": [
-        "Write",
-        "Edit"
-      ]
+      "model": "inherit"
     }
   },
   "debugger": {
@@ -45,11 +37,7 @@
     "opencode_mode": "subagent",
     "read_only": true,
     "claude": {
-      "model": "inherit",
-      "disallowedTools": [
-        "Write",
-        "Edit"
-      ]
+      "model": "inherit"
     }
   },
   "frontend-engineer": {
@@ -120,11 +108,7 @@
     "opencode_mode": "subagent",
     "read_only": true,
     "claude": {
-      "model": "inherit",
-      "disallowedTools": [
-        "Write",
-        "Edit"
-      ]
+      "model": "inherit"
     }
   },
   "verifier": {
@@ -132,11 +116,7 @@
     "opencode_mode": "subagent",
     "read_only": true,
     "claude": {
-      "model": "inherit",
-      "disallowedTools": [
-        "Write",
-        "Edit"
-      ]
+      "model": "inherit"
     }
   },
   "release-manager": {
@@ -144,11 +124,7 @@
     "opencode_mode": "subagent",
     "read_only": true,
     "claude": {
-      "model": "inherit",
-      "disallowedTools": [
-        "Write",
-        "Edit"
-      ]
+      "model": "inherit"
     }
   },
   "skill-author": {

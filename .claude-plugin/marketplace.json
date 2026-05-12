@@ -1,5 +1,8 @@
 {
   "name": "agent-bootstrap",
+  "owner": {
+    "name": "Hun"
+  },
   "description": "Marketplace for process-first Claude Code agents",
   "plugins": [
     {

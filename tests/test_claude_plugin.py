@@ -1,5 +1,6 @@
 import importlib.util
 import json
+import subprocess
 import tempfile
 import unittest
 from pathlib import Path
@@ -10,6 +11,12 @@ MARKETPLACE_PATH = REPO_ROOT / ".claude-plugin" / "marketplace.json"
 PLUGIN_ROOT = REPO_ROOT / "plugins" / "process-first-agents"
 PLUGIN_MANIFEST_PATH = PLUGIN_ROOT / ".claude-plugin" / "plugin.json"
 PLUGIN_SETTINGS_PATH = PLUGIN_ROOT / "settings.json"
+MINIMUM_READ_ONLY_DISALLOWED_TOOLS = {
+    "Write",
+    "Edit",
+    "MultiEdit",
+    "NotebookEdit",
+}
 
 
 def parse_frontmatter(markdown: str) -> dict[str, object]:
@@ -56,15 +63,33 @@ def load_renderer_module():
 
 
 class ClaudePluginTests(unittest.TestCase):
+    def run_claude_plugin_validate(self, path: Path) -> subprocess.CompletedProcess[str]:
+        return subprocess.run(
+            ["claude", "plugin", "validate", str(path)],
+            cwd=REPO_ROOT,
+            capture_output=True,
+            text=True,
+        )
+
     def test_marketplace_points_at_plugin_package(self) -> None:
         marketplace = json.loads(MARKETPLACE_PATH.read_text(encoding="utf-8"))
 
         self.assertEqual(marketplace["name"], "agent-bootstrap")
+        self.assertEqual(marketplace["owner"], {"name": "Hun"})
         self.assertEqual(len(marketplace["plugins"]), 1)
         self.assertEqual(marketplace["plugins"][0]["name"], "process-first-agents")
         self.assertEqual(
             marketplace["plugins"][0]["source"],
             "./plugins/process-first-agents",
+        )
+
+    def test_marketplace_manifest_passes_claude_validation(self) -> None:
+        result = self.run_claude_plugin_validate(MARKETPLACE_PATH)
+
+        self.assertEqual(
+            result.returncode,
+            0,
+            msg=result.stdout + result.stderr,
         )
 
     def test_plugin_manifest_and_settings_enable_eng_lead(self) -> None:
@@ -107,6 +132,22 @@ class ClaudePluginTests(unittest.TestCase):
         self.assertEqual(
             manifest["repository"],
             "https://github.com/hun99999/agent-bootstrap",
+        )
+
+    def test_renderer_outputs_read_only_agent_policy(self) -> None:
+        renderer = load_renderer_module()
+        with tempfile.TemporaryDirectory() as temp_dir:
+            plugin_root = Path(temp_dir) / "process-first-agents"
+
+            renderer.render_plugin_bundle(REPO_ROOT, plugin_root, "Hun")
+
+            planner = parse_frontmatter(
+                (plugin_root / "agents" / "planner.md").read_text(encoding="utf-8")
+            )
+
+        self.assertGreaterEqual(
+            set(planner["disallowedTools"]),
+            MINIMUM_READ_ONLY_DISALLOWED_TOOLS,
         )
 
     def test_generated_agents_have_frontmatter_and_rendered_constitution(self) -> None:
@@ -177,7 +218,10 @@ class ClaudePluginTests(unittest.TestCase):
                 self.assertNotIn("mcpServers", frontmatter)
                 self.assertNotIn("permissionMode", frontmatter)
                 if agent_name in read_only_agents:
-                    self.assertEqual(frontmatter["disallowedTools"], ["Write", "Edit"])
+                    self.assertGreaterEqual(
+                        set(frontmatter["disallowedTools"]),
+                        MINIMUM_READ_ONLY_DISALLOWED_TOOLS,
+                    )
                     self.assertNotIn("isolation", frontmatter)
                 elif agent_name in isolated_agents:
                     self.assertEqual(frontmatter["isolation"], "worktree")

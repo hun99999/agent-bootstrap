@@ -11,6 +11,8 @@ PLACEHOLDER_PATTERN = re.compile(r"\{\{([A-Z0-9_]+)\}\}")
 LOCAL_INCLUDE_LINE = "@local.md"
 PLUGIN_ROOT = Path("plugins/process-first-agents")
 METADATA_PATH = Path("shared/agent-metadata.json")
+CLAUDE_READ_ONLY_DISALLOWED_TOOLS = ["Write", "Edit", "MultiEdit", "NotebookEdit"]
+MARKETPLACE_OWNER = {"name": "Hun"}
 PLUGIN_AUTHOR = {"name": "Hun", "email": "48903443+hun99999@users.noreply.github.com"}
 PLUGIN_REPOSITORY = "https://github.com/hun99999/agent-bootstrap"
 
@@ -98,7 +100,14 @@ def build_agent_markdown(
     claude_metadata = metadata.get("claude", {})
     if not isinstance(claude_metadata, dict):
         raise ValueError(f"invalid Claude metadata for agent '{agent_source.stem}'")
-    for key in ["model", "disallowedTools", "isolation"]:
+    for key in ["model"]:
+        if key in claude_metadata:
+            frontmatter_fields.append((key, claude_metadata[key]))
+    if metadata.get("read_only"):
+        frontmatter_fields.append(("disallowedTools", CLAUDE_READ_ONLY_DISALLOWED_TOOLS))
+    elif "disallowedTools" in claude_metadata:
+        frontmatter_fields.append(("disallowedTools", claude_metadata["disallowedTools"]))
+    for key in ["isolation"]:
         if key in claude_metadata:
             frontmatter_fields.append((key, claude_metadata[key]))
 
@@ -117,6 +126,7 @@ def render_marketplace(repo_root: Path) -> None:
     marketplace_dir.mkdir(parents=True, exist_ok=True)
     marketplace = {
         "name": "agent-bootstrap",
+        "owner": MARKETPLACE_OWNER,
         "description": "Marketplace for process-first Claude Code agents",
         "plugins": [
             {
