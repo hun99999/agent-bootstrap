@@ -115,7 +115,7 @@ class ClaudePluginTests(unittest.TestCase):
 
         self.assertIn("name: eng-lead", eng_lead)
         self.assertIn("description: Primary lead for day-to-day work", eng_lead)
-        self.assertIn("Partner", eng_lead)
+        self.assertIn("Hun", eng_lead)
         self.assertNotIn("{{PARTNER_NAME}}", eng_lead)
         self.assertNotIn("@local.md", eng_lead)
         self.assertIn("name: reviewer", reviewer)

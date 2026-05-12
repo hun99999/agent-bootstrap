@@ -11,6 +11,8 @@ PLACEHOLDER_PATTERN = re.compile(r"\{\{([A-Z0-9_]+)\}\}")
 LOCAL_INCLUDE_LINE = "@local.md"
 PLUGIN_ROOT = Path("plugins/process-first-agents")
 METADATA_PATH = Path("shared/agent-metadata.json")
+PLUGIN_AUTHOR = {"name": "Hun", "email": "48903443+hun99999@users.noreply.github.com"}
+PLUGIN_REPOSITORY = "https://github.com/hun99999/agent-bootstrap"
 
 
 def parse_args() -> argparse.Namespace:
@@ -55,6 +57,18 @@ def load_agent_metadata(repo_root: Path) -> dict[str, dict[str, object]]:
     return json.loads(metadata_path.read_text(encoding="utf-8"))
 
 
+def serialize_frontmatter(fields: list[tuple[str, object]]) -> str:
+    lines = ["---"]
+    for key, value in fields:
+        if isinstance(value, list):
+            lines.append(f"{key}:")
+            lines.extend(f"  - {item}" for item in value)
+        else:
+            lines.append(f"{key}: {value}")
+    lines.append("---")
+    return "\n".join(lines)
+
+
 def build_agent_markdown(
     repo_root: Path,
     agent_source: Path,
@@ -77,14 +91,18 @@ def build_agent_markdown(
         agent_source,
     )
 
-    frontmatter = "\n".join(
-        [
-            "---",
-            f"name: {agent_source.stem}",
-            f"description: {metadata['description']}",
-            "---",
-        ]
-    )
+    frontmatter_fields: list[tuple[str, object]] = [
+        ("name", agent_source.stem),
+        ("description", metadata["description"]),
+    ]
+    claude_metadata = metadata.get("claude", {})
+    if not isinstance(claude_metadata, dict):
+        raise ValueError(f"invalid Claude metadata for agent '{agent_source.stem}'")
+    for key in ["model", "disallowedTools", "isolation"]:
+        if key in claude_metadata:
+            frontmatter_fields.append((key, claude_metadata[key]))
+
+    frontmatter = serialize_frontmatter(frontmatter_fields)
     return "\n\n".join(
         [
             frontmatter,
@@ -125,8 +143,8 @@ def render_plugin_bundle(repo_root: Path, plugin_root: Path, partner_name: str) 
         "name": "process-first-agents",
         "description": "Process-first shared agents for Claude Code",
         "version": "1.0.0",
-        "author": {"name": "Jerry Go", "email": "48903443+jerrygoha@users.noreply.github.com"},
-        "repository": "https://github.com/jerrygoha/agent-bootstrap",
+        "author": PLUGIN_AUTHOR,
+        "repository": PLUGIN_REPOSITORY,
         "license": "MIT",
         "keywords": ["claude-code", "agents", "process-first", "superpowers"],
     }

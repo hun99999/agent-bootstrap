@@ -2,81 +2,162 @@
   "eng-lead": {
     "description": "Primary lead for day-to-day work",
     "opencode_mode": "primary",
-    "read_only": false
+    "read_only": false,
+    "claude": {
+      "model": "inherit"
+    }
   },
   "worker": {
     "description": "Routine implementation worker for scoped changes",
     "opencode_mode": "subagent",
-    "read_only": false
+    "read_only": false,
+    "claude": {
+      "model": "inherit",
+      "isolation": "worktree"
+    }
   },
   "planner": {
     "description": "Planning-focused work for design and execution plans",
     "opencode_mode": "subagent",
-    "read_only": true
+    "read_only": true,
+    "claude": {
+      "model": "inherit",
+      "disallowedTools": [
+        "Write",
+        "Edit"
+      ]
+    }
   },
   "researcher": {
     "description": "Read-only context gathering across the repository",
     "opencode_mode": "subagent",
-    "read_only": true
+    "read_only": true,
+    "claude": {
+      "model": "inherit",
+      "disallowedTools": [
+        "Write",
+        "Edit"
+      ]
+    }
   },
   "debugger": {
     "description": "Root-cause debugging for bugs and regressions",
     "opencode_mode": "subagent",
-    "read_only": true
+    "read_only": true,
+    "claude": {
+      "model": "inherit",
+      "disallowedTools": [
+        "Write",
+        "Edit"
+      ]
+    }
   },
   "frontend-engineer": {
     "description": "Frontend implementation focused on UI behavior",
     "opencode_mode": "subagent",
-    "read_only": false
+    "read_only": false,
+    "claude": {
+      "model": "inherit",
+      "isolation": "worktree"
+    }
   },
   "backend-engineer": {
     "description": "Backend implementation focused on APIs and domain logic",
     "opencode_mode": "subagent",
-    "read_only": false
+    "read_only": false,
+    "claude": {
+      "model": "inherit",
+      "isolation": "worktree"
+    }
   },
   "platform-engineer": {
     "description": "Platform and runtime work across deployment and environments",
     "opencode_mode": "subagent",
-    "read_only": false
+    "read_only": false,
+    "claude": {
+      "model": "inherit",
+      "isolation": "worktree"
+    }
   },
   "data-engineer": {
     "description": "Data pipelines, data models, and migration-oriented work",
     "opencode_mode": "subagent",
-    "read_only": false
+    "read_only": false,
+    "claude": {
+      "model": "inherit",
+      "isolation": "worktree"
+    }
   },
   "security-engineer": {
     "description": "Security-sensitive work across auth and trust boundaries",
     "opencode_mode": "subagent",
-    "read_only": false
+    "read_only": false,
+    "claude": {
+      "model": "inherit",
+      "isolation": "worktree"
+    }
   },
   "integrations-engineer": {
     "description": "External API, webhook, and integration contract work",
     "opencode_mode": "subagent",
-    "read_only": false
+    "read_only": false,
+    "claude": {
+      "model": "inherit",
+      "isolation": "worktree"
+    }
   },
   "performance-engineer": {
     "description": "Latency, throughput, and bottleneck investigation",
     "opencode_mode": "subagent",
-    "read_only": false
+    "read_only": false,
+    "claude": {
+      "model": "inherit",
+      "isolation": "worktree"
+    }
   },
   "reviewer": {
     "description": "Review-only work focused on bugs and regressions",
     "opencode_mode": "subagent",
-    "read_only": true
+    "read_only": true,
+    "claude": {
+      "model": "inherit",
+      "disallowedTools": [
+        "Write",
+        "Edit"
+      ]
+    }
   },
   "verifier": {
     "description": "Verification-focused evidence gathering before completion",
     "opencode_mode": "subagent",
-    "read_only": true
+    "read_only": true,
+    "claude": {
+      "model": "inherit",
+      "disallowedTools": [
+        "Write",
+        "Edit"
+      ]
+    }
   },
   "release-manager": {
     "description": "Release readiness, CI gates, and branch finish decisions",
     "opencode_mode": "subagent",
-    "read_only": true
+    "read_only": true,
+    "claude": {
+      "model": "inherit",
+      "disallowedTools": [
+        "Write",
+        "Edit"
+      ]
+    }
   },
   "skill-author": {
     "description": "Create and refine reusable workflow skills",
     "opencode_mode": "subagent",
-    "read_only": false
+    "read_only": false,
+    "claude": {
+      "model": "inherit",
+      "isolation": "worktree"
+    }
   }
 }

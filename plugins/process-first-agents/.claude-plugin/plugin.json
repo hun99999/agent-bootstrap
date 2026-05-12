@@ -3,10 +3,10 @@
   "description": "Process-first shared agents for Claude Code",
   "version": "1.0.0",
   "author": {
-    "name": "Jerry Go",
-    "email": "48903443+jerrygoha@users.noreply.github.com"
+    "name": "Hun",
+    "email": "48903443+hun99999@users.noreply.github.com"
   },
-  "repository": "https://github.com/jerrygoha/agent-bootstrap",
+  "repository": "https://github.com/hun99999/agent-bootstrap",
   "license": "MIT",
   "keywords": [
     "claude-code",
