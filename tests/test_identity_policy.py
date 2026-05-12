@@ -4,14 +4,15 @@ from pathlib import Path
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
+OLD_USERNAME = "jerry" + "goha"
+OLD_DISPLAY_NAME = "Jerry" + " Go"
 STALE_PATTERNS = (
-    "jerrygoha",
-    "Jerry Go",
-    "48903443+jerrygoha@users.noreply.github.com",
-    "github.com/jerrygoha/agent-bootstrap",
+    OLD_USERNAME,
+    OLD_DISPLAY_NAME,
+    "48903443+" + OLD_USERNAME + "@users.noreply.github.com",
+    "github.com/" + OLD_USERNAME + "/agent-bootstrap",
 )
 ALLOWLIST_PREFIXES = ("docs/superpowers/plans/", "docs/superpowers/specs/")
-ALLOWLIST_FILES = {"tests/test_identity_policy.py"}
 
 
 class IdentityPolicyTests(unittest.TestCase):
@@ -31,9 +32,6 @@ class IdentityPolicyTests(unittest.TestCase):
 
         for relative in self.tracked_files():
             relative_posix = relative.as_posix()
-            if relative_posix in ALLOWLIST_FILES:
-                continue
-
             if relative_posix.startswith(ALLOWLIST_PREFIXES):
                 continue
 
@@ -52,7 +50,7 @@ class IdentityPolicyTests(unittest.TestCase):
         metadata = (REPO_ROOT / "docs" / "repo-metadata.md").read_text(encoding="utf-8")
 
         self.assertIn("gh repo edit hun99999/agent-bootstrap", metadata)
-        self.assertNotIn("gh repo edit jerrygoha/agent-bootstrap", metadata)
+        self.assertNotIn("gh repo edit " + OLD_USERNAME + "/agent-bootstrap", metadata)
 
 
 if __name__ == "__main__":
