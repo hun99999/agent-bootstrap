@@ -35,7 +35,10 @@ def custom_agent_blocks(config: str) -> list[str]:
 
 
 def has_assignment(text: str, key: str, value: str) -> bool:
-    return re.search(rf'(?m)^{re.escape(key)}\s*=\s*"{re.escape(value)}"\s*$', text) is not None
+    return re.search(
+        rf'(?m)^\s*{re.escape(key)}\s*=\s*"{re.escape(value)}"\s*(?:#.*)?$',
+        text,
+    ) is not None
 
 
 class CodexConfigPolicyTests(unittest.TestCase):
@@ -63,8 +66,11 @@ class CodexConfigPolicyTests(unittest.TestCase):
                 config = read_config(path)
                 previous = previous_profile_text(config)
 
-                self.assertIn('model = "gpt-5.4"', previous)
-                gpt_5_4_model_assignments = re.findall(r'(?m)^\s*model\s*=\s*"gpt-5\.4"\s*$', config)
+                self.assertTrue(has_assignment(previous, "model", "gpt-5.4"))
+                gpt_5_4_model_assignments = re.findall(
+                    r'(?m)^\s*model\s*=\s*"gpt-5\.4"\s*(?:#.*)?$',
+                    config,
+                )
                 self.assertEqual(len(gpt_5_4_model_assignments), 1)
 
     def test_legacy_custom_agents_do_not_pin_previous_model(self) -> None:
