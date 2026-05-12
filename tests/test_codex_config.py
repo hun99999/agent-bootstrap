@@ -34,6 +34,10 @@ def custom_agent_blocks(config: str) -> list[str]:
     return re.findall(r"(?ms)^\[\[custom_agent\]\]\n.*?(?=^\[\[custom_agent\]\]|^\[|\Z)", config)
 
 
+def has_assignment(text: str, key: str, value: str) -> bool:
+    return re.search(rf'(?m)^{re.escape(key)}\s*=\s*"{re.escape(value)}"\s*$', text) is not None
+
+
 class CodexConfigPolicyTests(unittest.TestCase):
     def test_template_and_snapshot_configs_match(self) -> None:
         template = read_config(CONFIG_PATHS[0])
@@ -60,18 +64,19 @@ class CodexConfigPolicyTests(unittest.TestCase):
                 previous = previous_profile_text(config)
 
                 self.assertIn('model = "gpt-5.4"', previous)
-                self.assertEqual(config.count('model = "gpt-5.4"'), 1)
+                gpt_5_4_model_assignments = re.findall(r'(?m)^\s*model\s*=\s*"gpt-5\.4"\s*$', config)
+                self.assertEqual(len(gpt_5_4_model_assignments), 1)
 
     def test_legacy_custom_agents_do_not_pin_previous_model(self) -> None:
         for path in CONFIG_PATHS:
             with self.subTest(path=path.relative_to(REPO_ROOT)):
                 config = read_config(path)
+                blocks = custom_agent_blocks(config)
 
-                self.assertNotIn('[[custom_agent]]\nagent_type = "eng-lead"\n', config)
-                self.assertNotIn('model = "gpt-5.4"\nmodel_reasoning_effort', config)
+                self.assertFalse(any(has_assignment(block, "agent_type", "eng-lead") for block in blocks))
 
-                for block in custom_agent_blocks(config):
-                    self.assertNotIn('model = "gpt-5.4"', block)
+                for block in blocks:
+                    self.assertFalse(has_assignment(block, "model", "gpt-5.4"))
 
 
 if __name__ == "__main__":
