@@ -11,6 +11,8 @@ This adapter installs the shared process-first prompt corpus into Codex and wire
 - `~/.codex/superpowers`
 - `~/.agents/skills/superpowers` symlinked to `~/.codex/superpowers/skills`
 
+Codex App can use the Codex App curated Superpowers plugin; this installer still supports the manual ~/.codex/superpowers fallback for local skill discovery. Avoid enabling both discovery paths unless duplicate skill entries are intentional.
+
 ## Installation
 
 ```bash

@@ -102,6 +102,8 @@ This bootstrap is built around `obra/superpowers`.
   - upstream official `superpowers` for the skills library
   - this repository's Claude plugin package for the shared agent prompts
 
+Codex App can use the Codex App curated Superpowers plugin; the installer still supports the manual ~/.codex/superpowers fallback for local skill discovery. Avoid enabling both discovery paths unless duplicate skill entries are intentional.
+
 The intent is to reuse upstream `superpowers` instead of copying the skill library into this repository.
 
 ## Repository Layout

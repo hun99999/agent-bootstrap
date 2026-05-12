@@ -31,6 +31,8 @@ bash .codex/install.sh --partner-name "Hun"
 - syncs the latest upstream `obra/superpowers` into `~/.codex/superpowers`
 - creates `~/.agents/skills/superpowers` as a symlink to `~/.codex/superpowers/skills`
 
+Codex App can use the Codex App curated Superpowers plugin; the installer still supports the manual ~/.codex/superpowers fallback for local skill discovery. Avoid enabling both discovery paths unless duplicate skill entries are intentional.
+
 ## Re-run
 
 ```bash

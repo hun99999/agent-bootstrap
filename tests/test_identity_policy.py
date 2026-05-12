@@ -11,6 +11,7 @@ STALE_PATTERNS = (
     "github.com/jerrygoha/agent-bootstrap",
 )
 ALLOWLIST_PREFIXES = ("docs/superpowers/plans/", "docs/superpowers/specs/")
+ALLOWLIST_FILES = {"tests/test_identity_policy.py"}
 
 
 class IdentityPolicyTests(unittest.TestCase):
@@ -30,6 +31,9 @@ class IdentityPolicyTests(unittest.TestCase):
 
         for relative in self.tracked_files():
             relative_posix = relative.as_posix()
+            if relative_posix in ALLOWLIST_FILES:
+                continue
+
             if relative_posix.startswith(ALLOWLIST_PREFIXES):
                 continue
 

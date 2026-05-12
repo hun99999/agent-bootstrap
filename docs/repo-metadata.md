@@ -52,7 +52,7 @@ Recommended visual direction:
 You can reapply the recommended GitHub metadata with:
 
 ```bash
-gh repo edit jerrygoha/agent-bootstrap \
+gh repo edit hun99999/agent-bootstrap \
   --description "Process-first bootstrap for Codex, Claude Code, and OpenCode with superpowers, role-based subagents, token-efficient workflows, and multilingual setup docs." \
   --add-topic agent-bootstrap \
   --add-topic ai-agents \
