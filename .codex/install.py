@@ -50,6 +50,12 @@ def parse_args() -> argparse.Namespace:
         default=DEFAULT_SUPERPOWERS_REMOTE,
         help="Git remote to sync into ~/.codex/superpowers. Defaults to obra/superpowers.",
     )
+    parser.add_argument(
+        "--superpowers-mode",
+        choices=("manual", "skip"),
+        default="manual",
+        help="Control manual Superpowers checkout and symlink installation. Defaults to manual.",
+    )
     return parser.parse_args()
 
 
@@ -73,6 +79,10 @@ def shared_source_files(repo_root: Path) -> list[tuple[Path, Path]]:
     files.extend(
         (agent_path, Path("agents") / agent_path.name)
         for agent_path in sorted((repo_root / "agents").glob("*.md"))
+    )
+    files.extend(
+        (agent_path, Path("agents") / agent_path.name)
+        for agent_path in sorted((template_root / "agents").glob("*.toml"))
     )
     return files
 
@@ -101,12 +111,18 @@ def backup_existing_paths(target_root: Path, managed_paths: list[Path]) -> Path 
     return backup_root
 
 
-def verify_install(target_root: Path, codex_home_abs: str, expected_agent_paths: list[Path]) -> None:
+def verify_install(
+    target_root: Path,
+    codex_home_abs: str,
+    expected_prompt_paths: list[Path],
+    expected_role_config_paths: list[Path],
+) -> None:
     required_files = [
         target_root / "AGENTS.md",
         target_root / "local.md",
         target_root / "config.toml",
-        *expected_agent_paths,
+        *expected_prompt_paths,
+        *expected_role_config_paths,
     ]
     missing = [path for path in required_files if not path.exists()]
     if missing:
@@ -114,10 +130,20 @@ def verify_install(target_root: Path, codex_home_abs: str, expected_agent_paths:
         raise RuntimeError(f"missing installed files: {missing_str}")
 
     config_text = (target_root / "config.toml").read_text(encoding="utf-8")
-    for agent_path in expected_agent_paths:
-        expected = f'{codex_home_abs}/agents/{agent_path.name}'
+    for role_config_path in expected_role_config_paths:
+        expected = f'config_file = "agents/{role_config_path.name}"'
         if expected not in config_text:
-            raise RuntimeError(f"config.toml is missing expected agent path: {expected}")
+            raise RuntimeError(f"config.toml is missing expected role config: {expected}")
+
+        role_config_text = role_config_path.read_text(encoding="utf-8")
+        prompt_name = f"{role_config_path.stem}.md"
+        expected_instruction = f'model_instructions_file = "{codex_home_abs}/agents/{prompt_name}"'
+        if expected_instruction not in role_config_text:
+            raise RuntimeError(
+                f"{role_config_path} is missing expected model instructions file: {expected_instruction}"
+            )
+        if re.search(r"(?m)^\s*model\s*=", role_config_text):
+            raise RuntimeError(f"{role_config_path} must not set role-level model")
 
 
 def verify_superpowers_symlink(codex_home: Path, agents_home: Path) -> None:
@@ -156,15 +182,18 @@ def print_install_plan(
     relative_paths: list[Path],
     partner_name: str,
     superpowers_remote: str,
+    superpowers_mode: str,
 ) -> None:
     print(f"Dry run: would install managed Codex files into {target_root}")
     print(f"Partner name: {partner_name}")
+    print(f"Superpowers mode: {superpowers_mode}")
     print(f"Superpowers remote: {superpowers_remote}")
     print("Managed files:")
     for relative in relative_paths:
         print(f"- {target_root / relative}")
-    print(f"- {target_root / 'superpowers'}")
-    print(f"- {agents_home / 'skills' / 'superpowers'}")
+    if superpowers_mode == "manual":
+        print(f"- {target_root / 'superpowers'}")
+        print(f"- {agents_home / 'skills' / 'superpowers'}")
 
 
 def git_stdout(*args: str, cwd: Path | None = None) -> str:
@@ -201,6 +230,12 @@ def backup_superpowers_dir(target_root: Path, superpowers_root: Path) -> Path:
     return backup_root
 
 
+def require_clean_superpowers_checkout(superpowers_root: Path) -> None:
+    status = git_stdout("status", "--short", cwd=superpowers_root)
+    if status.strip():
+        raise RuntimeError(f"dirty superpowers checkout: {superpowers_root}")
+
+
 def prepare_superpowers_checkout(target_root: Path, remote: str) -> Path | None:
     superpowers_root = target_root / "superpowers"
     if not superpowers_root.exists():
@@ -217,6 +252,7 @@ def prepare_superpowers_checkout(target_root: Path, remote: str) -> Path | None:
         remove_existing_path(superpowers_root)
         return backup_root
 
+    require_clean_superpowers_checkout(superpowers_root)
     return None
 
 
@@ -228,7 +264,7 @@ def sync_superpowers_repo(target_root: Path, remote: str) -> tuple[Path | None, 
         target_root.mkdir(parents=True, exist_ok=True)
         git_stdout("clone", "--depth", "1", remote, str(superpowers_root))
     else:
-        git_stdout("fetch", "--depth", "1", "origin", cwd=superpowers_root)
+        git_stdout("fetch", "origin", cwd=superpowers_root)
         git_stdout("remote", "set-head", "origin", "-a", cwd=superpowers_root)
         remote_head = git_stdout(
             "symbolic-ref",
@@ -237,8 +273,12 @@ def sync_superpowers_repo(target_root: Path, remote: str) -> tuple[Path | None, 
             cwd=superpowers_root,
         ).strip()
         branch_name = remote_head.split("/", maxsplit=1)[1]
-        git_stdout("checkout", branch_name, cwd=superpowers_root)
-        git_stdout("reset", "--hard", f"origin/{branch_name}", cwd=superpowers_root)
+        current_branch = git_stdout("branch", "--show-current", cwd=superpowers_root).strip()
+        if current_branch != branch_name:
+            raise RuntimeError(
+                f"superpowers checkout is on {current_branch}, expected {branch_name}"
+            )
+        git_stdout("merge", "--ff-only", f"origin/{branch_name}", cwd=superpowers_root)
 
     commit = verify_superpowers_install(target_root, remote)
     return backup_root, commit
@@ -258,7 +298,9 @@ def ensure_superpowers_symlink(codex_home: Path, agents_home: Path) -> None:
     if link_path.is_symlink() and link_path.resolve() == target.resolve():
         return
     if link_path.exists() or link_path.is_symlink():
-        remove_existing_path(link_path)
+        raise RuntimeError(
+            f"refusing to replace existing superpowers skills path: {link_path}"
+        )
     link_path.symlink_to(target)
 
 
@@ -289,6 +331,7 @@ def main() -> int:
             relative_paths,
             args.partner_name,
             args.superpowers_remote,
+            args.superpowers_mode,
         )
         return 0
 
@@ -300,15 +343,28 @@ def main() -> int:
         rendered = render_template(source.read_text(encoding="utf-8"), replacements, source)
         destination.write_text(rendered, encoding="utf-8")
 
-    superpowers_backup_root, superpowers_commit = sync_superpowers_repo(
-        target_root,
-        args.superpowers_remote,
-    )
-    ensure_superpowers_symlink(target_root, agents_home)
+    superpowers_backup_root = None
+    superpowers_commit = None
+    if args.superpowers_mode == "manual":
+        superpowers_backup_root, superpowers_commit = sync_superpowers_repo(
+            target_root,
+            args.superpowers_remote,
+        )
+        ensure_superpowers_symlink(target_root, agents_home)
 
-    agent_paths = [path for path in relative_paths if path.parts and path.parts[0] == "agents"]
-    verify_install(target_root, str(target_root), [target_root / path for path in agent_paths])
-    verify_superpowers_symlink(target_root, agents_home)
+    prompt_paths = [
+        target_root / path
+        for path in relative_paths
+        if path.parts and path.parts[0] == "agents" and path.suffix == ".md"
+    ]
+    role_config_paths = [
+        target_root / path
+        for path in relative_paths
+        if path.parts and path.parts[0] == "agents" and path.suffix == ".toml"
+    ]
+    verify_install(target_root, str(target_root), prompt_paths, role_config_paths)
+    if args.superpowers_mode == "manual":
+        verify_superpowers_symlink(target_root, agents_home)
 
     print(f"Installed managed Codex files into {target_root}")
     print(f"Partner name: {args.partner_name}")
@@ -320,15 +376,19 @@ def main() -> int:
             print(f"- managed files: {backup_root}")
         if superpowers_backup_root is not None:
             print(f"- superpowers replacement: {superpowers_backup_root}")
-    print(f"Superpowers:")
-    print(f"- remote: {args.superpowers_remote}")
-    print(f"- path: {target_root / 'superpowers'}")
-    print(f"- commit: {superpowers_commit}")
-    print(f"- skills symlink: {agents_home / 'skills' / 'superpowers'}")
+    if args.superpowers_mode == "manual":
+        print(f"Superpowers:")
+        print(f"- remote: {args.superpowers_remote}")
+        print(f"- path: {target_root / 'superpowers'}")
+        print(f"- commit: {superpowers_commit}")
+        print(f"- skills symlink: {agents_home / 'skills' / 'superpowers'}")
+    else:
+        print("Superpowers: skipped manual checkout and symlink")
     print("Managed files:")
     for relative in relative_paths:
         print(f"- {target_root / relative}")
-    print(f"- {target_root / 'superpowers'}")
+    if args.superpowers_mode == "manual":
+        print(f"- {target_root / 'superpowers'}")
     return 0
 
 

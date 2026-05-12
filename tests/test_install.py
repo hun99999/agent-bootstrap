@@ -320,6 +320,28 @@ class InstallScriptTests(unittest.TestCase):
             self.assertTrue(skills_symlink.is_symlink())
             self.assertEqual(skills_symlink.resolve(), (codex_home / "superpowers" / "skills").resolve())
 
+    def test_install_can_skip_manual_superpowers_install(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            root = Path(tmpdir)
+            codex_home = root / ".codex"
+            agents_home = root / ".agents"
+
+            result = self.run_installer(
+                "--partner-name",
+                "Hun",
+                "--codex-home",
+                str(codex_home),
+                "--agents-home",
+                str(agents_home),
+                "--superpowers-mode",
+                "skip",
+            )
+
+            self.assertEqual(result.returncode, 0, msg=result.stderr)
+            self.assertIn("Superpowers: skipped manual checkout and symlink", result.stdout)
+            self.assertFalse((codex_home / "superpowers").exists())
+            self.assertFalse((agents_home / "skills" / "superpowers").exists())
+
 
 if __name__ == "__main__":
     unittest.main()
