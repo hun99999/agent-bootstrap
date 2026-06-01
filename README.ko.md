@@ -158,6 +158,16 @@ GitHub 레포의 발견성은 일반 웹 SEO보다 repository metadata 영향을
 - Codex와 OpenCode: pull 후 각 installer를 다시 실행
 - Claude Code: pull 후 `python3 scripts/render_claude_plugin.py --partner-name "<Name>"`를 다시 실행하고 plugin을 갱신
 
+## 에이전트 스택 점검
+
+업데이트 전후에 로컬 Codex, Claude Code, OpenCode, Superpowers 상태를 확인하려면 다음을 실행합니다.
+
+```bash
+python3 scripts/audit_agent_stack.py
+```
+
+기본 점검은 offline/read-only입니다. npm과 원격 git 기준 최신 drift까지 확인하려면 `--online`을 붙이고, OpenCode 같은 optional tool 누락도 실패로 처리하려면 `--strict`를 붙입니다.
+
 ## 레거시 파일
 
 이전 Codex-only bootstrap 시절의 파일 일부가 아직 남아 있습니다.

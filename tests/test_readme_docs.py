@@ -40,6 +40,19 @@ class ReadmeDocsTests(unittest.TestCase):
             for phrase in expected_phrases:
                 self.assertIn(phrase, contents)
 
+    def test_docs_explain_agent_stack_audit_command(self) -> None:
+        for relative in (
+            "README.md",
+            "README.ko.md",
+            "README.ja.md",
+            "README.zh-CN.md",
+            "docs/README.codex.md",
+            "docs/README.claude.md",
+            "docs/README.opencode.md",
+        ):
+            contents = (REPO_ROOT / relative).read_text(encoding="utf-8")
+            self.assertIn("scripts/audit_agent_stack.py", contents)
+
     def test_translated_readmes_mention_duplicate_superpowers_discovery(self) -> None:
         expected_phrases = {
             "README.ko.md": "중복 skill 항목",

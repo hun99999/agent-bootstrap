@@ -39,3 +39,15 @@ Codex App can use the Codex App curated Superpowers plugin; the installer still 
 git pull
 bash .codex/install.sh --partner-name "Hun"
 ```
+
+## Audit
+
+```bash
+python3 scripts/audit_agent_stack.py
+```
+
+The default audit is offline and read-only. It checks the local Codex CLI, Claude Code CLI, optional OpenCode CLI, the `~/.codex/superpowers` checkout, and the `~/.agents/skills/superpowers` symlink. Use `--online` only when you want current npm and remote git drift checks.
+
+## Profiles
+
+The default Codex profile prioritizes quality with `gpt-5.5` and high reasoning settings. The `balanced` profile keeps `gpt-5.5` but uses medium reasoning and verbosity for lower-latency work. The `previous` profile pins the immediately previous supported model, `gpt-5.4`.

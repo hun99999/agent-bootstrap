@@ -29,3 +29,11 @@ bash .opencode/install.sh --partner-name "Hun"
 git pull
 bash .opencode/install.sh --partner-name "Hun"
 ```
+
+## Audit
+
+```bash
+python3 scripts/audit_agent_stack.py
+```
+
+The default audit is offline and read-only. OpenCode is optional by default because this repository can be used from Codex or Claude Code sessions too. Add `--strict` when a missing OpenCode CLI should fail the audit, and add `--online` when you explicitly want remote drift checks.

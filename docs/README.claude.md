@@ -44,3 +44,11 @@ This writes:
 ## Update
 
 Re-run the renderer after pulling new repo changes, then update the plugin in Claude Code.
+
+## Audit
+
+```bash
+python3 scripts/audit_agent_stack.py
+```
+
+The default audit is offline and read-only. It checks the local Codex CLI, Claude Code CLI, optional OpenCode CLI, Superpowers checkout state, and the Codex skills symlink. Add `--online` only when you explicitly want current npm and remote git drift checks.
