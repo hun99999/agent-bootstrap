@@ -115,6 +115,110 @@ Keep these out of public repositories:
 - auth state
 - machine-specific trust settings
 
+## Optional Tooling Decision Rules
+
+Optional tools are helpers, not guardrails by themselves. Never install a tool just because a guide mentions it.
+
+Use this rule set whenever an agent sets up a new repository, a new machine, or a new coding harness:
+
+1. Inventory first.
+2. Decide whether the tool is necessary for the current repository and task.
+3. Recommend when the tool would materially improve structural memory, evidence, or daily ergonomics.
+4. Ask before installing any new desktop app, CLI, plugin, browser extension, or package manager dependency.
+5. Install only through a verified current source or a package manager query run in the target environment.
+6. Verify the install after it finishes.
+7. Record only the project-safe usage rule in project-local knowledge.
+8. Skip installation when the repository can get the same benefit from existing docs, `local.md`, plain Markdown notes, or native repo tooling.
+
+The agent should explain the decision in plain terms:
+
+- Required: the repo cannot reasonably follow the requested workflow without it.
+- Recommended: it reduces repeated context gathering or catches structural drift, but the workflow still works without it.
+- Optional: useful for some users, not needed for the current task.
+- Skip installation: the tool is unrelated, too heavy for the repo size, already covered by native tooling, or would add private/machine-specific state.
+
+### Obsidian
+
+Obsidian is useful when the team or individual wants a durable project wiki/index outside the agent session. It is not required for the guardrails.
+
+Use Obsidian when:
+
+- the repository is large enough that repeated architecture rediscovery wastes time
+- the user wants a private cross-project vault for local project maps
+- project knowledge includes personal paths or context that should not be committed
+- the workflow needs a searchable index of module boundaries, source-of-truth files, decisions, and known hotspots
+
+Skip Obsidian when:
+
+- a committed `docs/architecture.md`, repo `AGENTS.md`, or untracked `local.md` is enough
+- the project is small and structure can be inspected quickly
+- the user does not want another desktop app
+- the target environment is headless and only needs Markdown files
+
+macOS check:
+
+```bash
+test -d /Applications/Obsidian.app && echo "Obsidian is installed" || echo "Obsidian is not installed"
+```
+
+macOS install options after user approval:
+
+- Official installer: download from <https://obsidian.md/download>.
+- Homebrew cask, when Homebrew is already trusted in that environment:
+
+```bash
+brew install --cask obsidian
+```
+
+Windows PowerShell check:
+
+```powershell
+winget list --name Obsidian
+```
+
+Windows PowerShell install flow after user approval:
+
+```powershell
+winget search Obsidian
+winget install --exact --id Obsidian.Obsidian
+```
+
+On Windows, verify the package name and publisher from `winget search Obsidian` before installing. If `winget` is missing, follow Microsoft's current WinGet/App Installer instructions or use the official Obsidian download page. Do not guess installer URLs, registry paths, or native PowerShell flags.
+
+After installing Obsidian, do not commit vault paths. A safe project-local note should say only where the project map lives relative to the repo, or that the private vault has an index the user can paste when needed.
+
+### Lumin Repo Lens
+
+Lumin Repo Lens is useful for TypeScript and JavaScript repositories where AST-backed structure evidence would help catch duplicate helpers, hidden coupling, unmanaged re-exports, and fan-in/fan-out hotspots.
+
+Use Lumin Repo Lens when:
+
+- the target repository is TS/JS-heavy
+- the change touches module boundaries, public APIs, re-exports, or shared types
+- the repo is large enough that manual import/fan-out inspection is unreliable
+- local `.audit/` evidence will help the agent explain and review the change
+
+Skip Lumin Repo Lens when:
+
+- the repository is not TS/JS
+- the task is a tiny isolated edit
+- native repo tooling already provides the needed import graph or architecture check
+- the user does not approve installing an optional plugin or skill
+
+Before running it in a target repository, make sure `.audit/` is ignored if the tool may write local artifacts.
+
+### Dependency And Complexity Tooling
+
+Dependency lint, strict type checks, cycle detection, complexity limits, and file/function size limits are strong guardrails. They are also real tooling changes.
+
+Add them only when one of these is true:
+
+- the repository already has the relevant toolchain and you are tightening an existing rule
+- the user explicitly approves adding the tool
+- the repository's documented standards already require that tool
+
+Otherwise, document the recommended rule and leave installation for a separate approved task.
+
 ## macOS
 
 Codex and OpenCode installers are shell scripts:

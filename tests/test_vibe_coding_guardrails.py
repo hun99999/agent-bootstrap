@@ -58,6 +58,29 @@ class VibeCodingGuardrailsDocsTests(unittest.TestCase):
         for phrase in expected_phrases:
             self.assertIn(phrase, guide)
 
+    def test_global_guardrail_setup_explains_optional_tool_install_rules(self) -> None:
+        guide_path = REPO_ROOT / "docs" / "global-guardrail-setup.md"
+
+        self.assertTrue(guide_path.exists(), f"missing guide: {guide_path}")
+        guide = guide_path.read_text(encoding="utf-8")
+
+        expected_phrases = (
+            "Optional Tooling Decision Rules",
+            "Inventory first",
+            "Recommend",
+            "Ask before installing",
+            "Skip installation",
+            "Obsidian",
+            "Lumin Repo Lens",
+            "macOS check",
+            "Windows PowerShell check",
+            "brew install --cask obsidian",
+            "winget search Obsidian",
+            "Never install a tool just because a guide mentions it",
+        )
+        for phrase in expected_phrases:
+            self.assertIn(phrase, guide)
+
     def test_local_project_knowledge_template_captures_operational_index(self) -> None:
         template_path = REPO_ROOT / "docs" / "local-project-knowledge-template.md"
 
@@ -98,6 +121,26 @@ class VibeCodingGuardrailsDocsTests(unittest.TestCase):
                 self.assertIn("TDD", prompt)
                 self.assertIn("edge cases", prompt)
                 self.assertIn("do not commit", prompt.lower())
+
+    def test_apply_prompt_requires_optional_tool_inventory_before_install(self) -> None:
+        prompt_path = REPO_ROOT / "prompts" / "apply-vibe-coding-guardrails.md"
+
+        self.assertTrue(prompt_path.exists(), f"missing prompt: {prompt_path}")
+        prompt = prompt_path.read_text(encoding="utf-8")
+
+        expected_phrases = (
+            "docs/global-guardrail-setup.md",
+            "inventory optional tools",
+            "Obsidian",
+            "Lumin Repo Lens",
+            "ask before installing",
+            "do not install",
+            "macOS",
+            "Windows PowerShell",
+            "verify the package name",
+        )
+        for phrase in expected_phrases:
+            self.assertIn(phrase, prompt)
 
 
 if __name__ == "__main__":
