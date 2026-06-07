@@ -30,6 +30,58 @@ Use this repository as an operating guide, not only as an installer.
 
 Optional tooling is decision-based. Obsidian, Lumin Repo Lens, dependency lint, cycle detection, strict type checks, and complexity limits should be recommended or installed only when the target repository and user approval justify them.
 
+## Quick Start
+
+Choose the scope first. Most failed agent setup work starts by configuring too much: a new harness, a new plugin stack, a new provider path, and a repo workflow all at once. Start with the smallest useful scope, verify it, then expand.
+
+1. If you want this machine's future Codex, Claude Code, or OpenCode sessions to start with these rules, follow [docs/global-guardrail-setup.md](docs/global-guardrail-setup.md).
+2. If you want to apply the same discipline to another repository, open that repository and paste [prompts/apply-vibe-coding-guardrails.md](prompts/apply-vibe-coding-guardrails.md).
+3. If a repository already has the guardrails and you want normal feature work, paste [prompts/start-with-vibe-coding-guardrails.md](prompts/start-with-vibe-coding-guardrails.md).
+4. If this repository has changed and you want an agent to reapply, audit, or improve the bootstrap itself, paste [prompts/update-agent-bootstrap.md](prompts/update-agent-bootstrap.md).
+
+## When To Use Each Prompt
+
+- `prompts/setup-codex-current-harness.md`: use inside Codex when the current Codex harness should receive the shared core only.
+- `prompts/setup-claude-current-harness.md`: use inside Claude Code when the Claude plugin and shared role prompts should be set up.
+- `prompts/setup-opencode-current-harness.md`: use inside OpenCode when OpenCode should receive the generated agents and native plugin wiring.
+- `prompts/setup-shared-core.md`: use when the target environment is unclear and the safest answer is only the shared prompt/skills layer.
+- `prompts/apply-vibe-coding-guardrails.md`: use in an application repository that needs structure maps, edge-case-first tests, dependency-boundary checks, and local project knowledge.
+- `prompts/start-with-vibe-coding-guardrails.md`: use for day-to-day feature, bugfix, or refactor work after a repository already has a project map and guardrail workflow.
+- `prompts/update-agent-bootstrap.md`: use for this repository when new changes need to be pulled, rendered, installed, audited, documented, and reviewed.
+
+## What The Guardrails Enforce
+
+The guardrails are meant to make agent coding less forgetful and less structurally messy.
+
+- Pre-write lens: inspect module boundaries, dependency direction, public APIs, helpers, types, shapes, re-exports, tests, error boundaries, and known hotspots before editing.
+- TDD write gate: write edge-case and failure-path tests first, confirm the expected failure, then make the smallest implementation change.
+- Coupling control: avoid hidden imports, initialization-order contracts, duplicate shapes, unreviewed barrels, and fan-in/fan-out hotspots.
+- Error discipline: do not silently swallow errors, do not add fallback behavior unless it is a documented requirement, and keep error handling at explicit boundaries.
+- Test discipline: assert behavior and side effects; keep mocks at external boundaries instead of mocking internal implementation details.
+- Privacy discipline: do not commit personal vault paths, private project paths, credentials, MCP endpoints, auth state, browser profiles, or machine-specific trust settings.
+
+## Optional Tools And Installation Policy
+
+Optional tools should support the workflow; they are not the workflow.
+
+- Obsidian is useful for a private project wiki when repository structure is large enough that repeated rediscovery wastes time.
+- Lumin Repo Lens is useful for TS/JS repositories when AST-backed evidence helps find duplicate helpers, hidden coupling, re-export drift, or fan-in/fan-out hotspots.
+- Dependency lint, cycle detection, strict type checks, complexity limits, and file/function size limits are strong guardrails, but they are real tooling changes.
+
+Do not install optional tools just because they are mentioned. Inventory the current environment first, explain whether the tool is required, recommended, optional, or skipped, ask before installing, verify the package name or official source, and record only project-safe usage guidance in the repository.
+
+## Maintaining This Repository
+
+Use [docs/agent-bootstrap-structure.md](docs/agent-bootstrap-structure.md) as the repo-local map before changing this bootstrap.
+
+- Change shared behavior in `AGENTS.md` and `agents/*.md`.
+- Change role metadata in `shared/agent-metadata.json`.
+- Change Codex installation behavior in `.codex/install.py`.
+- Change OpenCode installation behavior in `.opencode/install.py`.
+- Change Claude plugin rendering in `scripts/render_claude_plugin.py`.
+- Regenerate Claude plugin output with `python3 scripts/render_claude_plugin.py --partner-name "<Name>"` after shared prompt or metadata changes.
+- Verify with `python3 -m unittest discover -s tests -p 'test_*.py'` and `python3 scripts/audit_agent_stack.py`.
+
 ## What This Repository Is
 
 This repository is the source of truth for a shared operating model that can be installed into multiple coding harnesses instead of being tied to Codex alone.
