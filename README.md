@@ -63,6 +63,7 @@ These copy-paste prompts are the fastest way to keep another agent inside the in
 - OpenClaw ACP integration: [prompts/setup-openclaw-acp.md](prompts/setup-openclaw-acp.md)
 - Apply vibe-coding guardrails to another repository: [prompts/apply-vibe-coding-guardrails.md](prompts/apply-vibe-coding-guardrails.md)
 - Start work with vibe-coding guardrails: [prompts/start-with-vibe-coding-guardrails.md](prompts/start-with-vibe-coding-guardrails.md)
+- Update this bootstrap after repository changes: [prompts/update-agent-bootstrap.md](prompts/update-agent-bootstrap.md)
 
 ## Vibe Coding Guardrails
 
@@ -101,6 +102,8 @@ The repository is split into two layers:
 
 The shared core defines the operating model once.
 Each adapter translates that core into the native format expected by the target harness.
+
+For the detailed project-local structure map, update flow, source-of-truth boundaries, and generated-artifact policy, read [docs/agent-bootstrap-structure.md](docs/agent-bootstrap-structure.md).
 
 ## Superpowers Integration
 

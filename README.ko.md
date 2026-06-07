@@ -63,6 +63,7 @@ OpenClaw 연동 방법도 문서화하지만, OpenClaw는 first-class bootstrap 
 - 공통 shared core 세팅: [prompts/setup-shared-core.md](prompts/setup-shared-core.md)
 - OpenClaw shared core 전용: [prompts/setup-openclaw-shared-core.md](prompts/setup-openclaw-shared-core.md)
 - OpenClaw ACP 연동: [prompts/setup-openclaw-acp.md](prompts/setup-openclaw-acp.md)
+- 이 bootstrap 업데이트/재점검: [prompts/update-agent-bootstrap.md](prompts/update-agent-bootstrap.md)
 
 Codex 세션 시작용 위임 허용 문구:
 
@@ -92,6 +93,8 @@ Codex 세션 시작용 위임 허용 문구:
   - `.opencode/`
 
 shared core는 운영 모델을 한 번만 정의하고, 각 adapter가 이를 대상 하네스의 네이티브 형식으로 변환합니다.
+
+자세한 프로젝트 구조 지도, 업데이트 흐름, source-of-truth 경계, 생성물 정책은 [docs/agent-bootstrap-structure.md](docs/agent-bootstrap-structure.md)를 참고합니다.
 
 ## Superpowers 연동
 

@@ -72,6 +72,58 @@ class ReadmeDocsTests(unittest.TestCase):
         self.assertIn("prompts/apply-vibe-coding-guardrails.md", readme)
         self.assertIn("prompts/start-with-vibe-coding-guardrails.md", readme)
 
+    def test_readme_links_repo_structure_and_update_prompt(self) -> None:
+        readme = (REPO_ROOT / "README.md").read_text(encoding="utf-8")
+
+        self.assertIn("docs/agent-bootstrap-structure.md", readme)
+        self.assertIn("prompts/update-agent-bootstrap.md", readme)
+
+    def test_korean_readme_links_repo_structure_and_update_prompt(self) -> None:
+        readme = (REPO_ROOT / "README.ko.md").read_text(encoding="utf-8")
+
+        self.assertIn("docs/agent-bootstrap-structure.md", readme)
+        self.assertIn("prompts/update-agent-bootstrap.md", readme)
+
+    def test_agent_bootstrap_structure_doc_covers_boundaries_and_update_flow(self) -> None:
+        structure = (REPO_ROOT / "docs" / "agent-bootstrap-structure.md").read_text(
+            encoding="utf-8"
+        )
+
+        expected_phrases = (
+            "Shared Core",
+            "Harness Adapters",
+            "Generated Artifacts",
+            "Source Of Truth",
+            "Do not edit generated Claude plugin agents by hand",
+            "Update Flow",
+            "python3 scripts/render_claude_plugin.py --partner-name",
+            "python3 -m unittest discover -s tests -p 'test_*.py'",
+            "python3 scripts/audit_agent_stack.py",
+            "No private paths",
+        )
+        for phrase in expected_phrases:
+            self.assertIn(phrase, structure)
+
+    def test_update_prompt_covers_pull_render_install_and_review_loop(self) -> None:
+        prompt = (REPO_ROOT / "prompts" / "update-agent-bootstrap.md").read_text(
+            encoding="utf-8"
+        )
+
+        expected_phrases = (
+            "Update agent-bootstrap from the current repository state",
+            "git status",
+            "git pull --ff-only",
+            "docs/agent-bootstrap-structure.md",
+            "pre-write lens",
+            "python3 scripts/render_claude_plugin.py --partner-name",
+            "bash .codex/install.sh --partner-name",
+            "python3 scripts/audit_agent_stack.py",
+            "post-write review",
+            "do not commit private paths",
+        )
+        for phrase in expected_phrases:
+            self.assertIn(phrase, prompt)
+
     def test_harness_docs_explain_global_guardrail_install_scope(self) -> None:
         expectations = {
             "docs/README.codex.md": ("~/.codex", "user-level defaults", "new Codex sessions"),
