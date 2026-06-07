@@ -122,6 +122,52 @@ class ReadmeDocsTests(unittest.TestCase):
                 self.assertIn("docs/agent-bootstrap-structure.md", readme)
                 self.assertIn("prompts/update-agent-bootstrap.md", readme)
 
+    def test_all_readmes_explain_detailed_guardrail_workflow(self) -> None:
+        expectations = {
+            "README.md": (
+                "Quick Start",
+                "Choose the scope first",
+                "When To Use Each Prompt",
+                "What The Guardrails Enforce",
+                "Optional Tools And Installation Policy",
+                "Maintaining This Repository",
+                "Do not install optional tools just because they are mentioned",
+            ),
+            "README.ko.md": (
+                "빠른 시작",
+                "먼저 범위를 고릅니다",
+                "프롬프트별 사용 시점",
+                "Guardrail이 강제하는 것",
+                "선택 도구와 설치 정책",
+                "이 레포 유지보수",
+                "언급됐다는 이유만으로 선택 도구를 설치하지 않습니다",
+            ),
+            "README.ja.md": (
+                "クイックスタート",
+                "最初にスコープを選ぶ",
+                "各プロンプトを使う場面",
+                "Guardrail が強制すること",
+                "任意ツールとインストールポリシー",
+                "このリポジトリの保守",
+                "言及されているだけの理由で任意ツールをインストールしません",
+            ),
+            "README.zh-CN.md": (
+                "快速开始",
+                "先选择范围",
+                "每个提示词的使用场景",
+                "Guardrail 强制的内容",
+                "可选工具和安装策略",
+                "维护这个仓库",
+                "不要仅仅因为文档提到某个可选工具就安装它",
+            ),
+        }
+
+        for relative, phrases in expectations.items():
+            with self.subTest(relative=relative):
+                readme = (REPO_ROOT / relative).read_text(encoding="utf-8")
+                for phrase in phrases:
+                    self.assertIn(phrase, readme)
+
     def test_agent_bootstrap_structure_doc_covers_boundaries_and_update_flow(self) -> None:
         structure = (REPO_ROOT / "docs" / "agent-bootstrap-structure.md").read_text(
             encoding="utf-8"
