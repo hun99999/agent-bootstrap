@@ -36,6 +36,28 @@ class VibeCodingGuardrailsDocsTests(unittest.TestCase):
         for phrase in expected_phrases:
             self.assertIn(phrase, guide)
 
+    def test_global_guardrail_setup_explains_user_home_and_project_scope(self) -> None:
+        guide_path = REPO_ROOT / "docs" / "global-guardrail-setup.md"
+
+        self.assertTrue(guide_path.exists(), f"missing guide: {guide_path}")
+        guide = guide_path.read_text(encoding="utf-8")
+
+        expected_phrases = (
+            "Global guardrail setup",
+            "~/.codex",
+            "~/.config/opencode",
+            "Claude Code plugin",
+            "user-level defaults",
+            "project-local knowledge",
+            "new sessions",
+            "existing sessions",
+            "restart",
+            "macOS",
+            "Windows PowerShell",
+        )
+        for phrase in expected_phrases:
+            self.assertIn(phrase, guide)
+
     def test_local_project_knowledge_template_captures_operational_index(self) -> None:
         template_path = REPO_ROOT / "docs" / "local-project-knowledge-template.md"
 

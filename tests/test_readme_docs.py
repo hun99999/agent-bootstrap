@@ -68,8 +68,30 @@ class ReadmeDocsTests(unittest.TestCase):
         readme = (REPO_ROOT / "README.md").read_text(encoding="utf-8")
 
         self.assertIn("docs/vibe-coding-guardrails.md", readme)
+        self.assertIn("docs/global-guardrail-setup.md", readme)
         self.assertIn("prompts/apply-vibe-coding-guardrails.md", readme)
         self.assertIn("prompts/start-with-vibe-coding-guardrails.md", readme)
+
+    def test_harness_docs_explain_global_guardrail_install_scope(self) -> None:
+        expectations = {
+            "docs/README.codex.md": ("~/.codex", "user-level defaults", "new Codex sessions"),
+            "docs/README.claude.md": (
+                "Claude Code plugin",
+                "user-level defaults",
+                "new Claude Code sessions",
+            ),
+            "docs/README.opencode.md": (
+                "~/.config/opencode",
+                "user-level defaults",
+                "new OpenCode sessions",
+            ),
+        }
+
+        for relative, phrases in expectations.items():
+            contents = (REPO_ROOT / relative).read_text(encoding="utf-8")
+            with self.subTest(relative=relative):
+                for phrase in phrases:
+                    self.assertIn(phrase, contents)
 
 
 if __name__ == "__main__":

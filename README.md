@@ -66,6 +66,8 @@ These copy-paste prompts are the fastest way to keep another agent inside the in
 
 ## Vibe Coding Guardrails
 
+Use [docs/global-guardrail-setup.md](docs/global-guardrail-setup.md) when you want these guardrails installed as Codex, Claude Code, or OpenCode user-level defaults across projects.
+
 Use [docs/vibe-coding-guardrails.md](docs/vibe-coding-guardrails.md) when you want Codex, Claude Code, or OpenCode to apply a pre-write lens, TDD write gate, and post-write structure review to a repository.
 
 For project-specific context, copy [docs/local-project-knowledge-template.md](docs/local-project-knowledge-template.md) into a local `local.md`, an untracked note, or a private Obsidian page. Keep private paths, credentials, MCP endpoints, auth state, and machine-specific trust settings out of the public baseline.

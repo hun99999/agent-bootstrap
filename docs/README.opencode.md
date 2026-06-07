@@ -16,12 +16,16 @@ Do not configure another harness unless the user explicitly asks.
 bash .opencode/install.sh --partner-name "Hun"
 ```
 
+This is a global OpenCode setup for the current user. It writes user-level defaults under `~/.config/opencode`, so new OpenCode sessions in any project can inherit the shared agents and vibe-coding guardrails.
+
 ## What It Does
 
 - writes `~/.config/opencode/opencode.json`
 - enables the upstream plugin line `superpowers@git+https://github.com/obra/superpowers.git`
 - renders the shared constitution plus each role body into `~/.config/opencode/agents/*.md`
 - marks review-only agents as read-only where appropriate
+
+These user-level defaults are the global layer. Project-specific structure still belongs in project-local knowledge such as `local.md`, an untracked note, or a private Obsidian page. New OpenCode sessions should pick up the installed defaults; existing sessions may need a restart or a short manual instruction to apply the new guardrails.
 
 ## Re-run
 
