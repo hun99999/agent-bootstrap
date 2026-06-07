@@ -61,6 +61,14 @@ These copy-paste prompts are the fastest way to keep another agent inside the in
 - Generic shared core setup: [prompts/setup-shared-core.md](prompts/setup-shared-core.md)
 - OpenClaw shared core only: [prompts/setup-openclaw-shared-core.md](prompts/setup-openclaw-shared-core.md)
 - OpenClaw ACP integration: [prompts/setup-openclaw-acp.md](prompts/setup-openclaw-acp.md)
+- Apply vibe-coding guardrails to another repository: [prompts/apply-vibe-coding-guardrails.md](prompts/apply-vibe-coding-guardrails.md)
+- Start work with vibe-coding guardrails: [prompts/start-with-vibe-coding-guardrails.md](prompts/start-with-vibe-coding-guardrails.md)
+
+## Vibe Coding Guardrails
+
+Use [docs/vibe-coding-guardrails.md](docs/vibe-coding-guardrails.md) when you want Codex, Claude Code, or OpenCode to apply a pre-write lens, TDD write gate, and post-write structure review to a repository.
+
+For project-specific context, copy [docs/local-project-knowledge-template.md](docs/local-project-knowledge-template.md) into a local `local.md`, an untracked note, or a private Obsidian page. Keep private paths, credentials, MCP endpoints, auth state, and machine-specific trust settings out of the public baseline.
 
 Codex session opener for standing delegation preference:
 

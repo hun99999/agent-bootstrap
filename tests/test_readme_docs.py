@@ -64,6 +64,13 @@ class ReadmeDocsTests(unittest.TestCase):
             contents = (REPO_ROOT / relative).read_text(encoding="utf-8")
             self.assertIn(phrase, contents)
 
+    def test_readme_links_vibe_coding_guardrails(self) -> None:
+        readme = (REPO_ROOT / "README.md").read_text(encoding="utf-8")
+
+        self.assertIn("docs/vibe-coding-guardrails.md", readme)
+        self.assertIn("prompts/apply-vibe-coding-guardrails.md", readme)
+        self.assertIn("prompts/start-with-vibe-coding-guardrails.md", readme)
+
 
 if __name__ == "__main__":
     unittest.main()
