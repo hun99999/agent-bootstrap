@@ -18,6 +18,18 @@ Bootstrap a process-first AI coding environment for Codex, Claude Code, and Open
 - Public-safe baseline that avoids shipping credentials, private MCP endpoints, personal paths, or machine-specific trust state.
 - Multilingual onboarding so English, Korean, Japanese, and Simplified Chinese readers can start from the same repository.
 
+## What You Can Ask An Agent To Do
+
+Use this repository as an operating guide, not only as an installer.
+
+- Install global defaults: use [docs/global-guardrail-setup.md](docs/global-guardrail-setup.md) to install the shared guardrails into Codex, Claude Code, or OpenCode user-level defaults.
+- Apply guardrails to a project: paste [prompts/apply-vibe-coding-guardrails.md](prompts/apply-vibe-coding-guardrails.md) into an agent session inside a target repository.
+- Start feature work inside a guarded project: paste [prompts/start-with-vibe-coding-guardrails.md](prompts/start-with-vibe-coding-guardrails.md) before asking for a feature, bugfix, or refactor.
+- Update this bootstrap after repository changes: paste [prompts/update-agent-bootstrap.md](prompts/update-agent-bootstrap.md) after pulling new changes or when you want an agent to re-audit this repository.
+- Explain this repository's own structure: read [docs/agent-bootstrap-structure.md](docs/agent-bootstrap-structure.md) before editing shared prompts, installers, generated plugin output, or setup docs.
+
+Optional tooling is decision-based. Obsidian, Lumin Repo Lens, dependency lint, cycle detection, strict type checks, and complexity limits should be recommended or installed only when the target repository and user approval justify them.
+
 ## What This Repository Is
 
 This repository is the source of truth for a shared operating model that can be installed into multiple coding harnesses instead of being tied to Codex alone.

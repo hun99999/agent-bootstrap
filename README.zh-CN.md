@@ -63,6 +63,7 @@
 - 通用 shared core 设置: [prompts/setup-shared-core.md](prompts/setup-shared-core.md)
 - OpenClaw shared core 专用: [prompts/setup-openclaw-shared-core.md](prompts/setup-openclaw-shared-core.md)
 - OpenClaw ACP 集成: [prompts/setup-openclaw-acp.md](prompts/setup-openclaw-acp.md)
+- 更新/复查这个 bootstrap: [prompts/update-agent-bootstrap.md](prompts/update-agent-bootstrap.md)
 
 Codex 会话开场委托许可文案：
 
@@ -92,6 +93,8 @@ Codex 会话开场委托许可文案：
   - `.opencode/`
 
 shared core 只定义一次操作模型，各个 adapter 再把它转换为目标 harness 需要的原生格式。
+
+详细的项目结构图、更新流程、source-of-truth 边界和生成物策略，请参见 [docs/agent-bootstrap-structure.md](docs/agent-bootstrap-structure.md)。
 
 ## Superpowers 集成
 

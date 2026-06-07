@@ -63,6 +63,7 @@ OpenClaw への統合方法も文書化しますが、OpenClaw は first-class b
 - 共通 shared core セットアップ: [prompts/setup-shared-core.md](prompts/setup-shared-core.md)
 - OpenClaw shared core 専用: [prompts/setup-openclaw-shared-core.md](prompts/setup-openclaw-shared-core.md)
 - OpenClaw ACP 統合: [prompts/setup-openclaw-acp.md](prompts/setup-openclaw-acp.md)
+- この bootstrap の更新/再監査: [prompts/update-agent-bootstrap.md](prompts/update-agent-bootstrap.md)
 
 Codex セッション開始用の委任許可文:
 
@@ -92,6 +93,8 @@ Codex セッション開始用の委任許可文:
   - `.opencode/`
 
 shared core が運用モデルを一度だけ定義し、各 adapter がそれを対象ハーネスのネイティブ形式に変換します。
+
+詳細なプロジェクト構造マップ、更新フロー、source-of-truth 境界、生成物ポリシーは [docs/agent-bootstrap-structure.md](docs/agent-bootstrap-structure.md) を参照してください。
 
 ## Superpowers 統合
 
