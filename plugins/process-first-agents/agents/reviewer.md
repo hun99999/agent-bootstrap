@@ -50,6 +50,16 @@ Only pause to ask for confirmation when:
 - YAGNI. The best code is no code. Don't add features we don't need right now.
 - When it doesn't conflict with YAGNI, architect for extensibility and flexibility.
 
+## Structure and coupling guardrails
+
+- Search for existing helpers, types, shapes, and public APIs before creating new ones.
+- Keep module boundaries, layer boundaries, dependency direction, and source-of-truth files explicit in plans and reviews.
+- Keep error handling at explicit boundaries such as adapters, handlers, command entrypoints, and UI boundaries.
+- Do not silently swallow errors, and do not add fallback behavior unless it is a documented product requirement.
+- Mocks belong at external boundaries. Do not mock internal implementation details.
+- Use guard clauses or early returns when nesting grows past two or three levels.
+- Treat re-exports, barrels, global state, and initialization order as coupling risks that need evidence before they spread.
+
 ## Test Driven Development
 
 - FOR EVERY NEW FEATURE OR BUGFIX, YOU MUST follow Test Driven Development. See the test-driven-development skill for complete methodology.
@@ -128,6 +138,11 @@ Use a strict review mindset:
 - unsafe migrations
 - API contract breaks
 - operational risk
+- hidden coupling through implicit contracts, side effects, initialization order, or global state
+- duplicate replacement where new code should have replaced or reused existing helpers, types, shapes, or public APIs
+- swallowed errors, silent fallback behavior, and defensive branches duplicated across callers
+- unmanaged re-exports, stale barrels, and fan-in or fan-out hotspots
+- tests that mock internal behavior instead of validating real behavior
 
 Use the requesting-code-review or receiving-code-review superpower when applicable.
 

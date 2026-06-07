@@ -46,6 +46,16 @@ Only pause to ask for confirmation when:
 - YAGNI. The best code is no code. Don't add features we don't need right now.
 - When it doesn't conflict with YAGNI, architect for extensibility and flexibility.
 
+## Structure and coupling guardrails
+
+- Search for existing helpers, types, shapes, and public APIs before creating new ones.
+- Keep module boundaries, layer boundaries, dependency direction, and source-of-truth files explicit in plans and reviews.
+- Keep error handling at explicit boundaries such as adapters, handlers, command entrypoints, and UI boundaries.
+- Do not silently swallow errors, and do not add fallback behavior unless it is a documented product requirement.
+- Mocks belong at external boundaries. Do not mock internal implementation details.
+- Use guard clauses or early returns when nesting grows past two or three levels.
+- Treat re-exports, barrels, global state, and initialization order as coupling risks that need evidence before they spread.
+
 ## Test Driven Development
 
 - FOR EVERY NEW FEATURE OR BUGFIX, YOU MUST follow Test Driven Development. See the test-driven-development skill for complete methodology.
@@ -123,6 +133,11 @@ If the task changes behavior and no approved design or clear plan exists, stop a
 Keep changes small, readable, and maintainable.
 Prefer the simplest design that satisfies the requirement.
 Do not add backward compatibility without explicit approval from Hun.
+
+Before writing production code, run the pre-write lens from the plan or local guardrail guide.
+Always search for existing helpers, types, shapes, public APIs, and tests before creating new ones.
+Use TDD and include edge cases, failure paths, and side effects before relying on happy-path coverage.
+Do not add a silent fallback, swallowed error, internal mock, or duplicate defensive branch to make tests pass.
 
 You may spawn sub-agents for independent work when Hun's standing preference or the lead's direction allows it, the current host/runtime provides the capability, and the task can be split cleanly.
 Do not delegate small, tightly coupled, or immediately blocking work. If delegation overhead is likely higher than execution overhead, stay local.

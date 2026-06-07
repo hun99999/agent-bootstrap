@@ -63,6 +63,55 @@ class PromptCorpusPolicyTests(unittest.TestCase):
         )
         self.assertIn("continue into TDD implementation", debugger_text)
 
+    def test_root_prompt_contains_structure_guardrails(self):
+        root_prompt = (REPO_ROOT / "AGENTS.md").read_text()
+
+        expected_phrases = (
+            "Structure and coupling guardrails",
+            "Search for existing helpers, types, shapes, and public APIs before creating new ones",
+            "Keep error handling at explicit boundaries",
+            "Do not silently swallow errors",
+            "Mocks belong at external boundaries",
+            "Use guard clauses or early returns",
+        )
+        for phrase in expected_phrases:
+            self.assertIn(phrase, root_prompt)
+
+    def test_role_agents_include_guardrail_responsibilities(self):
+        expectations = {
+            "planner.md": (
+                "module boundaries",
+                "SSOT",
+                "dependency direction",
+                "edge cases",
+            ),
+            "worker.md": (
+                "search for existing helpers",
+                "pre-write lens",
+                "TDD",
+                "silent fallback",
+            ),
+            "reviewer.md": (
+                "hidden coupling",
+                "duplicate replacement",
+                "swallowed errors",
+                "fan-in",
+                "fan-out",
+                "internal behavior",
+            ),
+            "verifier.md": (
+                "pristine test output",
+                ".audit/",
+                "local evidence artifacts",
+            ),
+        }
+
+        for agent_name, phrases in expectations.items():
+            with self.subTest(agent=agent_name):
+                agent_text = (REPO_ROOT / "agents" / agent_name).read_text()
+                for phrase in phrases:
+                    self.assertIn(phrase, agent_text)
+
 
 if __name__ == "__main__":
     unittest.main()
