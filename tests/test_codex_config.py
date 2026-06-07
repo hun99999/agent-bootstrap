@@ -61,6 +61,8 @@ def parse_value(value: str) -> object:
         return True
     if value == "false":
         return False
+    if value.isdecimal():
+        return int(value)
     if value.startswith('"') and value.endswith('"'):
         return value[1:-1]
     raise ValueError(f"Unsupported TOML value in test fixture: {value}")
@@ -165,6 +167,21 @@ class CodexConfigPolicyTests(unittest.TestCase):
                 )
                 self.assertEqual(len(gpt_5_4_model_assignments), 1)
 
+    def test_balanced_profile_uses_latest_model_with_medium_reasoning(self) -> None:
+        for path in CONFIG_PATHS:
+            with self.subTest(path=path.relative_to(REPO_ROOT)):
+                parsed = read_toml(path)
+
+                self.assertEqual(
+                    parsed["profiles"]["balanced"],
+                    {
+                        "model": "gpt-5.5",
+                        "model_reasoning_effort": "medium",
+                        "model_verbosity": "medium",
+                        "plan_mode_reasoning_effort": "medium",
+                    },
+                )
+
     def test_legacy_custom_agents_are_removed(self) -> None:
         for path in CONFIG_PATHS:
             with self.subTest(path=path.relative_to(REPO_ROOT)):
@@ -175,14 +192,29 @@ class CodexConfigPolicyTests(unittest.TestCase):
 
     def test_expected_agent_role_tables_exist(self) -> None:
         expected_agents = set(EXPECTED_ROLES) | {"orchestrator"}
+        expected_agent_controls = {
+            "max_threads": 6,
+            "max_depth": 1,
+        }
         allowed_agent_keys = {"config_file", "description", "nickname_candidates"}
 
         for path in CONFIG_PATHS:
             with self.subTest(path=path.relative_to(REPO_ROOT)):
                 parsed = read_toml(path)
                 agents = parsed["agents"]
+                agent_tables = {
+                    name
+                    for name, value in agents.items()
+                    if isinstance(value, dict)
+                }
+                agent_controls = {
+                    name: value
+                    for name, value in agents.items()
+                    if not isinstance(value, dict)
+                }
 
-                self.assertEqual(set(agents), expected_agents)
+                self.assertEqual(agent_tables, expected_agents)
+                self.assertEqual(agent_controls, expected_agent_controls)
                 for role in EXPECTED_ROLES:
                     agent = agents[role]
                     self.assertLessEqual(set(agent), allowed_agent_keys)
@@ -196,7 +228,7 @@ class CodexConfigPolicyTests(unittest.TestCase):
                 self.assertIsInstance(orchestrator["description"], str)
                 self.assertNotEqual(orchestrator["description"].strip(), "")
 
-                config_file_counts = Counter(agent["config_file"] for agent in agents.values())
+                config_file_counts = Counter(agents[role]["config_file"] for role in agent_tables)
                 duplicates = {
                     config_file
                     for config_file, count in config_file_counts.items()

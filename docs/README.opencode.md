@@ -16,6 +16,8 @@ Do not configure another harness unless the user explicitly asks.
 bash .opencode/install.sh --partner-name "Hun"
 ```
 
+This is a global OpenCode setup for the current user. It writes user-level defaults under `~/.config/opencode`, so new OpenCode sessions in any project can inherit the shared agents and vibe-coding guardrails.
+
 ## What It Does
 
 - writes `~/.config/opencode/opencode.json`
@@ -23,9 +25,19 @@ bash .opencode/install.sh --partner-name "Hun"
 - renders the shared constitution plus each role body into `~/.config/opencode/agents/*.md`
 - marks review-only agents as read-only where appropriate
 
+These user-level defaults are the global layer. Project-specific structure still belongs in project-local knowledge such as `local.md`, an untracked note, or a private Obsidian page. New OpenCode sessions should pick up the installed defaults; existing sessions may need a restart or a short manual instruction to apply the new guardrails.
+
 ## Re-run
 
 ```bash
 git pull
 bash .opencode/install.sh --partner-name "Hun"
 ```
+
+## Audit
+
+```bash
+python3 scripts/audit_agent_stack.py
+```
+
+The default audit is offline and read-only. OpenCode is optional by default because this repository can be used from Codex or Claude Code sessions too. Add `--strict` when a missing OpenCode CLI should fail the audit, and add `--online` when you explicitly want remote drift checks.

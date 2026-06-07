@@ -61,6 +61,17 @@ These copy-paste prompts are the fastest way to keep another agent inside the in
 - Generic shared core setup: [prompts/setup-shared-core.md](prompts/setup-shared-core.md)
 - OpenClaw shared core only: [prompts/setup-openclaw-shared-core.md](prompts/setup-openclaw-shared-core.md)
 - OpenClaw ACP integration: [prompts/setup-openclaw-acp.md](prompts/setup-openclaw-acp.md)
+- Apply vibe-coding guardrails to another repository: [prompts/apply-vibe-coding-guardrails.md](prompts/apply-vibe-coding-guardrails.md)
+- Start work with vibe-coding guardrails: [prompts/start-with-vibe-coding-guardrails.md](prompts/start-with-vibe-coding-guardrails.md)
+- Update this bootstrap after repository changes: [prompts/update-agent-bootstrap.md](prompts/update-agent-bootstrap.md)
+
+## Vibe Coding Guardrails
+
+Use [docs/global-guardrail-setup.md](docs/global-guardrail-setup.md) when you want these guardrails installed as Codex, Claude Code, or OpenCode user-level defaults across projects.
+
+Use [docs/vibe-coding-guardrails.md](docs/vibe-coding-guardrails.md) when you want Codex, Claude Code, or OpenCode to apply a pre-write lens, TDD write gate, and post-write structure review to a repository.
+
+For project-specific context, copy [docs/local-project-knowledge-template.md](docs/local-project-knowledge-template.md) into a local `local.md`, an untracked note, or a private Obsidian page. Keep private paths, credentials, MCP endpoints, auth state, and machine-specific trust settings out of the public baseline.
 
 Codex session opener for standing delegation preference:
 
@@ -91,6 +102,8 @@ The repository is split into two layers:
 
 The shared core defines the operating model once.
 Each adapter translates that core into the native format expected by the target harness.
+
+For the detailed project-local structure map, update flow, source-of-truth boundaries, and generated-artifact policy, read [docs/agent-bootstrap-structure.md](docs/agent-bootstrap-structure.md).
 
 ## Superpowers Integration
 
@@ -156,6 +169,16 @@ Keep these out:
 
 - Codex and OpenCode: re-run the harness installer after pulling
 - Claude Code: re-run `python3 scripts/render_claude_plugin.py --partner-name "<Name>"` after pulling, then update the local plugin installation
+
+## Agent Stack Audit
+
+Run the local audit before or after updates to check Codex, Claude Code, OpenCode, and Superpowers state:
+
+```bash
+python3 scripts/audit_agent_stack.py
+```
+
+The default audit is offline and read-only. Add `--online` when you explicitly want npm and remote git drift checks, and add `--strict` when missing optional tools such as OpenCode should fail the audit.
 
 ## Legacy Files
 

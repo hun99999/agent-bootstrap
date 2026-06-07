@@ -18,6 +18,7 @@ CONFIG_RELATIVE_PATH = Path("opencode.json")
 LOCAL_INCLUDE_LINE = "@local.md"
 DEFAULT_PLUGIN = "superpowers@git+https://github.com/obra/superpowers.git"
 DEFAULT_AGENT = "eng-lead"
+OPENCODE_MODES = {"primary", "subagent"}
 
 
 def parse_args() -> argparse.Namespace:
@@ -90,6 +91,15 @@ def load_agent_metadata(repo_root: Path) -> dict[str, dict[str, object]]:
     return json.loads(metadata_path.read_text(encoding="utf-8"))
 
 
+def validate_agent_metadata(agent_name: str, metadata: dict[str, object]) -> None:
+    if not isinstance(metadata.get("description"), str) or not metadata["description"].strip():
+        raise ValueError(f"invalid description for OpenCode agent '{agent_name}'")
+    if metadata.get("opencode_mode") not in OPENCODE_MODES:
+        raise ValueError(f"invalid opencode_mode for OpenCode agent '{agent_name}'")
+    if not isinstance(metadata.get("read_only"), bool):
+        raise ValueError(f"invalid read_only for OpenCode agent '{agent_name}'")
+
+
 def strip_local_include(content: str) -> str:
     lines = [line for line in content.splitlines() if line.strip() != LOCAL_INCLUDE_LINE]
     return "\n".join(lines).rstrip() + "\n"
@@ -99,6 +109,7 @@ def build_frontmatter(agent_name: str, metadata_map: dict[str, dict[str, object]
     metadata = metadata_map.get(agent_name)
     if metadata is None:
         raise ValueError(f"missing OpenCode metadata for agent '{agent_name}'")
+    validate_agent_metadata(agent_name, metadata)
 
     lines = [
         "---",

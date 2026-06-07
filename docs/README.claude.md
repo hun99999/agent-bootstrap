@@ -41,6 +41,20 @@ This writes:
 /plugin install process-first-agents@agent-bootstrap
 ```
 
+This installs the `process-first-agents` Claude Code plugin as the user-level defaults for the shared agent prompts. New Claude Code sessions can then use the same process-first constitution and vibe-coding guardrails across projects.
+
+In other words, new Claude Code sessions should inherit these user-level defaults after the plugin is installed or updated.
+
+Project-specific structure still belongs in project-local knowledge such as `local.md`, an untracked note, or a private Obsidian page. Existing Claude Code sessions may need a restart, plugin reload, or a short manual instruction to apply newly installed guardrails.
+
 ## Update
 
 Re-run the renderer after pulling new repo changes, then update the plugin in Claude Code.
+
+## Audit
+
+```bash
+python3 scripts/audit_agent_stack.py
+```
+
+The default audit is offline and read-only. It checks the local Codex CLI, Claude Code CLI, optional OpenCode CLI, Superpowers checkout state, and the Codex skills symlink. Add `--online` only when you explicitly want current npm and remote git drift checks.

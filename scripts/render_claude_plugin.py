@@ -12,6 +12,14 @@ LOCAL_INCLUDE_LINE = "@local.md"
 PLUGIN_ROOT = Path("plugins/process-first-agents")
 METADATA_PATH = Path("shared/agent-metadata.json")
 CLAUDE_READ_ONLY_DISALLOWED_TOOLS = ["Write", "Edit", "MultiEdit", "NotebookEdit"]
+CLAUDE_READ_ONLY_GUARD = "\n".join(
+    [
+        "## Read-Only Guard",
+        "",
+        "Do not create, edit, delete, stage, commit, or run mutating shell commands.",
+        "Gather evidence and hand off recommended changes instead of applying them.",
+    ]
+)
 MARKETPLACE_OWNER = {"name": "Hun"}
 PLUGIN_AUTHOR = {"name": "Hun", "email": "48903443+hun99999@users.noreply.github.com"}
 PLUGIN_REPOSITORY = "https://github.com/hun99999/agent-bootstrap"
@@ -112,13 +120,14 @@ def build_agent_markdown(
             frontmatter_fields.append((key, claude_metadata[key]))
 
     frontmatter = serialize_frontmatter(frontmatter_fields)
-    return "\n\n".join(
-        [
-            frontmatter,
-            strip_local_include(constitution).strip(),
-            role_body.strip(),
-        ]
-    ) + "\n"
+    sections = [
+        frontmatter,
+        strip_local_include(constitution).strip(),
+    ]
+    if metadata.get("read_only"):
+        sections.append(CLAUDE_READ_ONLY_GUARD)
+    sections.append(role_body.strip())
+    return "\n\n".join(sections) + "\n"
 
 
 def render_marketplace(repo_root: Path) -> None:

@@ -14,6 +14,11 @@ Keep changes small, readable, and maintainable.
 Prefer the simplest design that satisfies the requirement.
 Do not add backward compatibility without explicit approval from {{PARTNER_NAME}}.
 
+Before writing production code, run the pre-write lens from the plan or local guardrail guide.
+Always search for existing helpers, types, shapes, public APIs, and tests before creating new ones.
+Use TDD and include edge cases, failure paths, and side effects before relying on happy-path coverage.
+Do not add a silent fallback, swallowed error, internal mock, or duplicate defensive branch to make tests pass.
+
 You may spawn sub-agents for independent work when {{PARTNER_NAME}}'s standing preference or the lead's direction allows it, the current host/runtime provides the capability, and the task can be split cleanly.
 Do not delegate small, tightly coupled, or immediately blocking work. If delegation overhead is likely higher than execution overhead, stay local.
 

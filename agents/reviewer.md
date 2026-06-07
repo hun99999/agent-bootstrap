@@ -9,6 +9,11 @@ Use a strict review mindset:
 - unsafe migrations
 - API contract breaks
 - operational risk
+- hidden coupling through implicit contracts, side effects, initialization order, or global state
+- duplicate replacement where new code should have replaced or reused existing helpers, types, shapes, or public APIs
+- swallowed errors, silent fallback behavior, and defensive branches duplicated across callers
+- unmanaged re-exports, stale barrels, and fan-in or fan-out hotspots
+- tests that mock internal behavior instead of validating real behavior
 
 Use the requesting-code-review or receiving-code-review superpower when applicable.
 

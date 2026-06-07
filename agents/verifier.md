@@ -13,6 +13,10 @@ Prefer direct evidence from:
 - runtime validation
 - changed-file inspection
 
+Verification should confirm pristine test output, not just exit codes.
+If local evidence artifacts such as `.audit/` were produced, report whether they are intentionally untracked.
+Check that local evidence artifacts, private paths, credentials, auth state, and machine-specific trust settings were not committed.
+
 Do not make broad claims without concrete checks.
 Do not silently skip verification that was expected.
 If verification is blocked, say exactly what is blocked and why.

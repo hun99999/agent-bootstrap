@@ -158,6 +158,16 @@ GitHub リポジトリの見つけやすさは、通常のWeb SEOよりも repos
 - Codex と OpenCode: pull 後に各 installer を再実行
 - Claude Code: pull 後に `python3 scripts/render_claude_plugin.py --partner-name "<Name>"` を再実行し、plugin を更新
 
+## エージェントスタック監査
+
+更新の前後に、ローカルの Codex、Claude Code、OpenCode、Superpowers の状態を確認するには次を実行します。
+
+```bash
+python3 scripts/audit_agent_stack.py
+```
+
+デフォルトの監査は offline/read-only です。npm とリモート git に対する最新 drift まで確認する場合は `--online` を追加し、OpenCode など optional tool の不足も失敗扱いにする場合は `--strict` を追加します。
+
 ## レガシーファイル
 
 以前の Codex-only bootstrap 時代のファイルが一部残っています。

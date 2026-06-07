@@ -17,6 +17,9 @@ MINIMUM_READ_ONLY_DISALLOWED_TOOLS = {
     "MultiEdit",
     "NotebookEdit",
 }
+READ_ONLY_NO_MUTATION_GUARD = (
+    "Do not create, edit, delete, stage, commit, or run mutating shell commands."
+)
 
 
 def parse_frontmatter(markdown: str) -> dict[str, object]:
@@ -60,6 +63,12 @@ def load_renderer_module():
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
     return module
+
+
+def load_agent_metadata() -> dict[str, dict[str, object]]:
+    return json.loads(
+        (REPO_ROOT / "shared" / "agent-metadata.json").read_text(encoding="utf-8")
+    )
 
 
 class ClaudePluginTests(unittest.TestCase):
@@ -145,10 +154,23 @@ class ClaudePluginTests(unittest.TestCase):
                 (plugin_root / "agents" / "planner.md").read_text(encoding="utf-8")
             )
 
-        self.assertGreaterEqual(
+        self.assertEqual(
             set(planner["disallowedTools"]),
             MINIMUM_READ_ONLY_DISALLOWED_TOOLS,
         )
+
+    def test_renderer_outputs_read_only_no_mutation_guard(self) -> None:
+        renderer = load_renderer_module()
+        with tempfile.TemporaryDirectory() as temp_dir:
+            plugin_root = Path(temp_dir) / "process-first-agents"
+
+            renderer.render_plugin_bundle(REPO_ROOT, plugin_root, "Hun")
+
+            planner = (plugin_root / "agents" / "planner.md").read_text(encoding="utf-8")
+            worker = (plugin_root / "agents" / "worker.md").read_text(encoding="utf-8")
+
+        self.assertIn(READ_ONLY_NO_MUTATION_GUARD, planner)
+        self.assertNotIn(READ_ONLY_NO_MUTATION_GUARD, worker)
 
     def test_generated_agents_have_frontmatter_and_rendered_constitution(self) -> None:
         eng_lead = (PLUGIN_ROOT / "agents" / "eng-lead.md").read_text(encoding="utf-8")
@@ -163,42 +185,18 @@ class ClaudePluginTests(unittest.TestCase):
         self.assertIn("description: Review-only work focused on bugs and regressions", reviewer)
 
     def test_generated_agents_have_claude_frontmatter_policy(self) -> None:
-        expected_agents = {
-            "eng-lead",
-            "worker",
-            "planner",
-            "researcher",
-            "debugger",
-            "frontend-engineer",
-            "backend-engineer",
-            "platform-engineer",
-            "data-engineer",
-            "security-engineer",
-            "integrations-engineer",
-            "performance-engineer",
-            "reviewer",
-            "verifier",
-            "release-manager",
-            "skill-author",
-        }
+        metadata = load_agent_metadata()
+        expected_agents = set(metadata)
         read_only_agents = {
-            "planner",
-            "researcher",
-            "debugger",
-            "reviewer",
-            "verifier",
-            "release-manager",
+            agent_name
+            for agent_name, agent_metadata in metadata.items()
+            if agent_metadata.get("read_only") is True
         }
         isolated_agents = {
-            "worker",
-            "frontend-engineer",
-            "backend-engineer",
-            "platform-engineer",
-            "data-engineer",
-            "security-engineer",
-            "integrations-engineer",
-            "performance-engineer",
-            "skill-author",
+            agent_name
+            for agent_name, agent_metadata in metadata.items()
+            if isinstance(agent_metadata.get("claude"), dict)
+            and agent_metadata["claude"].get("isolation") == "worktree"
         }
         self.assertEqual(read_only_agents & isolated_agents, set())
         self.assertEqual(
@@ -218,7 +216,7 @@ class ClaudePluginTests(unittest.TestCase):
                 self.assertNotIn("mcpServers", frontmatter)
                 self.assertNotIn("permissionMode", frontmatter)
                 if agent_name in read_only_agents:
-                    self.assertGreaterEqual(
+                    self.assertEqual(
                         set(frontmatter["disallowedTools"]),
                         MINIMUM_READ_ONLY_DISALLOWED_TOOLS,
                     )
@@ -230,6 +228,17 @@ class ClaudePluginTests(unittest.TestCase):
                     self.assertEqual(agent_name, "eng-lead")
                     self.assertNotIn("disallowedTools", frontmatter)
                     self.assertNotIn("isolation", frontmatter)
+
+    def test_generated_read_only_agents_include_no_mutation_guard(self) -> None:
+        metadata = load_agent_metadata()
+
+        for agent_name, agent_metadata in metadata.items():
+            contents = (PLUGIN_ROOT / "agents" / f"{agent_name}.md").read_text(encoding="utf-8")
+            with self.subTest(agent=agent_name):
+                if agent_metadata.get("read_only") is True:
+                    self.assertIn(READ_ONLY_NO_MUTATION_GUARD, contents)
+                else:
+                    self.assertNotIn(READ_ONLY_NO_MUTATION_GUARD, contents)
 
 
 if __name__ == "__main__":

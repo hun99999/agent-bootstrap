@@ -40,6 +40,19 @@ class ReadmeDocsTests(unittest.TestCase):
             for phrase in expected_phrases:
                 self.assertIn(phrase, contents)
 
+    def test_docs_explain_agent_stack_audit_command(self) -> None:
+        for relative in (
+            "README.md",
+            "README.ko.md",
+            "README.ja.md",
+            "README.zh-CN.md",
+            "docs/README.codex.md",
+            "docs/README.claude.md",
+            "docs/README.opencode.md",
+        ):
+            contents = (REPO_ROOT / relative).read_text(encoding="utf-8")
+            self.assertIn("scripts/audit_agent_stack.py", contents)
+
     def test_translated_readmes_mention_duplicate_superpowers_discovery(self) -> None:
         expected_phrases = {
             "README.ko.md": "중복 skill 항목",
@@ -50,6 +63,87 @@ class ReadmeDocsTests(unittest.TestCase):
         for relative, phrase in expected_phrases.items():
             contents = (REPO_ROOT / relative).read_text(encoding="utf-8")
             self.assertIn(phrase, contents)
+
+    def test_readme_links_vibe_coding_guardrails(self) -> None:
+        readme = (REPO_ROOT / "README.md").read_text(encoding="utf-8")
+
+        self.assertIn("docs/vibe-coding-guardrails.md", readme)
+        self.assertIn("docs/global-guardrail-setup.md", readme)
+        self.assertIn("prompts/apply-vibe-coding-guardrails.md", readme)
+        self.assertIn("prompts/start-with-vibe-coding-guardrails.md", readme)
+
+    def test_readme_links_repo_structure_and_update_prompt(self) -> None:
+        readme = (REPO_ROOT / "README.md").read_text(encoding="utf-8")
+
+        self.assertIn("docs/agent-bootstrap-structure.md", readme)
+        self.assertIn("prompts/update-agent-bootstrap.md", readme)
+
+    def test_korean_readme_links_repo_structure_and_update_prompt(self) -> None:
+        readme = (REPO_ROOT / "README.ko.md").read_text(encoding="utf-8")
+
+        self.assertIn("docs/agent-bootstrap-structure.md", readme)
+        self.assertIn("prompts/update-agent-bootstrap.md", readme)
+
+    def test_agent_bootstrap_structure_doc_covers_boundaries_and_update_flow(self) -> None:
+        structure = (REPO_ROOT / "docs" / "agent-bootstrap-structure.md").read_text(
+            encoding="utf-8"
+        )
+
+        expected_phrases = (
+            "Shared Core",
+            "Harness Adapters",
+            "Generated Artifacts",
+            "Source Of Truth",
+            "Do not edit generated Claude plugin agents by hand",
+            "Update Flow",
+            "python3 scripts/render_claude_plugin.py --partner-name",
+            "python3 -m unittest discover -s tests -p 'test_*.py'",
+            "python3 scripts/audit_agent_stack.py",
+            "No private paths",
+        )
+        for phrase in expected_phrases:
+            self.assertIn(phrase, structure)
+
+    def test_update_prompt_covers_pull_render_install_and_review_loop(self) -> None:
+        prompt = (REPO_ROOT / "prompts" / "update-agent-bootstrap.md").read_text(
+            encoding="utf-8"
+        )
+
+        expected_phrases = (
+            "Update agent-bootstrap from the current repository state",
+            "git status",
+            "git pull --ff-only",
+            "docs/agent-bootstrap-structure.md",
+            "pre-write lens",
+            "python3 scripts/render_claude_plugin.py --partner-name",
+            "bash .codex/install.sh --partner-name",
+            "python3 scripts/audit_agent_stack.py",
+            "post-write review",
+            "do not commit private paths",
+        )
+        for phrase in expected_phrases:
+            self.assertIn(phrase, prompt)
+
+    def test_harness_docs_explain_global_guardrail_install_scope(self) -> None:
+        expectations = {
+            "docs/README.codex.md": ("~/.codex", "user-level defaults", "new Codex sessions"),
+            "docs/README.claude.md": (
+                "Claude Code plugin",
+                "user-level defaults",
+                "new Claude Code sessions",
+            ),
+            "docs/README.opencode.md": (
+                "~/.config/opencode",
+                "user-level defaults",
+                "new OpenCode sessions",
+            ),
+        }
+
+        for relative, phrases in expectations.items():
+            contents = (REPO_ROOT / relative).read_text(encoding="utf-8")
+            with self.subTest(relative=relative):
+                for phrase in phrases:
+                    self.assertIn(phrase, contents)
 
 
 if __name__ == "__main__":

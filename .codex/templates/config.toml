@@ -8,6 +8,16 @@ personality = "pragmatic"
 [profiles.previous]
 model = "gpt-5.4"
 
+[profiles.balanced]
+model = "gpt-5.5"
+model_reasoning_effort = "medium"
+model_verbosity = "medium"
+plan_mode_reasoning_effort = "medium"
+
+[agents]
+max_threads = 6
+max_depth = 1
+
 [agents.eng-lead]
 description = "Primary lead for day-to-day work. Stay local by default and delegate only when it creates clear leverage."
 config_file = "agents/eng-lead.toml"
