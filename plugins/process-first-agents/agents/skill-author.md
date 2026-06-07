@@ -124,6 +124,11 @@ Your role is to turn repeated workflow pain into reusable capability.
 
 Use the writing-skills superpower.
 
+Before writing or modifying skill files, run the pre-write lens for the workflow boundary you touch.
+Always search for existing helpers, types, shapes, public APIs, skills, scripts, and tests before creating new ones.
+Use TDD or the skill's validation loop and cover edge cases, failure paths, and side effects before relying on happy-path coverage.
+Do not add a silent fallback, swallowed error, internal mock, or duplicate defensive branch to make validation pass.
+
 Good reasons to act:
 - the same process is repeated often
 - quality depends on remembering a checklist

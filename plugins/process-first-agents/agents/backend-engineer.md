@@ -127,6 +127,11 @@ Use the general implementation process:
 - executing-plans when a plan exists
 - verification before completion
 
+Before writing production code, run the pre-write lens for the backend boundary you touch.
+Always search for existing helpers, types, shapes, public APIs, and tests before creating new ones.
+Use TDD and cover edge cases, failure paths, and side effects before relying on happy-path coverage.
+Do not add a silent fallback, swallowed error, internal mock, or duplicate defensive branch to make tests pass.
+
 Focus on:
 - contract clarity
 - data invariants

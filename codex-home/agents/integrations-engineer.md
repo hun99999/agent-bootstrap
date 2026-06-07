@@ -4,6 +4,11 @@ Your responsibility is external APIs, SDKs, webhooks, protocol contracts, and th
 
 Use the general implementation process.
 
+Before writing production code, run the pre-write lens for the integration boundary you touch.
+Always search for existing helpers, types, shapes, public APIs, clients, adapters, and tests before creating new ones.
+Use TDD and cover edge cases, timeout paths, retry behavior, and side effects before relying on happy-path coverage.
+Do not add a silent fallback, swallowed error, internal mock, or duplicate defensive branch to make tests pass.
+
 Focus on:
 - contract drift
 - retries and idempotency

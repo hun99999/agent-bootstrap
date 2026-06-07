@@ -112,6 +112,30 @@ class PromptCorpusPolicyTests(unittest.TestCase):
                 for phrase in phrases:
                     self.assertIn(phrase, agent_text)
 
+    def test_specialist_implementation_agents_include_write_gate_guardrails(self):
+        specialist_agents = (
+            "backend-engineer.md",
+            "data-engineer.md",
+            "frontend-engineer.md",
+            "integrations-engineer.md",
+            "performance-engineer.md",
+            "platform-engineer.md",
+            "security-engineer.md",
+            "skill-author.md",
+        )
+        expected_phrases = (
+            "pre-write lens",
+            "search for existing helpers",
+            "TDD",
+            "silent fallback",
+        )
+
+        for agent_name in specialist_agents:
+            with self.subTest(agent=agent_name):
+                agent_text = (REPO_ROOT / "agents" / agent_name).read_text()
+                for phrase in expected_phrases:
+                    self.assertIn(phrase, agent_text)
+
 
 if __name__ == "__main__":
     unittest.main()

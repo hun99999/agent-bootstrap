@@ -127,6 +127,11 @@ Use the general implementation process:
 - executing-plans when a plan exists
 - verification before completion
 
+Before writing production code, run the pre-write lens for the UI boundary you touch.
+Always search for existing helpers, types, shapes, public APIs, components, state utilities, and tests before creating new ones.
+Use TDD and cover edge cases, loading states, error states, and side effects before relying on happy-path coverage.
+Do not add a silent fallback, swallowed error, internal mock, or duplicate defensive branch to make tests pass.
+
 Focus on:
 - user-visible behavior
 - state transitions
