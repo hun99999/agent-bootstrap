@@ -72,6 +72,36 @@ class ReadmeDocsTests(unittest.TestCase):
         self.assertIn("prompts/apply-vibe-coding-guardrails.md", readme)
         self.assertIn("prompts/start-with-vibe-coding-guardrails.md", readme)
 
+    def test_readme_explains_guardrail_workflows_near_the_top(self) -> None:
+        readme = (REPO_ROOT / "README.md").read_text(encoding="utf-8")
+        introduction = readme[:3000]
+
+        expected_phrases = (
+            "What You Can Ask An Agent To Do",
+            "Install global defaults",
+            "Apply guardrails to a project",
+            "Start feature work inside a guarded project",
+            "Update this bootstrap after repository changes",
+            "Optional tooling is decision-based",
+        )
+        for phrase in expected_phrases:
+            self.assertIn(phrase, introduction)
+
+    def test_korean_readme_explains_guardrail_workflows_near_the_top(self) -> None:
+        readme = (REPO_ROOT / "README.ko.md").read_text(encoding="utf-8")
+        introduction = readme[:3000]
+
+        expected_phrases = (
+            "에이전트에게 맡길 수 있는 일",
+            "전역 기본값 설치",
+            "프로젝트에 guardrail 적용",
+            "guardrail이 있는 프로젝트에서 기능 작업 시작",
+            "이 bootstrap 업데이트/재점검",
+            "선택 도구는 판단 후 사용",
+        )
+        for phrase in expected_phrases:
+            self.assertIn(phrase, introduction)
+
     def test_readme_links_repo_structure_and_update_prompt(self) -> None:
         readme = (REPO_ROOT / "README.md").read_text(encoding="utf-8")
 
@@ -83,6 +113,14 @@ class ReadmeDocsTests(unittest.TestCase):
 
         self.assertIn("docs/agent-bootstrap-structure.md", readme)
         self.assertIn("prompts/update-agent-bootstrap.md", readme)
+
+    def test_translated_readmes_link_repo_structure_and_update_prompt(self) -> None:
+        for relative in ("README.ko.md", "README.ja.md", "README.zh-CN.md"):
+            with self.subTest(relative=relative):
+                readme = (REPO_ROOT / relative).read_text(encoding="utf-8")
+
+                self.assertIn("docs/agent-bootstrap-structure.md", readme)
+                self.assertIn("prompts/update-agent-bootstrap.md", readme)
 
     def test_agent_bootstrap_structure_doc_covers_boundaries_and_update_flow(self) -> None:
         structure = (REPO_ROOT / "docs" / "agent-bootstrap-structure.md").read_text(
