@@ -48,6 +48,56 @@ Codex、Claude Code、OpenCode向けのプロセス重視AIコーディング環
 - credential、private MCP endpoint、個人パス、マシン固有の trust state を public baseline に含めないよう設計されています。
 - 英語、韓国語、日本語、中国語簡体字の文書を同じレポで提供します。
 
+## 対象プロジェクト用 Claude Code プロンプト
+
+Claude Code を対象プロジェクトのリポジトリ内で開き、次をそのまま貼り付けます。公開 URL を参照するため、個人ローカルパスに依存しません。
+
+```text
+このプロジェクトに agent-bootstrap ベースの vibe-coding guardrails を適用してください。
+
+参照リポジトリ:
+- https://github.com/hun99999/agent-bootstrap
+
+まずこのプロジェクトで git status --short --branch を実行してください。未コミット変更または untracked files がある場合は停止し、どう扱うか私に確認してください。承認なしに stash、delete、overwrite、git add をしないでください。
+
+次にこのプロジェクトを調査してください:
+- AGENTS.md、CLAUDE.md、README.md、既存 docs
+- package.json、pyproject.toml、Cargo.toml、go.mod、または他の言語/ツールの手がかり
+- 実際の test、lint、type-check、build コマンド
+- source-of-truth helper、type、schema、public API、module boundary、dependency direction、error boundary、re-export/barrel policy、known hotspot
+
+上の参照リポジトリ URL の文書を読んでください。必要ならこのプロジェクト外に read-only clone して読んでください。次のファイルを source として使ってください:
+- docs/agent-setup-playbook.md
+- docs/vibe-coding-guardrails.md
+- docs/global-guardrail-setup.md
+- docs/local-project-knowledge-template.md
+- prompts/apply-vibe-coding-guardrails.md
+- prompts/start-with-vibe-coding-guardrails.md
+
+可能なら optional tool inventory を read-only evidence としてだけ実行してください。参照リポジトリを clone した場合は、その clone の script をこのプロジェクト root に対して実行してください:
+- python3 <agent-bootstrap-clone>/scripts/inventory_optional_tools.py --repo-root .
+- python3 <agent-bootstrap-clone>/scripts/inventory_optional_tools.py --repo-root . --json
+
+その script がローカルで使えない場合は、その制約を説明し、直接調査で続けてください。任意ツールを自動インストールしないでください。Obsidian、Lumin Repo Lens、dependency lint、strict type checks、cycle detection、complexity limits は、インストール承認を求める前に required、recommended、optional、skipped のいずれかに分類してください。
+
+このプロジェクトに必要な最小限の guardrail だけを適用してください:
+- このプロジェクトがすでに使っている agent guidance を追加または更新する
+- docs/local-project-knowledge-template.md をもとに project structure index を作る
+- source-of-truth helper、type、schema、public API、module boundary、dependency direction、error boundary、re-export policy、test strategy、known hotspot、decision を記録する
+- local evidence artifact が作られる可能性がある場合だけ .audit/ を .gitignore に追加する
+- personal vault path、private path、credential、MCP endpoint、auth state、browser profile、machine-specific trust setting をコミットしない
+
+このプロジェクトが TS/JS-heavy で、私が Lumin Repo Lens の使用を承認した場合だけ evidence tool として使ってください:
+- structural claim には evidence が必要
+- absence claim には scan range が必要
+- 証拠が部分的な場合は "not observed in this scan range" と言う
+- pre-write intent は names、shapes、files、dependencies、plannedTypeEscapes を使う
+- post-write machine evidence は type escapes、unexpected files、scan range、confidence changes に限定する
+- duplicate helpers、dependency drift、public API drift、re-export drift は direct evidence が必要な manual review claim とする
+
+振る舞いの変更には TDD を使ってください。変更後、このプロジェクトの実際の verification コマンドと post-write review を実行してください。変更ファイル、実行コマンド、検証結果、skipped/recommended optional tools、残リスクを報告してください。
+```
+
 ## クイックスタート
 
 最初にスコープを選ぶことが重要です。エージェントのセットアップは、新しいハーネス、プラグイン、provider、リポジトリ運用を一度に変えようとすると失敗しやすくなります。まず最小の有効範囲を適用し、検証してから広げます。

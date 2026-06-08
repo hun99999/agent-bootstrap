@@ -58,6 +58,56 @@ Use this repository as an operating guide, not only as an installer.
 
 Optional tooling is decision-based. Obsidian, Lumin Repo Lens, dependency lint, cycle detection, strict type checks, and complexity limits should be recommended or installed only when the target repository and user approval justify them.
 
+## Target Repository Claude Code Prompt
+
+Paste this into Claude Code while Claude Code is open inside the target project repository. It tells the agent to use this public repository as the guardrail source without relying on a private local path.
+
+```text
+Apply agent-bootstrap vibe-coding guardrails to this project.
+
+Reference repository:
+- https://github.com/hun99999/agent-bootstrap
+
+First, run git status --short --branch in this project. If there are uncommitted changes or untracked files, stop and ask me how to handle them. Do not stash, delete, overwrite, or git add anything without approval.
+
+Then inspect this project:
+- AGENTS.md, CLAUDE.md, README.md, and existing docs
+- package.json, pyproject.toml, Cargo.toml, go.mod, or other language/tooling signals
+- real test, lint, type-check, and build commands
+- source-of-truth helpers, types, schemas, public APIs, module boundaries, dependency direction, error boundaries, re-export or barrel policy, and known hotspots
+
+Read the reference repository docs from the URL above. If needed, clone it read-only outside this project. Use these files as the source:
+- docs/agent-setup-playbook.md
+- docs/vibe-coding-guardrails.md
+- docs/global-guardrail-setup.md
+- docs/local-project-knowledge-template.md
+- prompts/apply-vibe-coding-guardrails.md
+- prompts/start-with-vibe-coding-guardrails.md
+
+Run optional tool inventory only as read-only evidence when possible. If you cloned the reference repository, run its script against this project root:
+- python3 <agent-bootstrap-clone>/scripts/inventory_optional_tools.py --repo-root .
+- python3 <agent-bootstrap-clone>/scripts/inventory_optional_tools.py --repo-root . --json
+
+If that script is not available locally, explain the limitation and continue with direct inspection. Do not install optional tools automatically. Classify Obsidian, Lumin Repo Lens, dependency lint, strict type checks, cycle detection, and complexity limits as required, recommended, optional, or skipped before asking for any install approval.
+
+Apply only the smallest useful guardrails for this project:
+- add or update the project agent guidance that this project already uses
+- create a project structure index from docs/local-project-knowledge-template.md
+- record source-of-truth helpers, types, schemas, public APIs, module boundaries, dependency direction, error boundaries, re-export policy, test strategy, known hotspots, and decisions
+- add .audit/ to .gitignore only if local evidence artifacts may be produced
+- do not commit personal vault paths, private paths, credentials, MCP endpoints, auth state, browser profiles, or machine-specific trust settings
+
+If this is a TS/JS-heavy project and I approve Lumin Repo Lens, use it only as an evidence tool:
+- structural claims require evidence
+- absence claims require scan range
+- say "not observed in this scan range" when evidence is partial
+- pre-write intent uses names, shapes, files, dependencies, plannedTypeEscapes
+- post-write machine evidence is limited to type escapes, unexpected files, scan range, and confidence changes
+- duplicate helpers, dependency drift, public API drift, and re-export drift are manual review claims that need direct evidence
+
+Use TDD for behavior changes. After changes, run this project's real verification commands and post-write review. Report files changed, commands run, verification results, optional tools skipped or recommended, and remaining risks.
+```
+
 ## Quick Start
 
 Choose the scope first. Most failed agent setup work starts by configuring too much: a new harness, a new plugin stack, a new provider path, and a repo workflow all at once. Start with the smallest useful scope, verify it, then expand.

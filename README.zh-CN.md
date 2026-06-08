@@ -48,6 +48,56 @@
 - 设计目标就是不把 credential、private MCP endpoint、个人路径或机器特定 trust state 放进 public baseline。
 - 同一个仓库同时提供英文、韩文、日文、简体中文文档。
 
+## 目标项目 Claude Code 提示词
+
+在目标项目仓库中打开 Claude Code，然后原样粘贴下面的提示词。它引用公开 URL，不依赖个人本地路径。
+
+```text
+请把 agent-bootstrap 的 vibe-coding guardrails 应用到这个项目。
+
+参考仓库:
+- https://github.com/hun99999/agent-bootstrap
+
+首先在这个项目中运行 git status --short --branch。如果有未提交修改或 untracked files，停止并询问我如何处理。未经批准，不要 stash、delete、overwrite 或 git add。
+
+然后检查这个项目:
+- AGENTS.md、CLAUDE.md、README.md 和现有 docs
+- package.json、pyproject.toml、Cargo.toml、go.mod 或其他语言/工具信号
+- 真实的 test、lint、type-check、build 命令
+- source-of-truth helper、type、schema、public API、module boundary、dependency direction、error boundary、re-export/barrel policy、known hotspot
+
+阅读上面参考仓库 URL 中的文档。必要时，在这个项目之外 read-only clone 后阅读。使用这些文件作为 source:
+- docs/agent-setup-playbook.md
+- docs/vibe-coding-guardrails.md
+- docs/global-guardrail-setup.md
+- docs/local-project-knowledge-template.md
+- prompts/apply-vibe-coding-guardrails.md
+- prompts/start-with-vibe-coding-guardrails.md
+
+如果可以，把 optional tool inventory 只作为 read-only evidence 运行。如果已经 clone 参考仓库，就用那个 clone 的 script 检查这个项目 root:
+- python3 <agent-bootstrap-clone>/scripts/inventory_optional_tools.py --repo-root .
+- python3 <agent-bootstrap-clone>/scripts/inventory_optional_tools.py --repo-root . --json
+
+如果这个 script 在本地不可用，说明限制，并继续直接检查。不要自动安装可选工具。Obsidian、Lumin Repo Lens、dependency lint、strict type checks、cycle detection、complexity limits 在请求安装批准前，必须先分类为 required、recommended、optional 或 skipped。
+
+只应用这个项目需要的最小 guardrail:
+- 添加或更新这个项目已经使用的 agent guidance
+- 基于 docs/local-project-knowledge-template.md 创建 project structure index
+- 记录 source-of-truth helper、type、schema、public API、module boundary、dependency direction、error boundary、re-export policy、test strategy、known hotspot 和 decision
+- 只有在可能产生 local evidence artifact 时，才把 .audit/ 加入 .gitignore
+- 不要提交 personal vault path、private path、credential、MCP endpoint、auth state、browser profile 或 machine-specific trust setting
+
+只有当这个项目是 TS/JS-heavy，并且我批准使用 Lumin Repo Lens 时，才把它作为 evidence tool 使用:
+- structural claim 需要 evidence
+- absence claim 需要 scan range
+- 证据不完整时，说 "not observed in this scan range"
+- pre-write intent 使用 names、shapes、files、dependencies、plannedTypeEscapes
+- post-write machine evidence 仅限 type escapes、unexpected files、scan range、confidence changes
+- duplicate helpers、dependency drift、public API drift、re-export drift 是需要 direct evidence 的 manual review claim
+
+行为变更使用 TDD。修改后运行这个项目真实的 verification 命令和 post-write review。报告修改文件、执行命令、验证结果、skipped/recommended optional tools 和剩余风险。
+```
+
 ## 快速开始
 
 先选择范围。代理设置最容易失败的情况，是一次性改动新的 harness、新插件栈、新 provider 和仓库工作流。先应用最小的有效范围，验证之后再扩大。
