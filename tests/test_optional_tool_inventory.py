@@ -69,6 +69,34 @@ class OptionalToolInventoryTests(unittest.TestCase):
         self.assertIn("reason", first)
         self.assertIn("install_status", first)
 
+    def test_lumin_inventory_reports_existing_audit_artifacts(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            repo_root = Path(tmpdir)
+            audit_dir = repo_root / ".audit"
+            audit_dir.mkdir()
+            (audit_dir / "manifest.json").write_text("{}", encoding="utf-8")
+            (audit_dir / "audit-summary.latest.md").write_text("# audit\n", encoding="utf-8")
+            (audit_dir / "pre-write-advisory.latest.json").write_text(
+                "{}", encoding="utf-8"
+            )
+            (audit_dir / "post-write-delta.latest.json").write_text(
+                "{}", encoding="utf-8"
+            )
+            (repo_root / "package.json").write_text("{}", encoding="utf-8")
+
+            results = inventory_optional_tools.build_inventory(
+                repo_root,
+                command_lookup=lambda command: None,
+                path_exists=lambda path: False,
+                platform_name="Linux",
+            )
+            lumin = next(result for result in results if result.name == "lumin-repo-lens")
+
+        self.assertIn(".audit/manifest.json exists", lumin.evidence)
+        self.assertIn(".audit/audit-summary.latest.md exists", lumin.evidence)
+        self.assertIn(".audit/pre-write-advisory.latest.json exists", lumin.evidence)
+        self.assertIn(".audit/post-write-delta.latest.json exists", lumin.evidence)
+
 
 if __name__ == "__main__":
     unittest.main()

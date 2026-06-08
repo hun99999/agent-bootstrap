@@ -135,6 +135,20 @@ Skip it when:
 
 If `.audit/` artifacts may be created, make sure `.audit/` is ignored before running the tool.
 
+When Lumin Repo Lens is approved and available, use it as an evidence workflow, not as a magic reviewer:
+
+- No structural claim without evidence: cite a produced artifact, a direct file inspection, or both before claiming a duplicate helper, public surface, cycle, fan-in hotspot, re-export drift, or missing boundary.
+- No absence claim without scan range: say "not observed in this scan range" instead of "does not exist" unless the checked range, files, and exclusions make that claim true.
+- For a first pass or branch-level review, prefer the upstream full audit workflow. Treat `quick, full, ci` as audit cadences with different confidence, and read the produced `manifest.json` before using summaries.
+- Before writing code, capture the pre-write intent with these keys: `names, shapes, files, dependencies, plannedTypeEscapes`. The agent should infer this from the user's task and repository evidence; the user should not need to hand-write JSON.
+- Read the invocation-specific advisory produced for that pre-write run before editing. Do not rely only on a `latest` pointer when a command produced a more specific advisory path.
+- After writing, run the matching post-write delta against the same invocation-specific advisory. Review `silent-new` type escapes, planned-not-observed type escapes, unexpected files outside the intent, scan range changes, and degraded confidence.
+- Use canon draft or check-canon only for Lumin-supported canon sources.
+- Lumin canon sources are limited to type ownership, helper registry, topology, and naming.
+- Use living audit or project docs for boundary policy, public API policy, dependency direction, and re-export policy.
+- Keep a living audit when a repo needs ongoing structural tracking. Prefer a shareable repository doc such as `docs/current/audit/lumin-structural-audit.md` when it is safe to commit; otherwise keep the same index shape in an `Obsidian or private wiki` page.
+- Do not treat Lumin warnings as automatic refactor permission. The agent still needs to inspect cited files, avoid false-positive cleanup, and make the smallest change approved by the task.
+
 ### Dependency, Type, Cycle, And Complexity Checks
 
 Dependency lint, strict type checks, cycle detection, complexity limits, and file/function size limits are strong controls, but they are tooling changes.

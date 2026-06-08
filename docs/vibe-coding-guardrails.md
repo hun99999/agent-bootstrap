@@ -222,6 +222,55 @@ LUMIN_REPO_LENS_NO_AUTO_INSTALL=1 node skills/lumin-repo-lens/scripts/audit-repo
 
 The tool output is evidence. The agent must still inspect the cited files and make the engineering call.
 
+## Lumin Evidence Lifecycle
+
+Use this lifecycle only when the target repository is TS/JS-heavy and Lumin Repo Lens is installed or explicitly approved. If Lumin is missing, the agent should still follow the same evidence rules with native repo tools and direct inspection.
+
+### Structural claim contract
+
+The contract is stricter than "run a tool and summarize it":
+
+- No structural claim without evidence. A claim about duplicate helpers, hidden coupling, dead exports, cycles, topology, barrel drift, public-surface risk, god files, or fan-in/fan-out hotspots needs a cited artifact or direct file evidence.
+- No absence claim without scan range. `not observed is not does not exist`; report the files, directories, excludes, language coverage, and confidence behind the statement.
+- Read `.audit/manifest.json` first when it exists. It is the source for scan range, produced artifacts, skipped lanes, confidence, and blind spots.
+- Treat `.audit/audit-summary.latest.md` as an artifact map, not a final review. The engineering review still belongs to the agent.
+- Label structural conclusions as `grounded, degraded, unknown` when artifact quality, parse coverage, or scan range changes affect confidence.
+- Avoid false-positive cleanup. Static "no consumer found" evidence is not enough to delete code when resolver blindness, parse taint, runtime imports, framework conventions, generated files, or public API promises might apply.
+
+### Audit cadence
+
+Use the smallest cadence that gives enough evidence:
+
+- `quick, full, ci`: quick is for focused checks, full is for first pass or branch-level reviews, and ci is for automated guardrail enforcement when the repo has opted in.
+- Use full evidence for a first checkup, large refactor, post-refactor review, stale artifacts, or an explicit structural audit request.
+- Use focused checks for a narrow feature after a recent comparable full audit.
+- Do not compare two audit results unless their scan range and confidence are compatible enough for the claim being made.
+
+### Pre-write and post-write
+
+For a scoped code task:
+
+1. Build the pre-write intent from the requested change. Track `names`, `shapes`, `files`, `dependencies`, and `plannedTypeEscapes`.
+2. Run the approved Lumin pre-write flow or native equivalent.
+3. Read the invocation-specific `pre-write-advisory` before editing. Do not rely only on a `latest` pointer when a specific advisory path exists.
+4. Implement with TDD and the write gate in this guide.
+5. Run the matching `post-write-delta` against the same advisory.
+6. Lumin post-write machine evidence covers `silent-new` type escapes, planned-not-observed type escapes, unexpected new files outside the intent, scan range changes, and degraded confidence.
+
+If the post-write delta says a change was not observed, inspect the actual diff and the scan range before concluding anything. The correct closeout may be "unknown until a wider audit runs."
+
+Manual post-write review still covers duplicate helpers, changed dependencies, public API drift, dependency direction, re-export drift, hidden coupling, and weak tests. Keep those as engineering review claims backed by direct file evidence or repository-native tools, not as unsupported Lumin delta fields.
+
+### Canon and living audit
+
+Use canon or living audit docs when the repo has enough structure to justify durable memory:
+
+- Lumin canon sources are limited to type ownership, helper registry, topology, and naming.
+- Use living audit or project docs for boundary policy, public API policy, dependency direction, and re-export policy.
+- Keep a living audit for unresolved structure risks, stale evidence, recurring hotspots, and accepted deviations.
+- Prefer `docs/current/audit/lumin-structural-audit.md` for shareable project facts.
+- Keep private local details in `local.md`, an untracked note, or an Obsidian page. The repository should link to the kind of knowledge needed, not to Hun's personal vault path.
+
 ## Local Wiki Or Obsidian Index
 
 Use `docs/local-project-knowledge-template.md` as the shape of a project wiki page.
