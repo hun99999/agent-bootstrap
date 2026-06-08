@@ -87,6 +87,65 @@ class ReadmeDocsTests(unittest.TestCase):
         for phrase in expected_phrases:
             self.assertIn(phrase, introduction)
 
+    def test_all_readmes_include_public_target_repo_claude_prompt(self) -> None:
+        expectations = {
+            "README.md": (
+                "Target Repository Claude Code Prompt",
+                "Reference repository:",
+                "https://github.com/hun99999/agent-bootstrap",
+                "Apply agent-bootstrap vibe-coding guardrails to this project.",
+                "git status --short --branch",
+                "optional tool inventory",
+                "Obsidian",
+                "Lumin Repo Lens",
+                "scan range",
+                "Do not install optional tools automatically",
+            ),
+            "README.ko.md": (
+                "대상 프로젝트용 Claude Code 프롬프트",
+                "참조 레포:",
+                "https://github.com/hun99999/agent-bootstrap",
+                "이 프로젝트에 agent-bootstrap 기반 vibe-coding guardrails를 적용해줘.",
+                "git status --short --branch",
+                "optional tool inventory",
+                "Obsidian",
+                "Lumin Repo Lens",
+                "scan range",
+                "선택 도구를 자동 설치하지 마라",
+            ),
+            "README.ja.md": (
+                "対象プロジェクト用 Claude Code プロンプト",
+                "参照リポジトリ:",
+                "https://github.com/hun99999/agent-bootstrap",
+                "このプロジェクトに agent-bootstrap ベースの vibe-coding guardrails を適用してください。",
+                "git status --short --branch",
+                "optional tool inventory",
+                "Obsidian",
+                "Lumin Repo Lens",
+                "scan range",
+                "任意ツールを自動インストールしない",
+            ),
+            "README.zh-CN.md": (
+                "目标项目 Claude Code 提示词",
+                "参考仓库:",
+                "https://github.com/hun99999/agent-bootstrap",
+                "请把 agent-bootstrap 的 vibe-coding guardrails 应用到这个项目。",
+                "git status --short --branch",
+                "optional tool inventory",
+                "Obsidian",
+                "Lumin Repo Lens",
+                "scan range",
+                "不要自动安装可选工具",
+            ),
+        }
+
+        for relative, phrases in expectations.items():
+            with self.subTest(relative=relative):
+                readme = (REPO_ROOT / relative).read_text(encoding="utf-8")
+                for phrase in phrases:
+                    self.assertIn(phrase, readme)
+                self.assertNotIn("/" + "Users/hooooonje/codex-dotfiles", readme)
+
     def test_korean_readme_explains_guardrail_workflows_near_the_top(self) -> None:
         readme = (REPO_ROOT / "README.ko.md").read_text(encoding="utf-8")
         introduction = readme[:7000]
