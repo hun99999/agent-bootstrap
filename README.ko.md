@@ -2,6 +2,34 @@
 
 [English](README.md) | [한국어](README.ko.md) | [日本語](README.ja.md) | [简体中文](README.zh-CN.md)
 
+## 마스터 프롬프트
+
+아래를 Codex, Claude Code, OpenCode 또는 다른 코딩 에이전트에게 그대로 붙여넣습니다. 에이전트는 이 레포를 clone한 위치에서 시작해야 합니다.
+
+```text
+이 레포를 기준으로 agent-bootstrap을 처음부터 끝까지 세팅해줘.
+
+먼저 AGENTS.md, README.md, docs/global-guardrail-setup.md, docs/vibe-coding-guardrails.md, docs/agent-bootstrap-structure.md, docs/local-project-knowledge-template.md를 읽어라. 명령어, 패키지 이름, 설정 옵션, API 세부사항을 지어내지 마라.
+
+파일을 바꾸기 전에 git status --short --branch를 실행해라. 커밋되지 않은 변경이나 untracked 파일이 있으면 멈추고 어떻게 처리할지 물어봐라. 현재 하네스가 Codex, Claude Code, OpenCode, 기타 중 무엇인지 확인하고 내가 요청한 범위를 확인해라.
+
+가장 작은 유효 범위를 선택해라:
+- 이미 Codex, Claude Code, OpenCode 안에 있다면 내가 명시적으로 다른 하네스를 요구하지 않는 한 현재 하네스만 세팅해라.
+- 하네스가 불명확하면 shared-core-only를 적용해라.
+- 애플리케이션 레포라면 project guardrail을 적용하고 project-local knowledge guidance를 만들어라.
+- 언급됐다는 이유만으로 선택 도구를 설치하지 마십시오.
+
+선택한 범위를 처음부터 끝까지 세팅해라:
+- 이 레포에 문서화된 명령으로 shared core를 설치하거나 렌더링해라.
+- Superpowers는 이 레포에 문서화된 경로로만 업데이트해라.
+- shared prompt나 metadata가 바뀌었다면 Claude plugin output을 재생성해라.
+- Obsidian, Lumin Repo Lens, dependency lint, strict type checks, cycle detection, complexity limits 같은 선택 도구를 inventory하고 required, recommended, optional, skipped 중 하나로 분류해라. 어떤 것도 설치 전에는 반드시 물어봐라.
+- private path, credential, MCP endpoint, auth state, browser profile, machine-specific trust setting을 tracked file에 넣지 마라.
+- 테스트와 scripts/audit_agent_stack.py를 포함해 이 레포의 실제 검증 명령을 실행해라.
+- duplicate helper, hidden coupling, swallowed error, fallback drift, unmanaged re-export, fan-in/fan-out hotspot, weak test, generated-output drift, private path leakage를 post-write review로 확인해라.
+- 적절하다면 작은 단위로 커밋하고, 무엇을 바꿨는지, 무엇을 설치했는지, 실행한 명령, 검증 결과, 남은 리스크를 요약해라.
+```
+
 Codex, Claude Code, OpenCode를 위한 프로세스 중심 AI 코딩 환경 부트스트랩입니다.
 
 `agent-bootstrap`은 최신 AI 코딩 도구에 공통으로 적용할 수 있는 `superpowers` 워크플로우, 역할 기반 서브에이전트, 토큰 효율적인 실행 방식, 다국어 설치 문서를 제공합니다.

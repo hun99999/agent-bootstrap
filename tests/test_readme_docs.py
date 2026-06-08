@@ -74,7 +74,7 @@ class ReadmeDocsTests(unittest.TestCase):
 
     def test_readme_explains_guardrail_workflows_near_the_top(self) -> None:
         readme = (REPO_ROOT / "README.md").read_text(encoding="utf-8")
-        introduction = readme[:3000]
+        introduction = readme[:7000]
 
         expected_phrases = (
             "What You Can Ask An Agent To Do",
@@ -89,7 +89,7 @@ class ReadmeDocsTests(unittest.TestCase):
 
     def test_korean_readme_explains_guardrail_workflows_near_the_top(self) -> None:
         readme = (REPO_ROOT / "README.ko.md").read_text(encoding="utf-8")
-        introduction = readme[:3000]
+        introduction = readme[:7000]
 
         expected_phrases = (
             "에이전트에게 맡길 수 있는 일",
@@ -121,6 +121,61 @@ class ReadmeDocsTests(unittest.TestCase):
 
                 self.assertIn("docs/agent-bootstrap-structure.md", readme)
                 self.assertIn("prompts/update-agent-bootstrap.md", readme)
+
+    def test_all_readmes_put_master_prompt_near_the_top(self) -> None:
+        expectations = {
+            "README.md": (
+                "## Master Prompt",
+                "Paste this into Codex, Claude Code, OpenCode, or another coding agent",
+                "First read AGENTS.md",
+                "git status --short --branch",
+                "Choose the smallest valid scope",
+                "Do not install optional tools just because they are mentioned",
+                "run post-write review",
+                "verification results",
+                "Bootstrap a process-first AI coding environment",
+            ),
+            "README.ko.md": (
+                "## 마스터 프롬프트",
+                "아래를 Codex, Claude Code, OpenCode 또는 다른 코딩 에이전트에게 그대로 붙여넣습니다",
+                "먼저 AGENTS.md",
+                "git status --short --branch",
+                "가장 작은 유효 범위",
+                "언급됐다는 이유만으로 선택 도구를 설치하지 마십시오",
+                "post-write review",
+                "검증 결과",
+                "Codex, Claude Code, OpenCode를 위한",
+            ),
+            "README.ja.md": (
+                "## マスタープロンプト",
+                "次を Codex、Claude Code、OpenCode、または別のコーディングエージェントにそのまま貼り付けます",
+                "まず AGENTS.md",
+                "git status --short --branch",
+                "最小の有効スコープ",
+                "言及されているだけの理由で任意ツールをインストールしないでください",
+                "post-write review",
+                "検証結果",
+                "Codex、Claude Code、OpenCode向け",
+            ),
+            "README.zh-CN.md": (
+                "## 主提示词",
+                "把下面内容原样粘贴给 Codex、Claude Code、OpenCode 或其他编码代理",
+                "先阅读 AGENTS.md",
+                "git status --short --branch",
+                "最小有效范围",
+                "不要仅仅因为文档提到某个可选工具就安装它",
+                "post-write review",
+                "验证结果",
+                "面向 Codex、Claude Code 和 OpenCode",
+            ),
+        }
+
+        for relative, phrases in expectations.items():
+            with self.subTest(relative=relative):
+                readme = (REPO_ROOT / relative).read_text(encoding="utf-8")
+                for phrase in phrases:
+                    self.assertIn(phrase, readme)
+                self.assertLess(readme.index(phrases[0]), readme.index(phrases[-1]))
 
     def test_all_readmes_explain_detailed_guardrail_workflow(self) -> None:
         expectations = {

@@ -2,6 +2,34 @@
 
 [English](README.md) | [한국어](README.ko.md) | [日本語](README.ja.md) | [简体中文](README.zh-CN.md)
 
+## マスタープロンプト
+
+次を Codex、Claude Code、OpenCode、または別のコーディングエージェントにそのまま貼り付けます。エージェントはこのリポジトリの clone 内で開始してください。
+
+```text
+このリポジトリを基準に agent-bootstrap を最初から最後までセットアップしてください。
+
+まず AGENTS.md、README.md、docs/global-guardrail-setup.md、docs/vibe-coding-guardrails.md、docs/agent-bootstrap-structure.md、docs/local-project-knowledge-template.md を読んでください。コマンド、package name、設定オプション、API 詳細を作り出さないでください。
+
+ファイルを変更する前に git status --short --branch を実行してください。未コミット変更や untracked file があれば停止し、どう扱うか確認してください。現在のハーネスが Codex、Claude Code、OpenCode、その他のどれかを確認し、私が要求した範囲を確認してください。
+
+最小の有効スコープを選んでください:
+- すでに Codex、Claude Code、OpenCode の中にいる場合、私が明示的に別のハーネスを要求しない限り、現在のハーネスだけを設定してください。
+- ハーネスが不明な場合は shared-core-only を適用してください。
+- アプリケーションリポジトリの場合は project guardrail を適用し、project-local knowledge guidance を作ってください。
+- 言及されているだけの理由で任意ツールをインストールしないでください。
+
+選んだ範囲を最初から最後までセットアップしてください:
+- このリポジトリに文書化されたコマンドで shared core をインストールまたは render してください。
+- Superpowers はこのリポジトリに文書化された経路でのみ更新してください。
+- shared prompt または metadata が変わった場合は Claude plugin output を再生成してください。
+- Obsidian、Lumin Repo Lens、dependency lint、strict type checks、cycle detection、complexity limits などの任意ツールを inventory し、required、recommended、optional、skipped のいずれかに分類してください。何かをインストールする前には必ず確認してください。
+- private path、credential、MCP endpoint、auth state、browser profile、machine-specific trust setting を tracked file に入れないでください。
+- tests と scripts/audit_agent_stack.py を含む、このリポジトリの実際の検証コマンドを実行してください。
+- duplicate helper、hidden coupling、swallowed error、fallback drift、unmanaged re-export、fan-in/fan-out hotspot、weak test、generated-output drift、private path leakage を post-write review で確認してください。
+- 適切であれば小さな単位で commit し、変更内容、インストールしたもの、実行したコマンド、検証結果、残リスクを要約してください。
+```
+
 Codex、Claude Code、OpenCode向けのプロセス重視AIコーディング環境ブートストラップです。
 
 `agent-bootstrap` は、最新のAIコーディングツール向けに、共有 `superpowers` ワークフロー、役割ベースのサブエージェント、トークン効率の高い実行モデル、多言語セットアップ文書を提供します。
