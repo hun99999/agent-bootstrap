@@ -113,7 +113,7 @@ class VibeCodingGuardrailsDocsTests(unittest.TestCase):
         for heading in expected_headings:
             self.assertIn(heading, template)
 
-        self.assertNotIn("/Users/", template)
+        self.assertNotIn("/" + "Users/", template)
         self.assertNotIn("C:\\\\Users\\\\", template)
 
     def test_copy_paste_prompts_cover_apply_and_start_workflows(self) -> None:

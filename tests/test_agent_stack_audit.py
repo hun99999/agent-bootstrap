@@ -159,6 +159,19 @@ class AgentStackAuditTests(unittest.TestCase):
         self.assertEqual(result.status, "ok", msg=result.detail)
         self.assertTrue(result.required)
 
+    def test_repo_only_audit_skips_local_cli_and_superpowers_checks(self) -> None:
+        audit = load_audit_module()
+
+        checks = audit.run_audit(
+            REPO_ROOT,
+            Path("/missing/superpowers"),
+            Path("/missing/agents"),
+            online=False,
+            repo_only=True,
+        )
+
+        self.assertEqual([check.name for check in checks], ["claude-generated-bundle"])
+
 
 if __name__ == "__main__":
     unittest.main()

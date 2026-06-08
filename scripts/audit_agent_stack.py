@@ -361,7 +361,11 @@ def run_audit(
     superpowers_path: Path,
     agents_home: Path,
     online: bool,
+    repo_only: bool = False,
 ) -> list[CheckResult]:
+    if repo_only:
+        return [check_claude_generated_bundle(repo_root)]
+
     checks = [
         check_cli(name, command, package_name, required, online)
         for name, command, package_name, required in CLI_CHECKS
@@ -430,6 +434,11 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
         action="store_true",
         help="Treat missing optional tools as failures.",
     )
+    parser.add_argument(
+        "--repo-only",
+        action="store_true",
+        help="Skip local CLI and user-home checks; verify repository-generated artifacts only.",
+    )
     return parser.parse_args(argv)
 
 
@@ -445,6 +454,7 @@ def main(argv: list[str]) -> int:
         Path(args.superpowers_path),
         Path(args.agents_home),
         args.online,
+        args.repo_only,
     )
     failed = should_fail(checks, args.strict)
 
@@ -452,6 +462,7 @@ def main(argv: list[str]) -> int:
         payload = {
             "ok": not failed,
             "online": args.online,
+            "repo_only": args.repo_only,
             "checks": [asdict(check) for check in checks],
         }
         print(json.dumps(payload, indent=2, sort_keys=True))

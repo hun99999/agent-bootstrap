@@ -831,7 +831,7 @@ python3 scripts/render_claude_plugin.py --partner-name "Hun"
 Expected:
 
 ```text
-Rendered Claude plugin bundle at /Users/hooooonje/codex-dotfiles/plugins/process-first-agents
+Rendered Claude plugin bundle at <repo>/plugins/process-first-agents
 ```
 
 - [ ] **Step 6: Run focused tests**
@@ -1032,7 +1032,7 @@ python3 scripts/render_claude_plugin.py --partner-name "Hun"
 Expected:
 
 ```text
-Rendered Claude plugin bundle at /Users/hooooonje/codex-dotfiles/plugins/process-first-agents
+Rendered Claude plugin bundle at <repo>/plugins/process-first-agents
 ```
 
 - [ ] **Step 5: Run focused tests**
