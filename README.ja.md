@@ -9,7 +9,7 @@
 ```text
 このリポジトリを基準に agent-bootstrap を最初から最後までセットアップしてください。
 
-まず AGENTS.md、README.md、docs/global-guardrail-setup.md、docs/vibe-coding-guardrails.md、docs/agent-bootstrap-structure.md、docs/local-project-knowledge-template.md を読んでください。コマンド、package name、設定オプション、API 詳細を作り出さないでください。
+まず AGENTS.md、README.md、docs/agent-setup-playbook.md、docs/global-guardrail-setup.md、docs/vibe-coding-guardrails.md、docs/agent-bootstrap-structure.md、docs/local-project-knowledge-template.md を読んでください。コマンド、package name、設定オプション、API 詳細を作り出さないでください。
 
 ファイルを変更する前に git status --short --branch を実行してください。未コミット変更や untracked file があれば停止し、どう扱うか確認してください。現在のハーネスが Codex、Claude Code、OpenCode、その他のどれかを確認し、私が要求した範囲を確認してください。
 
