@@ -2,6 +2,34 @@
 
 [English](README.md) | [한국어](README.ko.md) | [日本語](README.ja.md) | [简体中文](README.zh-CN.md)
 
+## 主提示词
+
+把下面内容原样粘贴给 Codex、Claude Code、OpenCode 或其他编码代理。代理应当在这个仓库的 clone 中开始。
+
+```text
+请以这个仓库为准，从头到尾设置 agent-bootstrap。
+
+先阅读 AGENTS.md、README.md、docs/global-guardrail-setup.md、docs/vibe-coding-guardrails.md、docs/agent-bootstrap-structure.md 和 docs/local-project-knowledge-template.md。不要编造命令、package name、配置选项或 API 细节。
+
+修改文件之前，运行 git status --short --branch。如果有未提交修改或 untracked file，停止并询问如何处理。确认当前 harness 是 Codex、Claude Code、OpenCode 还是其他，并确认我要求的范围。
+
+选择最小有效范围:
+- 如果已经在 Codex、Claude Code 或 OpenCode 中，除非我明确要求其他 harness，否则只配置当前 harness。
+- 如果 harness 不明确，应用 shared-core-only。
+- 如果这是应用仓库，应用 project guardrail，并创建 project-local knowledge guidance。
+- 不要仅仅因为文档提到某个可选工具就安装它。
+
+从头到尾设置所选范围:
+- 使用本仓库文档化的命令安装或 render shared core。
+- 只通过本仓库文档化的路径更新 Superpowers。
+- 如果 shared prompt 或 metadata 改变，重新生成 Claude plugin output。
+- inventory Obsidian、Lumin Repo Lens、dependency lint、strict type checks、cycle detection、complexity limits 等可选工具，并把每个工具分类为 required、recommended、optional 或 skipped。安装任何东西之前必须询问。
+- 不要把 private path、credential、MCP endpoint、auth state、browser profile 或 machine-specific trust setting 放入 tracked file。
+- 运行本仓库真实的验证命令，包括 tests 和 scripts/audit_agent_stack.py。
+- 用 post-write review 检查 duplicate helper、hidden coupling、swallowed error、fallback drift、unmanaged re-export、fan-in/fan-out hotspot、weak test、generated-output drift 和 private path leakage。
+- 适当时以小的可评审单位提交，并总结改了什么、安装了什么、运行了哪些命令、验证结果和剩余风险。
+```
+
 面向 Codex、Claude Code 和 OpenCode 的流程优先 AI 编程环境引导仓库。
 
 `agent-bootstrap` 提供可复用的 `superpowers` 工作流、基于角色的子代理、更加节省 token 的执行方式，以及面向现代 AI 编码工具的多语言安装文档。

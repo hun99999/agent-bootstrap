@@ -2,6 +2,34 @@
 
 [English](README.md) | [한국어](README.ko.md) | [日本語](README.ja.md) | [简体中文](README.zh-CN.md)
 
+## Master Prompt
+
+Paste this into Codex, Claude Code, OpenCode, or another coding agent while the agent is in a clone of this repository:
+
+```text
+Set up agent-bootstrap end to end from this repository.
+
+First read AGENTS.md, README.md, docs/global-guardrail-setup.md, docs/vibe-coding-guardrails.md, docs/agent-bootstrap-structure.md, and docs/local-project-knowledge-template.md. Do not invent commands, package names, configuration options, or API details.
+
+Before changing anything, run git status --short --branch. If there is uncommitted or untracked user work, stop and ask how to handle it. Identify the current harness: Codex, Claude Code, OpenCode, or other. Identify my requested scope.
+
+Choose the smallest valid scope:
+- If you are already inside Codex, Claude Code, or OpenCode, configure only that current harness unless I explicitly ask for another.
+- If no harness is clear, apply shared-core-only.
+- If this is an application repository, apply the project guardrails and create project-local knowledge guidance.
+- Do not install optional tools just because they are mentioned.
+
+Set up the selected scope end to end:
+- install or render the shared core using this repository's documented commands
+- update Superpowers only through this repository's documented path
+- regenerate Claude plugin output if shared prompts or metadata changed
+- inventory optional tools such as Obsidian, Lumin Repo Lens, dependency lint, strict type checks, cycle detection, and complexity limits; classify each as required, recommended, optional, or skipped; ask before installing anything
+- keep private paths, credentials, MCP endpoints, auth state, browser profiles, and machine-specific trust settings out of tracked files
+- run the repository's real verification commands, including tests and scripts/audit_agent_stack.py when available
+- run post-write review for duplicate helpers, hidden coupling, swallowed errors, fallback drift, unmanaged re-exports, fan-in/fan-out hotspots, weak tests, generated-output drift, and private path leakage
+- commit small reviewable changes when appropriate, then summarize what changed, what was installed, commands run, verification results, and remaining risks
+```
+
 Bootstrap a process-first AI coding environment for Codex, Claude Code, and OpenCode.
 
 `agent-bootstrap` gives you a shared `superpowers` workflow, role-based subagents, token-efficient execution, and multilingual setup docs for modern AI coding tools.
