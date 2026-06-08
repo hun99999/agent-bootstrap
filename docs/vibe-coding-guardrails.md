@@ -16,6 +16,29 @@ The fix is not one huge prompt. The fix is a repeatable operating loop:
 
 The loop should be boring. Boring is good here.
 
+## Applied Checklist Mapping
+
+This section maps the original vibe-coding problem checklist to concrete artifacts in this repository.
+
+| Original issue or fix | Repository application |
+| --- | --- |
+| agent memory is not continuous | `docs/agent-setup-playbook.md` and `docs/local-project-knowledge-template.md` tell agents to build persistent project maps instead of rediscovering helpers, types, shapes, commands, and boundaries every session. |
+| hidden coupling | `AGENTS.md`, this guide, and role prompts require pre-write checks for module boundaries, dependency direction, hidden imports, initialization order, global state, and side effects. |
+| weak tests | `AGENTS.md` requires TDD; this guide requires behavior, failure-path, edge-case, and side-effect tests instead of string-only checks. |
+| edge cases | The write gate requires empty input, null or missing values, boundary values, failure paths, side effects, and concurrency checks when relevant. |
+| deep nesting | `AGENTS.md` tells agents to use guard clauses or early returns when nesting grows past two or three levels. |
+| god functions | This guide tells agents to avoid god functions and god files, and the post-write review checks whether responsibility concentrated in one file. |
+| circular dependencies | The pre-write lens asks agents to inspect dependency direction and likely cycle risks before editing. |
+| re-export drift | The pre-write lens and post-write review both call out re-export and barrel files as coupling risks. |
+| silent fallback | `AGENTS.md`, this guide, and the setup playbook all forbid swallowed errors and fallback behavior unless it is a documented requirement. |
+| flat directories | `docs/local-project-knowledge-template.md` asks agents to record architecture maps, module boundaries, dependency direction, public APIs, and known hotspots so directory boundaries stay visible. |
+
+The support scripts reinforce those rules:
+
+- `scripts/inventory_optional_tools.py` gives agents a read-only way to classify Obsidian, Lumin Repo Lens, dependency lint, strict type checks, cycle detection, and complexity limits before asking to install anything.
+- `scripts/check_private_paths.py` scans tracked files for concrete private paths and secret assignments.
+- `scripts/audit_agent_stack.py` checks local harness state and generated Claude plugin drift; `--repo-only` keeps CI focused on repository artifacts.
+
 ## Operating Loop
 
 ### Pre-write lens

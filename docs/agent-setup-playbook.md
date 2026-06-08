@@ -65,6 +65,15 @@ When two valid scopes could apply, prefer the smaller one and explain what is in
 
 Inventory tools before installing anything.
 
+This repository includes a read-only optional tool inventory helper. It does not install tools.
+
+```bash
+python3 scripts/inventory_optional_tools.py
+python3 scripts/inventory_optional_tools.py --json
+```
+
+Use its output as evidence, not as permission to install. The agent must still classify each tool, explain the reason, and ask before installing anything.
+
 For every relevant tool, report:
 
 - detected state: installed, missing, unknown, or not applicable

@@ -103,7 +103,7 @@ class VibeCodingGuardrailsDocsTests(unittest.TestCase):
         for heading in expected_headings:
             self.assertIn(heading, template)
 
-        self.assertNotIn("/Users/", template)
+        self.assertNotIn("/" + "Users/", template)
         self.assertNotIn("C:\\Users\\", template)
 
     def test_copy_paste_prompts_cover_apply_and_start_workflows(self) -> None:
@@ -180,6 +180,43 @@ class VibeCodingGuardrailsDocsTests(unittest.TestCase):
                 master_prompt = readme.split("```", maxsplit=2)[1]
 
                 self.assertIn("docs/agent-setup-playbook.md", master_prompt)
+
+    def test_playbook_points_agents_at_optional_tool_inventory_script(self) -> None:
+        playbook = (REPO_ROOT / "docs" / "agent-setup-playbook.md").read_text(
+            encoding="utf-8"
+        )
+
+        expected_phrases = (
+            "python3 scripts/inventory_optional_tools.py",
+            "python3 scripts/inventory_optional_tools.py --json",
+            "read-only",
+            "does not install tools",
+        )
+        for phrase in expected_phrases:
+            self.assertIn(phrase, playbook)
+
+    def test_vibe_coding_guide_maps_original_problem_checklist_to_repo_artifacts(self) -> None:
+        guide = (REPO_ROOT / "docs" / "vibe-coding-guardrails.md").read_text(
+            encoding="utf-8"
+        )
+
+        expected_phrases = (
+            "Applied Checklist Mapping",
+            "agent memory is not continuous",
+            "hidden coupling",
+            "weak tests",
+            "edge cases",
+            "god functions",
+            "circular dependencies",
+            "re-export",
+            "silent fallback",
+            "flat directories",
+            "docs/agent-setup-playbook.md",
+            "scripts/inventory_optional_tools.py",
+            "scripts/check_private_paths.py",
+        )
+        for phrase in expected_phrases:
+            self.assertIn(phrase, guide)
 
 
 if __name__ == "__main__":

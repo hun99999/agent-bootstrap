@@ -1,5 +1,6 @@
 import importlib.util
 import json
+import shutil
 import subprocess
 import tempfile
 import unittest
@@ -93,6 +94,9 @@ class ClaudePluginTests(unittest.TestCase):
         )
 
     def test_marketplace_manifest_passes_claude_validation(self) -> None:
+        if shutil.which("claude") is None:
+            self.skipTest("claude CLI is not installed")
+
         result = self.run_claude_plugin_validate(MARKETPLACE_PATH)
 
         self.assertEqual(
