@@ -16,6 +16,23 @@ Copy this template into a project-local `local.md`, an untracked note, or an Obs
 - Storage or persistence:
 - UI or delivery surfaces:
 
+## Structural Evidence Index
+
+- Last refreshed:
+- Scan range:
+- Claim rule: state scan range before saying something was not found.
+- Confidence or blind spots:
+- `.audit/manifest.json`:
+- `.audit/audit-summary.latest.md`:
+- `.audit/pre-write-advisory.latest.json`:
+- `.audit/post-write-delta.latest.json`:
+- `docs/current/audit/lumin-structural-audit.md`:
+- Canon or source-of-truth docs:
+- Files that must be inspected before touching shared helpers:
+- Files that must be inspected before changing public APIs:
+- Files that must be inspected before changing import topology:
+- Local-only notes that should stay untracked:
+
 ## Source Of Truth
 
 - Shared utility source of truth:

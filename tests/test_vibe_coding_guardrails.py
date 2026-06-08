@@ -195,6 +195,113 @@ class VibeCodingGuardrailsDocsTests(unittest.TestCase):
         for phrase in expected_phrases:
             self.assertIn(phrase, playbook)
 
+    def test_playbook_covers_lumin_evidence_backed_workflow(self) -> None:
+        playbook = (REPO_ROOT / "docs" / "agent-setup-playbook.md").read_text(
+            encoding="utf-8"
+        )
+
+        expected_phrases = (
+            "No structural claim without evidence",
+            "No absence claim without scan range",
+            "pre-write intent",
+            "names, shapes, files, dependencies, plannedTypeEscapes",
+            "invocation-specific advisory",
+            "post-write delta",
+            "silent-new",
+            "canon draft",
+            "living audit",
+            "docs/current/audit/lumin-structural-audit.md",
+            "Obsidian or private wiki",
+        )
+        for phrase in expected_phrases:
+            self.assertIn(phrase, playbook)
+
+    def test_vibe_coding_guide_covers_lumin_structural_claim_contract(self) -> None:
+        guide = (REPO_ROOT / "docs" / "vibe-coding-guardrails.md").read_text(
+            encoding="utf-8"
+        )
+
+        expected_phrases = (
+            "Lumin Evidence Lifecycle",
+            "quick, full, ci",
+            "manifest.json",
+            "audit-summary.latest.md",
+            "grounded, degraded, unknown",
+            "not observed is not does not exist",
+            "scan range",
+            "false-positive",
+            "pre-write-advisory",
+            "post-write-delta",
+        )
+        for phrase in expected_phrases:
+            self.assertIn(phrase, guide)
+
+    def test_lumin_docs_do_not_overclaim_machine_post_write_outputs(self) -> None:
+        checked_paths = (
+            REPO_ROOT / "docs" / "agent-setup-playbook.md",
+            REPO_ROOT / "docs" / "vibe-coding-guardrails.md",
+            REPO_ROOT / "prompts" / "apply-vibe-coding-guardrails.md",
+            REPO_ROOT / "prompts" / "start-with-vibe-coding-guardrails.md",
+        )
+
+        for path in checked_paths:
+            with self.subTest(path=path.name):
+                content = path.read_text(encoding="utf-8")
+                self.assertNotIn("silent-new helpers", content)
+
+        guide = (REPO_ROOT / "docs" / "vibe-coding-guardrails.md").read_text(
+            encoding="utf-8"
+        )
+        lifecycle = guide.split("## Lumin Evidence Lifecycle", maxsplit=1)[1].split(
+            "## Local Wiki Or Obsidian Index",
+            maxsplit=1,
+        )[0]
+
+        self.assertIn(
+            "Lumin post-write machine evidence covers `silent-new` type escapes",
+            lifecycle,
+        )
+        self.assertIn(
+            "Manual post-write review still covers duplicate helpers",
+            lifecycle,
+        )
+        self.assertNotIn("changed dependencies, and degraded scan confidence", lifecycle)
+
+    def test_lumin_canon_sources_are_limited_to_upstream_sources(self) -> None:
+        guide = (REPO_ROOT / "docs" / "vibe-coding-guardrails.md").read_text(
+            encoding="utf-8"
+        )
+        playbook = (REPO_ROOT / "docs" / "agent-setup-playbook.md").read_text(
+            encoding="utf-8"
+        )
+
+        expected_phrases = (
+            "Lumin canon sources are limited to type ownership, helper registry, topology, and naming.",
+            "Use living audit or project docs for boundary policy, public API policy, dependency direction, and re-export policy.",
+        )
+        for phrase in expected_phrases:
+            self.assertIn(phrase, guide)
+            self.assertIn(phrase, playbook)
+
+    def test_local_project_knowledge_template_indexes_structural_evidence(self) -> None:
+        template = (REPO_ROOT / "docs" / "local-project-knowledge-template.md").read_text(
+            encoding="utf-8"
+        )
+
+        expected_phrases = (
+            "Structural Evidence Index",
+            ".audit/manifest.json",
+            ".audit/audit-summary.latest.md",
+            ".audit/pre-write-advisory",
+            ".audit/post-write-delta",
+            "docs/current/audit/lumin-structural-audit.md",
+            "Canon or source-of-truth docs",
+            "scan range",
+            "Last refreshed",
+        )
+        for phrase in expected_phrases:
+            self.assertIn(phrase, template)
+
     def test_vibe_coding_guide_maps_original_problem_checklist_to_repo_artifacts(self) -> None:
         guide = (REPO_ROOT / "docs" / "vibe-coding-guardrails.md").read_text(
             encoding="utf-8"

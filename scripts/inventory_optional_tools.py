@@ -134,6 +134,15 @@ def classify_lumin_repo_lens(
         detected = True
         evidence.append("lumin-repo-lens command is on PATH")
     evidence.append("Target repository appears TS/JS-heavy" if ts_js else "No TS/JS repository signal detected")
+    for artifact_name in (
+        "manifest.json",
+        "audit-summary.latest.md",
+        "pre-write-advisory.latest.json",
+        "post-write-delta.latest.json",
+    ):
+        artifact_path = repo_root / ".audit" / artifact_name
+        if artifact_path.exists():
+            evidence.append(f".audit/{artifact_name} exists")
 
     return ToolInventory(
         name="lumin-repo-lens",
