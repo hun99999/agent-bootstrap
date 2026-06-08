@@ -9,7 +9,7 @@ Paste this into Codex, Claude Code, OpenCode, or another coding agent while the 
 ```text
 Set up agent-bootstrap end to end from this repository.
 
-First read AGENTS.md, README.md, docs/global-guardrail-setup.md, docs/vibe-coding-guardrails.md, docs/agent-bootstrap-structure.md, and docs/local-project-knowledge-template.md. Do not invent commands, package names, configuration options, or API details.
+First read AGENTS.md, README.md, docs/agent-setup-playbook.md, docs/global-guardrail-setup.md, docs/vibe-coding-guardrails.md, docs/agent-bootstrap-structure.md, and docs/local-project-knowledge-template.md. Do not invent commands, package names, configuration options, or API details.
 
 Before changing anything, run git status --short --branch. If there is uncommitted or untracked user work, stop and ask how to handle it. Identify the current harness: Codex, Claude Code, OpenCode, or other. Identify my requested scope.
 

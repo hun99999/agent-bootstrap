@@ -9,7 +9,7 @@
 ```text
 이 레포를 기준으로 agent-bootstrap을 처음부터 끝까지 세팅해줘.
 
-먼저 AGENTS.md, README.md, docs/global-guardrail-setup.md, docs/vibe-coding-guardrails.md, docs/agent-bootstrap-structure.md, docs/local-project-knowledge-template.md를 읽어라. 명령어, 패키지 이름, 설정 옵션, API 세부사항을 지어내지 마라.
+먼저 AGENTS.md, README.md, docs/agent-setup-playbook.md, docs/global-guardrail-setup.md, docs/vibe-coding-guardrails.md, docs/agent-bootstrap-structure.md, docs/local-project-knowledge-template.md를 읽어라. 명령어, 패키지 이름, 설정 옵션, API 세부사항을 지어내지 마라.
 
 파일을 바꾸기 전에 git status --short --branch를 실행해라. 커밋되지 않은 변경이나 untracked 파일이 있으면 멈추고 어떻게 처리할지 물어봐라. 현재 하네스가 Codex, Claude Code, OpenCode, 기타 중 무엇인지 확인하고 내가 요청한 범위를 확인해라.
 

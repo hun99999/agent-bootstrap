@@ -142,6 +142,45 @@ class VibeCodingGuardrailsDocsTests(unittest.TestCase):
         for phrase in expected_phrases:
             self.assertIn(phrase, prompt)
 
+    def test_agent_setup_playbook_gives_agents_executable_setup_guidance(self) -> None:
+        playbook_path = REPO_ROOT / "docs" / "agent-setup-playbook.md"
+
+        self.assertTrue(playbook_path.exists(), f"missing playbook: {playbook_path}")
+        playbook = playbook_path.read_text(encoding="utf-8")
+
+        expected_phrases = (
+            "Agent Setup Playbook",
+            "Success Criteria",
+            "Discovery Pass",
+            "Scope Decision",
+            "Environment Inventory",
+            "Required, Recommended, Optional, Skipped",
+            "Installation Approval Gate",
+            "Setup Paths",
+            "Verification Matrix",
+            "Existing Sessions",
+            "Final Report Template",
+            "Do not claim completion",
+            "No private paths",
+            "macOS",
+            "Windows PowerShell",
+            "Codex",
+            "Claude Code",
+            "OpenCode",
+            "Obsidian",
+            "Lumin Repo Lens",
+        )
+        for phrase in expected_phrases:
+            self.assertIn(phrase, playbook)
+
+    def test_readmes_point_master_prompt_at_agent_setup_playbook(self) -> None:
+        for relative in ("README.md", "README.ko.md", "README.ja.md", "README.zh-CN.md"):
+            with self.subTest(relative=relative):
+                readme = (REPO_ROOT / relative).read_text(encoding="utf-8")
+                master_prompt = readme.split("```", maxsplit=2)[1]
+
+                self.assertIn("docs/agent-setup-playbook.md", master_prompt)
+
 
 if __name__ == "__main__":
     unittest.main()

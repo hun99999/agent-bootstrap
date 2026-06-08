@@ -9,7 +9,7 @@
 ```text
 请以这个仓库为准，从头到尾设置 agent-bootstrap。
 
-先阅读 AGENTS.md、README.md、docs/global-guardrail-setup.md、docs/vibe-coding-guardrails.md、docs/agent-bootstrap-structure.md 和 docs/local-project-knowledge-template.md。不要编造命令、package name、配置选项或 API 细节。
+先阅读 AGENTS.md、README.md、docs/agent-setup-playbook.md、docs/global-guardrail-setup.md、docs/vibe-coding-guardrails.md、docs/agent-bootstrap-structure.md 和 docs/local-project-knowledge-template.md。不要编造命令、package name、配置选项或 API 细节。
 
 修改文件之前，运行 git status --short --branch。如果有未提交修改或 untracked file，停止并询问如何处理。确认当前 harness 是 Codex、Claude Code、OpenCode 还是其他，并确认我要求的范围。
 
