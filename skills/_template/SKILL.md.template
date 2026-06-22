@@ -1,0 +1,27 @@
+---
+name: example-skill-name
+description: Use when a future agent needs this reusable workflow, evidence pattern, or reference guide.
+---
+
+# Example Skill Name
+
+## Purpose
+
+State the reusable workflow or reference boundary in one or two sentences.
+
+## When To Use
+
+- Use for recurring work that should be discoverable across projects.
+- Do not use for one-off project notes or private local state.
+
+## Workflow
+
+1. Confirm the user's objective.
+2. Inspect local project evidence before making claims.
+3. Follow the smallest approved workflow.
+4. Validate the result before reporting completion.
+
+## Safety
+
+- Do not include credentials, private paths, auth state, browser profiles, or machine-specific trust settings.
+- Keep project-specific state out of the global skill unless the user explicitly approves it.

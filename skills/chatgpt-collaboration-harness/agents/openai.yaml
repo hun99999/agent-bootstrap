@@ -1,0 +1,4 @@
+interface:
+  display_name: "ChatGPT Collaboration Harness"
+  short_description: "Delegate staged work to ChatGPT Pro safely"
+  default_prompt: "Use $chatgpt-collaboration-harness to confirm my goal, split it into stages, delegate useful parts to ChatGPT Pro in Korean, require source-backed evidence instead of inference-only answers, use Search Mode or deep research when helpful, validate locally, and request final review."
