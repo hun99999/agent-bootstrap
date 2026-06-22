@@ -3,6 +3,7 @@ import unittest
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
+PRIVATE_HOME_PATH = "/" + "Users/hooooonje"
 
 
 class SkillCatalogTests(unittest.TestCase):
@@ -17,7 +18,7 @@ class SkillCatalogTests(unittest.TestCase):
         self.assertIn("~/.codex/skills", catalog)
         self.assertIn("community-sentiment", catalog)
         self.assertIn("Korean by default", catalog)
-        self.assertNotIn("/Users/hooooonje", catalog)
+        self.assertNotIn(PRIVATE_HOME_PATH, catalog)
 
     def test_chatgpt_collaboration_harness_source_is_cataloged(self) -> None:
         skill_root = REPO_ROOT / "skills" / "chatgpt-collaboration-harness"
@@ -61,7 +62,7 @@ class SkillCatalogTests(unittest.TestCase):
         )
         for phrase in expected_phrases:
             self.assertIn(phrase, guide)
-        self.assertNotIn("/Users/hooooonje", guide)
+        self.assertNotIn(PRIVATE_HOME_PATH, guide)
 
     def test_setup_prompt_keeps_installation_approval_gated(self) -> None:
         prompt = (REPO_ROOT / "prompts" / "setup-codex-skills.md").read_text(
@@ -81,7 +82,7 @@ class SkillCatalogTests(unittest.TestCase):
         )
         for phrase in expected_phrases:
             self.assertIn(phrase, prompt)
-        self.assertNotIn("/Users/hooooonje", prompt)
+        self.assertNotIn(PRIVATE_HOME_PATH, prompt)
 
     def test_readme_links_skill_catalog_workflow(self) -> None:
         readme = (REPO_ROOT / "README.md").read_text(encoding="utf-8")
