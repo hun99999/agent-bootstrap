@@ -6,7 +6,7 @@ This document tracks the repository metadata that improves GitHub discoverabilit
 
 Use this repository description on GitHub:
 
-> Process-first bootstrap for Codex, Claude Code, and OpenCode with superpowers, role-based subagents, token-efficient workflows, and multilingual setup docs.
+> Process-first bootstrap for Codex and Claude Code with superpowers, role-based subagents, token-efficient workflows, and multilingual setup docs.
 
 ## Topics
 
@@ -20,7 +20,6 @@ Recommended GitHub topics:
 - `codex`
 - `developer-tools`
 - `multilingual`
-- `opencode`
 - `prompt-engineering`
 - `subagents`
 - `superpowers`
@@ -32,13 +31,13 @@ GitHub social preview is a repository setting, not a tracked file format.
 Recommended social preview copy:
 
 - Title: `Process-First AI Coding Bootstrap`
-- Subtitle: `Codex, Claude Code, OpenCode, superpowers, subagents, multilingual docs`
+- Subtitle: `Codex, Claude Code, superpowers, subagents, multilingual docs`
 
 Recommended visual direction:
 
 - clean light background
 - one bold headline
-- three harness labels: `Codex`, `Claude Code`, `OpenCode`
+- two harness labels: `Codex`, `Claude Code`
 - one supporting row: `superpowers`, `subagents`, `token-efficient workflows`
 
 ## Notes
@@ -53,7 +52,7 @@ You can reapply the recommended GitHub metadata with:
 
 ```bash
 gh repo edit hun99999/agent-bootstrap \
-  --description "Process-first bootstrap for Codex, Claude Code, and OpenCode with superpowers, role-based subagents, token-efficient workflows, and multilingual setup docs." \
+  --description "Process-first bootstrap for Codex and Claude Code with superpowers, role-based subagents, token-efficient workflows, and multilingual setup docs." \
   --add-topic agent-bootstrap \
   --add-topic ai-agents \
   --add-topic ai-coding \
@@ -62,7 +61,6 @@ gh repo edit hun99999/agent-bootstrap \
   --add-topic codex \
   --add-topic developer-tools \
   --add-topic multilingual \
-  --add-topic opencode \
   --add-topic prompt-engineering \
   --add-topic subagents \
   --add-topic superpowers

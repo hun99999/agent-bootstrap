@@ -112,6 +112,21 @@ class SkillCatalogTests(unittest.TestCase):
         for phrase in expected_phrases:
             self.assertIn(phrase, template)
 
+    def test_private_project_skills_are_not_cataloged(self) -> None:
+        catalog = (REPO_ROOT / "skills" / "README.md").read_text(encoding="utf-8")
+
+        self.assertFalse((REPO_ROOT / "skills" / "auto-eva").exists())
+        expected_phrases = (
+            "Private project skills such as auto-eva",
+            "not this public catalog",
+            "~/.codex/skills",
+            "~/.claude/skills",
+            "templates and public-safe process guidance",
+        )
+        for phrase in expected_phrases:
+            self.assertIn(phrase, catalog)
+        self.assertNotIn(PRIVATE_HOME_PATH, catalog)
+
     def test_chatgpt_collaboration_harness_source_is_cataloged(self) -> None:
         skill_root = REPO_ROOT / "skills" / "chatgpt-collaboration-harness"
         expected_files = (

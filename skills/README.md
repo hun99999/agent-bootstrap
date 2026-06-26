@@ -13,6 +13,10 @@ It is not an always-install bootstrap. Future agents should inspect this catalog
 - Run the skill validator after installing or syncing a skill.
 - Preserve original catalog/vendor skills separately from Hun-specific operational wrappers.
 
+## Private Project Skills
+
+Private project skills such as auto-eva belong in local runtime skill homes, not this public catalog. Use `~/.codex/skills` for Codex and `~/.claude/skills` for Claude Code. Keep templates and public-safe process guidance here; keep private access paths, credentials, auth state, browser profiles, customer data, and machine-specific trust settings out of git.
+
 ## Skill QA Contract
 
 Treat skill changes as tested workflow code. Start with a failing test or explicit pressure scenario when possible, run the skill validator, run relevant repo tests, check for private paths and secrets, and verify the installed runtime copy separately from the repo catalog source before calling the skill ready.

@@ -36,6 +36,14 @@
 
 > 本文档是 `README.md` 的简体中文翻译。以英文版为准。
 
+## 当前公开范围
+
+Codex 和 Claude Code 是当前 first-class setup target。OpenCode 和 OpenClaw 保持为 optional/reference surface；只有在需要兼容性说明时才参考现有文档，不要把它们当作默认设置路径。
+
+## Private Project Skills
+
+不要把 auto-eva 这类 private project skill 提交到这个 public repository。实际项目专用 skill 应放在本地 runtime home，例如 Codex 的 `~/.codex/skills` 和 Claude Code 的 `~/.claude/skills`。这个仓库只保留 templates and public-safe process guidance，不放 private access path、credential、auth state、browser profile、customer data 或 machine-specific trust setting。
+
 ## 为什么使用 agent-bootstrap？
 
 - 不需要为 Codex、Claude Code、OpenCode 分别维护不同的提示词栈，而是共享一套基于 `superpowers` 的工作流。

@@ -24,6 +24,8 @@ Keep private paths, credentials, MCP endpoints, auth state, browser profiles, an
 
 Remember: memory is a recall layer, not a source of truth. If memory, ChatGPT Pro, or another external review conflicts with repo docs, scripts, tests, AGENTS files, or observed runtime output, the current project source wins.
 
+Private project skills such as auto-eva belong in local runtime skill homes, not this public catalog. Use `~/.codex/skills` for Codex and `~/.claude/skills` for Claude Code. Keep templates and public-safe process guidance in git; keep private access paths, credentials, auth state, browser profiles, customer data, and machine-specific trust settings local.
+
 ## Catalog Workflow
 
 1. Run `git status --short --branch`.

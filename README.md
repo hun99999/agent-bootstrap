@@ -34,6 +34,14 @@ Bootstrap a process-first AI coding environment for Codex, Claude Code, and Open
 
 `agent-bootstrap` gives you a shared `superpowers` workflow, role-based subagents, token-efficient execution, and multilingual setup docs for modern AI coding tools.
 
+## Current Public Focus
+
+Codex and Claude Code are the current first-class setup targets for this public repository. OpenCode and OpenClaw remain optional/reference surfaces: keep their existing docs only when they help preserve compatibility, but do not treat them as the default setup path.
+
+## Private Project Skills
+
+Do not commit private project skills such as auto-eva to this public repository. Keep actual project-specific skills in local runtime homes such as `~/.codex/skills` for Codex and `~/.claude/skills` for Claude Code. This repository should contain templates and public-safe process guidance, not private access paths, credentials, auth state, browser profiles, customer data, or machine-specific trust settings.
+
 ## Why use agent-bootstrap?
 
 - Shared `superpowers` workflow across Codex, Claude Code, and OpenCode instead of maintaining separate prompt stacks for each tool.
