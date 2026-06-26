@@ -45,6 +45,15 @@ Rule #1: If you want exception to ANY rule, YOU MUST STOP and get explicit permi
 - When memory or prior summaries conflict with current evidence, repo docs, scripts, tests, AGENTS files, and observed runtime output win.
 - Project-specific operating knowledge belongs in project docs or project skills, with repo-local source-of-truth pointers when a skill is required.
 
+## Skill creation and QA
+
+- When creating or editing a skill, treat the skill as tested process code, not just prose.
+- Start with a failing test or explicit pressure scenario before writing the skill change when the host or repo can support it.
+- Keep skill bodies concise and move detailed procedures into reference files when that makes the trigger behavior clearer.
+- After skill edits, run the skill validator, run relevant repo tests, check for private paths and secrets, and inspect the rendered or installed result when applicable.
+- When a skill has both a repo catalog source and runtime copy, verify any runtime copy separately from the repo catalog source.
+- Do not claim a skill is ready only because the Markdown looks reasonable.
+
 # Proactiveness
 
 When asked to do something, just do it - including obvious follow-up actions needed to complete the task properly.

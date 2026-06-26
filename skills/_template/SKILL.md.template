@@ -66,6 +66,15 @@ Replace placeholders with real project commands and evidence.
 
 Separate smoke checks from official proof. Do not overclaim from narrow evidence.
 
+## Skill QA Contract
+
+When editing this skill, prove the workflow still works:
+
+- `skill validator`: TODO, command for validating this skill.
+- `pressure scenario`: TODO, one realistic prompt or task that should trigger this skill.
+- `private data check`: TODO, command or review step for private paths, credentials, secrets, auth state, browser profiles, and machine-specific trust settings.
+- `runtime copy check`: TODO, how to compare and validate the installed copy when this skill is synced into runtime.
+
 ## QA / Refactor Loop
 
 After the first artifact works:

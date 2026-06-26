@@ -13,6 +13,10 @@ It is not an always-install bootstrap. Future agents should inspect this catalog
 - Run the skill validator after installing or syncing a skill.
 - Preserve original catalog/vendor skills separately from Hun-specific operational wrappers.
 
+## Skill QA Contract
+
+Treat skill changes as tested workflow code. Start with a failing test or explicit pressure scenario when possible, run the skill validator, run relevant repo tests, check for private paths and secrets, and verify the installed runtime copy separately from the repo catalog source before calling the skill ready.
+
 ### chatgpt-collaboration-harness
 
 Use this first when work should be coordinated with ChatGPT Pro across staged implementation, delegated subtasks, Search Mode, deep research, source-backed investigation, or final review.
@@ -20,6 +24,7 @@ Use this first when work should be coordinated with ChatGPT Pro across staged im
 Key policy:
 
 - Codex owns local files, validation, and final judgment.
+- Use `references/file-artifact-exchange.md` when the stage needs approved screenshots, files, and generated artifacts.
 - ChatGPT Pro must not answer from inference alone when facts, project source behavior, official docs, rankings, preferences, or public sentiment matter.
 - Technical claims should use project source, local evidence, official documentation, primary sources, or source-backed research first.
 - Community evidence is allowed for taste, popularity, adoption, or preference questions, but it must be labeled `community-sentiment`, not treated as official fact.

@@ -16,6 +16,7 @@ Treat this repository as a skill catalog, not an always-install bootstrap:
 - put chatgpt-collaboration-harness first in the review because it is the primary staged ChatGPT Pro collaboration skill
 - identify karpathy-guidelines as an original catalog/vendor skill and preserve its source attribution
 - identify hun-engineering-loop as the Hun-specific operational wrapper for memory preflight, source-of-truth checks, high-risk approval boundaries, artifact-first execution, and QA evidence
+- enforce the skill QA contract: start from a failing test or explicit pressure scenario when possible, validate the skill, check private paths and secrets, and verify runtime copies separately
 - inspect each selected skill before recommending it
 - Compare the catalog copy with the installed runtime copy under ~/.codex/skills/<skill-name>
 - classify each selected skill as install, update, already current, skip, or needs review
@@ -37,6 +38,7 @@ For chatgpt-collaboration-harness, preserve these rules:
 - community sources may be used for preferences, rankings, popularity, taste, adoption, or ecosystem feel, but label them as community-sentiment rather than official fact
 - use Korean by default unless I request another language or the deliverable requires another language
 - Codex must classify ChatGPT Pro output as accepted, rejected, deferred, or needs-local-verification and verify locally before relying on it
+- use file-artifact-exchange rules before sharing screenshots, files, and generated artifacts or relying on downloaded artifacts
 - keep project goals, ChatGPT work tabs/conversations, approved sharing scopes, and validation records separate across projects
 
 If I approve installation or update:

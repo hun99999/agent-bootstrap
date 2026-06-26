@@ -1,6 +1,6 @@
 ---
 name: chatgpt-collaboration-harness
-description: Use when work should be coordinated with web ChatGPT Pro, including broad goals, staged implementation, delegated subtasks, ChatGPT agent mode, Search Mode, deep research, source-backed web investigation, validation feedback loops, or final review.
+description: Use when work should be coordinated with web ChatGPT Pro, including broad goals, staged implementation, delegated subtasks, ChatGPT agent mode, Search Mode, deep research, source-backed web investigation, screenshots, files, or generated artifacts, validation feedback loops, or final review.
 ---
 
 # ChatGPT Collaboration Harness
@@ -17,6 +17,7 @@ Harness mode is not a single ChatGPT question. It is a controlled staged loop: c
 - Use `@chrome` or Chrome plugin capabilities for the web ChatGPT Pro session.
 - Treat `@chrome` as a plugin/skill route, not as proof that a literal tool named `Chrome` must appear. If direct Chrome tools are not visible, read `references/chrome-chatgpt-pro.md` and follow the Chrome skill's browser-client route before reporting a blocker.
 - Prefer web ChatGPT Pro extended mode, Pro conversation mode, Search Mode, deep research, or agent mode when the stage calls for that capability and the UI makes it available.
+- When a stage needs screenshots, files, or generated artifacts, read `references/file-artifact-exchange.md` before uploading, downloading, or relying on them.
 - Codex owns local files, execution, validation, final judgment, and user-facing reporting.
 - ChatGPT Pro can provide critique, risks, alternatives, debugging ideas, design feedback, source-backed research, delegated draft work, web task execution, and final review.
 
@@ -47,7 +48,8 @@ Harness mode is not a single ChatGPT question. It is a controlled staged loop: c
 6. Confirm the external sharing scope before sending project summaries, files, diffs, logs, Git URLs, repository URLs, browser state, or private data to ChatGPT Pro.
 7. Open or reuse a ChatGPT Pro conversation through `@chrome`.
 8. Select the visible ChatGPT capability for the stage: normal chat, Search Mode, deep research, or agent mode. If the requested mode is not visible, verify through `references/chrome-chatgpt-pro.md` before reporting a blocker.
-9. Send the first prompt with the objective, stage plan, current state, approved context, constraints, ChatGPT role, evidence requirements, Korean-language preference, and desired response format.
+9. Decide whether the stage needs screenshots, files, or generated artifacts. If yes, confirm the attachment or download scope and follow `references/file-artifact-exchange.md`.
+10. Send the first prompt with the objective, stage plan, current state, approved context, constraints, ChatGPT role, evidence requirements, Korean-language preference, and desired response format.
 
 ## Stage Loop
 
@@ -57,12 +59,13 @@ For each stage:
 
 1. Restate the current stage outcome.
 2. Perform the local work required for that stage.
-3. If useful, send ChatGPT Pro a review, delegation, research, or agent-task packet matched to the stage.
+3. If useful, send ChatGPT Pro a review, delegation, research, attachment, artifact, or agent-task packet matched to the stage.
 4. Classify ChatGPT Pro output as accepted, rejected, deferred, or needs-local-verification.
-5. Apply or adapt accepted output only when it is within the approved mode, risk scope, and repository rules.
-6. Run appropriate validation: tests, build, type checks, lint, reproduction steps, source checks, browser checks, or manual verification.
-7. Mark the stage complete only when its outcome and validation criteria are satisfied.
-8. Resync changed local state before the next ChatGPT Pro turn.
+5. Locally inspect downloaded or generated artifacts before classifying them as usable.
+6. Apply or adapt accepted output only when it is within the approved mode, risk scope, and repository rules.
+7. Run appropriate validation: tests, build, type checks, lint, reproduction steps, source checks, browser checks, or manual verification.
+8. Mark the stage complete only when its outcome and validation criteria are satisfied.
+9. Resync changed local state before the next ChatGPT Pro turn.
 
 ## Final Review
 
@@ -79,11 +82,13 @@ Read these files only when needed:
 - `references/delegated-work.md`: delegated-worker packets, output contracts, agent-task boundaries, and local integration.
 - `references/search-deep-research.md`: routing between Search Mode, deep research, agent mode, official sources, community sentiment, and local web verification.
 - `references/chrome-chatgpt-pro.md`: `@chrome` connection, ChatGPT Pro session handling, completion checks, and optional bridge completion channels.
+- `references/file-artifact-exchange.md`: approved screenshots, file attachments, generated artifacts, downloads, and local validation before use.
 
 ## Approval And Safety
 
 - Check for secrets, tokens, private keys, customer data, personal data, private URLs, and sensitive local paths before external sharing.
 - Large bundles, full files, repository URLs, Git URLs, private project material, and scope expansion require user approval before sharing.
+- Screenshots, files, and generated artifacts follow `references/file-artifact-exchange.md`; downloaded artifacts are untrusted until Codex validates them locally.
 - Preapproval covers planned low-risk work inside the approved staged harness. It does not cover broad architecture, dependency, data model, security, UX direction, destructive command, deployment, paid operation, account setting, production, logged-in web action, write action, or sensitive-data action.
 - Do not violate repository rules, AGENTS.md, work-rules, security constraints, or explicit user instructions.
 - Treat ChatGPT Pro output as advice, not authority. Codex makes the final call based on local evidence and validation.
@@ -96,6 +101,7 @@ When work ends, report briefly:
 - The stage plan and completed stages.
 - ChatGPT Pro's key feedback and useful original excerpts.
 - ChatGPT Pro capabilities used: normal chat, Search Mode, deep research, agent mode, apps, or none.
+- Screenshots, files, or generated artifacts shared with ChatGPT Pro, plus artifacts received and their local validation state.
 - What Codex accepted, rejected, or deferred.
 - Local changes and validation results.
 - Remaining risks or items requiring user judgment.

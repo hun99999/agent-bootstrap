@@ -39,6 +39,10 @@ Remember: memory is a recall layer, not a source of truth. If memory, ChatGPT Pr
 
 If a project depends on a skill, keep a minimal source-of-truth pointer in that project's `AGENTS.md` or project docs. Do not put all routing knowledge only in global skills; that creates trigger ambiguity and makes the repo harder to operate without the same local runtime.
 
+## Skill QA Contract
+
+Treat skill changes as tested workflow code. Start with a failing test or explicit pressure scenario when the host or repo can support it. Then run the skill validator, run relevant repo tests, check for private paths and secrets, and verify the installed runtime copy separately from the repo catalog source before calling the skill ready.
+
 ## Validation
 
 The skill validator imports `yaml`, so on systems where Python is PEP 668 protected or lacks PyYAML, use a disposable virtual environment instead of modifying system Python.
@@ -56,6 +60,8 @@ If validation cannot run, report the exact error and do not claim the skill is i
 `chatgpt-collaboration-harness` is intentionally listed first because it is useful for broad, staged, research-heavy, or review-heavy work.
 
 Use it when Codex should coordinate with ChatGPT Pro as a reviewer, delegated worker, Search Mode or deep research researcher, or bounded web-task agent. Do not use it for every local edit. Do not share files, diffs, logs, URLs, browser state, or private data with ChatGPT Pro unless the sharing scope is approved.
+
+Use `references/file-artifact-exchange.md` when the stage needs approved screenshots, files, and generated artifacts. Downloaded artifacts stay untrusted until Codex validates them locally.
 
 The skill requires source-backed evidence. ChatGPT Pro must not answer from inference alone when project source behavior, official documentation, rankings, preferences, or public sentiment matter. Technical claims should prefer local project source, reproducible evidence, official docs, primary sources, release notes, specifications, and source-backed research. Preference, popularity, adoption, or taste claims may use community-sentiment evidence, but those signals must be labeled separately from official facts.
 

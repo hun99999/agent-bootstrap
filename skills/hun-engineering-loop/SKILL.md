@@ -67,6 +67,17 @@ Name the evidence required before claiming completion.
 
 Separate smoke evidence from official proof. Do not overclaim from HTTP 200, a local render, or a passing narrow test.
 
+## Skill QA Contract
+
+When the task creates or edits a skill, treat the skill as tested process code:
+
+- Start with a failing test, validation failure, or explicit pressure scenario when the repo can support it.
+- Keep the skill trigger clear: when to use it, when not to use it, and which reference files to read.
+- Run the skill validator and relevant repo tests.
+- Check for private paths, credentials, secrets, browser profiles, auth state, and machine-specific trust settings.
+- If the skill has a runtime copy, validate the installed runtime copy separately from the repo catalog source.
+- Do not call the skill ready only because the Markdown reads well.
+
 ## QA / Refactor Loop
 
 After the first working artifact:

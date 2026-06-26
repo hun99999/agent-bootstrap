@@ -122,6 +122,7 @@ class SkillCatalogTests(unittest.TestCase):
             "references/chrome-chatgpt-pro.md",
             "references/delegated-work.md",
             "references/search-deep-research.md",
+            "references/file-artifact-exchange.md",
         )
 
         for relative in expected_files:
@@ -132,10 +133,38 @@ class SkillCatalogTests(unittest.TestCase):
         self.assertIn("Evidence And Language Rules", skill)
         self.assertIn("community-sentiment", skill)
         self.assertIn("keep the ChatGPT Pro conversation", skill)
+        self.assertIn("screenshots, files, or generated artifacts", skill)
+        self.assertIn("file-artifact-exchange.md", skill)
 
         prompt = (skill_root / "agents" / "openai.yaml").read_text(encoding="utf-8")
         self.assertIn("source-backed evidence", prompt)
         self.assertIn("Korean", prompt)
+        self.assertIn("screenshots, files, and artifacts", prompt)
+
+    def test_chatgpt_collaboration_harness_documents_file_artifact_exchange(self) -> None:
+        reference = (
+            REPO_ROOT
+            / "skills"
+            / "chatgpt-collaboration-harness"
+            / "references"
+            / "file-artifact-exchange.md"
+        ).read_text(encoding="utf-8")
+
+        expected_phrases = (
+            "Screenshot Attachments",
+            "File Attachments",
+            "Receiving Generated Artifacts",
+            "Attachment Packet",
+            "Artifact Return Contract",
+            "Check for secrets",
+            "Do not upload credentials",
+            "Downloaded artifacts are untrusted until Codex validates them locally",
+            "archive listing before extraction",
+            "accepted, rejected, deferred, or needs-local-verification",
+        )
+        for phrase in expected_phrases:
+            self.assertIn(phrase, reference)
+        self.assertNotIn(PRIVATE_HOME_PATH, reference)
 
     def test_skill_setup_guide_documents_selective_install_flow(self) -> None:
         guide = (REPO_ROOT / "docs" / "codex-skills.md").read_text(encoding="utf-8")
@@ -151,6 +180,7 @@ class SkillCatalogTests(unittest.TestCase):
             "PyYAML",
             "community-sentiment",
             "one ChatGPT work tab or conversation per project",
+            "screenshots, files, and generated artifacts",
             "karpathy-guidelines",
             "hun-engineering-loop",
             "memory is a recall layer, not a source of truth",
@@ -178,6 +208,8 @@ class SkillCatalogTests(unittest.TestCase):
             "Ask before installing or overwriting",
             "quick_validate.py",
             "Do not copy private paths, credentials, MCP endpoints, auth state, or browser profiles",
+            "file-artifact-exchange",
+            "skill QA contract",
         )
         for phrase in expected_phrases:
             self.assertIn(phrase, prompt)
