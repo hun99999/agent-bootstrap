@@ -11,14 +11,106 @@ class SkillCatalogTests(unittest.TestCase):
         catalog = (REPO_ROOT / "skills" / "README.md").read_text(encoding="utf-8")
 
         first_entry = catalog.index("### chatgpt-collaboration-harness")
+        karpathy_entry = catalog.index("### karpathy-guidelines")
+        hun_loop_entry = catalog.index("### hun-engineering-loop")
         template_entry = catalog.index("### _template")
         self.assertLess(first_entry, template_entry)
+        self.assertLess(first_entry, karpathy_entry)
+        self.assertLess(karpathy_entry, hun_loop_entry)
+        self.assertLess(hun_loop_entry, template_entry)
         self.assertIn("browse, review, select, then install", catalog)
         self.assertIn("not an always-install bootstrap", catalog)
         self.assertIn("~/.codex/skills", catalog)
         self.assertIn("community-sentiment", catalog)
         self.assertIn("Korean by default", catalog)
+        self.assertIn("original catalog/vendor skill", catalog)
+        self.assertIn("Hun-specific operational wrapper", catalog)
         self.assertNotIn(PRIVATE_HOME_PATH, catalog)
+
+    def test_karpathy_guidelines_source_is_preserved(self) -> None:
+        skill_root = REPO_ROOT / "skills" / "karpathy-guidelines"
+
+        self.assertTrue((skill_root / "SKILL.md").exists())
+        self.assertTrue((skill_root / "references" / "SOURCE.md").exists())
+
+        skill = (skill_root / "SKILL.md").read_text(encoding="utf-8")
+        source = (skill_root / "references" / "SOURCE.md").read_text(
+            encoding="utf-8"
+        )
+
+        self.assertIn("name: karpathy-guidelines", skill)
+        self.assertIn("license: MIT", skill)
+        self.assertIn("Think Before Coding", skill)
+        self.assertIn("Simplicity First", skill)
+        self.assertIn("Surgical Changes", skill)
+        self.assertIn("Goal-Driven Execution", skill)
+        self.assertIn("https://github.com/multica-ai/andrej-karpathy-skills", source)
+        self.assertIn("2c606141936f1eeef17fa3043a72095b4765b9c2", source)
+        self.assertIn("MIT", source)
+        self.assertNotIn(PRIVATE_HOME_PATH, source)
+
+    def test_hun_engineering_loop_wraps_karpathy_with_local_policy(self) -> None:
+        skill_root = REPO_ROOT / "skills" / "hun-engineering-loop"
+
+        self.assertTrue((skill_root / "SKILL.md").exists())
+        self.assertTrue((skill_root / "agents" / "openai.yaml").exists())
+
+        skill = (skill_root / "SKILL.md").read_text(encoding="utf-8")
+
+        expected_sections = (
+            "Memory Preflight",
+            "Source Of Truth",
+            "Access And Approval Boundary",
+            "Artifact-First Execution",
+            "Verification Contract",
+            "QA / Refactor Loop",
+            "Final Report",
+        )
+        for section in expected_sections:
+            self.assertIn(section, skill)
+
+        expected_phrases = (
+            "karpathy-guidelines",
+            "memory is a recall layer, not a source of truth",
+            "high-risk stop/ask boundary",
+            "permission profiles, hooks, or approval layers",
+            "fast check",
+            "targeted regression",
+            "type/lint/build",
+            "deployment smoke",
+        )
+        for phrase in expected_phrases:
+            self.assertIn(phrase, skill)
+
+    def test_project_skill_template_contains_qa_evidence_contract(self) -> None:
+        template = (REPO_ROOT / "skills" / "_template" / "SKILL.md.template").read_text(
+            encoding="utf-8"
+        )
+
+        expected_sections = (
+            "Scope / Non-goals",
+            "Memory Preflight",
+            "Source Of Truth",
+            "Access And Approval Boundary",
+            "Artifact-First Execution",
+            "Verification Contract",
+            "QA / Refactor Loop",
+            "Final Report",
+        )
+        for section in expected_sections:
+            self.assertIn(section, template)
+
+        expected_phrases = (
+            "fast check",
+            "targeted regression",
+            "type/lint/build",
+            "browser/manual QA",
+            "deployment smoke",
+            "negative/regression test",
+            "memory is a recall layer, not a source of truth",
+        )
+        for phrase in expected_phrases:
+            self.assertIn(phrase, template)
 
     def test_chatgpt_collaboration_harness_source_is_cataloged(self) -> None:
         skill_root = REPO_ROOT / "skills" / "chatgpt-collaboration-harness"
@@ -59,6 +151,13 @@ class SkillCatalogTests(unittest.TestCase):
             "PyYAML",
             "community-sentiment",
             "one ChatGPT work tab or conversation per project",
+            "karpathy-guidelines",
+            "hun-engineering-loop",
+            "memory is a recall layer, not a source of truth",
+            "high-risk stop/ask boundary",
+            "permission profiles, hooks, or approval layers",
+            "source-of-truth pointer",
+            "QA evidence contract",
         )
         for phrase in expected_phrases:
             self.assertIn(phrase, guide)

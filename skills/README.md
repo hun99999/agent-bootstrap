@@ -11,6 +11,7 @@ It is not an always-install bootstrap. Future agents should inspect this catalog
 - Do not install every skill automatically.
 - Do not copy private paths, credentials, MCP endpoints, auth state, browser profiles, or machine-specific trust settings into tracked files.
 - Run the skill validator after installing or syncing a skill.
+- Preserve original catalog/vendor skills separately from Hun-specific operational wrappers.
 
 ### chatgpt-collaboration-harness
 
@@ -28,6 +29,37 @@ Key policy:
 Catalog path: `skills/chatgpt-collaboration-harness`
 
 Runtime install target: `~/.codex/skills/chatgpt-collaboration-harness`
+
+### karpathy-guidelines
+
+Use this when writing, reviewing, or refactoring code and the main risk is overcomplication, hidden assumptions, broad diffs, or weak success criteria.
+
+Key policy:
+
+- This is an original catalog/vendor skill preserved from `multica-ai/andrej-karpathy-skills`.
+- Keep upstream attribution and the MIT license note in `skills/karpathy-guidelines/references/SOURCE.md`.
+- Do not add Hun-specific local workflow rules to this skill.
+- Use `hun-engineering-loop` when the work also needs memory preflight, source-of-truth ordering, access approval boundaries, and QA evidence contracts.
+
+Catalog path: `skills/karpathy-guidelines`
+
+Runtime install target: `~/.codex/skills/karpathy-guidelines`
+
+### hun-engineering-loop
+
+Use this for Hun-specific non-trivial engineering work across planning, implementation, review, refactor, QA, or handoff.
+
+Key policy:
+
+- This is the Hun-specific operational wrapper around `karpathy-guidelines`, repo rules, memory preflight, and executable verification.
+- Memory is a recall layer, not a source of truth.
+- Current repo docs, scripts, tests, `AGENTS.md`, and observed runtime output beat memory and external advice.
+- Broad access is allowed only as capability; high-risk actions still require a stop/ask approval boundary.
+- Every project skill should name a concrete QA evidence contract instead of saying only "test it".
+
+Catalog path: `skills/hun-engineering-loop`
+
+Runtime install target: `~/.codex/skills/hun-engineering-loop`
 
 ### _template
 

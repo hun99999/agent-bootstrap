@@ -1,0 +1,4 @@
+interface:
+  display_name: "Karpathy Guidelines"
+  short_description: "Apply cautious, simple, surgical coding guidelines"
+  default_prompt: "Use $karpathy-guidelines to surface assumptions, prefer simple implementation, keep changes surgical, and define verifiable success criteria before coding or reviewing."

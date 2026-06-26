@@ -14,10 +14,22 @@ If there are uncommitted changes or untracked files, stop and ask me how to hand
 Treat this repository as a skill catalog, not an always-install bootstrap:
 - list the skills available under skills/
 - put chatgpt-collaboration-harness first in the review because it is the primary staged ChatGPT Pro collaboration skill
+- identify karpathy-guidelines as an original catalog/vendor skill and preserve its source attribution
+- identify hun-engineering-loop as the Hun-specific operational wrapper for memory preflight, source-of-truth checks, high-risk approval boundaries, artifact-first execution, and QA evidence
 - inspect each selected skill before recommending it
 - Compare the catalog copy with the installed runtime copy under ~/.codex/skills/<skill-name>
 - classify each selected skill as install, update, already current, skip, or needs review
 - Ask before installing or overwriting any skill
+
+For karpathy-guidelines:
+- keep the upstream content and attribution separate from Hun-specific local policy
+- do not fold project-specific or machine-specific rules into the original catalog/vendor skill
+
+For hun-engineering-loop:
+- treat memory as a recall layer, not a source of truth
+- current repo docs, scripts, tests, AGENTS files, and observed runtime output beat memory and external advice
+- enforce the high-risk stop/ask boundary even when broad filesystem or tool access is available
+- require a QA evidence contract: fast check, targeted regression, type/lint/build, browser/manual QA, deployment smoke, and negative/regression test where relevant
 
 For chatgpt-collaboration-harness, preserve these rules:
 - ChatGPT Pro must not answer from inference alone when facts, source behavior, official docs, rankings, preferences, or public sentiment matter
