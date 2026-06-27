@@ -77,6 +77,37 @@ class PromptCorpusPolicyTests(unittest.TestCase):
         for phrase in expected_phrases:
             self.assertIn(phrase, root_prompt)
 
+    def test_root_prompt_contains_access_and_memory_boundaries(self):
+        root_prompt = (REPO_ROOT / "AGENTS.md").read_text()
+
+        expected_phrases = (
+            "Access and approval boundary",
+            "Broad filesystem or tool access is operational capability, not blanket approval",
+            "High-risk actions require an explicit stop and ask",
+            "delete data, prune history, rotate credentials, change permissions",
+            "production, deployment, billing, external accounts, secrets, auth state, browser profiles",
+            "Memory is a recall layer, not a source of truth",
+            "repo docs, scripts, tests, AGENTS files, and observed runtime output win",
+            "Project-specific operating knowledge belongs in project docs or project skills",
+        )
+        for phrase in expected_phrases:
+            self.assertIn(phrase, root_prompt)
+
+    def test_root_prompt_contains_skill_creation_qa_contract(self):
+        root_prompt = (REPO_ROOT / "AGENTS.md").read_text()
+
+        expected_phrases = (
+            "Skill creation and QA",
+            "When creating or editing a skill, treat the skill as tested process code",
+            "Start with a failing test or explicit pressure scenario",
+            "run the skill validator",
+            "check for private paths and secrets",
+            "verify any runtime copy separately from the repo catalog source",
+            "Do not claim a skill is ready only because the Markdown looks reasonable",
+        )
+        for phrase in expected_phrases:
+            self.assertIn(phrase, root_prompt)
+
     def test_role_agents_include_guardrail_responsibilities(self):
         expectations = {
             "planner.md": (

@@ -36,6 +36,14 @@ Codex、Claude Code、OpenCode向けのプロセス重視AIコーディング環
 
 > この文書は `README.md` の日本語訳です。正本は英語版です。
 
+## 現在の公開スコープ
+
+Codex と Claude Code が現在の first-class setup target です。OpenCode と OpenClaw は optional/reference surface として残し、互換性維持に役立つ場合だけ既存文書を参照します。これらをデフォルトのセットアップ経路として扱わないでください。
+
+## Private Project Skills
+
+auto-eva のような private project skill はこの public repository にコミットしません。実際のプロジェクト別 skill は、Codex 用の `~/.codex/skills` や Claude Code 用の `~/.claude/skills` などローカル runtime home に置きます。このリポジトリには templates and public-safe process guidance だけを置き、private access path、credential、auth state、browser profile、customer data、machine-specific trust setting は入れません。
+
 ## agent-bootstrap を使う理由
 
 - Codex、Claude Code、OpenCodeごとに別々のプロンプトスタックを管理せず、1つの `superpowers` ベースのワークフローを共有できます。

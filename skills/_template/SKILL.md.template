@@ -1,0 +1,95 @@
+---
+name: example-skill-name
+description: Use when a future agent needs this reusable workflow, project operating guide, evidence pattern, or reference boundary.
+---
+
+# Example Skill Name
+
+## Scope / Non-goals
+
+State what this skill covers and what it must not cover.
+
+- Use for recurring project or workflow operations that future agents should discover.
+- Do not store credentials, private paths, auth state, browser profiles, MCP endpoints, or machine-specific trust settings.
+- Do not duplicate source-of-truth details that belong in repo docs, scripts, tests, or `AGENTS.md`.
+
+## Memory Preflight
+
+Tell the agent what memory keywords to search before work starts.
+
+- Remember: memory is a recall layer, not a source of truth.
+- Re-check drift-prone facts against current files, live output, or official docs.
+- If memory conflicts with the repo or observed runtime behavior, the current source wins.
+
+## Source Of Truth
+
+List the current authoritative sources in order.
+
+Example:
+
+1. User's latest instruction.
+2. Repo `AGENTS.md`, README, docs, scripts, tests, CI, and runtime output.
+3. This skill.
+4. Memory and prior summaries.
+5. External review after local verification.
+
+Leave a minimal source-of-truth pointer in repo docs or `AGENTS.md` when this skill is required for a project.
+
+## Access And Approval Boundary
+
+Define what the agent may do directly and what requires Hun's explicit approval.
+
+Require a stop/ask before deletion, credential or permission changes, production/deploy/billing changes, external account actions, public sharing, auth state changes, browser profile changes, history rewrites, force-pushes, hook bypasses, or test disabling.
+
+## Artifact-First Execution
+
+Name the durable artifact that should exist before open-ended implementation.
+
+Examples:
+
+- design/spec plus implementation plan;
+- failing regression test;
+- checklist with acceptance criteria;
+- source-backed research note;
+- migration or rollout plan.
+
+## Verification Contract
+
+Replace placeholders with real project commands and evidence.
+
+- `fast check`: TODO, for example `npm run lint` or `python3 -m compileall`.
+- `targeted regression`: TODO, test or repro for the changed behavior.
+- `type/lint/build`: TODO, project-level static and build checks.
+- `browser/manual QA`: TODO, UI workflow, screenshot, or manual check when relevant.
+- `deployment smoke`: TODO, preview or production check when release state is in scope.
+- `negative/regression test`: TODO, proof that old failure or unsafe path is blocked.
+
+Separate smoke checks from official proof. Do not overclaim from narrow evidence.
+
+## Skill QA Contract
+
+When editing this skill, prove the workflow still works:
+
+- `skill validator`: TODO, command for validating this skill.
+- `pressure scenario`: TODO, one realistic prompt or task that should trigger this skill.
+- `private data check`: TODO, command or review step for private paths, credentials, secrets, auth state, browser profiles, and machine-specific trust settings.
+- `runtime copy check`: TODO, how to compare and validate the installed copy when this skill is synced into runtime.
+
+## QA / Refactor Loop
+
+After the first artifact works:
+
+1. Run targeted verification.
+2. Review for duplicate helpers, hidden coupling, weak tests, swallowed errors, unrelated formatting churn, and over-broad diffs.
+3. Refactor only when it reduces real duplication, clarifies boundaries, or matches established local patterns.
+4. Re-run relevant verification.
+
+## Final Report
+
+Report:
+
+- files or runtime paths changed;
+- commands and checks run;
+- accepted/rejected/deferred external advice;
+- verification not run and why;
+- remaining risks or follow-up work.

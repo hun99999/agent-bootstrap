@@ -34,6 +34,14 @@ Bootstrap a process-first AI coding environment for Codex, Claude Code, and Open
 
 `agent-bootstrap` gives you a shared `superpowers` workflow, role-based subagents, token-efficient execution, and multilingual setup docs for modern AI coding tools.
 
+## Current Public Focus
+
+Codex and Claude Code are the current first-class setup targets for this public repository. OpenCode and OpenClaw remain optional/reference surfaces: keep their existing docs only when they help preserve compatibility, but do not treat them as the default setup path.
+
+## Private Project Skills
+
+Do not commit private project skills such as auto-eva to this public repository. Keep actual project-specific skills in local runtime homes such as `~/.codex/skills` for Codex and `~/.claude/skills` for Claude Code. This repository should contain templates and public-safe process guidance, not private access paths, credentials, auth state, browser profiles, customer data, or machine-specific trust settings.
+
 ## Why use agent-bootstrap?
 
 - Shared `superpowers` workflow across Codex, Claude Code, and OpenCode instead of maintaining separate prompt stacks for each tool.
@@ -53,6 +61,7 @@ Use this repository as an operating guide, not only as an installer.
 - Install global defaults: use [docs/global-guardrail-setup.md](docs/global-guardrail-setup.md) to install the shared guardrails into Codex, Claude Code, or OpenCode user-level defaults.
 - Apply guardrails to a project: paste [prompts/apply-vibe-coding-guardrails.md](prompts/apply-vibe-coding-guardrails.md) into an agent session inside a target repository.
 - Start feature work inside a guarded project: paste [prompts/start-with-vibe-coding-guardrails.md](prompts/start-with-vibe-coding-guardrails.md) before asking for a feature, bugfix, or refactor.
+- Review optional Codex skills: read [skills/README.md](skills/README.md) and [docs/codex-skills.md](docs/codex-skills.md), then use [prompts/setup-codex-skills.md](prompts/setup-codex-skills.md) when you want an agent to browse, compare, and install approved skills.
 - Update this bootstrap after repository changes: paste [prompts/update-agent-bootstrap.md](prompts/update-agent-bootstrap.md) after pulling new changes or when you want an agent to re-audit this repository.
 - Explain this repository's own structure: read [docs/agent-bootstrap-structure.md](docs/agent-bootstrap-structure.md) before editing shared prompts, installers, generated plugin output, or setup docs.
 
@@ -123,6 +132,7 @@ Choose the scope first. Most failed agent setup work starts by configuring too m
 - `prompts/setup-claude-current-harness.md`: use inside Claude Code when the Claude plugin and shared role prompts should be set up.
 - `prompts/setup-opencode-current-harness.md`: use inside OpenCode when OpenCode should receive the generated agents and native plugin wiring.
 - `prompts/setup-shared-core.md`: use when the target environment is unclear and the safest answer is only the shared prompt/skills layer.
+- `prompts/setup-codex-skills.md`: use when you want an agent to inspect this repository's optional Codex skill catalog, compare selected skills with `~/.codex/skills`, and install only approved skills.
 - `prompts/apply-vibe-coding-guardrails.md`: use in an application repository that needs structure maps, edge-case-first tests, dependency-boundary checks, and local project knowledge.
 - `prompts/start-with-vibe-coding-guardrails.md`: use for day-to-day feature, bugfix, or refactor work after a repository already has a project map and guardrail workflow.
 - `prompts/update-agent-bootstrap.md`: use for this repository when new changes need to be pulled, rendered, installed, audited, documented, and reviewed.
@@ -203,6 +213,7 @@ These copy-paste prompts are the fastest way to keep another agent inside the in
 - Generic shared core setup: [prompts/setup-shared-core.md](prompts/setup-shared-core.md)
 - OpenClaw shared core only: [prompts/setup-openclaw-shared-core.md](prompts/setup-openclaw-shared-core.md)
 - OpenClaw ACP integration: [prompts/setup-openclaw-acp.md](prompts/setup-openclaw-acp.md)
+- Optional Codex skill catalog setup: [prompts/setup-codex-skills.md](prompts/setup-codex-skills.md)
 - Apply vibe-coding guardrails to another repository: [prompts/apply-vibe-coding-guardrails.md](prompts/apply-vibe-coding-guardrails.md)
 - Start work with vibe-coding guardrails: [prompts/start-with-vibe-coding-guardrails.md](prompts/start-with-vibe-coding-guardrails.md)
 - Update this bootstrap after repository changes: [prompts/update-agent-bootstrap.md](prompts/update-agent-bootstrap.md)
@@ -277,6 +288,8 @@ The intent is to reuse upstream `superpowers` instead of copying the skill libra
   - repository-level Claude marketplace entry
 - `plugins/process-first-agents/`
   - generated Claude plugin package
+- `skills/`
+  - optional Codex skill catalog; see [docs/codex-skills.md](docs/codex-skills.md)
 - `scripts/render_claude_plugin.py`
   - rebuilds the Claude plugin package from the shared prompt corpus
 - `docs/`

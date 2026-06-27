@@ -16,6 +16,49 @@ class ReadmeDocsTests(unittest.TestCase):
         self.assertIn("subagents", readme)
         self.assertIn("token-efficient", readme)
 
+    def test_readmes_mark_codex_claude_as_current_public_focus(self) -> None:
+        expectations = {
+            "README.md": (
+                "Current Public Focus",
+                "Codex and Claude Code are the current first-class setup targets",
+                "OpenCode and OpenClaw remain optional/reference surfaces",
+            ),
+            "README.ko.md": (
+                "현재 공개 범위",
+                "Codex와 Claude Code가 현재 first-class setup target",
+                "OpenCode와 OpenClaw는 optional/reference surface",
+            ),
+            "README.ja.md": (
+                "現在の公開スコープ",
+                "Codex と Claude Code が現在の first-class setup target",
+                "OpenCode と OpenClaw は optional/reference surface",
+            ),
+            "README.zh-CN.md": (
+                "当前公开范围",
+                "Codex 和 Claude Code 是当前 first-class setup target",
+                "OpenCode 和 OpenClaw 保持为 optional/reference surface",
+            ),
+        }
+
+        for relative, phrases in expectations.items():
+            with self.subTest(relative=relative):
+                readme = (REPO_ROOT / relative).read_text(encoding="utf-8")
+                for phrase in phrases:
+                    self.assertIn(phrase, readme)
+
+    def test_main_readme_documents_private_project_skills_stay_local(self) -> None:
+        readme = (REPO_ROOT / "README.md").read_text(encoding="utf-8")
+
+        expected_phrases = (
+            "Private Project Skills",
+            "Do not commit private project skills such as auto-eva",
+            "`~/.codex/skills`",
+            "`~/.claude/skills`",
+            "templates and public-safe process guidance",
+        )
+        for phrase in expected_phrases:
+            self.assertIn(phrase, readme)
+
     def test_translated_readmes_exist_with_language_switcher(self) -> None:
         for relative in ("README.ko.md", "README.ja.md", "README.zh-CN.md"):
             contents = (REPO_ROOT / relative).read_text(encoding="utf-8")

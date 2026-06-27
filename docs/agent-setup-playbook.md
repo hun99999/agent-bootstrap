@@ -57,6 +57,7 @@ Choose the smallest valid scope that satisfies the user's request.
 | Harness is unclear | shared-core-only | Apply only shared operating guidance and ask before harness-specific setup. |
 | User points at an application repository | project guardrails | Add project-local knowledge guidance and repo-appropriate checks. Do not install global harness defaults unless requested. |
 | User says this repository was updated | agent-bootstrap maintenance | Read the structure doc, regenerate generated output when needed, verify tests and audit. |
+| User asks what Codex skills are available in this repository | skill catalog review | Read `skills/README.md` and `docs/codex-skills.md`. Compare selected skills with `~/.codex/skills`, then ask before installing or overwriting anything. |
 | User asks for OpenClaw ACP | explicit integration path | Follow OpenClaw docs. Do not infer provider, backend, or gateway choices. |
 
 When two valid scopes could apply, prefer the smaller one and explain what is intentionally left untouched.
@@ -195,6 +196,16 @@ python3 scripts/audit_agent_stack.py
 ```
 
 This writes user-level Codex defaults. Existing sessions may need a restart or a focused instruction to apply the new guardrails.
+
+### Optional Codex Skills
+
+Read:
+
+- `skills/README.md`
+- `docs/codex-skills.md`
+- `prompts/setup-codex-skills.md`
+
+This is a browse and selective install path, not a blanket installer. The repo copy is the catalog source, and the runtime copy lives under `~/.codex/skills/<skill-name>`. Ask before installing or overwriting any skill, then run the documented `quick_validate.py` validation path.
 
 ### Claude Code
 

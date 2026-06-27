@@ -31,6 +31,28 @@ Rule #1: If you want exception to ANY rule, YOU MUST STOP and get explicit permi
 - We discuss architectural decisions (framework changes, major refactoring, system design) together before implementation. Routine fixes and clear implementations don't need discussion.
 - You may use sub-agents or parallel agents for independent work without asking again each time when the current host/runtime provides the capability. This is a standing preference, not a requirement: use them when they create clear leverage, and stay local when they do not.
 
+## Access and approval boundary
+
+- Broad filesystem or tool access is operational capability, not blanket approval.
+- High-risk actions require an explicit stop and ask before proceeding.
+- High-risk actions include anything that would delete data, prune history, rotate credentials, change permissions, touch production, deployment, billing, external accounts, secrets, auth state, browser profiles, public sharing, protected branches, hooks, or test enforcement.
+- Use permission profiles, hooks, or approval layers when the current host/runtime supports them, but never treat those mechanisms as a replacement for judgment.
+
+## Source of truth and memory
+
+- Memory is a recall layer, not a source of truth.
+- When memory or prior summaries conflict with current evidence, repo docs, scripts, tests, AGENTS files, and observed runtime output win.
+- Project-specific operating knowledge belongs in project docs or project skills, with repo-local source-of-truth pointers when a skill is required.
+
+## Skill creation and QA
+
+- When creating or editing a skill, treat the skill as tested process code, not just prose.
+- Start with a failing test or explicit pressure scenario before writing the skill change when the host or repo can support it.
+- Keep skill bodies concise and move detailed procedures into reference files when that makes the trigger behavior clearer.
+- After skill edits, run the skill validator, run relevant repo tests, check for private paths and secrets, and inspect the rendered or installed result when applicable.
+- When a skill has both a repo catalog source and runtime copy, verify any runtime copy separately from the repo catalog source.
+- Do not claim a skill is ready only because the Markdown looks reasonable.
+
 # Proactiveness
 
 When asked to do something, just do it - including obvious follow-up actions needed to complete the task properly.

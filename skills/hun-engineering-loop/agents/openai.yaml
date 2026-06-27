@@ -1,0 +1,4 @@
+interface:
+  display_name: "Hun Engineering Loop"
+  short_description: "Run Hun-specific engineering workflow"
+  default_prompt: "Use $hun-engineering-loop to work with memory preflight, source-of-truth checks, high-risk approval boundaries, artifact-first execution, and QA evidence before reporting completion."
