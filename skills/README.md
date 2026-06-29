@@ -1,13 +1,19 @@
 # Skill Catalog
 
-This directory is a browse, review, select, then install catalog for reusable Codex skills.
+This directory is a browse, review, select, then install catalog for reusable skills.
+Codex is the primary catalog target. Public-safe portable skills may also be
+reviewed and installed into Claude Code's user skill home.
 
-It is not an always-install bootstrap. Future agents should inspect this catalog, compare a selected skill with the installed runtime copy under `~/.codex/skills`, ask before installing or overwriting, then validate the installed skill.
+It is not an always-install bootstrap. Future agents should inspect this catalog,
+compare a selected skill with the installed runtime copy under `~/.codex/skills`
+or `~/.claude/skills`, ask before installing or overwriting, then validate the
+installed skill.
 
 ## Catalog Rules
 
 - The repo copy is the reviewable catalog source.
 - The installed copy under `~/.codex/skills/<skill-name>` is the runtime copy used by Codex.
+- The installed copy under `~/.claude/skills/<skill-name>` is the runtime copy used by Claude Code.
 - Do not install every skill automatically.
 - Do not copy private paths, credentials, MCP endpoints, auth state, browser profiles, or machine-specific trust settings into tracked files.
 - Run the skill validator after installing or syncing a skill.
@@ -37,7 +43,11 @@ Key policy:
 
 Catalog path: `skills/chatgpt-collaboration-harness`
 
-Runtime install target: `~/.codex/skills/chatgpt-collaboration-harness`
+Codex runtime install target: `~/.codex/skills/chatgpt-collaboration-harness`
+
+Claude Code install: review and adapt before use. This skill assumes a
+Codex-owned local validation loop plus ChatGPT Pro browser collaboration, so do
+not auto-sync it into Claude Code without checking those tool assumptions.
 
 ### karpathy-guidelines
 
@@ -52,7 +62,9 @@ Key policy:
 
 Catalog path: `skills/karpathy-guidelines`
 
-Runtime install target: `~/.codex/skills/karpathy-guidelines`
+Codex runtime install target: `~/.codex/skills/karpathy-guidelines`
+
+Claude Code runtime install target: `~/.claude/skills/karpathy-guidelines`
 
 ### hun-engineering-loop
 
@@ -68,7 +80,9 @@ Key policy:
 
 Catalog path: `skills/hun-engineering-loop`
 
-Runtime install target: `~/.codex/skills/hun-engineering-loop`
+Codex runtime install target: `~/.codex/skills/hun-engineering-loop`
+
+Claude Code runtime install target: `~/.claude/skills/hun-engineering-loop`
 
 ### _template
 

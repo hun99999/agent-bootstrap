@@ -237,6 +237,21 @@ class SkillCatalogTests(unittest.TestCase):
         self.assertIn("prompts/setup-codex-skills.md", readme)
         self.assertIn("skills/README.md", readme)
 
+    def test_catalog_distinguishes_codex_and_claude_runtime_targets(self) -> None:
+        catalog = (REPO_ROOT / "skills" / "README.md").read_text(encoding="utf-8")
+
+        expected_phrases = (
+            "Codex runtime install target: `~/.codex/skills/karpathy-guidelines`",
+            "Claude Code runtime install target: `~/.claude/skills/karpathy-guidelines`",
+            "Codex runtime install target: `~/.codex/skills/hun-engineering-loop`",
+            "Claude Code runtime install target: `~/.claude/skills/hun-engineering-loop`",
+            "Claude Code install: review and adapt before use",
+        )
+        for phrase in expected_phrases:
+            self.assertIn(phrase, catalog)
+
+        self.assertNotIn(PRIVATE_HOME_PATH, catalog)
+
 
 if __name__ == "__main__":
     unittest.main()

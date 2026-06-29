@@ -48,7 +48,7 @@ Harness adapters translate the shared core into each host's native shape.
   - Generated Claude Code plugin package.
   - Built by `scripts/render_claude_plugin.py`.
 - `skills/`
-  - Optional Codex skill catalog.
+  - Optional reusable skill catalog.
   - `skills/README.md` lists available catalog skills.
   - Skill source directories such as `skills/chatgpt-collaboration-harness/` are reviewable catalog copies, not automatically installed runtime state.
 
@@ -81,6 +81,7 @@ python3 scripts/render_claude_plugin.py --partner-name "Hun"
 - Global installation and optional tooling rules: `docs/global-guardrail-setup.md`.
 - Project-local knowledge shape: `docs/local-project-knowledge-template.md`.
 - Optional Codex skill catalog workflow: `docs/codex-skills.md`.
+- Optional Claude Code skill catalog workflow: `docs/claude-skills.md`.
 - Optional Codex skill setup prompt: `prompts/setup-codex-skills.md`.
 
 ## Dependency Direction
@@ -153,7 +154,7 @@ Check these areas carefully:
 - Claude renderer changes that silently accept unknown placeholders.
 - Docs that mention commands not implemented by this repository.
 - Optional tool docs that imply installation without user approval.
-- Skill catalog changes that confuse the repo catalog source with the runtime copy under `~/.codex/skills`.
+- Skill catalog changes that confuse the repo catalog source with runtime copies under `~/.codex/skills` or `~/.claude/skills`.
 
 ## Privacy Boundary
 

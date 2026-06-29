@@ -20,6 +20,7 @@ Do not configure another harness unless the user explicitly asks.
 3. Render the Claude plugin bundle with your preferred partner name.
 4. Add the local repository as a Claude plugin marketplace.
 5. Install `process-first-agents` from that marketplace.
+6. Optionally review and install public-safe skills into `~/.claude/skills`.
 
 ## Render the Plugin Bundle
 
@@ -46,6 +47,22 @@ This installs the `process-first-agents` Claude Code plugin as the user-level de
 In other words, new Claude Code sessions should inherit these user-level defaults after the plugin is installed or updated.
 
 Project-specific structure still belongs in project-local knowledge such as `local.md`, an untracked note, or a private Obsidian page. Existing Claude Code sessions may need a restart, plugin reload, or a short manual instruction to apply newly installed guardrails.
+
+## Claude Code Skill Catalog
+
+Use [docs/claude-skills.md](claude-skills.md) when Claude Code should use the
+same public-safe reusable skills that were added for Codex.
+
+Recommended portable skills:
+
+- `karpathy-guidelines`
+- `hun-engineering-loop`
+
+Install selected skills into `~/.claude/skills`. Do not install every catalog
+skill automatically, and do not copy private project skills into this public
+repository. `chatgpt-collaboration-harness` requires review before Claude Code
+use because it assumes Codex-owned local validation and ChatGPT Pro browser
+collaboration.
 
 ## Update
 

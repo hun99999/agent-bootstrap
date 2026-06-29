@@ -341,6 +341,8 @@ class ReadmeDocsTests(unittest.TestCase):
             "python3 -m unittest discover -s tests -p 'test_*.py'",
             "python3 scripts/audit_agent_stack.py",
             "No private paths",
+            "Optional Claude Code skill catalog workflow",
+            "docs/claude-skills.md",
         )
         for phrase in expected_phrases:
             self.assertIn(phrase, structure)
@@ -385,6 +387,41 @@ class ReadmeDocsTests(unittest.TestCase):
             with self.subTest(relative=relative):
                 for phrase in phrases:
                     self.assertIn(phrase, contents)
+
+    def test_claude_docs_explain_public_safe_skill_sync(self) -> None:
+        claude_readme = (REPO_ROOT / "docs" / "README.claude.md").read_text(
+            encoding="utf-8"
+        )
+        claude_skills = (REPO_ROOT / "docs" / "claude-skills.md").read_text(
+            encoding="utf-8"
+        )
+
+        readme_phrases = (
+            "Claude Code Skill Catalog",
+            "docs/claude-skills.md",
+            "~/.claude/skills",
+            "karpathy-guidelines",
+            "hun-engineering-loop",
+        )
+        for phrase in readme_phrases:
+            self.assertIn(phrase, claude_readme)
+
+        guide_phrases = (
+            "Claude Code Skills",
+            "browse, review, select, install",
+            "~/.claude/skills/<skill-name>",
+            "Do not install every skill automatically",
+            "karpathy-guidelines",
+            "hun-engineering-loop",
+            "chatgpt-collaboration-harness",
+            "private project skills",
+            "quick_validate.py",
+            "python3 -m unittest discover -s tests -p 'test_*.py'",
+        )
+        for phrase in guide_phrases:
+            self.assertIn(phrase, claude_skills)
+
+        self.assertNotIn("/" + "Users/hooooonje", claude_skills)
 
 
 if __name__ == "__main__":
