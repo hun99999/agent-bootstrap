@@ -9,9 +9,11 @@ Codex uses a local installer because the baseline needs two things that are user
 
 Inside Codex, the default setup scope is `current-harness-only`.
 
-If the user says "set this up from the repo" and does not explicitly ask for Claude Code, OpenCode, OpenClaw ACP, or cross-harness setup, configure Codex only.
+If the user says "set this up from the repo" and does not explicitly ask for Claude Code, configure Codex only.
 
 Do not configure another harness unless the user explicitly asks.
+
+OpenCode and OpenClaw are legacy/reference material, not current first-class setup targets for this repository.
 
 Codex session opener for standing delegation preference:
 
@@ -50,7 +52,7 @@ bash .codex/install.sh --partner-name "Hun"
 python3 scripts/audit_agent_stack.py
 ```
 
-The default audit is offline and read-only. It checks the local Codex CLI, Claude Code CLI, optional OpenCode CLI, the `~/.codex/superpowers` checkout, and the `~/.agents/skills/superpowers` symlink. Use `--online` only when you want current npm and remote git drift checks.
+The default audit is offline and read-only. It checks the local Codex CLI, Claude Code CLI, the `~/.codex/superpowers` checkout, the `~/.agents/skills/superpowers` symlink, and the generated Claude plugin bundle. Use `--online` only when you want current npm and remote git drift checks.
 
 ## Profiles
 

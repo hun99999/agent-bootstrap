@@ -11,32 +11,32 @@ class ReadmeDocsTests(unittest.TestCase):
         readme = (REPO_ROOT / "README.md").read_text(encoding="utf-8")
 
         self.assertIn(LANGUAGE_SWITCHER, readme)
-        self.assertIn("Codex, Claude Code, and OpenCode", readme)
+        self.assertIn("Codex and Claude Code", readme)
         self.assertIn("superpowers", readme)
         self.assertIn("subagents", readme)
         self.assertIn("token-efficient", readme)
 
-    def test_readmes_mark_codex_claude_as_current_public_focus(self) -> None:
+    def test_readmes_mark_codex_claude_as_only_first_class_surfaces(self) -> None:
         expectations = {
             "README.md": (
-                "Current Public Focus",
-                "Codex and Claude Code are the current first-class setup targets",
-                "OpenCode and OpenClaw remain optional/reference surfaces",
+                "Current Supported Surfaces",
+                "Codex and Claude Code are the only first-class setup targets",
+                "OpenCode and OpenClaw are legacy/reference material, not active service targets",
             ),
             "README.ko.md": (
-                "현재 공개 범위",
-                "Codex와 Claude Code가 현재 first-class setup target",
-                "OpenCode와 OpenClaw는 optional/reference surface",
+                "현재 지원 표면",
+                "Codex와 Claude Code만 first-class setup target",
+                "OpenCode와 OpenClaw는 legacy/reference material이며 active service target이 아닙니다",
             ),
             "README.ja.md": (
-                "現在の公開スコープ",
-                "Codex と Claude Code が現在の first-class setup target",
-                "OpenCode と OpenClaw は optional/reference surface",
+                "現在のサポート対象",
+                "Codex と Claude Code だけが first-class setup target",
+                "OpenCode と OpenClaw は legacy/reference material であり active service target ではありません",
             ),
             "README.zh-CN.md": (
-                "当前公开范围",
-                "Codex 和 Claude Code 是当前 first-class setup target",
-                "OpenCode 和 OpenClaw 保持为 optional/reference surface",
+                "当前支持范围",
+                "只有 Codex 和 Claude Code 是 first-class setup target",
+                "OpenCode 和 OpenClaw 是 legacy/reference material，不是 active service target",
             ),
         }
 
@@ -91,7 +91,6 @@ class ReadmeDocsTests(unittest.TestCase):
             "README.zh-CN.md",
             "docs/README.codex.md",
             "docs/README.claude.md",
-            "docs/README.opencode.md",
         ):
             contents = (REPO_ROOT / relative).read_text(encoding="utf-8")
             self.assertIn("scripts/audit_agent_stack.py", contents)
@@ -228,47 +227,47 @@ class ReadmeDocsTests(unittest.TestCase):
         expectations = {
             "README.md": (
                 "## Master Prompt",
-                "Paste this into Codex, Claude Code, OpenCode, or another coding agent",
+                "Paste this into Codex or Claude Code",
                 "First read AGENTS.md",
                 "git status --short --branch",
                 "Choose the smallest valid scope",
                 "Do not install optional tools just because they are mentioned",
                 "run post-write review",
                 "verification results",
-                "Bootstrap a process-first AI coding environment",
+                "Bootstrap a process-first AI coding environment for Codex and Claude Code",
             ),
             "README.ko.md": (
                 "## 마스터 프롬프트",
-                "아래를 Codex, Claude Code, OpenCode 또는 다른 코딩 에이전트에게 그대로 붙여넣습니다",
+                "아래를 Codex 또는 Claude Code에 그대로 붙여넣습니다",
                 "먼저 AGENTS.md",
                 "git status --short --branch",
                 "가장 작은 유효 범위",
                 "언급됐다는 이유만으로 선택 도구를 설치하지 마십시오",
                 "post-write review",
                 "검증 결과",
-                "Codex, Claude Code, OpenCode를 위한",
+                "Codex와 Claude Code를 위한",
             ),
             "README.ja.md": (
                 "## マスタープロンプト",
-                "次を Codex、Claude Code、OpenCode、または別のコーディングエージェントにそのまま貼り付けます",
+                "次を Codex または Claude Code にそのまま貼り付けます",
                 "まず AGENTS.md",
                 "git status --short --branch",
                 "最小の有効スコープ",
                 "言及されているだけの理由で任意ツールをインストールしないでください",
                 "post-write review",
                 "検証結果",
-                "Codex、Claude Code、OpenCode向け",
+                "Codex と Claude Code 向け",
             ),
             "README.zh-CN.md": (
                 "## 主提示词",
-                "把下面内容原样粘贴给 Codex、Claude Code、OpenCode 或其他编码代理",
+                "把下面内容原样粘贴给 Codex 或 Claude Code",
                 "先阅读 AGENTS.md",
                 "git status --short --branch",
                 "最小有效范围",
                 "不要仅仅因为文档提到某个可选工具就安装它",
                 "post-write review",
                 "验证结果",
-                "面向 Codex、Claude Code 和 OpenCode",
+                "面向 Codex 和 Claude Code",
             ),
         }
 
@@ -375,11 +374,6 @@ class ReadmeDocsTests(unittest.TestCase):
                 "user-level defaults",
                 "new Claude Code sessions",
             ),
-            "docs/README.opencode.md": (
-                "~/.config/opencode",
-                "user-level defaults",
-                "new OpenCode sessions",
-            ),
         }
 
         for relative, phrases in expectations.items():
@@ -401,7 +395,8 @@ class ReadmeDocsTests(unittest.TestCase):
             "docs/claude-skills.md",
             "~/.claude/skills",
             "karpathy-guidelines",
-            "hun-engineering-loop",
+            "Do not install `hun-engineering-loop` as part of the public Claude Code default",
+            "Do not install `chatgpt-collaboration-harness` into Claude Code",
         )
         for phrase in readme_phrases:
             self.assertIn(phrase, claude_readme)
@@ -412,8 +407,9 @@ class ReadmeDocsTests(unittest.TestCase):
             "~/.claude/skills/<skill-name>",
             "Do not install every skill automatically",
             "karpathy-guidelines",
-            "hun-engineering-loop",
-            "chatgpt-collaboration-harness",
+            "public Claude Code default skill set",
+            "Do not install `hun-engineering-loop` as part of the public default",
+            "Do not install `chatgpt-collaboration-harness` into Claude Code",
             "private project skills",
             "quick_validate.py",
             "python3 -m unittest discover -s tests -p 'test_*.py'",

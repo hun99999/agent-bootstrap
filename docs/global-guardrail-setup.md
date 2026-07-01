@@ -6,7 +6,7 @@ It does not mean every repository receives committed guardrail files. Repositori
 
 ## Mental Model
 
-- Global layer: user-level defaults for Codex, Claude Code, or OpenCode.
+- Global layer: user-level defaults for Codex or Claude Code.
 - Project layer: project-local knowledge, local commands, architecture notes, and optional `.audit/` evidence.
 - Session layer: the currently running agent context.
 
@@ -72,24 +72,14 @@ Then inside Claude Code:
 /plugin install process-first-agents@agent-bootstrap
 ```
 
-The Claude Code plugin carries the same shared constitution and role prompt bodies that Codex and OpenCode use. New Claude Code sessions should use those user-level defaults after the plugin is installed or updated.
+The Claude Code plugin carries the same shared constitution and role prompt bodies that Codex uses. New Claude Code sessions should use those user-level defaults after the plugin is installed or updated.
 
-## OpenCode Global Setup
+## Legacy Surfaces
 
-OpenCode uses `~/.config/opencode` for user-level defaults.
-
-Run this from the repository root:
-
-```bash
-bash .opencode/install.sh --partner-name "Hun"
-```
-
-The OpenCode installer writes:
-
-- `~/.config/opencode/opencode.json`
-- `~/.config/opencode/agents/*.md`
-
-The config enables the upstream Superpowers plugin line and renders this repository's shared agent prompts as OpenCode agents. New OpenCode sessions should use those user-level defaults.
+OpenCode and OpenClaw are legacy/reference material in this repository, not
+current first-class setup targets. Do not run legacy installers or route new
+setup work through those files unless Hun explicitly asks to restore that
+support.
 
 ## Project-Local Knowledge
 
@@ -221,11 +211,10 @@ Otherwise, document the recommended rule and leave installation for a separate a
 
 ## macOS
 
-Codex and OpenCode installers are shell scripts:
+The Codex installer is a shell script:
 
 ```bash
 bash .codex/install.sh --partner-name "Hun"
-bash .opencode/install.sh --partner-name "Hun"
 ```
 
 Claude Code plugin installation happens inside Claude Code after rendering the plugin bundle with Python.
@@ -244,7 +233,7 @@ For repository-local `.audit/` handling:
 Add-Content -Path .gitignore -Value ".audit/"
 ```
 
-The Codex and OpenCode installers are shell scripts. On Windows, run them in an environment that supports the target harness and shell behavior, such as WSL or Git Bash, unless the harness provides native Windows instructions. Do not invent native PowerShell installer flags that this repository does not implement.
+The Codex installer is a shell script. On Windows, run it in an environment that supports the target harness and shell behavior, such as WSL or Git Bash, unless the harness provides native Windows instructions. Do not invent native PowerShell installer flags that this repository does not implement.
 
 ## Updating
 
@@ -253,7 +242,6 @@ After pulling changes in this repository:
 ```bash
 bash .codex/install.sh --partner-name "Hun"
 python3 scripts/render_claude_plugin.py --partner-name "Hun"
-bash .opencode/install.sh --partner-name "Hun"
 python3 scripts/audit_agent_stack.py
 ```
 

@@ -1,163 +1,152 @@
-# agent-bootstrap Structure
+# Agent Bootstrap Structure
 
-This is the project-local structure map for `agent-bootstrap`. Use it before changing installer behavior, shared agent prompts, generated plugin output, setup docs, or copy-paste prompts.
+`agent-bootstrap` is a public-safe baseline for preparing AI coding environments
+for Codex and Claude Code.
 
-## Purpose
-
-`agent-bootstrap` is a public-safe baseline for preparing AI coding environments across Codex, Claude Code, and OpenCode.
-
-It has two jobs:
-
-1. Install or render the same process-first operating model into each supported harness.
-2. Give future agents enough repository structure to update that operating model without duplicating prompts, editing generated output by hand, or leaking local machine state.
+OpenCode and OpenClaw files may remain in history or legacy folders for audit
+and migration reference, but they are not current first-class service targets.
+Do not expand those surfaces unless Hun explicitly asks to restore them.
 
 ## Shared Core
 
-The shared core is the source of truth for the operating model.
+The shared core defines the behavior once:
 
 - `AGENTS.md`
-  - Shared constitution template.
-  - Contains global behavior rules, structure guardrails, TDD requirements, review requirements, version-control policy, and privacy boundaries.
-  - Must stay identical to `codex-home/AGENTS.md`.
 - `agents/*.md`
-  - Shared role prompt bodies.
-  - These are the prompt bodies that Codex, Claude Code, and OpenCode adapters render or copy.
 - `shared/agent-metadata.json`
-  - Role metadata used by Claude plugin rendering and OpenCode install tests.
-  - Add new agent metadata here before expecting harness adapters to render a new role.
+- repository-level docs and prompts that explain the operating model
+
+These files provide the process-first constitution, role prompts, source of
+truth ordering, high-risk approval boundary, TDD expectation, review habits, and
+privacy rules that Codex and Claude Code adapters consume.
 
 ## Harness Adapters
 
-Harness adapters translate the shared core into each host's native shape.
+Current first-class harness adapters are:
 
 - `.codex/`
-  - Current Codex installer and templates.
-  - `.codex/install.py` is the implementation.
-  - `.codex/install.sh` is the shell entrypoint.
+  - Codex installer, templates, and install docs.
+  - `.codex/install.py` renders Codex config and user-level defaults.
   - `.codex/templates/config.toml` and `.codex/templates/local.md` are Codex-specific templates.
-- `codex-home/`
-  - Checked-in sample/rendered Codex home tree.
-  - `codex-home/AGENTS.md` and `codex-home/agents/*.md` must mirror the shared core.
-  - `codex-home/agents/*.toml` are Codex role config files.
-- `.opencode/`
-  - OpenCode installer, templates, and install docs.
-  - `.opencode/install.py` renders OpenCode config and agent files.
-- `.claude-plugin/marketplace.json`
+- `.claude-plugin/`
   - Repository-level Claude Code marketplace entry.
 - `plugins/process-first-agents/`
   - Generated Claude Code plugin package.
-  - Built by `scripts/render_claude_plugin.py`.
-- `skills/`
-  - Optional reusable skill catalog.
-  - `skills/README.md` lists available catalog skills.
-  - Skill source directories such as `skills/chatgpt-collaboration-harness/` are reviewable catalog copies, not automatically installed runtime state.
+  - `scripts/render_claude_plugin.py` renders this package from the shared core.
+
+Legacy OpenCode/OpenClaw docs or prompts are not part of the active setup path.
+Do not route new setup work through them by default.
 
 ## Generated Artifacts
 
-Generated artifacts are committed because users install directly from this repository, but they should not become separate sources of truth.
+Generated artifacts are committed so a fresh cloner can inspect and install the
+Claude Code plugin without guessing what the renderer should produce.
 
-- Do not edit generated Claude plugin agents by hand.
-- Regenerate Claude output with:
+Generated Claude Code plugin files include:
+
+- `.claude-plugin/marketplace.json`
+- `plugins/process-first-agents/.claude-plugin/plugin.json`
+- `plugins/process-first-agents/settings.json`
+- `plugins/process-first-agents/agents/*.md`
+
+Do not edit generated Claude plugin agents by hand. Change the shared source,
+run the renderer, then verify the generated bundle.
 
 ```bash
 python3 scripts/render_claude_plugin.py --partner-name "Hun"
 ```
 
-- After changing `AGENTS.md`, `agents/*.md`, or `shared/agent-metadata.json`, compare generated output and commit the source and generated changes together.
-- Treat `plugins/process-first-agents/agents/*.md` as render output.
-- Treat `codex-home/AGENTS.md` and `codex-home/agents/*.md` as mirrors of the shared core, guarded by tests.
+## Skill Catalog
+
+The public skill model is deliberately small:
+
+- `skills/karpathy-guidelines/` is the public default base skill.
+- `skills/chatgpt-collaboration-harness/` is an optional Codex collaboration skill, not a Claude Code default.
+- `skills/hun-engineering-loop/` is a Hun-local wrapper, not part of the public default install set.
+- `skills/_template/` is a template for future project workflow skills.
+
+Optional Codex skill catalog workflow:
+
+- [skills/README.md](../skills/README.md)
+- [docs/codex-skills.md](codex-skills.md)
+- [prompts/setup-codex-skills.md](../prompts/setup-codex-skills.md)
+
+Optional Claude Code skill catalog workflow:
+
+- [docs/claude-skills.md](claude-skills.md)
+
+Private project skills stay in local runtime homes such as `~/.codex/skills` or
+`~/.claude/skills`, not in this public repository.
 
 ## Source Of Truth
 
-- Shared behavior rules: `AGENTS.md`.
-- Role behavior: `agents/*.md`.
-- Role metadata: `shared/agent-metadata.json`.
-- Codex install behavior: `.codex/install.py`.
-- OpenCode install behavior: `.opencode/install.py`.
-- Claude plugin render behavior: `scripts/render_claude_plugin.py`.
-- Stack verification behavior: `scripts/audit_agent_stack.py`.
-- Public setup explanation: `README.md` and `docs/README.*.md`.
-- Guardrail workflow explanation: `docs/vibe-coding-guardrails.md`.
-- Global installation and optional tooling rules: `docs/global-guardrail-setup.md`.
-- Project-local knowledge shape: `docs/local-project-knowledge-template.md`.
-- Optional Codex skill catalog workflow: `docs/codex-skills.md`.
-- Optional Claude Code skill catalog workflow: `docs/claude-skills.md`.
-- Optional Codex skill setup prompt: `prompts/setup-codex-skills.md`.
+When changing this repository, use this order:
 
-## Dependency Direction
+1. Hun's latest instruction.
+2. `AGENTS.md`.
+3. Current README and docs.
+4. Tests and scripts.
+5. Generated artifacts.
+6. Memory or prior summaries.
 
-Keep dependency direction simple:
+Memory is a recall layer, not a source of truth. Current repo files, scripts,
+tests, and observed runtime output override memory when they conflict.
 
-1. Shared prompt corpus feeds harness adapters.
-2. Harness adapters render or install host-specific files.
-3. Tests verify the shared corpus, adapter output, docs, and generated plugin bundle.
-4. Public docs explain how to use the output.
+## No Private Paths
 
-Do not make shared prompt files depend on generated artifacts. Do not make tests depend on local user paths or already-installed harness state unless the test explicitly uses a temporary directory.
+Tracked files must not contain:
+
+- personal home paths
+- private project access paths
+- credentials, tokens, keys, or auth state
+- private MCP endpoints
+- browser profiles
+- machine-specific trust settings
+- customer data
+
+Run the private-path checker before publishing docs, prompts, skills, generated
+plugin output, or setup script changes:
+
+```bash
+python3 scripts/check_private_paths.py
+```
 
 ## Update Flow
 
-Use this flow when Hun says the repository has been updated and asks an agent to apply or improve the setup:
-
-1. Check Git state.
+Use this flow after pulling repo changes or changing shared prompts, metadata,
+docs, skills, or generated plugin output:
 
 ```bash
 git status --short --branch
-```
-
-2. Pull only when the worktree is clean or Hun has approved how to handle local changes.
-
-```bash
-git pull --ff-only
-```
-
-3. Read the structure and guardrail docs.
-
-```text
-docs/agent-bootstrap-structure.md
-docs/vibe-coding-guardrails.md
-docs/global-guardrail-setup.md
-```
-
-4. Run a pre-write lens over touched areas: shared core, adapters, generated artifacts, tests, docs, and prompts.
-5. Use TDD for behavior, installer, renderer, policy, and prompt-contract changes.
-6. Regenerate Claude plugin output when shared prompt or metadata sources change.
-
-```bash
 python3 scripts/render_claude_plugin.py --partner-name "Hun"
-```
-
-7. Install globally only when the current task asks to update the local harness defaults. Run only the installer for the harness being updated.
-
-```bash
-bash .codex/install.sh --partner-name "Hun"
-bash .opencode/install.sh --partner-name "Hun"
-```
-
-8. Verify repository behavior.
-
-```bash
 python3 -m unittest discover -s tests -p 'test_*.py'
 python3 scripts/audit_agent_stack.py
+python3 scripts/check_private_paths.py
 ```
 
-9. Run post-write review for duplicate prompt rules, generated output drift, private path leakage, swallowed errors, unmanaged compatibility behavior, and weak tests.
+If the worktree is dirty before starting, stop and decide how to preserve local
+work. Do not stash, overwrite, or delete user work automatically.
 
-## Review Hotspots
+## Editing Map
 
-Check these areas carefully:
+- Shared behavior: `AGENTS.md` and `agents/*.md`
+- Role metadata: `shared/agent-metadata.json`
+- Codex installer: `.codex/install.py`
+- Claude renderer: `scripts/render_claude_plugin.py`
+- Root onboarding docs: `README.md` plus translated README files
+- Harness docs: `docs/README.codex.md`, `docs/README.claude.md`
+- Skill catalog docs: `skills/README.md`, `docs/codex-skills.md`, `docs/claude-skills.md`
+- Repo metadata guidance: `docs/repo-metadata.md`
 
-- `AGENTS.md` and `codex-home/AGENTS.md` drift.
-- `agents/*.md`, `codex-home/agents/*.md`, and `plugins/process-first-agents/agents/*.md` drift.
-- `shared/agent-metadata.json` missing metadata for a new role.
-- Installer changes that overwrite user files without backup or preflight.
-- Claude renderer changes that silently accept unknown placeholders.
-- Docs that mention commands not implemented by this repository.
-- Optional tool docs that imply installation without user approval.
-- Skill catalog changes that confuse the repo catalog source with runtime copies under `~/.codex/skills` or `~/.claude/skills`.
+## Review Checklist
 
-## Privacy Boundary
+Before calling a change complete:
 
-No private paths, credentials, tokens, cookies, MCP endpoints, auth state, or machine-specific trust settings belong in tracked files.
-
-Use `local.md`, untracked notes, or a private Obsidian page for local-only state. Public docs should describe what to record, not where Hun personally stores it.
+- The README and translated README files agree on first-class supported surfaces.
+- Codex and Claude Code docs do not route users into legacy setup paths.
+- `karpathy-guidelines` remains the public default base skill.
+- `hun-engineering-loop` is described as Hun-local, not a public default.
+- `chatgpt-collaboration-harness` is not installed into Claude Code.
+- Generated Claude plugin output matches the renderer.
+- Tests pass.
+- No private paths or secrets are present.

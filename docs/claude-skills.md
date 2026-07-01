@@ -1,7 +1,7 @@
 # Claude Code Skills
 
-This guide mirrors the public-safe part of the repository skill catalog into
-Claude Code. The workflow is browse, review, select, install.
+This guide mirrors only the public-safe part of the repository skill catalog
+into Claude Code. The workflow is browse, review, select, install.
 
 Claude Code runtime skills live under:
 
@@ -24,20 +24,21 @@ validate the installed copy.
 Keep private access paths, credentials, auth state, browser profiles, customer
 data, MCP endpoints, and machine-specific trust settings out of git.
 
-## Recommended Claude Code Skill Set
+## Public Claude Code Default Skill Set
 
-Install these only after review:
+The public Claude Code default skill set is intentionally small:
 
 - `karpathy-guidelines`: portable upstream/vendor behavior for reducing common
   coding-agent mistakes.
-- `hun-engineering-loop`: Hun-specific operational wrapper for source-of-truth
-  ordering, high-risk approval boundaries, artifact-first execution, and QA
-  evidence.
 
-Do not auto-install `chatgpt-collaboration-harness` into Claude Code. It is
-cataloged because it is useful for Codex-led ChatGPT Pro collaboration, but it
-assumes Codex-owned local validation and browser coordination. Review and adapt
-it before using it from Claude Code.
+Do not install `hun-engineering-loop` as part of the public default. It is a
+Hun-local wrapper for memory preflight, source-of-truth ordering, high-risk
+approval boundaries, artifact-first execution, and QA evidence. It can exist in
+Hun's private runtime when Hun explicitly approves that local setup.
+
+Do not install `chatgpt-collaboration-harness` into Claude Code. It is cataloged
+because it is useful for Codex-led ChatGPT Pro collaboration, but it assumes
+Codex-owned local validation and browser coordination.
 
 ## Install Or Sync A Skill
 
@@ -57,7 +58,8 @@ ls skills/karpathy-guidelines
 test -e ~/.claude/skills/karpathy-guidelines && diff -ru skills/karpathy-guidelines ~/.claude/skills/karpathy-guidelines || true
 ```
 
-After Hun approves installing or overwriting, copy only the selected skill:
+After Hun approves installing or overwriting, copy only the selected public-safe
+skill:
 
 ```bash
 mkdir -p ~/.claude/skills
@@ -65,8 +67,7 @@ rm -rf ~/.claude/skills/karpathy-guidelines
 cp -R skills/karpathy-guidelines ~/.claude/skills/karpathy-guidelines
 ```
 
-Repeat separately for `hun-engineering-loop` if approved. Do not use a broad
-copy command that installs all catalog skills.
+Do not use a broad copy command that installs all catalog skills.
 
 ## Validate
 
@@ -77,7 +78,6 @@ disposable PyYAML environment when system Python lacks PyYAML:
 python3 -m venv /tmp/codex-skill-validate-pyyaml
 /tmp/codex-skill-validate-pyyaml/bin/python -m pip install PyYAML
 /tmp/codex-skill-validate-pyyaml/bin/python ~/.codex/skills/.system/skill-creator/scripts/quick_validate.py ~/.claude/skills/karpathy-guidelines
-/tmp/codex-skill-validate-pyyaml/bin/python ~/.codex/skills/.system/skill-creator/scripts/quick_validate.py ~/.claude/skills/hun-engineering-loop
 python3 -m unittest discover -s tests -p 'test_*.py'
 ```
 

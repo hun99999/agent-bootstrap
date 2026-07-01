@@ -45,7 +45,6 @@ class VibeCodingGuardrailsDocsTests(unittest.TestCase):
         expected_phrases = (
             "Global guardrail setup",
             "~/.codex",
-            "~/.config/opencode",
             "Claude Code plugin",
             "user-level defaults",
             "project-local knowledge",
@@ -54,6 +53,8 @@ class VibeCodingGuardrailsDocsTests(unittest.TestCase):
             "restart",
             "macOS",
             "Windows PowerShell",
+            "Legacy Surfaces",
+            "OpenCode and OpenClaw are legacy/reference material",
         )
         for phrase in expected_phrases:
             self.assertIn(phrase, guide)

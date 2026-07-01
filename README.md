@@ -4,25 +4,29 @@
 
 ## Master Prompt
 
-Paste this into Codex, Claude Code, OpenCode, or another coding agent while the agent is in a clone of this repository:
+Paste this into Codex or Claude Code while the agent is in a clone of this repository:
 
 ```text
 Set up agent-bootstrap end to end from this repository.
 
 First read AGENTS.md, README.md, docs/agent-setup-playbook.md, docs/global-guardrail-setup.md, docs/vibe-coding-guardrails.md, docs/agent-bootstrap-structure.md, and docs/local-project-knowledge-template.md. Do not invent commands, package names, configuration options, or API details.
 
-Before changing anything, run git status --short --branch. If there is uncommitted or untracked user work, stop and ask how to handle it. Identify the current harness: Codex, Claude Code, OpenCode, or other. Identify my requested scope.
+Before changing anything, run git status --short --branch. If there is uncommitted or untracked user work, stop and ask how to handle it. Identify whether the current harness is Codex or Claude Code. Identify my requested scope.
 
 Choose the smallest valid scope:
-- If you are already inside Codex, Claude Code, or OpenCode, configure only that current harness unless I explicitly ask for another.
-- If no harness is clear, apply shared-core-only.
+- If you are already inside Codex, configure Codex only unless I explicitly ask for Claude Code too.
+- If you are already inside Claude Code, configure Claude Code only unless I explicitly ask for Codex too.
+- If no supported harness is clear, stop and ask which supported harness to configure.
 - If this is an application repository, apply the project guardrails and create project-local knowledge guidance.
 - Do not install optional tools just because they are mentioned.
 
 Set up the selected scope end to end:
 - install or render the shared core using this repository's documented commands
-- update Superpowers only through this repository's documented path
+- install upstream superpowers only through the documented path for the current harness
 - regenerate Claude plugin output if shared prompts or metadata changed
+- use karpathy-guidelines as the public default base skill
+- keep hun-engineering-loop local to Hun-specific runtime setups unless I explicitly approve publishing that wrapper into a project
+- do not install chatgpt-collaboration-harness into Claude Code
 - inventory optional tools such as Obsidian, Lumin Repo Lens, dependency lint, strict type checks, cycle detection, and complexity limits; classify each as required, recommended, optional, or skipped; ask before installing anything
 - keep private paths, credentials, MCP endpoints, auth state, browser profiles, and machine-specific trust settings out of tracked files
 - run the repository's real verification commands, including tests and scripts/audit_agent_stack.py when available
@@ -30,38 +34,103 @@ Set up the selected scope end to end:
 - commit small reviewable changes when appropriate, then summarize what changed, what was installed, commands run, verification results, and remaining risks
 ```
 
-Bootstrap a process-first AI coding environment for Codex, Claude Code, and OpenCode.
+Bootstrap a process-first AI coding environment for Codex and Claude Code.
 
-`agent-bootstrap` gives you a shared `superpowers` workflow, role-based subagents, token-efficient execution, and multilingual setup docs for modern AI coding tools.
+`agent-bootstrap` gives a fresh clone a shared `superpowers` workflow, role-based subagents, token-efficient execution habits, detailed setup docs, and a public-safe skill model based on `karpathy-guidelines`.
 
-## Current Public Focus
+## Current Supported Surfaces
 
-Codex and Claude Code are the current first-class setup targets for this public repository. OpenCode and OpenClaw remain optional/reference surfaces: keep their existing docs only when they help preserve compatibility, but do not treat them as the default setup path.
+Codex and Claude Code are the only first-class setup targets for this repository.
 
-## Private Project Skills
+OpenCode and OpenClaw are legacy/reference material, not active service targets. Their old files may remain in git so older users can audit or migrate them, but new setup docs, README guidance, and default audits should not present them as a normal installation path.
 
-Do not commit private project skills such as auto-eva to this public repository. Keep actual project-specific skills in local runtime homes such as `~/.codex/skills` for Codex and `~/.claude/skills` for Claude Code. This repository should contain templates and public-safe process guidance, not private access paths, credentials, auth state, browser profiles, customer data, or machine-specific trust settings.
+This split keeps the public repo small enough to understand:
 
-## Why use agent-bootstrap?
-
-- Shared `superpowers` workflow across Codex, Claude Code, and OpenCode instead of maintaining separate prompt stacks for each tool.
-- Role-based subagents and a shared prompt corpus so planning, implementation, review, verification, and release work stay consistent.
-- Token-efficient, process-first execution that reduces wasted context by pushing teams toward scoped work, clear handoffs, and reusable skills.
-- Native harness adapters instead of one generic installer hack:
-  - Codex gets managed `.codex` files plus latest `superpowers`
-  - Claude Code gets a plugin marketplace entry plus generated agent plugin package
-  - OpenCode gets generated agents plus native plugin wiring
-- Public-safe baseline that avoids shipping credentials, private MCP endpoints, personal paths, or machine-specific trust state.
-- Multilingual onboarding so English, Korean, Japanese, and Simplified Chinese readers can start from the same repository.
+- Codex gets `.codex` templates, a Codex installer, Codex docs, and optional Codex skill catalog guidance.
+- Claude Code gets a generated plugin bundle plus optional public-safe skill sync guidance.
+- Shared role prompts stay in `AGENTS.md`, `agents/*.md`, and `shared/agent-metadata.json`.
+- Project-specific or private workflow knowledge stays outside this public repo unless it is safe to share.
 
 ## What You Can Ask An Agent To Do
 
 Use this repository as an operating guide, not only as an installer.
 
-- Install global defaults: use [docs/global-guardrail-setup.md](docs/global-guardrail-setup.md) to install the shared guardrails into Codex, Claude Code, or OpenCode user-level defaults.
+- Install global defaults: use [docs/global-guardrail-setup.md](docs/global-guardrail-setup.md) to install the shared guardrails into Codex or Claude Code user-level defaults.
 - Apply guardrails to a project: paste [prompts/apply-vibe-coding-guardrails.md](prompts/apply-vibe-coding-guardrails.md) into an agent session inside a target repository.
 - Start feature work inside a guarded project: paste [prompts/start-with-vibe-coding-guardrails.md](prompts/start-with-vibe-coding-guardrails.md) before asking for a feature, bugfix, or refactor.
-- Review optional Codex skills: read [skills/README.md](skills/README.md) and [docs/codex-skills.md](docs/codex-skills.md), then use [prompts/setup-codex-skills.md](prompts/setup-codex-skills.md) when you want an agent to browse, compare, and install approved skills.
+- Review optional Codex skills: read [skills/README.md](skills/README.md) and [docs/codex-skills.md](docs/codex-skills.md), then use [prompts/setup-codex-skills.md](prompts/setup-codex-skills.md) when you want an agent to browse, compare, and install approved Codex skills.
+- Review optional Claude Code skills: read [docs/claude-skills.md](docs/claude-skills.md) and install only the public-safe skill set you approve.
+- Update this bootstrap after repository changes: paste [prompts/update-agent-bootstrap.md](prompts/update-agent-bootstrap.md) after pulling new changes or when you want an agent to re-audit this repository.
+- Explain this repository's own structure: read [docs/agent-bootstrap-structure.md](docs/agent-bootstrap-structure.md) before editing shared prompts, installers, generated plugin output, or setup docs.
+
+Optional tooling is decision-based. Obsidian, Lumin Repo Lens, dependency lint, cycle detection, strict type checks, and complexity limits should be recommended or installed only when the target repository and user approval justify them.
+
+## Private Project Skills
+
+Do not commit private project skills such as auto-eva to this public repository. Keep actual project-specific skills in local runtime homes such as `~/.codex/skills` for Codex and `~/.claude/skills` for Claude Code. This repository should contain templates and public-safe process guidance, not private access paths, credentials, auth state, browser profiles, customer data, or machine-specific trust settings.
+
+## Core Model
+
+The public baseline is deliberately thin.
+
+- `karpathy-guidelines` is the public default base skill. It keeps coding agents focused on assumptions, simplicity, surgical diffs, and verifiable success criteria.
+- `superpowers` provides the reusable workflow library for brainstorming, planning, TDD, debugging, verification, and review.
+- `hun-engineering-loop` is a Hun-local wrapper around `karpathy-guidelines`. It adds memory preflight, source-of-truth ordering, high-risk approval boundaries, artifact-first execution, and QA evidence contracts. It is useful in Hun's local runtime, but it is not part of the public default install set.
+- `chatgpt-collaboration-harness` is a Codex-side collaboration skill for carefully scoped ChatGPT Pro work. It is not installed into Claude Code by default.
+
+Memory and prior summaries are recall layers, not sources of truth. Current user instructions, repo docs, scripts, tests, `AGENTS.md`, and observed runtime output win when they conflict.
+
+Broad filesystem or tool access is capability, not blanket approval. Stop and ask before deleting data, rotating credentials, changing permissions, touching production, changing billing or external accounts, sharing private material, rewriting history, bypassing hooks, changing browser profiles, or disabling tests.
+
+## Quick Start
+
+Choose the scope first. Most failed setup work starts by configuring too much: a second harness, a plugin stack, optional tools, and project rules all at once. Start with the smallest useful scope, verify it, then expand.
+
+1. Clone or pull the repository.
+
+   ```bash
+   git clone https://github.com/hun99999/agent-bootstrap.git
+   cd agent-bootstrap
+   git status --short --branch
+   ```
+
+2. Read the shared rules before editing or installing anything.
+
+   ```bash
+   sed -n '1,220p' AGENTS.md
+   sed -n '1,220p' docs/agent-setup-playbook.md
+   ```
+
+3. Pick the current supported harness.
+
+   - Codex: follow [docs/README.codex.md](docs/README.codex.md).
+   - Claude Code: follow [docs/README.claude.md](docs/README.claude.md).
+
+4. Run verification before and after changes.
+
+   ```bash
+   python3 -m unittest discover -s tests -p 'test_*.py'
+   python3 scripts/audit_agent_stack.py
+   ```
+
+5. If you are updating an existing clone, pull first, regenerate generated artifacts when needed, then rerun the same verification.
+
+   ```bash
+   git pull --ff-only
+   python3 scripts/render_claude_plugin.py --partner-name "<Name>"
+   python3 -m unittest discover -s tests -p 'test_*.py'
+   python3 scripts/audit_agent_stack.py
+   ```
+
+## Detailed Agent Request References
+
+Use this repository as an operating guide, not only as an installer.
+
+- Install global defaults: use [docs/global-guardrail-setup.md](docs/global-guardrail-setup.md) to install the shared guardrails into Codex or Claude Code user-level defaults.
+- Apply guardrails to a project: paste [prompts/apply-vibe-coding-guardrails.md](prompts/apply-vibe-coding-guardrails.md) into an agent session inside a target repository.
+- Start feature work inside a guarded project: paste [prompts/start-with-vibe-coding-guardrails.md](prompts/start-with-vibe-coding-guardrails.md) before asking for a feature, bugfix, or refactor.
+- Review optional Codex skills: read [skills/README.md](skills/README.md) and [docs/codex-skills.md](docs/codex-skills.md), then use [prompts/setup-codex-skills.md](prompts/setup-codex-skills.md) when you want an agent to browse, compare, and install approved Codex skills.
+- Review optional Claude Code skills: read [docs/claude-skills.md](docs/claude-skills.md) and install only the public-safe skill set you approve.
 - Update this bootstrap after repository changes: paste [prompts/update-agent-bootstrap.md](prompts/update-agent-bootstrap.md) after pulling new changes or when you want an agent to re-audit this repository.
 - Explain this repository's own structure: read [docs/agent-bootstrap-structure.md](docs/agent-bootstrap-structure.md) before editing shared prompts, installers, generated plugin output, or setup docs.
 
@@ -117,25 +186,17 @@ If this is a TS/JS-heavy project and I approve Lumin Repo Lens, use it only as a
 Use TDD for behavior changes. After changes, run this project's real verification commands and post-write review. Report files changed, commands run, verification results, optional tools skipped or recommended, and remaining risks.
 ```
 
-## Quick Start
-
-Choose the scope first. Most failed agent setup work starts by configuring too much: a new harness, a new plugin stack, a new provider path, and a repo workflow all at once. Start with the smallest useful scope, verify it, then expand.
-
-1. If you want this machine's future Codex, Claude Code, or OpenCode sessions to start with these rules, follow [docs/global-guardrail-setup.md](docs/global-guardrail-setup.md).
-2. If you want to apply the same discipline to another repository, open that repository and paste [prompts/apply-vibe-coding-guardrails.md](prompts/apply-vibe-coding-guardrails.md).
-3. If a repository already has the guardrails and you want normal feature work, paste [prompts/start-with-vibe-coding-guardrails.md](prompts/start-with-vibe-coding-guardrails.md).
-4. If this repository has changed and you want an agent to reapply, audit, or improve the bootstrap itself, paste [prompts/update-agent-bootstrap.md](prompts/update-agent-bootstrap.md).
-
 ## When To Use Each Prompt
 
-- `prompts/setup-codex-current-harness.md`: use inside Codex when the current Codex harness should receive the shared core only.
+- `prompts/setup-codex-current-harness.md`: use inside Codex when the current Codex harness should receive the shared core.
 - `prompts/setup-claude-current-harness.md`: use inside Claude Code when the Claude plugin and shared role prompts should be set up.
-- `prompts/setup-opencode-current-harness.md`: use inside OpenCode when OpenCode should receive the generated agents and native plugin wiring.
-- `prompts/setup-shared-core.md`: use when the target environment is unclear and the safest answer is only the shared prompt/skills layer.
+- `prompts/setup-shared-core.md`: use only when the target environment is unclear and the safest answer is to inspect shared prompt guidance without installing anything.
 - `prompts/setup-codex-skills.md`: use when you want an agent to inspect this repository's optional Codex skill catalog, compare selected skills with `~/.codex/skills`, and install only approved skills.
 - `prompts/apply-vibe-coding-guardrails.md`: use in an application repository that needs structure maps, edge-case-first tests, dependency-boundary checks, and local project knowledge.
 - `prompts/start-with-vibe-coding-guardrails.md`: use for day-to-day feature, bugfix, or refactor work after a repository already has a project map and guardrail workflow.
 - `prompts/update-agent-bootstrap.md`: use for this repository when new changes need to be pulled, rendered, installed, audited, documented, and reviewed.
+
+Legacy prompts for older OpenCode or OpenClaw experiments may remain in git, but they are not part of the current supported setup path.
 
 ## What The Guardrails Enforce
 
@@ -147,6 +208,7 @@ The guardrails are meant to make agent coding less forgetful and less structural
 - Error discipline: do not silently swallow errors, do not add fallback behavior unless it is a documented requirement, and keep error handling at explicit boundaries.
 - Test discipline: assert behavior and side effects; keep mocks at external boundaries instead of mocking internal implementation details.
 - Privacy discipline: do not commit personal vault paths, private project paths, credentials, MCP endpoints, auth state, browser profiles, or machine-specific trust settings.
+- Skill discipline: treat skills as tested process code, not as casual prose. Run validators and repo tests before claiming a skill is ready.
 
 ## Optional Tools And Installation Policy
 
@@ -158,6 +220,44 @@ Optional tools should support the workflow; they are not the workflow.
 
 Do not install optional tools just because they are mentioned. Inventory the current environment first, explain whether the tool is required, recommended, optional, or skipped, ask before installing, verify the package name or official source, and record only project-safe usage guidance in the repository.
 
+## Install Guides
+
+- Codex: [docs/README.codex.md](docs/README.codex.md)
+- Claude Code: [docs/README.claude.md](docs/README.claude.md)
+- Codex skills: [docs/codex-skills.md](docs/codex-skills.md)
+- Claude Code skills: [docs/claude-skills.md](docs/claude-skills.md)
+
+## Architecture
+
+The repository is split into three practical layers:
+
+- shared core
+  - `AGENTS.md`
+  - `agents/*.md`
+  - `shared/agent-metadata.json`
+  - common process-first constitution and role prompt bodies
+- first-class harness adapters
+  - `.codex/`
+  - `.claude-plugin/`
+  - `plugins/process-first-agents/`
+- reusable public-safe skills
+  - `skills/karpathy-guidelines/`
+  - `skills/chatgpt-collaboration-harness/`
+  - `skills/hun-engineering-loop/`
+  - `skills/_template/`
+
+The shared core defines the operating model once. Codex and Claude Code adapters translate that core into each supported runtime's native format. For the detailed project-local structure map, update flow, source-of-truth boundaries, and generated-artifact policy, read [docs/agent-bootstrap-structure.md](docs/agent-bootstrap-structure.md).
+
+## Superpowers Integration
+
+This bootstrap is centered on upstream `obra/superpowers`.
+
+- Codex can use the Codex App curated Superpowers plugin.
+- The Codex installer also supports a manual ~/.codex/superpowers fallback for environments that rely on local skill discovery.
+- Claude Code should install upstream `superpowers` from Anthropic's official plugin marketplace, then install this repository's generated `process-first-agents` plugin.
+
+Avoid enabling both the Codex App curated Superpowers plugin and the manual fallback unless duplicate skill entries are intentional.
+
 ## Maintaining This Repository
 
 Use [docs/agent-bootstrap-structure.md](docs/agent-bootstrap-structure.md) as the repo-local map before changing this bootstrap.
@@ -165,191 +265,45 @@ Use [docs/agent-bootstrap-structure.md](docs/agent-bootstrap-structure.md) as th
 - Change shared behavior in `AGENTS.md` and `agents/*.md`.
 - Change role metadata in `shared/agent-metadata.json`.
 - Change Codex installation behavior in `.codex/install.py`.
-- Change OpenCode installation behavior in `.opencode/install.py`.
 - Change Claude plugin rendering in `scripts/render_claude_plugin.py`.
 - Regenerate Claude plugin output with `python3 scripts/render_claude_plugin.py --partner-name "<Name>"` after shared prompt or metadata changes.
 - Verify with `python3 -m unittest discover -s tests -p 'test_*.py'` and `python3 scripts/audit_agent_stack.py`.
+- Keep generated Claude plugin output in sync. Do not edit generated Claude plugin agents by hand.
 
-## What This Repository Is
+## Pull And Update Workflow
 
-This repository is the source of truth for a shared operating model that can be installed into multiple coding harnesses instead of being tied to Codex alone.
+For an existing clone:
 
-It is aimed at teams and individual developers who want one reusable bootstrap for:
-
-- Codex
-- Claude Code
-- OpenCode
-
-It also documents how to integrate those tools into OpenClaw, but OpenClaw is intentionally treated as an integration layer rather than a first-class bootstrap target.
-
-## Default Setup Scope
-
-If the user says "set this up from the repo" and does not specify a harness, default to `shared-core-only`.
-
-`shared-core-only` means:
-
-- install or update `superpowers` if the current tool supports it
-- install the shared constitution and agent/subagent prompts in the current tool's native format
-- avoid picking a new harness, ACP backend, gateway, or provider stack unless the user explicitly asks for it
-
-This matters most for OpenClaw-style setup requests. The correct default is not `Codex-first`, `Claude-first`, or `OpenCode-first`. The correct default is the shared prompt and skills layer only.
-
-## Default Scope Matrix
-
-- Codex: `current-harness-only`
-- Claude Code: `current-harness-only`
-- OpenCode: `current-harness-only`
-- OpenClaw: `shared-core-only`
-
-`current-harness-only` means: if you are already inside Codex, Claude Code, or OpenCode and the user says "set this up from the repo", default to configuring only that current harness. Do not configure another harness unless the user explicitly asks.
-
-## Setup Prompts
-
-These copy-paste prompts are the fastest way to keep another agent inside the intended scope:
-
-- Codex current harness only: [prompts/setup-codex-current-harness.md](prompts/setup-codex-current-harness.md)
-- Claude Code current harness only: [prompts/setup-claude-current-harness.md](prompts/setup-claude-current-harness.md)
-- OpenCode current harness only: [prompts/setup-opencode-current-harness.md](prompts/setup-opencode-current-harness.md)
-- Generic shared core setup: [prompts/setup-shared-core.md](prompts/setup-shared-core.md)
-- OpenClaw shared core only: [prompts/setup-openclaw-shared-core.md](prompts/setup-openclaw-shared-core.md)
-- OpenClaw ACP integration: [prompts/setup-openclaw-acp.md](prompts/setup-openclaw-acp.md)
-- Optional Codex skill catalog setup: [prompts/setup-codex-skills.md](prompts/setup-codex-skills.md)
-- Apply vibe-coding guardrails to another repository: [prompts/apply-vibe-coding-guardrails.md](prompts/apply-vibe-coding-guardrails.md)
-- Start work with vibe-coding guardrails: [prompts/start-with-vibe-coding-guardrails.md](prompts/start-with-vibe-coding-guardrails.md)
-- Update this bootstrap after repository changes: [prompts/update-agent-bootstrap.md](prompts/update-agent-bootstrap.md)
-
-## Vibe Coding Guardrails
-
-Use [docs/global-guardrail-setup.md](docs/global-guardrail-setup.md) when you want these guardrails installed as Codex, Claude Code, or OpenCode user-level defaults across projects.
-
-Use [docs/vibe-coding-guardrails.md](docs/vibe-coding-guardrails.md) when you want Codex, Claude Code, or OpenCode to apply a pre-write lens, TDD write gate, and post-write structure review to a repository.
-
-For project-specific context, copy [docs/local-project-knowledge-template.md](docs/local-project-knowledge-template.md) into a local `local.md`, an untracked note, or a private Obsidian page. Keep private paths, credentials, MCP endpoints, auth state, and machine-specific trust settings out of the public baseline.
-
-Codex session opener for standing delegation preference:
-
-```text
-In this session, you may use sub-agents or parallel agents for independently separable work when that clearly improves efficiency. This is permission, not a requirement: if the work is small, tightly coupled, immediately blocking, or the delegation overhead is not worth it, stay local instead.
+```bash
+git status --short --branch
+git pull --ff-only
+python3 scripts/render_claude_plugin.py --partner-name "<Name>"
+python3 -m unittest discover -s tests -p 'test_*.py'
+python3 scripts/audit_agent_stack.py
 ```
 
-## Install Guides
-
-- Codex: [docs/README.codex.md](docs/README.codex.md)
-- Claude Code: [docs/README.claude.md](docs/README.claude.md)
-- OpenCode: [docs/README.opencode.md](docs/README.opencode.md)
-- OpenClaw integration: [docs/README.openclaw.md](docs/README.openclaw.md)
-
-## Architecture
-
-The repository is split into two layers:
-
-- shared core
-  - `AGENTS.md`
-  - `agents/*.md`
-  - `shared/agent-metadata.json`
-  - common process-first constitution and role prompt bodies
-- harness adapters
-  - `.codex/`
-  - `.claude-plugin/`
-  - `.opencode/`
-
-The shared core defines the operating model once.
-Each adapter translates that core into the native format expected by the target harness.
-
-For the detailed project-local structure map, update flow, source-of-truth boundaries, and generated-artifact policy, read [docs/agent-bootstrap-structure.md](docs/agent-bootstrap-structure.md).
-
-## Superpowers Integration
-
-This bootstrap is built around `obra/superpowers`.
-
-- Codex uses the native `~/.agents/skills/superpowers` symlink pattern.
-- OpenCode uses the native plugin line `superpowers@git+https://github.com/obra/superpowers.git`.
-- Claude Code is split into:
-  - upstream official `superpowers` for the skills library
-  - this repository's Claude plugin package for the shared agent prompts
-
-Codex App can use the Codex App curated Superpowers plugin; the installer still supports the manual ~/.codex/superpowers fallback for local skill discovery. Avoid enabling both discovery paths unless duplicate skill entries are intentional.
-
-The intent is to reuse upstream `superpowers` instead of copying the skill library into this repository.
-
-## Repository Layout
-
-- `AGENTS.md`
-  - shared constitution template
-- `agents/`
-  - shared role prompt bodies
-- `shared/agent-metadata.json`
-  - shared descriptions and OpenCode capability metadata
-- `.codex/`
-  - Codex installer, templates, and install guide
-- `.opencode/`
-  - OpenCode installer, templates, and install guide
-- `.claude-plugin/marketplace.json`
-  - repository-level Claude marketplace entry
-- `plugins/process-first-agents/`
-  - generated Claude plugin package
-- `skills/`
-  - optional Codex skill catalog; see [docs/codex-skills.md](docs/codex-skills.md)
-- `scripts/render_claude_plugin.py`
-  - rebuilds the Claude plugin package from the shared prompt corpus
-- `docs/`
-  - harness-specific guides, repository metadata guidance, and OpenClaw notes
-- `tests/`
-  - Python verification for installers, plugin metadata, and README expectations
-
-## Discoverability
-
-GitHub repository discoverability is driven more by repository metadata than by classic web SEO.
-
-This repository improves discoverability through:
-
-- a keyword-rich canonical README
-- multilingual README variants
-- GitHub repository description and topics
-- documented social preview guidance in [docs/repo-metadata.md](docs/repo-metadata.md)
-
-## Constraints
-
-This repository should contain only the baseline setup that is safe to share publicly.
-
-Keep these out:
-
-- private MCP endpoints
-- personal project paths
-- organization-specific secrets
-- machine-specific trust configuration
-- credentials, tokens, or auth state
-
-## Updating
-
-- Codex and OpenCode: re-run the harness installer after pulling
-- Claude Code: re-run `python3 scripts/render_claude_plugin.py --partner-name "<Name>"` after pulling, then update the local plugin installation
+If `git status --short --branch` is not clean, stop and decide whether the local work should be committed, moved to a WIP branch, or left untouched before pulling. Do not stash or overwrite user work automatically.
 
 ## Agent Stack Audit
 
-Run the local audit before or after updates to check Codex, Claude Code, OpenCode, and Superpowers state:
+Run the local audit before or after updates to check Codex, Claude Code, Superpowers state, and the generated Claude plugin bundle:
 
 ```bash
 python3 scripts/audit_agent_stack.py
 ```
 
-The default audit is offline and read-only. Add `--online` when you explicitly want npm and remote git drift checks, and add `--strict` when missing optional tools such as OpenCode should fail the audit.
+The default audit is offline and read-only. Add `--online` only when you explicitly want npm and remote git drift checks. The audit no longer treats OpenCode as a default supported surface.
 
-## Legacy Files
+## Compatibility Notes
 
-Some files from the earlier Codex-only bootstrap still exist during the transition:
-
-- `codex-home/`
-- `scripts/install.py`
-- `scripts/install.sh`
-- `prompts/fresh-install.md`
-
-They are compatibility entrypoints, not the long-term multi-harness architecture.
+Some legacy files remain for history and migration review, including older OpenCode and OpenClaw docs or prompts. They are not the current public setup path. Do not expand them unless Hun explicitly asks to restore support.
 
 ## Testing
 
-Installer and metadata tests use Python's `unittest`:
+Installer, metadata, README expectations, skill catalog expectations, and generated plugin output are validated with Python `unittest`:
 
 ```bash
 python3 -m unittest discover -s tests -p 'test_*.py'
 ```
+
+Run `python3 scripts/check_private_paths.py` before publishing changes that touch README files, skills, prompts, docs, generated plugin output, or setup scripts.

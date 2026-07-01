@@ -1,52 +1,45 @@
-# OpenClaw
+# OpenClaw Legacy Notes
 
-OpenClaw is still treated as an integration layer rather than a first-class bootstrap target.
+OpenClaw is legacy/reference material in this repository, not a current first-class bootstrap target.
 
-That part has not changed.
-
-What has changed is the default setup scope.
-
-If a user says "set this up from the repo" and does not explicitly ask for ACP or name a harness, the correct default is `shared-core-only`.
-
-Do not default to Codex-first.
+The current public setup path is Codex or Claude Code. Do not configure OpenClaw
+from this repository unless Hun explicitly asks for legacy OpenClaw migration,
+shared-core reference work, or ACP integration work.
 
 ## Native Vs ACP
 
-OpenClaw should stay `native-first` for default delegation.
+OpenClaw should stay `native-first` for any explicit legacy work.
 
 ACP is optional.
 
-Use OpenClaw-native delegation for routine internal orchestration. Use ACP only when the user explicitly wants an external harness runtime such as Codex, Claude Code, or OpenCode.
+Use OpenClaw-native delegation for routine internal orchestration. Use ACP only when the user explicitly asks for ACP and identifies the harness to connect.
 
-## Path A: shared-core-only
+## Path A: legacy shared-core-only
 
-This is the default path for OpenClaw users who want the repository's workflow layer without replacing the rest of their OpenClaw environment.
+This path is preserved for users who explicitly want to map the repository's
+workflow layer into an existing OpenClaw setup.
 
-Use this path when the user wants:
-
-- `superpowers`
-- shared prompt corpus
-- agent and subagent prompts
-- minimal disruption to their existing OpenClaw setup
+Use this path only when the user asks for OpenClaw shared-core work.
 
 What to do:
 
-- install or update `superpowers` if the current environment supports it
-- apply `AGENTS.md` and `agents/*.md` in whatever native format the current OpenClaw setup can consume
+- read the root `AGENTS.md`
+- apply only the shared prompt/skill layer the user approved
 - back up any prompt or skill files you replace
+- do not change ACP settings
+- do not reset the OpenClaw environment
 
 What not to do:
 
 - do not choose Codex-first, Claude-first, or OpenCode-first by default
-- do not change ACP settings
-- do not touch unrelated OpenClaw identity, gateway, transport, auth, or provider settings
-- do not reset the entire OpenClaw environment
+- do not change unrelated identity, gateway, transport, auth, provider, or messaging settings
+- do not treat a repo URL alone as permission to redesign the runtime stack
 
 ## Path B: ACP integration
 
 This is the optional path.
 
-Use it only if the user explicitly asks for ACP integration or explicitly names a harness such as Codex, Claude Code, or OpenCode.
+Use it only if the user explicitly asks for ACP integration.
 
 What to do:
 
@@ -59,29 +52,18 @@ What to do:
 What not to do:
 
 - do not infer ACP from a generic setup request
-- do not change unrelated OpenClaw identity, gateway, transport, auth, or provider settings
-- do not treat a repo URL alone as permission to redesign the user's runtime stack
-
-## Recommended Order
-
-For generic setup requests:
-
-1. Start with Path A: `shared-core-only`
-2. Stop there unless the user asks for ACP or names a harness
-
-For explicit ACP requests:
-
-1. Confirm the harness
-2. Bootstrap that harness if needed
-3. Apply only the ACP integration changes required for that harness
+- do not change unrelated OpenClaw identity, gateway, transport, auth, provider, or messaging settings
+- do not touch Codex or Claude Code configuration unless the approved ACP scope requires it
 
 ## Scope Boundary
 
-This repository does not ship a universal OpenClaw config because those settings are environment-specific:
+This repository does not ship a universal OpenClaw config because those settings
+are environment-specific:
 
 - model/provider selection
 - transport and gateway details
 - auth and token handling
 - local path assumptions
 
-Those should remain in the user's own environment unless they explicitly request changes inside that scope.
+Those should remain in the user's own environment unless they explicitly request
+changes inside that scope.

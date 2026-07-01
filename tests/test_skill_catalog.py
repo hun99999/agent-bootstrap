@@ -7,24 +7,25 @@ PRIVATE_HOME_PATH = "/" + "Users/hooooonje"
 
 
 class SkillCatalogTests(unittest.TestCase):
-    def test_catalog_lists_chatgpt_collaboration_harness_first(self) -> None:
+    def test_catalog_lists_karpathy_guidelines_as_public_base_first(self) -> None:
         catalog = (REPO_ROOT / "skills" / "README.md").read_text(encoding="utf-8")
 
-        first_entry = catalog.index("### chatgpt-collaboration-harness")
         karpathy_entry = catalog.index("### karpathy-guidelines")
+        chatgpt_entry = catalog.index("### chatgpt-collaboration-harness")
         hun_loop_entry = catalog.index("### hun-engineering-loop")
         template_entry = catalog.index("### _template")
-        self.assertLess(first_entry, template_entry)
-        self.assertLess(first_entry, karpathy_entry)
-        self.assertLess(karpathy_entry, hun_loop_entry)
+        self.assertLess(karpathy_entry, chatgpt_entry)
+        self.assertLess(chatgpt_entry, hun_loop_entry)
         self.assertLess(hun_loop_entry, template_entry)
         self.assertIn("browse, review, select, then install", catalog)
         self.assertIn("not an always-install bootstrap", catalog)
         self.assertIn("~/.codex/skills", catalog)
+        self.assertIn("public default base skill", catalog)
         self.assertIn("community-sentiment", catalog)
         self.assertIn("Korean by default", catalog)
         self.assertIn("original catalog/vendor skill", catalog)
-        self.assertIn("Hun-specific operational wrapper", catalog)
+        self.assertIn("Hun-local operational wrapper", catalog)
+        self.assertIn("not part of the public default install set", catalog)
         self.assertNotIn(PRIVATE_HOME_PATH, catalog)
 
     def test_karpathy_guidelines_source_is_preserved(self) -> None:
@@ -193,11 +194,13 @@ class SkillCatalogTests(unittest.TestCase):
             "git status --short --branch",
             "quick_validate.py",
             "PyYAML",
+            "public default base skill",
             "community-sentiment",
             "one ChatGPT work tab or conversation per project",
             "screenshots, files, and generated artifacts",
             "karpathy-guidelines",
             "hun-engineering-loop",
+            "Hun-local wrapper",
             "memory is a recall layer, not a source of truth",
             "high-risk stop/ask boundary",
             "permission profiles, hooks, or approval layers",
@@ -243,9 +246,10 @@ class SkillCatalogTests(unittest.TestCase):
         expected_phrases = (
             "Codex runtime install target: `~/.codex/skills/karpathy-guidelines`",
             "Claude Code runtime install target: `~/.claude/skills/karpathy-guidelines`",
+            "Codex runtime install target: `~/.codex/skills/chatgpt-collaboration-harness`",
+            "Claude Code install: do not install by default",
             "Codex runtime install target: `~/.codex/skills/hun-engineering-loop`",
-            "Claude Code runtime install target: `~/.claude/skills/hun-engineering-loop`",
-            "Claude Code install: review and adapt before use",
+            "Claude Code install: Hun-local only, not a public default",
         )
         for phrase in expected_phrases:
             self.assertIn(phrase, catalog)

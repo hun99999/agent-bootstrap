@@ -15,9 +15,12 @@ installed skill.
 - The installed copy under `~/.codex/skills/<skill-name>` is the runtime copy used by Codex.
 - The installed copy under `~/.claude/skills/<skill-name>` is the runtime copy used by Claude Code.
 - Do not install every skill automatically.
+- Use `karpathy-guidelines` as the public default base skill.
+- Treat `hun-engineering-loop` as a Hun-local operational wrapper, not part of the public default install set.
+- Treat `chatgpt-collaboration-harness` as an optional Codex collaboration skill, not a Claude Code default.
 - Do not copy private paths, credentials, MCP endpoints, auth state, browser profiles, or machine-specific trust settings into tracked files.
 - Run the skill validator after installing or syncing a skill.
-- Preserve original catalog/vendor skills separately from Hun-specific operational wrappers.
+- Preserve original catalog/vendor skills separately from Hun-local operational wrappers.
 
 ## Private Project Skills
 
@@ -27,9 +30,26 @@ Private project skills such as auto-eva belong in local runtime skill homes, not
 
 Treat skill changes as tested workflow code. Start with a failing test or explicit pressure scenario when possible, run the skill validator, run relevant repo tests, check for private paths and secrets, and verify the installed runtime copy separately from the repo catalog source before calling the skill ready.
 
+### karpathy-guidelines
+
+Use this when writing, reviewing, or refactoring code and the main risk is overcomplication, hidden assumptions, broad diffs, or weak success criteria.
+
+Key policy:
+
+- This is an original catalog/vendor skill preserved from `multica-ai/andrej-karpathy-skills`.
+- Keep upstream attribution and the MIT license note in `skills/karpathy-guidelines/references/SOURCE.md`.
+- Do not add Hun-specific local workflow rules to this skill.
+- Use this as the public default base skill for Codex and Claude Code.
+
+Catalog path: `skills/karpathy-guidelines`
+
+Codex runtime install target: `~/.codex/skills/karpathy-guidelines`
+
+Claude Code runtime install target: `~/.claude/skills/karpathy-guidelines`
+
 ### chatgpt-collaboration-harness
 
-Use this first when work should be coordinated with ChatGPT Pro across staged implementation, delegated subtasks, Search Mode, deep research, source-backed investigation, or final review.
+Use this only when Codex should coordinate with ChatGPT Pro across staged implementation, delegated subtasks, Search Mode, deep research, source-backed investigation, screenshots, file exchange, generated artifacts, or final review.
 
 Key policy:
 
@@ -45,26 +65,8 @@ Catalog path: `skills/chatgpt-collaboration-harness`
 
 Codex runtime install target: `~/.codex/skills/chatgpt-collaboration-harness`
 
-Claude Code install: review and adapt before use. This skill assumes a
-Codex-owned local validation loop plus ChatGPT Pro browser collaboration, so do
-not auto-sync it into Claude Code without checking those tool assumptions.
-
-### karpathy-guidelines
-
-Use this when writing, reviewing, or refactoring code and the main risk is overcomplication, hidden assumptions, broad diffs, or weak success criteria.
-
-Key policy:
-
-- This is an original catalog/vendor skill preserved from `multica-ai/andrej-karpathy-skills`.
-- Keep upstream attribution and the MIT license note in `skills/karpathy-guidelines/references/SOURCE.md`.
-- Do not add Hun-specific local workflow rules to this skill.
-- Use `hun-engineering-loop` when the work also needs memory preflight, source-of-truth ordering, access approval boundaries, and QA evidence contracts.
-
-Catalog path: `skills/karpathy-guidelines`
-
-Codex runtime install target: `~/.codex/skills/karpathy-guidelines`
-
-Claude Code runtime install target: `~/.claude/skills/karpathy-guidelines`
+Claude Code install: do not install by default. This skill assumes a Codex-owned
+local validation loop plus ChatGPT Pro browser collaboration.
 
 ### hun-engineering-loop
 
@@ -72,17 +74,19 @@ Use this for Hun-specific non-trivial engineering work across planning, implemen
 
 Key policy:
 
-- This is the Hun-specific operational wrapper around `karpathy-guidelines`, repo rules, memory preflight, and executable verification.
+- This is the Hun-local operational wrapper around `karpathy-guidelines`, repo rules, memory preflight, and executable verification.
+- It is useful in Hun's local Codex runtime, but it is not part of the public default install set.
 - Memory is a recall layer, not a source of truth.
 - Current repo docs, scripts, tests, `AGENTS.md`, and observed runtime output beat memory and external advice.
 - Broad access is allowed only as capability; high-risk actions still require a stop/ask approval boundary.
 - Every project skill should name a concrete QA evidence contract instead of saying only "test it".
+- Use permission profiles, hooks, or approval layers when the host supports them, but do not treat them as a replacement for judgment.
 
 Catalog path: `skills/hun-engineering-loop`
 
 Codex runtime install target: `~/.codex/skills/hun-engineering-loop`
 
-Claude Code runtime install target: `~/.claude/skills/hun-engineering-loop`
+Claude Code install: Hun-local only, not a public default.
 
 ### _template
 

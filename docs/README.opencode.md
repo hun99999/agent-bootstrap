@@ -1,43 +1,38 @@
-# OpenCode
+# OpenCode Legacy Notes
 
-OpenCode uses a local installer because the baseline needs user-specific prompt rendering while still relying on upstream `obra/superpowers` through OpenCode's native plugin support.
+OpenCode is legacy/reference material in this repository, not a current first-class setup target.
 
-## Default Scope
+The current public setup path is Codex or Claude Code. Do not run the OpenCode installer for a fresh setup unless Hun explicitly asks for legacy migration or restoration work.
 
-Inside OpenCode, the default setup scope is `current-harness-only`.
+## Preserved Files
 
-If the user says "set this up from the repo" and does not explicitly ask for Codex, Claude Code, OpenClaw ACP, or cross-harness setup, configure OpenCode only.
+The repository still contains older OpenCode files so prior work can be audited:
 
-Do not configure another harness unless the user explicitly asks.
+- `.opencode/install.py`
+- `.opencode/install.sh`
+- `.opencode/INSTALL.md`
+- `prompts/setup-opencode-current-harness.md`
+- `tests/test_opencode_install.py`
 
-## Install
+Those files are compatibility/reference material. They should not appear in the
+root README as a normal install path.
 
-```bash
-bash .opencode/install.sh --partner-name "Hun"
-```
+## If Hun Explicitly Restores OpenCode Work
 
-This is a global OpenCode setup for the current user. It writes user-level defaults under `~/.config/opencode`, so new OpenCode sessions in any project can inherit the shared agents and vibe-coding guardrails.
+Before touching OpenCode files:
 
-## What It Does
-
-- writes `~/.config/opencode/opencode.json`
-- enables the upstream plugin line `superpowers@git+https://github.com/obra/superpowers.git`
-- renders the shared constitution plus each role body into `~/.config/opencode/agents/*.md`
-- marks review-only agents as read-only where appropriate
-
-These user-level defaults are the global layer. Project-specific structure still belongs in project-local knowledge such as `local.md`, an untracked note, or a private Obsidian page. New OpenCode sessions should pick up the installed defaults; existing sessions may need a restart or a short manual instruction to apply the new guardrails.
-
-## Re-run
+1. Run `git status --short --branch`.
+2. Confirm the request is legacy OpenCode migration or restoration, not normal setup.
+3. Read the preserved installer and tests.
+4. Do not change Codex or Claude Code behavior unless the request explicitly says so.
+5. Run the relevant legacy tests and the full repository test suite.
 
 ```bash
-git pull
-bash .opencode/install.sh --partner-name "Hun"
+python3 -m unittest tests.test_opencode_install -v
+python3 -m unittest discover -s tests -p 'test_*.py'
 ```
 
 ## Audit
 
-```bash
-python3 scripts/audit_agent_stack.py
-```
-
-The default audit is offline and read-only. OpenCode is optional by default because this repository can be used from Codex or Claude Code sessions too. Add `--strict` when a missing OpenCode CLI should fail the audit, and add `--online` when you explicitly want remote drift checks.
+`python3 scripts/audit_agent_stack.py` no longer checks OpenCode by default. That
+is intentional: OpenCode is not a current supported surface.

@@ -78,7 +78,14 @@ class AgentStackAuditTests(unittest.TestCase):
 
         self.assertEqual(audit.parse_version("codex-cli 0.135.0"), "0.135.0")
         self.assertEqual(audit.parse_version("2.1.159 (Claude Code)"), "2.1.159")
-        self.assertEqual(audit.parse_version("opencode 1.15.13"), "1.15.13")
+        self.assertEqual(audit.parse_version("tool 1.15.13"), "1.15.13")
+
+    def test_default_cli_checks_only_first_class_surfaces(self) -> None:
+        audit = load_audit_module()
+
+        check_names = [check[0] for check in audit.CLI_CHECKS]
+
+        self.assertEqual(check_names, ["codex", "claude"])
 
     def test_cli_check_reports_installed_version_without_online_latest(self) -> None:
         audit = load_audit_module()

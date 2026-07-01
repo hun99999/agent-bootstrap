@@ -18,7 +18,6 @@ from pathlib import Path
 CLI_CHECKS = (
     ("codex", ("codex", "--version"), "@openai/codex", True),
     ("claude", ("claude", "--version"), "@anthropic-ai/claude-code", True),
-    ("opencode", ("opencode", "--version"), None, False),
 )
 
 FAILING_STATUSES = {"dirty", "error", "update-available"}

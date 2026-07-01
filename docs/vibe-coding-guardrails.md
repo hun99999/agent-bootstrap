@@ -189,16 +189,13 @@ Optional Lumin Repo Lens commands documented by the upstream project:
 
 Use `:full` for a first checkup, a branch-level review, or a major refactor. Use `:pre-write` before a scoped code change and `:post-write` after the change.
 
-## OpenCode Notes
+## Legacy Surface Notes
 
-OpenCode should follow the same shared-core instructions:
-
-- read the root `AGENTS.md`
-- use the local project knowledge template
-- run pre-write, write, and post-write checks
-- keep local evidence artifacts untracked
-
-This repository's OpenCode adapter installs the shared agents and the upstream `superpowers` plugin line. It does not make Lumin Repo Lens a default dependency.
+OpenCode and OpenClaw are legacy/reference material in this repository, not
+current first-class service targets. If Hun explicitly asks for migration or
+restoration work on those surfaces, apply the same shared-core guardrails: read
+the root `AGENTS.md`, use the local project knowledge template, run pre-write,
+write, and post-write checks, and keep local evidence artifacts untracked.
 
 ## Optional Lumin Repo Lens
 

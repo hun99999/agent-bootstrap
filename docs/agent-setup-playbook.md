@@ -35,7 +35,7 @@ If the repository has uncommitted changes or untracked files, stop and ask how t
 
 Then identify:
 
-- current harness: Codex, Claude Code, OpenCode, OpenClaw, or other
+- current harness: Codex, Claude Code, legacy surface, or other
 - requested scope: current harness, shared core, project guardrails, this bootstrap repository, or another explicit target
 - host OS and shell: macOS shell, Linux shell, Windows PowerShell, WSL, Git Bash, or unknown
 - existing repo tooling: test command, lint command, type check command, build command, dependency graph tool, formatter, CI
@@ -51,14 +51,13 @@ Choose the smallest valid scope that satisfies the user's request.
 
 | User request or context | Default scope | What to do |
 | --- | --- | --- |
-| Inside Codex and user says "set this up" | Codex current-harness-only | Use the Codex docs and installer. Do not configure Claude Code or OpenCode unless requested. |
-| Inside Claude Code and user says "set this up" | Claude Code current-harness-only | Render/install the Claude Code plugin path. Do not configure Codex or OpenCode unless requested. |
-| Inside OpenCode and user says "set this up" | OpenCode current-harness-only | Use the OpenCode docs and installer. Do not configure Codex or Claude Code unless requested. |
+| Inside Codex and user says "set this up" | Codex current-harness-only | Use the Codex docs and installer. Do not configure Claude Code unless requested. |
+| Inside Claude Code and user says "set this up" | Claude Code current-harness-only | Render/install the Claude Code plugin path. Do not configure Codex unless requested. |
 | Harness is unclear | shared-core-only | Apply only shared operating guidance and ask before harness-specific setup. |
 | User points at an application repository | project guardrails | Add project-local knowledge guidance and repo-appropriate checks. Do not install global harness defaults unless requested. |
 | User says this repository was updated | agent-bootstrap maintenance | Read the structure doc, regenerate generated output when needed, verify tests and audit. |
 | User asks what Codex skills are available in this repository | skill catalog review | Read `skills/README.md` and `docs/codex-skills.md`. Compare selected skills with `~/.codex/skills`, then ask before installing or overwriting anything. |
-| User asks for OpenClaw ACP | explicit integration path | Follow OpenClaw docs. Do not infer provider, backend, or gateway choices. |
+| User asks for OpenCode or OpenClaw | legacy/reference path | Explain that those surfaces are not current first-class targets. Proceed only if the user explicitly wants legacy migration or restoration work. |
 
 When two valid scopes could apply, prefer the smaller one and explain what is intentionally left untouched.
 
@@ -224,21 +223,11 @@ python3 -m unittest tests.test_claude_plugin -v
 
 Claude Code plugin installation itself happens inside Claude Code using the documented marketplace commands. If the active environment cannot run Claude Code plugin commands, report that limitation instead of pretending the install happened.
 
-### OpenCode
+### Legacy Surfaces
 
-Read:
-
-- `docs/README.opencode.md`
-- `docs/global-guardrail-setup.md`
-- `.opencode/INSTALL.md`
-
-Documented command from the repository root:
-
-```bash
-bash .opencode/install.sh --partner-name "Hun"
-```
-
-OpenCode is optional for users who only use Codex or Claude Code. Use `scripts/audit_agent_stack.py --strict` only when missing optional tools should fail the audit.
+OpenCode and OpenClaw are legacy/reference material, not active service targets.
+Do not run legacy installers or route a fresh setup through those docs unless
+Hun explicitly asks for migration or restoration work.
 
 ### Project Guardrails
 
@@ -267,7 +256,7 @@ Run verification that matches the work performed.
 | Shared `AGENTS.md` or `agents/*.md` changed | Full tests, Claude plugin render check, generated bundle drift check |
 | Claude plugin renderer changed | `python3 -m unittest tests.test_claude_plugin -v` and `python3 scripts/audit_agent_stack.py` |
 | Codex installer changed | Codex install tests and full tests |
-| OpenCode installer changed | OpenCode install tests and full tests |
+| Legacy installer changed | The relevant legacy tests and full tests |
 | Global local install performed | `python3 scripts/audit_agent_stack.py` after install |
 | Optional tool installed | Tool-specific version or health check plus a note about what state changed |
 | Target project guardrails applied | Target repo's real test/lint/type/build commands, plus post-write review |
