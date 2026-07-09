@@ -3,9 +3,32 @@ import unittest
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
+SETUP_PROMPT_PATHS = (
+    REPO_ROOT / "prompts" / "fresh-install.md",
+    REPO_ROOT / "prompts" / "setup-codex-current-harness.md",
+)
 
 
 class PromptCorpusPolicyTests(unittest.TestCase):
+    def test_setup_prompts_ask_identity_and_inherit_runtime_model_entitlements(self):
+        expected_phrases = (
+            "Ask the user what name",
+            "Inspect the active Codex and Claude runtimes",
+            "models and reasoning levels they actually support",
+            "Do not promise or hard-code a particular model",
+            "If support cannot be discovered, ask the user rather than guessing",
+            "Do not commit the chosen partner name",
+        )
+
+        for path in SETUP_PROMPT_PATHS:
+            with self.subTest(path=path.relative_to(REPO_ROOT)):
+                prompt = path.read_text(encoding="utf-8")
+
+                for phrase in expected_phrases:
+                    self.assertIn(phrase, prompt)
+                self.assertNotIn("Hun", prompt)
+                self.assertNotRegex(prompt, r"\b(?:gpt-\d|claude-(?:opus|sonnet|haiku))")
+
     def test_root_prompt_scopes_clarification_and_host_capabilities(self):
         root_prompt = (REPO_ROOT / "AGENTS.md").read_text()
 

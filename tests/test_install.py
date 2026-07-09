@@ -1,4 +1,3 @@
-import re
 import shutil
 import subprocess
 import sys
@@ -10,29 +9,6 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parents[1]
 INSTALLER = REPO_ROOT / ".codex" / "install.py"
 LEGACY_INSTALLER = REPO_ROOT / "scripts" / "install.py"
-
-
-def top_level_text(config: str) -> str:
-    lines = []
-    for line in config.splitlines():
-        if re.match(r"^\s*\[", line):
-            break
-        lines.append(line)
-    return "\n".join(lines)
-
-
-def table_text(config: str, table: str) -> str:
-    match = re.search(rf"(?ms)^\[{re.escape(table)}\]\n(?P<body>.*?)(?=^\[|\Z)", config)
-    if match is None:
-        return ""
-    return match.group("body")
-
-
-def has_assignment(text: str, key: str, value: str) -> bool:
-    return re.search(
-        rf'(?m)^\s*{re.escape(key)}\s*=\s*"{re.escape(value)}"\s*(?:#.*)?$',
-        text,
-    ) is not None
 
 
 class InstallScriptTests(unittest.TestCase):
@@ -223,7 +199,7 @@ class InstallScriptTests(unittest.TestCase):
             )
             self.assertNotIn("model =", eng_lead_text)
 
-    def test_install_writes_modern_codex_model_policy(self) -> None:
+    def test_install_inherits_runtime_codex_model_policy(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
             root = Path(tmpdir)
             codex_home = root / ".codex"
@@ -249,15 +225,24 @@ class InstallScriptTests(unittest.TestCase):
 
             self.assertEqual(result.returncode, 0, msg=result.stderr)
             config_text = (codex_home / "config.toml").read_text(encoding="utf-8")
-            top_level = top_level_text(config_text)
-            previous = table_text(config_text, "profiles.previous")
+            role_texts = [
+                path.read_text(encoding="utf-8")
+                for path in sorted((codex_home / "agents").glob("*.toml"))
+            ]
+            forbidden_assignments = (
+                "model",
+                "model_reasoning_effort",
+                "model_reasoning_summary",
+                "model_verbosity",
+                "plan_mode_reasoning_effort",
+            )
 
-            self.assertTrue(has_assignment(top_level, "model", "gpt-5.5"))
-            self.assertTrue(has_assignment(top_level, "model_reasoning_summary", "detailed"))
-            self.assertTrue(has_assignment(top_level, "model_verbosity", "high"))
-            self.assertTrue(has_assignment(top_level, "plan_mode_reasoning_effort", "xhigh"))
-            self.assertTrue(has_assignment(previous, "model", "gpt-5.4"))
-            self.assertEqual(config_text.count('model = "gpt-5.4"'), 1)
+            for text in [config_text, *role_texts]:
+                for key in forbidden_assignments:
+                    self.assertNotRegex(text, rf"(?m)^\s*{key}\s*=")
+            self.assertIn('personality = "pragmatic"', config_text)
+            self.assertIn("[agents]", config_text)
+            self.assertIn("[features]", config_text)
 
     def test_install_refuses_dirty_superpowers_checkout(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:

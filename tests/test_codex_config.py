@@ -32,23 +32,30 @@ EXPECTED_ROLES = (
     "performance-engineer",
 )
 EXPECTED_ROLE_POLICIES = {
-    "eng-lead": ("workspace-write", "on-request", "xhigh"),
-    "planner": ("read-only", "never", "xhigh"),
-    "researcher": ("read-only", "never", "high"),
-    "debugger": ("read-only", "never", "xhigh"),
-    "reviewer": ("read-only", "never", "xhigh"),
-    "verifier": ("read-only", "never", "high"),
-    "release-manager": ("read-only", "never", "high"),
-    "skill-author": ("workspace-write", "on-request", "high"),
-    "worker": ("workspace-write", "on-request", "high"),
-    "frontend-engineer": ("workspace-write", "on-request", "high"),
-    "backend-engineer": ("workspace-write", "on-request", "high"),
-    "platform-engineer": ("workspace-write", "on-request", "high"),
-    "data-engineer": ("workspace-write", "on-request", "high"),
-    "security-engineer": ("workspace-write", "on-request", "xhigh"),
-    "integrations-engineer": ("workspace-write", "on-request", "high"),
-    "performance-engineer": ("workspace-write", "on-request", "high"),
+    "eng-lead": ("workspace-write", "on-request"),
+    "planner": ("read-only", "never"),
+    "researcher": ("read-only", "never"),
+    "debugger": ("read-only", "never"),
+    "reviewer": ("read-only", "never"),
+    "verifier": ("read-only", "never"),
+    "release-manager": ("read-only", "never"),
+    "skill-author": ("workspace-write", "on-request"),
+    "worker": ("workspace-write", "on-request"),
+    "frontend-engineer": ("workspace-write", "on-request"),
+    "backend-engineer": ("workspace-write", "on-request"),
+    "platform-engineer": ("workspace-write", "on-request"),
+    "data-engineer": ("workspace-write", "on-request"),
+    "security-engineer": ("workspace-write", "on-request"),
+    "integrations-engineer": ("workspace-write", "on-request"),
+    "performance-engineer": ("workspace-write", "on-request"),
 }
+FORBIDDEN_MODEL_KEYS = (
+    "model",
+    "model_reasoning_effort",
+    "model_reasoning_summary",
+    "model_verbosity",
+    "plan_mode_reasoning_effort",
+)
 
 
 def read_config(path: Path) -> str:
@@ -97,90 +104,49 @@ def read_toml(path: Path) -> dict:
     return parse_toml_subset(read_config(path))
 
 
-def top_level_text(config: str) -> str:
-    lines = []
-    for line in config.splitlines():
-        if re.match(r"^\s*\[", line):
-            break
-        lines.append(line)
-    return "\n".join(lines)
-
-
-def previous_profile_text(config: str) -> str:
-    match = re.search(r"(?ms)^\[profiles\.previous\]\n(?P<body>.*?)(?=^\[|\Z)", config)
-    if match is None:
-        return ""
-    return match.group("body")
-
-
-def custom_agent_blocks(config: str) -> list[str]:
-    return re.findall(r"(?ms)^\[\[custom_agent\]\]\n.*?(?=^\[\[custom_agent\]\]|^\[|\Z)", config)
-
-
-def has_assignment(text: str, key: str, value: str) -> bool:
-    return re.search(
-        rf'(?m)^\s*{re.escape(key)}\s*=\s*"{re.escape(value)}"\s*(?:#.*)?$',
-        text,
-    ) is not None
-
-
 class CodexConfigPolicyTests(unittest.TestCase):
-    def test_template_and_snapshot_configs_match(self) -> None:
+    def test_template_and_snapshot_config_trees_match(self) -> None:
         template = read_config(CONFIG_PATHS[0])
         snapshot = read_config(CONFIG_PATHS[1])
 
         self.assertEqual(snapshot, template)
+        template_roles = {
+            path.name: path.read_bytes()
+            for path in ROLE_CONFIG_DIRS[0].glob("*.toml")
+        }
+        snapshot_roles = {
+            path.name: path.read_bytes()
+            for path in ROLE_CONFIG_DIRS[1].glob("*.toml")
+        }
+        self.assertEqual(snapshot_roles, template_roles)
 
-    def test_default_model_policy_uses_latest_model(self) -> None:
+    def test_public_configs_inherit_runtime_model_and_retain_shared_policy(self) -> None:
         for path in CONFIG_PATHS:
             with self.subTest(path=path.relative_to(REPO_ROOT)):
                 config = read_config(path)
-                top_level = top_level_text(config)
                 parsed = parse_toml_subset(config)
 
-                expected_top_level_assignments = {
-                    "model": "gpt-5.5",
-                    "model_reasoning_effort": "xhigh",
-                    "model_reasoning_summary": "detailed",
-                    "model_verbosity": "high",
-                    "plan_mode_reasoning_effort": "xhigh",
-                    "personality": "pragmatic",
-                }
-                for key, value in expected_top_level_assignments.items():
-                    self.assertTrue(has_assignment(top_level, key, value), key)
-                    self.assertEqual(parsed[key], value)
+                self.assertEqual(parsed["personality"], "pragmatic")
+                self.assertIn("agents", parsed)
+                self.assertEqual(parsed["features"], {"multi_agent": True})
+                self.assertNotIn("profiles", parsed)
 
-                self.assertEqual(parsed["features"]["multi_agent"], True)
+    def test_public_config_trees_do_not_pin_model_entitlements(self) -> None:
+        scanned_paths = tuple(CONFIG_PATHS) + tuple(
+            role_path
+            for role_dir in ROLE_CONFIG_DIRS
+            for role_path in sorted(role_dir.glob("*.toml"))
+        )
 
-    def test_previous_profile_is_only_gpt_5_4_default_fallback(self) -> None:
-        for path in CONFIG_PATHS:
+        for path in scanned_paths:
             with self.subTest(path=path.relative_to(REPO_ROOT)):
-                config = read_config(path)
-                previous = previous_profile_text(config)
-                parsed = parse_toml_subset(config)
+                assignments = []
+                for line in read_config(path).splitlines():
+                    for key in FORBIDDEN_MODEL_KEYS:
+                        if re.match(rf"^\s*{re.escape(key)}\s*=", line):
+                            assignments.append(line.strip())
 
-                self.assertTrue(has_assignment(previous, "model", "gpt-5.4"))
-                self.assertEqual(parsed["profiles"]["previous"], {"model": "gpt-5.4"})
-                gpt_5_4_model_assignments = re.findall(
-                    r'(?m)^\s*model\s*=\s*"gpt-5\.4"\s*(?:#.*)?$',
-                    config,
-                )
-                self.assertEqual(len(gpt_5_4_model_assignments), 1)
-
-    def test_balanced_profile_uses_latest_model_with_medium_reasoning(self) -> None:
-        for path in CONFIG_PATHS:
-            with self.subTest(path=path.relative_to(REPO_ROOT)):
-                parsed = read_toml(path)
-
-                self.assertEqual(
-                    parsed["profiles"]["balanced"],
-                    {
-                        "model": "gpt-5.5",
-                        "model_reasoning_effort": "medium",
-                        "model_verbosity": "medium",
-                        "plan_mode_reasoning_effort": "medium",
-                    },
-                )
+                self.assertEqual(assignments, [])
 
     def test_legacy_custom_agents_are_removed(self) -> None:
         for path in CONFIG_PATHS:
@@ -241,7 +207,6 @@ class CodexConfigPolicyTests(unittest.TestCase):
             "model_instructions_file",
             "sandbox_mode",
             "approval_policy",
-            "model_reasoning_effort",
         }
 
         for role_dir in ROLE_CONFIG_DIRS:
@@ -249,7 +214,7 @@ class CodexConfigPolicyTests(unittest.TestCase):
                 with self.subTest(role_dir=role_dir.relative_to(REPO_ROOT), role=role):
                     path = role_dir / f"{role}.toml"
                     role_config = read_toml(path)
-                    sandbox_mode, approval_policy, reasoning_effort = EXPECTED_ROLE_POLICIES[role]
+                    sandbox_mode, approval_policy = EXPECTED_ROLE_POLICIES[role]
 
                     self.assertEqual(set(role_config), allowed_role_config_keys)
                     self.assertEqual(
@@ -258,26 +223,7 @@ class CodexConfigPolicyTests(unittest.TestCase):
                     )
                     self.assertEqual(role_config["sandbox_mode"], sandbox_mode)
                     self.assertEqual(role_config["approval_policy"], approval_policy)
-                    self.assertEqual(role_config["model_reasoning_effort"], reasoning_effort)
                     self.assertNotIn("model", role_config)
-
-    def test_gpt_5_4_is_not_pinned_in_role_configs(self) -> None:
-        scanned_paths = tuple(CONFIG_PATHS) + tuple(
-            role_dir / f"{role}.toml"
-            for role_dir in ROLE_CONFIG_DIRS
-            for role in EXPECTED_ROLES
-        )
-        model_assignments = []
-
-        for path in scanned_paths:
-            for line in read_config(path).splitlines():
-                if re.match(r'^\s*model\s*=\s*"gpt-5\.4"\s*(?:#.*)?$', line):
-                    model_assignments.append(path.relative_to(REPO_ROOT))
-
-        self.assertEqual(
-            model_assignments,
-            [CONFIG_PATHS[0].relative_to(REPO_ROOT), CONFIG_PATHS[1].relative_to(REPO_ROOT)],
-        )
 
 
 if __name__ == "__main__":
