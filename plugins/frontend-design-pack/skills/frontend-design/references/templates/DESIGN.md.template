@@ -1,0 +1,38 @@
+# Design Contract: <surface>
+
+## User and Job
+
+- User:
+- Job:
+- Current behavior:
+- Desired Outcome:
+- Success signal:
+
+## Constraints and Sources
+
+- Approved scope:
+- Project components and tokens:
+- Figma, screenshots, and assets:
+- Accessibility, legal, compliance, and brand requirements:
+
+## States
+
+- Entry and exit:
+- Loading, empty, partial, error, and success:
+- Disabled, permission, offline, retry, and destructive states:
+- Compact, wide, long-content, localization, and RTL behavior:
+
+## Decisions
+
+- Material direction:
+- Components and tokens:
+- Interaction and motion:
+- Copy:
+- Alternatives rejected:
+
+## Verification
+
+- Tests and build checks:
+- Rendered viewports and states:
+- Keyboard, focus, touch, reduced-motion, and accessibility checks:
+- Remaining risks:

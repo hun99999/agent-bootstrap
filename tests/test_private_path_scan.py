@@ -41,7 +41,7 @@ class PrivatePathScanTests(unittest.TestCase):
             repo_root = Path(tmpdir)
             vendor = repo_root / "design-stack/vendor/source/reference.md"
             vendor.parent.mkdir(parents=True)
-            content = "API_" + "TOKEN=placeholder\n"
+            content = "API_" + "TOKEN" + "=placeholder\n"
             vendor.write_text(content, encoding="utf-8")
             digest = hashlib.sha256(content.encode()).hexdigest()
             baseline = {
@@ -54,7 +54,7 @@ class PrivatePathScanTests(unittest.TestCase):
                             {
                                 "label": "secret-assignment",
                                 "line": 1,
-                                "excerpt": "API_" + "TOKEN=placeholder",
+                                "excerpt": "API_" + "TOKEN" + "=placeholder",
                             }
                         ],
                     }
@@ -72,16 +72,16 @@ class PrivatePathScanTests(unittest.TestCase):
 
     def test_changed_content_new_finding_and_unlisted_line_are_not_suppressed(self) -> None:
         scenarios = (
-            "API_" + "TOKEN=changed\n",
-            "API_" + "TOKEN=placeholder\nSECRET=value\n",
-            "safe first line\nAPI_" + "TOKEN=placeholder\n",
+            "API_" + "TOKEN" + "=changed\n",
+            "API_" + "TOKEN" + "=placeholder\n" + "SECRET" + "=value\n",
+            "safe first line\nAPI_" + "TOKEN" + "=placeholder\n",
         )
         for changed_content in scenarios:
             with self.subTest(content=changed_content), tempfile.TemporaryDirectory() as tmpdir:
                 repo_root = Path(tmpdir)
                 vendor = repo_root / "design-stack/vendor/source/reference.md"
                 vendor.parent.mkdir(parents=True)
-                original = "API_" + "TOKEN=placeholder\n"
+                original = "API_" + "TOKEN" + "=placeholder\n"
                 vendor.write_text(changed_content, encoding="utf-8")
                 baseline = {
                     "schema_version": 1,
@@ -93,7 +93,7 @@ class PrivatePathScanTests(unittest.TestCase):
                                 {
                                     "label": "secret-assignment",
                                     "line": 1,
-                                    "excerpt": "API_" + "TOKEN=placeholder",
+                                    "excerpt": "API_" + "TOKEN" + "=placeholder",
                                 }
                             ],
                         }

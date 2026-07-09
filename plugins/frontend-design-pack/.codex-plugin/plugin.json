@@ -1,0 +1,22 @@
+{
+  "author": {
+    "email": "48903443+hun99999@users.noreply.github.com",
+    "name": "Hun"
+  },
+  "description": "One evidence-first frontend design router with reviewed MengTo procedures, official quality guidance, and labeled DESIGN.md inspiration.",
+  "homepage": "https://github.com/hun99999/agent-bootstrap",
+  "keywords": [
+    "frontend-design",
+    "product-design",
+    "user-interface",
+    "user-experience",
+    "accessibility",
+    "responsive-design",
+    "design-system"
+  ],
+  "license": "MIT",
+  "name": "frontend-design-pack",
+  "repository": "https://github.com/hun99999/agent-bootstrap",
+  "skills": "./skills/",
+  "version": "0.1.0"
+}
