@@ -89,11 +89,13 @@ def lock_payload(content: bytes = b"fixture\n") -> dict:
                         "path": "LICENSE",
                         "size": len(FIXTURE_LICENSE),
                         "sha256": sha256_bytes(FIXTURE_LICENSE),
+                        "materialization": "vendored",
                     },
                     {
                         "path": "skills/fixture/SKILL.md",
                         "size": len(content),
                         "sha256": sha256_bytes(content),
+                        "materialization": "vendored",
                     }
                 ],
             }
@@ -146,6 +148,16 @@ def provenance_payload(content: bytes = b"fixture\n") -> dict:
     }
 
 
+def set_skill_materialization(lock: dict, value: str) -> dict:
+    skill_record = next(
+        record
+        for record in lock["sources"][0]["files"]
+        if record["path"] == "skills/fixture/SKILL.md"
+    )
+    skill_record["materialization"] = value
+    return lock
+
+
 class FrontendDesignRegistryUnitTests(unittest.TestCase):
     def test_registry_accepts_complete_source_contract(self) -> None:
         design_stack.validate_registry(registry_payload())
@@ -175,6 +187,14 @@ class FrontendDesignRegistryUnitTests(unittest.TestCase):
         registry["sources"][0]["destination"] = "../outside"
         with self.assertRaisesRegex(design_stack.ValidationError, "destination"):
             design_stack.validate_registry(registry)
+
+    def test_registry_rejects_unsafe_source_ids(self) -> None:
+        for source_id in ("../source", "Source", "source/name", ".source", "source_name"):
+            with self.subTest(source_id=source_id):
+                registry = registry_payload()
+                registry["sources"][0]["id"] = source_id
+                with self.assertRaisesRegex(design_stack.ValidationError, "id"):
+                    design_stack.validate_registry(registry)
 
     def test_lock_rejects_revision_that_does_not_match_registry(self) -> None:
         lock = lock_payload()
@@ -256,6 +276,54 @@ class FrontendDesignRegistryUnitTests(unittest.TestCase):
                 metadata_only=False,
             )
 
+    def test_lock_rejects_materialized_metadata_only_file(self) -> None:
+        content = b"fixture\n"
+        registry = registry_payload()
+        lock = lock_payload(content)
+        skill_record = next(
+            record
+            for record in lock["sources"][0]["files"]
+            if record["path"] == "skills/fixture/SKILL.md"
+        )
+        skill_record["materialization"] = "metadata-only"
+        with tempfile.TemporaryDirectory() as temp_dir:
+            repo_root = Path(temp_dir)
+            vendor = repo_root / "design-stack/vendor/mengto-skills"
+            (vendor / "skills/fixture").mkdir(parents=True)
+            (vendor / "LICENSE").write_bytes(FIXTURE_LICENSE)
+            (vendor / "skills/fixture/SKILL.md").write_bytes(content)
+            with self.assertRaisesRegex(
+                design_stack.ValidationError, "metadata-only"
+            ):
+                design_stack.validate_lock(
+                    registry,
+                    lock,
+                    repo_root=repo_root,
+                    metadata_only=False,
+                )
+
+    def test_lock_allows_missing_metadata_only_file(self) -> None:
+        content = b"fixture\n"
+        registry = registry_payload()
+        lock = lock_payload(content)
+        skill_record = next(
+            record
+            for record in lock["sources"][0]["files"]
+            if record["path"] == "skills/fixture/SKILL.md"
+        )
+        skill_record["materialization"] = "metadata-only"
+        with tempfile.TemporaryDirectory() as temp_dir:
+            repo_root = Path(temp_dir)
+            vendor = repo_root / "design-stack/vendor/mengto-skills"
+            vendor.mkdir(parents=True)
+            (vendor / "LICENSE").write_bytes(FIXTURE_LICENSE)
+            design_stack.validate_lock(
+                registry,
+                lock,
+                repo_root=repo_root,
+                metadata_only=False,
+            )
+
     def test_provenance_requires_complete_record_contract(self) -> None:
         for field in sorted(REQUIRED_PROVENANCE_FIELDS):
             with self.subTest(field=field):
@@ -309,9 +377,12 @@ class FrontendDesignRegistryUnitTests(unittest.TestCase):
                         "license_path": "skills/fixture/LICENSE.txt",
                         "license_sha256": "b" * 64,
                     }
+                lock = lock_payload()
+                if decision == "mapped-to-official":
+                    set_skill_materialization(lock, "metadata-only")
                 with self.assertRaisesRegex(design_stack.ValidationError, "license"):
                     design_stack.validate_provenance(
-                        registry_payload(), lock_payload(), provenance
+                        registry_payload(), lock, provenance
                     )
 
     def test_included_material_license_matches_its_locked_source_notice(self) -> None:
@@ -380,9 +451,10 @@ class FrontendDesignRegistryUnitTests(unittest.TestCase):
             "notice_path": None,
             "notice_sha256": None,
         }
+        lock = set_skill_materialization(lock_payload(), "metadata-only")
         with self.assertRaisesRegex(design_stack.ValidationError, "catalog"):
             design_stack.validate_provenance(
-                registry_payload(), lock_payload(), provenance
+                registry_payload(), lock, provenance
             )
 
     def test_unresolved_material_is_allowed_only_when_blocked_or_excluded(self) -> None:
@@ -398,8 +470,9 @@ class FrontendDesignRegistryUnitTests(unittest.TestCase):
                     "notice_path": None,
                     "notice_sha256": None,
                 }
+                lock = set_skill_materialization(lock_payload(), "metadata-only")
                 design_stack.validate_provenance(
-                    registry_payload(), lock_payload(), provenance
+                    registry_payload(), lock, provenance
                 )
 
     def test_non_included_decisions_require_reason(self) -> None:
@@ -411,9 +484,10 @@ class FrontendDesignRegistryUnitTests(unittest.TestCase):
             "notice_path": None,
             "notice_sha256": None,
         }
+        lock = set_skill_materialization(lock_payload(), "metadata-only")
         with self.assertRaisesRegex(design_stack.ValidationError, "reason"):
             design_stack.validate_provenance(
-                registry_payload(), lock_payload(), provenance
+                registry_payload(), lock, provenance
             )
 
     def test_mapped_decision_requires_content_addressed_official_mapping(self) -> None:
@@ -421,9 +495,36 @@ class FrontendDesignRegistryUnitTests(unittest.TestCase):
         record = provenance["records"][0]
         record["decision"] = "mapped-to-official"
         record["reason"] = "Use a reviewed official equivalent."
+        lock = set_skill_materialization(lock_payload(), "metadata-only")
         with self.assertRaisesRegex(design_stack.ValidationError, "official_mapping"):
             design_stack.validate_provenance(
-                registry_payload(), lock_payload(), provenance
+                registry_payload(), lock, provenance
+            )
+
+    def test_mapped_decision_cannot_materialize_the_upstream_duplicate(self) -> None:
+        lock = lock_payload()
+        provenance = provenance_payload()
+        record = provenance["records"][0]
+        record["decision"] = "mapped-to-official"
+        record["reason"] = "Use the official replacement."
+        record["license"] = {
+            "spdx": "Apache-2.0",
+            "status": "verified",
+            "notice_path": "skills/fixture/LICENSE.txt",
+            "notice_sha256": "b" * 64,
+        }
+        record["official_mapping"] = {
+            "repository": "https://example.invalid/official",
+            "revision": "e" * 40,
+            "tree": "f" * 40,
+            "path": "skills/fixture/SKILL.md",
+            "content_sha256": "c" * 64,
+            "license_path": "skills/fixture/LICENSE.txt",
+            "license_sha256": "b" * 64,
+        }
+        with self.assertRaisesRegex(design_stack.ValidationError, "materialization"):
+            design_stack.validate_provenance(
+                registry_payload(), lock, provenance
             )
 
     def test_mapped_decision_requires_immutable_official_source_and_notice(self) -> None:
@@ -444,11 +545,12 @@ class FrontendDesignRegistryUnitTests(unittest.TestCase):
                 record["reason"] = "Use a reviewed official equivalent."
                 record["official_mapping"] = dict(required_mapping_fields)
                 del record["official_mapping"][missing_field]
+                lock = set_skill_materialization(lock_payload(), "metadata-only")
                 with self.assertRaisesRegex(
                     design_stack.ValidationError, missing_field
                 ):
                     design_stack.validate_provenance(
-                        registry_payload(), lock_payload(), provenance
+                        registry_payload(), lock, provenance
                     )
 
     def test_google_cli_contract_parses_hash_locked_manifest(self) -> None:
@@ -681,6 +783,20 @@ class FrontendDesignCommittedRegistryTests(unittest.TestCase):
                     self.assertTrue(record["origin"]["publisher"])
                 if record["decision"] != "included":
                     self.assertTrue(record.get("reason"))
+
+    def test_committed_materialization_matches_provenance_decisions(self) -> None:
+        locked_files = {
+            (source["id"], record["path"]): record
+            for source in self.lock["sources"]
+            for record in source["files"]
+        }
+        for record in self.provenance["records"]:
+            with self.subTest(path=record["upstream_path"]):
+                locked = locked_files[(record["source_id"], record["upstream_path"])]
+                expected = (
+                    "vendored" if record["decision"] == "included" else "metadata-only"
+                )
+                self.assertEqual(locked["materialization"], expected)
 
     def test_known_mengto_provenance_gaps_are_not_silently_included(self) -> None:
         decisions = {

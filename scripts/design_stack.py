@@ -38,6 +38,7 @@ DECISIONS = {"included", "mapped-to-official", "excluded", "blocked"}
 VERIFIED_LICENSE_DECISIONS = {"included", "mapped-to-official"}
 HEX_40_PATTERN = re.compile(r"^[0-9a-f]{40}$")
 SHA256_PATTERN = re.compile(r"^[0-9a-f]{64}$")
+SOURCE_ID_PATTERN = re.compile(r"^[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$")
 
 
 class ValidationError(ValueError):
@@ -157,6 +158,10 @@ def validate_registry(registry: Mapping[str, Any]) -> None:
                 raise ValidationError(f"{context} is missing required field '{field}'")
 
         source_id = _require_nonempty_string(source["id"], f"{context}.id")
+        if SOURCE_ID_PATTERN.fullmatch(source_id) is None:
+            raise ValidationError(
+                f"{context}.id must be a lowercase, hyphen-delimited identifier"
+            )
         if source_id in source_ids:
             raise ValidationError(f"duplicate source id: {source_id}")
         source_ids.add(source_id)
@@ -334,6 +339,14 @@ def _validate_source_license_locks(
             raise ValidationError(
                 f"source '{source['id']}' license notice is not hash-locked"
             )
+        expected_materialization = (
+            "vendored" if source["distribution"] == "vendored" else "metadata-only"
+        )
+        if locked_notice["materialization"] != expected_materialization:
+            raise ValidationError(
+                f"source '{source['id']}' license notice materialization must be "
+                f"{expected_materialization}"
+            )
 
 
 def validate_lock(
@@ -374,7 +387,7 @@ def validate_lock(
         for file_index, raw_file in enumerate(files):
             file_context = f"{context}.files[{file_index}]"
             file_record = _require_mapping(raw_file, file_context)
-            for field in ("path", "size", "sha256"):
+            for field in ("path", "size", "sha256", "materialization"):
                 if field not in file_record:
                     raise ValidationError(
                         f"{file_context} is missing required field '{field}'"
@@ -391,18 +404,39 @@ def validate_lock(
             digest = _require_sha256(
                 file_record["sha256"], f"{file_context}.sha256"
             )
+            materialization = _require_nonempty_string(
+                file_record["materialization"],
+                f"{file_context}.materialization",
+            )
+            if materialization not in {"vendored", "metadata-only"}:
+                raise ValidationError(
+                    f"{file_context}.materialization must be vendored or metadata-only"
+                )
+            if source["distribution"] != "vendored" and materialization == "vendored":
+                raise ValidationError(
+                    f"{file_context}.materialization cannot be vendored for a "
+                    f"{source['distribution']} source"
+                )
             locked_files[(source_id, path)] = file_record
 
             if not metadata_only and source["distribution"] == "vendored":
                 if repo_root is None:
                     raise ValidationError("repo_root is required for full lock validation")
                 local_path = repo_root / source["destination"] / Path(path)
-                if not local_path.is_file():
-                    raise ValidationError(f"missing vendored file: {local_path}")
-                if local_path.stat().st_size != size:
-                    raise ValidationError(f"size mismatch for vendored file: {local_path}")
-                if sha256_file(local_path) != digest:
-                    raise ValidationError(f"SHA-256 mismatch for vendored file: {local_path}")
+                if materialization == "metadata-only":
+                    if local_path.exists() or local_path.is_symlink():
+                        raise ValidationError(
+                            f"metadata-only source file must not be materialized: {local_path}"
+                        )
+                else:
+                    if not local_path.is_file():
+                        raise ValidationError(f"missing vendored file: {local_path}")
+                    if local_path.stat().st_size != size:
+                        raise ValidationError(f"size mismatch for vendored file: {local_path}")
+                    if sha256_file(local_path) != digest:
+                        raise ValidationError(
+                            f"SHA-256 mismatch for vendored file: {local_path}"
+                        )
 
     if locked_source_ids != set(registry_sources):
         missing = sorted(set(registry_sources) - locked_source_ids)
@@ -523,6 +557,14 @@ def validate_provenance(
         if decision not in DECISIONS:
             raise ValidationError(
                 f"{context}.decision must be one of {sorted(DECISIONS)}"
+            )
+        expected_materialization = (
+            "vendored" if decision == "included" else "metadata-only"
+        )
+        if locked_file["materialization"] != expected_materialization:
+            raise ValidationError(
+                f"{context} decision {decision} requires "
+                f"{expected_materialization} materialization"
             )
         if decision != "included":
             _require_nonempty_string(record.get("reason"), f"{context}.reason")
