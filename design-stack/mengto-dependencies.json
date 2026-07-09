@@ -1,0 +1,217 @@
+{
+  "schema_version": 1,
+  "procedures": [
+    {
+      "source_path": "agent-skills/codex/copywriting/SKILL.md",
+      "dependencies": [
+        {
+          "target_path": "references/ai-writing-detection.md",
+          "source_id": "marketing-skills",
+          "source_path": "skills/seo-audit/references/ai-writing-detection.md"
+        },
+        {
+          "target_path": "references/copy-frameworks.md",
+          "source_id": "marketing-skills",
+          "source_path": "skills/copywriting/references/copy-frameworks.md"
+        },
+        {
+          "target_path": "references/natural-transitions.md",
+          "source_id": "marketing-skills",
+          "source_path": "skills/copywriting/references/natural-transitions.md"
+        }
+      ]
+    },
+    {
+      "source_path": "agent-skills/codex/customer-email-draft-threads/SKILL.md",
+      "dependencies": [
+        {
+          "target_path": "references/runbook.md",
+          "source_id": "mengto-skills",
+          "source_path": "agent-skills/codex/customer-email-draft-threads/references/runbook.md"
+        }
+      ]
+    },
+    {
+      "source_path": "agent-skills/codex/elevenlabs-tts/SKILL.md",
+      "dependencies": [
+        {
+          "target_path": "scripts/generate_voice.py",
+          "source_id": "mengto-skills",
+          "source_path": "agent-skills/codex/elevenlabs-tts/scripts/generate_voice.py"
+        }
+      ]
+    },
+    {
+      "source_path": "agent-skills/codex/netlify-deploy/SKILL.md",
+      "dependencies": [
+        {
+          "target_path": "references/cli-commands.md",
+          "source_id": "openai-netlify-deploy",
+          "source_path": "skills/.curated/netlify-deploy/references/cli-commands.md"
+        },
+        {
+          "target_path": "references/deployment-patterns.md",
+          "source_id": "openai-netlify-deploy",
+          "source_path": "skills/.curated/netlify-deploy/references/deployment-patterns.md"
+        },
+        {
+          "target_path": "references/netlify-toml.md",
+          "source_id": "openai-netlify-deploy",
+          "source_path": "skills/.curated/netlify-deploy/references/netlify-toml.md"
+        }
+      ]
+    },
+    {
+      "source_path": "agent-skills/codex/optimize-web-animations/SKILL.md",
+      "external_runtime_requirements": [
+        {
+          "capability": "browser:control-in-app-browser",
+          "required_file": "scripts/browser-client.mjs",
+          "resolution": "discover-installed-plugin"
+        }
+      ],
+      "dependencies": [
+        {
+          "target_path": "references/browser-profiling.md",
+          "source_id": "mengto-skills",
+          "source_path": "agent-skills/codex/optimize-web-animations/references/browser-profiling.md"
+        }
+      ]
+    },
+    {
+      "source_path": "agent-skills/codex/performance-profiling/SKILL.md",
+      "dependencies": [
+        {
+          "target_path": "references/energy-diagnostics.md",
+          "source_id": "mengto-skills",
+          "source_path": "agent-skills/codex/performance-profiling/references/energy-diagnostics.md"
+        },
+        {
+          "target_path": "references/launch-optimization.md",
+          "source_id": "mengto-skills",
+          "source_path": "agent-skills/codex/performance-profiling/references/launch-optimization.md"
+        },
+        {
+          "target_path": "references/memory-profiling.md",
+          "source_id": "mengto-skills",
+          "source_path": "agent-skills/codex/performance-profiling/references/memory-profiling.md"
+        },
+        {
+          "target_path": "references/time-profiler.md",
+          "source_id": "mengto-skills",
+          "source_path": "agent-skills/codex/performance-profiling/references/time-profiler.md"
+        }
+      ]
+    },
+    {
+      "source_path": "agent-skills/codex/stitched-full-page-capture/SKILL.md",
+      "dependencies": [
+        {
+          "target_path": "scripts/stitch_full_page_capture.mjs",
+          "source_id": "mengto-skills",
+          "source_path": "agent-skills/codex/stitched-full-page-capture/scripts/stitch_full_page_capture.mjs"
+        }
+      ]
+    },
+    {
+      "source_path": "agent-skills/codex/swiftui-debugging/SKILL.md",
+      "dependencies": [
+        {
+          "target_path": "references/body-reevaluation.md",
+          "source_id": "apple-swiftui-debugging",
+          "source_path": "skills/performance/swiftui-debugging/body-reevaluation.md"
+        },
+        {
+          "target_path": "references/common-pitfalls.md",
+          "source_id": "apple-swiftui-debugging",
+          "source_path": "skills/performance/swiftui-debugging/common-pitfalls.md"
+        },
+        {
+          "target_path": "references/lazy-loading.md",
+          "source_id": "apple-swiftui-debugging",
+          "source_path": "skills/performance/swiftui-debugging/lazy-loading.md"
+        },
+        {
+          "target_path": "references/upstream-license.md",
+          "source_id": "apple-swiftui-debugging",
+          "source_path": "LICENSE"
+        },
+        {
+          "target_path": "references/view-identity.md",
+          "source_id": "apple-swiftui-debugging",
+          "source_path": "skills/performance/swiftui-debugging/view-identity.md"
+        }
+      ]
+    },
+    {
+      "source_path": "agent-skills/codex/video-to-superprompt/SKILL.md",
+      "dependencies": [
+        {
+          "target_path": "references/superprompt-template.md",
+          "source_id": "mengto-skills",
+          "source_path": "agent-skills/codex/video-to-superprompt/references/superprompt-template.md"
+        }
+      ]
+    },
+    {
+      "source_path": "agent-skills/ui/seo-audit/SKILL.md",
+      "dependencies": [
+        {
+          "target_path": "references/ai-writing-detection.md",
+          "source_id": "marketing-skills",
+          "source_path": "skills/seo-audit/references/ai-writing-detection.md"
+        }
+      ]
+    },
+    {
+      "source_path": "agent-skills/ui/swiftui-pro/SKILL.md",
+      "dependencies": [
+        {
+          "target_path": "references/accessibility.md",
+          "source_id": "swiftui-agent-skill",
+          "source_path": "swiftui-pro/references/accessibility.md"
+        },
+        {
+          "target_path": "references/api.md",
+          "source_id": "swiftui-agent-skill",
+          "source_path": "swiftui-pro/references/api.md"
+        },
+        {
+          "target_path": "references/data.md",
+          "source_id": "swiftui-agent-skill",
+          "source_path": "swiftui-pro/references/data.md"
+        },
+        {
+          "target_path": "references/design.md",
+          "source_id": "swiftui-agent-skill",
+          "source_path": "swiftui-pro/references/design.md"
+        },
+        {
+          "target_path": "references/hygiene.md",
+          "source_id": "swiftui-agent-skill",
+          "source_path": "swiftui-pro/references/hygiene.md"
+        },
+        {
+          "target_path": "references/navigation.md",
+          "source_id": "swiftui-agent-skill",
+          "source_path": "swiftui-pro/references/navigation.md"
+        },
+        {
+          "target_path": "references/performance.md",
+          "source_id": "swiftui-agent-skill",
+          "source_path": "swiftui-pro/references/performance.md"
+        },
+        {
+          "target_path": "references/swift.md",
+          "source_id": "swiftui-agent-skill",
+          "source_path": "swiftui-pro/references/swift.md"
+        },
+        {
+          "target_path": "references/views.md",
+          "source_id": "swiftui-agent-skill",
+          "source_path": "swiftui-pro/references/views.md"
+        }
+      ]
+    }
+  ]
+}

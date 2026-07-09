@@ -60,6 +60,25 @@ These sources outrank all external design guidance:
 The upstream README count is not authoritative. The importer must derive the inventory from the
 tree at the pinned revision.
 
+The pinned MengTo tree omits some companion files referenced by included procedures. Resolve every
+declared local dependency before packaging it. Nine supporting files come from the pinned MengTo
+revision. Recover byte-identical companion files from their original pinned repositories when
+available, and label any newer original-source substitution explicitly:
+
+- `coreyhaines31/marketingskills@33218ff1ca025b977da902ecb18d40e808f00c26`
+  for copywriting and SEO references;
+- `openai/skills@49f948faa9258a0c61caceaf225e179651397431` for the Apache-2.0
+  Netlify references;
+- `twostraws/SwiftUI-Agent-Skill@f7309bdc9eb7231ac40317abd2b08a451a14e0aa`
+  for byte-identical SwiftUI Pro references;
+- `rshankras/claude-code-apple-skills@1a16fa57e2039a6db2f510b10b64899d91e11c10`
+  for labeled SwiftUI debugging substitutions and their MIT notice.
+
+Render each included procedure as `<category>/<name>/procedure.md` with sibling `references/` and
+`scripts/` paths. This preserves upstream procedure bytes, keeps exactly one native `SKILL.md`, and
+lets relative dependencies resolve recursively. Imported scripts remain inert during sync, render,
+install, and validation.
+
 ### Google DESIGN.md
 
 - Upstream: `https://github.com/google-labs-code/design.md`
@@ -133,6 +152,10 @@ plugins/frontend-design-pack/
         ├── source-precedence.md
         ├── quality-gates.md
         ├── mengto/
+        │   └── <category>/<name>/
+        │       ├── procedure.md
+        │       ├── references/
+        │       └── scripts/
         ├── design-md/
         └── vercel/
 ```

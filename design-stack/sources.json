@@ -22,6 +22,28 @@
       "destination": null
     },
     {
+      "id": "apple-swiftui-debugging",
+      "repository": "https://github.com/rshankras/claude-code-apple-skills",
+      "revision": "1a16fa57e2039a6db2f510b10b64899d91e11c10",
+      "authority": "original-upstream-substitution",
+      "scope": [
+        "skills/performance/swiftui-debugging/body-reevaluation.md",
+        "skills/performance/swiftui-debugging/common-pitfalls.md",
+        "skills/performance/swiftui-debugging/lazy-loading.md",
+        "skills/performance/swiftui-debugging/view-identity.md"
+      ],
+      "license": {
+        "spdx": "MIT",
+        "status": "verified",
+        "notice_path": "LICENSE",
+        "notice_sha256": "7c90586a6b5c334e403c5fd11397926d85b1f063d68f6d1199b005cd61b148b3"
+      },
+      "role": "mengto-procedure-dependency",
+      "update_method": "reviewed-local-tar",
+      "distribution": "vendored",
+      "destination": "design-stack/vendor/apple-swiftui-debugging"
+    },
+    {
       "id": "awesome-design-md",
       "repository": "https://github.com/VoltAgent/awesome-design-md",
       "revision": "664b3e78fd1a298ba11973822da988483256d4b4",
@@ -62,12 +84,42 @@
       "destination": "design-stack/vendor/google-design-md"
     },
     {
+      "id": "marketing-skills",
+      "repository": "https://github.com/coreyhaines31/marketingskills",
+      "revision": "33218ff1ca025b977da902ecb18d40e808f00c26",
+      "authority": "original-upstream-byte-identical",
+      "scope": [
+        "skills/copywriting/references/copy-frameworks.md",
+        "skills/copywriting/references/natural-transitions.md",
+        "skills/seo-audit/references/ai-writing-detection.md"
+      ],
+      "license": {
+        "spdx": "MIT",
+        "status": "verified",
+        "notice_path": "LICENSE",
+        "notice_sha256": "b70d71e24e40fce5da8f4b6f9cd862096a048e433db7f3c8cac5e348e6d34591"
+      },
+      "role": "mengto-procedure-dependency",
+      "update_method": "reviewed-local-tar",
+      "distribution": "vendored",
+      "destination": "design-stack/vendor/marketing-skills"
+    },
+    {
       "id": "mengto-skills",
       "repository": "https://github.com/MengTo/Skills",
       "revision": "25f872a94e3bbee85ecacba4041fa52c21cb0e44",
       "authority": "procedural-guidance",
       "scope": [
-        "agent-skills/**/SKILL.md"
+        "agent-skills/**/SKILL.md",
+        "agent-skills/codex/customer-email-draft-threads/references/runbook.md",
+        "agent-skills/codex/elevenlabs-tts/scripts/generate_voice.py",
+        "agent-skills/codex/optimize-web-animations/references/browser-profiling.md",
+        "agent-skills/codex/performance-profiling/references/energy-diagnostics.md",
+        "agent-skills/codex/performance-profiling/references/launch-optimization.md",
+        "agent-skills/codex/performance-profiling/references/memory-profiling.md",
+        "agent-skills/codex/performance-profiling/references/time-profiler.md",
+        "agent-skills/codex/stitched-full-page-capture/scripts/stitch_full_page_capture.mjs",
+        "agent-skills/codex/video-to-superprompt/references/superprompt-template.md"
       ],
       "license": {
         "spdx": "MIT",
@@ -98,6 +150,54 @@
       "update_method": "explicit-package-selection",
       "distribution": "on-demand",
       "destination": null
+    },
+    {
+      "id": "openai-netlify-deploy",
+      "repository": "https://github.com/openai/skills",
+      "revision": "49f948faa9258a0c61caceaf225e179651397431",
+      "authority": "official-upstream-byte-identical",
+      "scope": [
+        "skills/.curated/netlify-deploy/references/cli-commands.md",
+        "skills/.curated/netlify-deploy/references/deployment-patterns.md",
+        "skills/.curated/netlify-deploy/references/netlify-toml.md"
+      ],
+      "license": {
+        "spdx": "Apache-2.0",
+        "status": "verified",
+        "notice_path": "skills/.curated/netlify-deploy/LICENSE.txt",
+        "notice_sha256": "4dd13869245e356246a5b770723247bbb80a8f07a181d1d3d873a1734297cdb9"
+      },
+      "role": "mengto-procedure-dependency",
+      "update_method": "reviewed-local-tar",
+      "distribution": "vendored",
+      "destination": "design-stack/vendor/openai-netlify-deploy"
+    },
+    {
+      "id": "swiftui-agent-skill",
+      "repository": "https://github.com/twostraws/SwiftUI-Agent-Skill",
+      "revision": "f7309bdc9eb7231ac40317abd2b08a451a14e0aa",
+      "authority": "original-upstream-byte-identical",
+      "scope": [
+        "swiftui-pro/references/accessibility.md",
+        "swiftui-pro/references/api.md",
+        "swiftui-pro/references/data.md",
+        "swiftui-pro/references/design.md",
+        "swiftui-pro/references/hygiene.md",
+        "swiftui-pro/references/navigation.md",
+        "swiftui-pro/references/performance.md",
+        "swiftui-pro/references/swift.md",
+        "swiftui-pro/references/views.md"
+      ],
+      "license": {
+        "spdx": "MIT",
+        "status": "verified",
+        "notice_path": "LICENSE",
+        "notice_sha256": "b9b479e6df9f27cbc8e7abe91f771b396f3f0fa114d070c7c0b02c820c6b74dc"
+      },
+      "role": "mengto-procedure-dependency",
+      "update_method": "reviewed-local-tar",
+      "distribution": "vendored",
+      "destination": "design-stack/vendor/swiftui-agent-skill"
     },
     {
       "id": "vercel-agent-skills",

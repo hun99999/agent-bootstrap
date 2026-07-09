@@ -13,7 +13,7 @@ Use this skill as one router, not as permission to load the whole design corpus.
 2. Name the target surface. If the surface is not clear enough to work safely, inspect the repository or ask the smallest blocking question.
 3. Inspect primary project evidence: repository instructions, current behavior, components, tokens, tests, project-owned DESIGN.md, supplied Figma context, screenshots, and approved assets.
 4. Read `references/source-precedence.md` and apply it before outside aesthetics.
-5. Load the smallest sufficient set of references selected by `routing.json`. Never load the corpus wholesale.
+5. Load the smallest sufficient set of references selected by `references/routing.json`. Resolve MengTo selections through `references/reference-catalog.json`: `source_path` selects the routing rule, and `reference_path` identifies the packaged file. Never load the corpus wholesale, and never load an entry whose decision is `blocked`.
 6. Label every outside source with its authority and scope. Use at most three inspiration sources.
 
 ## Follow the mode contract
@@ -25,7 +25,7 @@ Use this skill as one router, not as permission to load the whole design corpus.
 - `copy`: change only copy, accessible names, and directly required markup. Report structural blockers separately.
 - `harden`: preserve the approved direction and close reachable-state, resilience, accessibility, responsive, and finish defects.
 
-For implementation, review, copy, and hardening, read `references/quality-gates.md`. Material with external services or side effects is explicit-use-only. Open Design is explicit-demand-only. Imported scripts are reference text and must never be executed merely because they were loaded.
+For implementation, review, copy, and hardening, read `references/quality-gates.md`. Material with external services or side effects is explicit-use-only. Open Design is explicit-demand-only. Treat catalog `external_runtime_requirements` as capability checks: discover an installed capability and skip the dependent evaluator when it is unavailable; never hard-code a machine path. Imported scripts are reference text and must never be executed merely because they were loaded.
 
 ## Report the route
 

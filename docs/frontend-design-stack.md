@@ -29,8 +29,14 @@ An agent setting up this repository should perform these steps in order:
 ## What Is Included
 
 - One router with six modes: Shape, Explore, Implement, Review, Copy, and Harden.
-- 95 reviewed MengTo catalog decisions: 90 procedures are included as inert Markdown references;
-  5 provenance-gap duplicates resolve to pinned official mappings instead of being republished.
+- 95 reviewed MengTo catalog decisions: 90 procedures are included as inert references and 5
+  provenance-gap duplicates resolve to pinned official mappings instead of being republished.
+  The included procedures carry 30 dependency destinations from 29 hash-locked source files, so
+  their declared local references and helper scripts resolve inside the installed plugin.
+- Missing MengTo companion files are resolved from their pinned original sources rather than
+  being silently relicensed: Corey Haines' Marketing Skills, OpenAI's Netlify skill, Paul Hudson's
+  SwiftUI Agent Skill, and Ravi Shankar's Apple skills. Byte-identical recovery and original-source
+  substitution are labeled separately in the catalog and provenance ledger.
 - 74 DESIGN.md references from VoltAgent's collection. These are third-party analysis of public
   interfaces. The Meta and Vercel entries are not guidance published by Meta or Vercel.
 - The pinned Google DESIGN.md CLI package contract, currently version `0.3.0`.
@@ -42,9 +48,14 @@ default. The Vercel agent-skills source remains reference-only because the revie
 provide a redistributable license; the MIT-licensed Web Interface Guidelines source supplies the
 vendored official interface guidance instead.
 
-Imported scripts are inert data. The sync, renderer, installer, and validators do not execute them.
+Imported scripts are inert data and are physically stored as non-executable files. The sync,
+renderer, installer, and validators do not execute them.
 Procedures that deploy, publish, authenticate, upload, email, or call an external service are
 explicit-use-only and still require the user's approval for that action.
+
+The browser evaluator records `browser:control-in-app-browser` as a discoverable external runtime
+requirement. It never stores a private installation path. If that capability is unavailable, the
+agent skips only that evaluator instead of pretending the whole design procedure is available.
 
 ## Validate The Tracked Source
 
@@ -58,8 +69,11 @@ python3 scripts/check_private_paths.py
 git diff --check
 ```
 
-`validate_frontend_design_stack.py` verifies locked source bytes, provenance, licenses, deterministic
-rendering, and the tracked plugin. It does not silently validate an installed runtime copy.
+`validate_frontend_design_stack.py` verifies locked source bytes, provenance, licenses, recursive
+procedure dependencies, deterministic rendering, and the tracked plugin. The renderer builds and
+validates a same-filesystem staging tree before a journaled swap, so a late failure or interrupted
+replacement restores the previous complete output. Repository ancestors and unapproved in-repo
+destinations are rejected. This validation does not silently validate an installed runtime copy.
 
 ## Install In Codex
 
@@ -179,6 +193,8 @@ not fetch, checkout, render, install, or update a runtime.
 
 Review added, removed, renamed, content, mode, frontmatter, script, asset, dependency, URL,
 permission, service, side-effect, license, and provenance changes before approving an import.
+For MengTo updates, review `design-stack/mengto-dependencies.json` as well: a new local path in a
+procedure must resolve to a pinned source, lock record, provenance record, and packaged destination.
 
 ## Approved Source Sync
 
@@ -209,7 +225,8 @@ uses a recovery journal for interrupted multi-path replacement. It never downloa
 executes imported content.
 
 After sync, require human diff review. Then rerun the full verification commands above. Review
-`THIRD_PARTY_NOTICES.md`, the source lock, provenance changes, generated catalog, and plugin diff.
+`THIRD_PARTY_NOTICES.md`, `mengto-dependencies.json`, the source lock, provenance changes, generated
+catalog, and plugin diff.
 
 ## Versioning, Update, And Rollback
 

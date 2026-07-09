@@ -13,13 +13,97 @@
       ]
     },
     {
-      "path": "plugins/frontend-design-pack/skills/frontend-design/references/mengto/codex/netlify-deploy.md",
+      "path": "design-stack/vendor/mengto-skills/agent-skills/codex/elevenlabs-tts/scripts/generate_voice.py",
+      "sha256": "0255ad49ff55b08e3cc4447b4d6b04d6b446cbba3b0b85a17a2ba05cf0a512f7",
+      "findings": [
+        {
+          "label": "secret-assignment",
+          "line": 122,
+          "excerpt": "def api_json(path: str, api_key: str, params: Optional[dict[str, Any]] = None) -> dict[str, Any]:"
+        },
+        {
+          "label": "secret-assignment",
+          "line": 133,
+          "excerpt": "def api_audio(path: str, api_key: str, payload: dict[str, Any], params: dict[str, Any]) -> bytes:"
+        },
+        {
+          "label": "secret-assignment",
+          "line": 158,
+          "excerpt": "def resolve_voice_id(api_key: str, voice_name: str) -> tuple[str, dict[str, Any]]:"
+        },
+        {
+          "label": "secret-assignment",
+          "line": 256,
+          "excerpt": "api_key = env.get(\"ELEVENLABS_API_KEY\")"
+        }
+      ]
+    },
+    {
+      "path": "design-stack/vendor/mengto-skills/agent-skills/codex/performance-profiling/references/memory-profiling.md",
+      "sha256": "1d06b26c04391229d4ba96bfa962051100c7e41285e76671013fed9a018ed1c9",
+      "findings": [
+        {
+          "label": "secret-assignment",
+          "line": 195,
+          "excerpt": "let token = NotificationCenter.default.addObserver("
+        },
+        {
+          "label": "secret-assignment",
+          "line": 202,
+          "excerpt": "let token = NotificationCenter.default.addObserver("
+        }
+      ]
+    },
+    {
+      "path": "plugins/frontend-design-pack/skills/frontend-design/references/mengto/codex/elevenlabs-tts/scripts/generate_voice.py",
+      "sha256": "0255ad49ff55b08e3cc4447b4d6b04d6b446cbba3b0b85a17a2ba05cf0a512f7",
+      "findings": [
+        {
+          "label": "secret-assignment",
+          "line": 122,
+          "excerpt": "def api_json(path: str, api_key: str, params: Optional[dict[str, Any]] = None) -> dict[str, Any]:"
+        },
+        {
+          "label": "secret-assignment",
+          "line": 133,
+          "excerpt": "def api_audio(path: str, api_key: str, payload: dict[str, Any], params: dict[str, Any]) -> bytes:"
+        },
+        {
+          "label": "secret-assignment",
+          "line": 158,
+          "excerpt": "def resolve_voice_id(api_key: str, voice_name: str) -> tuple[str, dict[str, Any]]:"
+        },
+        {
+          "label": "secret-assignment",
+          "line": 256,
+          "excerpt": "api_key = env.get(\"ELEVENLABS_API_KEY\")"
+        }
+      ]
+    },
+    {
+      "path": "plugins/frontend-design-pack/skills/frontend-design/references/mengto/codex/netlify-deploy/procedure.md",
       "sha256": "0de932710f4e73605b8a8c413b79d6b2b2d1a9e387e6ea1dc7cbcd500101a378",
       "findings": [
         {
           "label": "secret-assignment",
           "line": 65,
           "excerpt": "export NETLIFY_AUTH_TOKEN=your_token_here"
+        }
+      ]
+    },
+    {
+      "path": "plugins/frontend-design-pack/skills/frontend-design/references/mengto/codex/performance-profiling/references/memory-profiling.md",
+      "sha256": "1d06b26c04391229d4ba96bfa962051100c7e41285e76671013fed9a018ed1c9",
+      "findings": [
+        {
+          "label": "secret-assignment",
+          "line": 195,
+          "excerpt": "let token = NotificationCenter.default.addObserver("
+        },
+        {
+          "label": "secret-assignment",
+          "line": 202,
+          "excerpt": "let token = NotificationCenter.default.addObserver("
         }
       ]
     }

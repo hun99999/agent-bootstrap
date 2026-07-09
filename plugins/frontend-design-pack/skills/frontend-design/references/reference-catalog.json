@@ -606,7 +606,7 @@
       "authority": "procedural-guidance",
       "decision": "included",
       "name": "audit-verify-explain-grade-5",
-      "reference_path": "references/mengto/codex/audit-verify-explain-grade-5.md",
+      "reference_path": "references/mengto/codex/audit-verify-explain-grade-5/procedure.md",
       "sha256": "d4b5ce0ccda298b75fc7927f88a67dd5528693085ee52fa92b0623544665ba32",
       "source_id": "mengto-skills",
       "source_path": "agent-skills/codex/audit-verify-explain-grade-5/SKILL.md"
@@ -615,25 +615,65 @@
       "authority": "procedural-guidance",
       "decision": "included",
       "name": "copywriting",
-      "reference_path": "references/mengto/codex/copywriting.md",
+      "reference_path": "references/mengto/codex/copywriting/procedure.md",
       "sha256": "6c6753ffed0c3bd3bfc2eeef1109dbcfd6671000ee287a41d6fd05abf64b82c7",
       "source_id": "mengto-skills",
-      "source_path": "agent-skills/codex/copywriting/SKILL.md"
+      "source_path": "agent-skills/codex/copywriting/SKILL.md",
+      "supporting_files": [
+        {
+          "authority": "original-upstream-byte-identical",
+          "reference_path": "references/mengto/codex/copywriting/references/ai-writing-detection.md",
+          "role": "mengto-procedure-dependency",
+          "sha256": "f1e273f56ce7e2215ff218bf903680ddcec0fd026ab90c3ebfb3439ed0edfaa4",
+          "source_id": "marketing-skills",
+          "source_path": "skills/seo-audit/references/ai-writing-detection.md",
+          "target_path": "references/ai-writing-detection.md"
+        },
+        {
+          "authority": "original-upstream-byte-identical",
+          "reference_path": "references/mengto/codex/copywriting/references/copy-frameworks.md",
+          "role": "mengto-procedure-dependency",
+          "sha256": "f387b6ed4b510efa9f0d3c459f4898971c8b0176e8c34185040cb264eca50186",
+          "source_id": "marketing-skills",
+          "source_path": "skills/copywriting/references/copy-frameworks.md",
+          "target_path": "references/copy-frameworks.md"
+        },
+        {
+          "authority": "original-upstream-byte-identical",
+          "reference_path": "references/mengto/codex/copywriting/references/natural-transitions.md",
+          "role": "mengto-procedure-dependency",
+          "sha256": "4ff23f8943af2f65b072f26f1c53ce55f19cc26d7be211c11cae8e34b43e859f",
+          "source_id": "marketing-skills",
+          "source_path": "skills/copywriting/references/natural-transitions.md",
+          "target_path": "references/natural-transitions.md"
+        }
+      ]
     },
     {
       "authority": "procedural-guidance",
       "decision": "included",
       "name": "customer-email-draft-threads",
-      "reference_path": "references/mengto/codex/customer-email-draft-threads.md",
+      "reference_path": "references/mengto/codex/customer-email-draft-threads/procedure.md",
       "sha256": "914db381663d2c9fa9508af1f7265fd4a09493098bc64217d9d16b1d9a8ace02",
       "source_id": "mengto-skills",
-      "source_path": "agent-skills/codex/customer-email-draft-threads/SKILL.md"
+      "source_path": "agent-skills/codex/customer-email-draft-threads/SKILL.md",
+      "supporting_files": [
+        {
+          "authority": "procedural-guidance",
+          "reference_path": "references/mengto/codex/customer-email-draft-threads/references/runbook.md",
+          "role": "frontend-procedure-reference",
+          "sha256": "bb12af26f29788561427faf025d1c0aa9a70815f4fcaf7104c327195868ccd4c",
+          "source_id": "mengto-skills",
+          "source_path": "agent-skills/codex/customer-email-draft-threads/references/runbook.md",
+          "target_path": "references/runbook.md"
+        }
+      ]
     },
     {
       "authority": "procedural-guidance",
       "decision": "included",
       "name": "customer-support-verification",
-      "reference_path": "references/mengto/codex/customer-support-verification.md",
+      "reference_path": "references/mengto/codex/customer-support-verification/procedure.md",
       "sha256": "ef0af78a0eafc8b9f4a06320d7a29bf9fe5408cde9bd29cc3428f34a9c09b308",
       "source_id": "mengto-skills",
       "source_path": "agent-skills/codex/customer-support-verification/SKILL.md"
@@ -642,7 +682,7 @@
       "authority": "procedural-guidance",
       "decision": "included",
       "name": "daily-ui-inspiration-capture",
-      "reference_path": "references/mengto/codex/daily-ui-inspiration-capture.md",
+      "reference_path": "references/mengto/codex/daily-ui-inspiration-capture/procedure.md",
       "sha256": "26f316421cbb18f24a3aba96ff5d064b0f62f1ca74a6fa86160643a2f21460e0",
       "source_id": "mengto-skills",
       "source_path": "agent-skills/codex/daily-ui-inspiration-capture/SKILL.md"
@@ -651,16 +691,27 @@
       "authority": "procedural-guidance",
       "decision": "included",
       "name": "elevenlabs-tts",
-      "reference_path": "references/mengto/codex/elevenlabs-tts.md",
+      "reference_path": "references/mengto/codex/elevenlabs-tts/procedure.md",
       "sha256": "066b56c8711ebf935222b4f02f7c67485e88299574a5dc6f1d4347cfefb86196",
       "source_id": "mengto-skills",
-      "source_path": "agent-skills/codex/elevenlabs-tts/SKILL.md"
+      "source_path": "agent-skills/codex/elevenlabs-tts/SKILL.md",
+      "supporting_files": [
+        {
+          "authority": "procedural-guidance",
+          "reference_path": "references/mengto/codex/elevenlabs-tts/scripts/generate_voice.py",
+          "role": "frontend-procedure-reference",
+          "sha256": "0255ad49ff55b08e3cc4447b4d6b04d6b446cbba3b0b85a17a2ba05cf0a512f7",
+          "source_id": "mengto-skills",
+          "source_path": "agent-skills/codex/elevenlabs-tts/scripts/generate_voice.py",
+          "target_path": "scripts/generate_voice.py"
+        }
+      ]
     },
     {
       "authority": "procedural-guidance",
       "decision": "included",
       "name": "html-to-interaction-prompts",
-      "reference_path": "references/mengto/codex/html-to-interaction-prompts.md",
+      "reference_path": "references/mengto/codex/html-to-interaction-prompts/procedure.md",
       "sha256": "59b800616a70b89b2d5b3d85b8b138c3d22afc83a23fe7e565e08bd1610a8999",
       "source_id": "mengto-skills",
       "source_path": "agent-skills/codex/html-to-interaction-prompts/SKILL.md"
@@ -669,19 +720,66 @@
       "authority": "procedural-guidance",
       "decision": "included",
       "name": "netlify-deploy",
-      "reference_path": "references/mengto/codex/netlify-deploy.md",
+      "reference_path": "references/mengto/codex/netlify-deploy/procedure.md",
       "sha256": "0de932710f4e73605b8a8c413b79d6b2b2d1a9e387e6ea1dc7cbcd500101a378",
       "source_id": "mengto-skills",
-      "source_path": "agent-skills/codex/netlify-deploy/SKILL.md"
+      "source_path": "agent-skills/codex/netlify-deploy/SKILL.md",
+      "supporting_files": [
+        {
+          "authority": "official-upstream-byte-identical",
+          "reference_path": "references/mengto/codex/netlify-deploy/references/cli-commands.md",
+          "role": "mengto-procedure-dependency",
+          "sha256": "a24b08401b8c796e4a58933a71441b3341b61afc840d690d9127b27ab00cfe05",
+          "source_id": "openai-netlify-deploy",
+          "source_path": "skills/.curated/netlify-deploy/references/cli-commands.md",
+          "target_path": "references/cli-commands.md"
+        },
+        {
+          "authority": "official-upstream-byte-identical",
+          "reference_path": "references/mengto/codex/netlify-deploy/references/deployment-patterns.md",
+          "role": "mengto-procedure-dependency",
+          "sha256": "fdb8c3b96fe03099826e4207b4933df3ff97571415f5e283567979bdc86cdc85",
+          "source_id": "openai-netlify-deploy",
+          "source_path": "skills/.curated/netlify-deploy/references/deployment-patterns.md",
+          "target_path": "references/deployment-patterns.md"
+        },
+        {
+          "authority": "official-upstream-byte-identical",
+          "reference_path": "references/mengto/codex/netlify-deploy/references/netlify-toml.md",
+          "role": "mengto-procedure-dependency",
+          "sha256": "436ea3c2e0ce04abb34895db993d91b8660423977d9c52a89f2dfa014cad0b9c",
+          "source_id": "openai-netlify-deploy",
+          "source_path": "skills/.curated/netlify-deploy/references/netlify-toml.md",
+          "target_path": "references/netlify-toml.md"
+        }
+      ]
     },
     {
       "authority": "procedural-guidance",
       "decision": "included",
+      "external_runtime_requirements": [
+        {
+          "capability": "browser:control-in-app-browser",
+          "required_file": "scripts/browser-client.mjs",
+          "resolution": "discover-installed-plugin"
+        }
+      ],
       "name": "optimize-web-animations",
-      "reference_path": "references/mengto/codex/optimize-web-animations.md",
+      "reference_path": "references/mengto/codex/optimize-web-animations/procedure.md",
       "sha256": "37a8f512bb22a4f2112e4ed388068c0cd184d312d64ee00a993da5bf04ded947",
       "source_id": "mengto-skills",
-      "source_path": "agent-skills/codex/optimize-web-animations/SKILL.md"
+      "source_path": "agent-skills/codex/optimize-web-animations/SKILL.md",
+      "supporting_files": [
+        {
+          "authority": "procedural-guidance",
+          "reference_path": "references/mengto/codex/optimize-web-animations/references/browser-profiling.md",
+          "role": "frontend-procedure-reference",
+          "sha256": "69df1bc96bdd4ee2d149527b7fce4065801b83afff33b5b70a2d654bb300f53d",
+          "source_id": "mengto-skills",
+          "source_path": "agent-skills/codex/optimize-web-animations/references/browser-profiling.md",
+          "target_path": "references/browser-profiling.md"
+        }
+      ]
     },
     {
       "authority": "procedural-guidance",
@@ -705,10 +803,48 @@
       "authority": "procedural-guidance",
       "decision": "included",
       "name": "performance-profiling",
-      "reference_path": "references/mengto/codex/performance-profiling.md",
+      "reference_path": "references/mengto/codex/performance-profiling/procedure.md",
       "sha256": "e2301598090cf01a0d3b726a039ef4c5c9b05f64d20fb17f52a2271994945c5a",
       "source_id": "mengto-skills",
-      "source_path": "agent-skills/codex/performance-profiling/SKILL.md"
+      "source_path": "agent-skills/codex/performance-profiling/SKILL.md",
+      "supporting_files": [
+        {
+          "authority": "procedural-guidance",
+          "reference_path": "references/mengto/codex/performance-profiling/references/energy-diagnostics.md",
+          "role": "frontend-procedure-reference",
+          "sha256": "e8064c505c2d015907d5b588f6b3d7b31e30c3aafbe5095dc0ef9d60c5ad1e46",
+          "source_id": "mengto-skills",
+          "source_path": "agent-skills/codex/performance-profiling/references/energy-diagnostics.md",
+          "target_path": "references/energy-diagnostics.md"
+        },
+        {
+          "authority": "procedural-guidance",
+          "reference_path": "references/mengto/codex/performance-profiling/references/launch-optimization.md",
+          "role": "frontend-procedure-reference",
+          "sha256": "117cc130c62a9565155239818ab847fdda240f5ea246e659725f771611b2460b",
+          "source_id": "mengto-skills",
+          "source_path": "agent-skills/codex/performance-profiling/references/launch-optimization.md",
+          "target_path": "references/launch-optimization.md"
+        },
+        {
+          "authority": "procedural-guidance",
+          "reference_path": "references/mengto/codex/performance-profiling/references/memory-profiling.md",
+          "role": "frontend-procedure-reference",
+          "sha256": "1d06b26c04391229d4ba96bfa962051100c7e41285e76671013fed9a018ed1c9",
+          "source_id": "mengto-skills",
+          "source_path": "agent-skills/codex/performance-profiling/references/memory-profiling.md",
+          "target_path": "references/memory-profiling.md"
+        },
+        {
+          "authority": "procedural-guidance",
+          "reference_path": "references/mengto/codex/performance-profiling/references/time-profiler.md",
+          "role": "frontend-procedure-reference",
+          "sha256": "7744b8791a936418221ade47c50269535982acaf970fa35d3ec5aa680e167149",
+          "source_id": "mengto-skills",
+          "source_path": "agent-skills/codex/performance-profiling/references/time-profiler.md",
+          "target_path": "references/time-profiler.md"
+        }
+      ]
     },
     {
       "authority": "procedural-guidance",
@@ -768,34 +904,103 @@
       "authority": "procedural-guidance",
       "decision": "included",
       "name": "stitched-full-page-capture",
-      "reference_path": "references/mengto/codex/stitched-full-page-capture.md",
+      "reference_path": "references/mengto/codex/stitched-full-page-capture/procedure.md",
       "sha256": "0ff78c19ffd8162e4cb3c44d5e225ab570c55082d2098a73ffb7dad8d295ed01",
       "source_id": "mengto-skills",
-      "source_path": "agent-skills/codex/stitched-full-page-capture/SKILL.md"
+      "source_path": "agent-skills/codex/stitched-full-page-capture/SKILL.md",
+      "supporting_files": [
+        {
+          "authority": "procedural-guidance",
+          "reference_path": "references/mengto/codex/stitched-full-page-capture/scripts/stitch_full_page_capture.mjs",
+          "role": "frontend-procedure-reference",
+          "sha256": "0c29b22061882ffd1db8714340a58bfd3f645aa3c0c14a7ba828a74e1fdb6303",
+          "source_id": "mengto-skills",
+          "source_path": "agent-skills/codex/stitched-full-page-capture/scripts/stitch_full_page_capture.mjs",
+          "target_path": "scripts/stitch_full_page_capture.mjs"
+        }
+      ]
     },
     {
       "authority": "procedural-guidance",
       "decision": "included",
       "name": "swiftui-debugging",
-      "reference_path": "references/mengto/codex/swiftui-debugging.md",
+      "reference_path": "references/mengto/codex/swiftui-debugging/procedure.md",
       "sha256": "3c4b3665faf58cf03abebbceedc9e84325b002e17a9a16bd1f78f35bf0b073ca",
       "source_id": "mengto-skills",
-      "source_path": "agent-skills/codex/swiftui-debugging/SKILL.md"
+      "source_path": "agent-skills/codex/swiftui-debugging/SKILL.md",
+      "supporting_files": [
+        {
+          "authority": "original-upstream-substitution",
+          "reference_path": "references/mengto/codex/swiftui-debugging/references/body-reevaluation.md",
+          "role": "mengto-procedure-dependency",
+          "sha256": "fc5599a5007e92d4a2d429d51a1230fd9cd8b647f11aca794ce8a8fe49e9e689",
+          "source_id": "apple-swiftui-debugging",
+          "source_path": "skills/performance/swiftui-debugging/body-reevaluation.md",
+          "target_path": "references/body-reevaluation.md"
+        },
+        {
+          "authority": "original-upstream-substitution",
+          "reference_path": "references/mengto/codex/swiftui-debugging/references/common-pitfalls.md",
+          "role": "mengto-procedure-dependency",
+          "sha256": "dcf44203d24457686e61cda15d31623de76f299e95eea008b53f897e14ad9e89",
+          "source_id": "apple-swiftui-debugging",
+          "source_path": "skills/performance/swiftui-debugging/common-pitfalls.md",
+          "target_path": "references/common-pitfalls.md"
+        },
+        {
+          "authority": "original-upstream-substitution",
+          "reference_path": "references/mengto/codex/swiftui-debugging/references/lazy-loading.md",
+          "role": "mengto-procedure-dependency",
+          "sha256": "d07b91aba3e705617b851a9ea61dbe3c318b6b52a991061181bee5c2aa95806b",
+          "source_id": "apple-swiftui-debugging",
+          "source_path": "skills/performance/swiftui-debugging/lazy-loading.md",
+          "target_path": "references/lazy-loading.md"
+        },
+        {
+          "authority": "original-upstream-substitution",
+          "reference_path": "references/mengto/codex/swiftui-debugging/references/upstream-license.md",
+          "role": "mengto-procedure-dependency",
+          "sha256": "7c90586a6b5c334e403c5fd11397926d85b1f063d68f6d1199b005cd61b148b3",
+          "source_id": "apple-swiftui-debugging",
+          "source_path": "LICENSE",
+          "target_path": "references/upstream-license.md"
+        },
+        {
+          "authority": "original-upstream-substitution",
+          "reference_path": "references/mengto/codex/swiftui-debugging/references/view-identity.md",
+          "role": "mengto-procedure-dependency",
+          "sha256": "435a90f22d68da8de596ba76d160d158b9a18ab3892e061d6e59eb8fe2d02d3e",
+          "source_id": "apple-swiftui-debugging",
+          "source_path": "skills/performance/swiftui-debugging/view-identity.md",
+          "target_path": "references/view-identity.md"
+        }
+      ]
     },
     {
       "authority": "procedural-guidance",
       "decision": "included",
       "name": "video-to-superprompt",
-      "reference_path": "references/mengto/codex/video-to-superprompt.md",
+      "reference_path": "references/mengto/codex/video-to-superprompt/procedure.md",
       "sha256": "2b0db0096fb715f9e5c6be419f2be5caf0df5e1991ac019308185e2d72c2f950",
       "source_id": "mengto-skills",
-      "source_path": "agent-skills/codex/video-to-superprompt/SKILL.md"
+      "source_path": "agent-skills/codex/video-to-superprompt/SKILL.md",
+      "supporting_files": [
+        {
+          "authority": "procedural-guidance",
+          "reference_path": "references/mengto/codex/video-to-superprompt/references/superprompt-template.md",
+          "role": "frontend-procedure-reference",
+          "sha256": "8f5d73d56a453a754ad325f3f512a455f34711ea07677539d445672b7016361d",
+          "source_id": "mengto-skills",
+          "source_path": "agent-skills/codex/video-to-superprompt/references/superprompt-template.md",
+          "target_path": "references/superprompt-template.md"
+        }
+      ]
     },
     {
       "authority": "procedural-guidance",
       "decision": "included",
       "name": "x-bookmark-quote-posts",
-      "reference_path": "references/mengto/codex/x-bookmark-quote-posts.md",
+      "reference_path": "references/mengto/codex/x-bookmark-quote-posts/procedure.md",
       "sha256": "0426567c701ee9f03c7f532cb49eec982c8ce2e37c8f0e32d12410e201b7a37f",
       "source_id": "mengto-skills",
       "source_path": "agent-skills/codex/x-bookmark-quote-posts/SKILL.md"
@@ -804,7 +1009,7 @@
       "authority": "procedural-guidance",
       "decision": "included",
       "name": "aura-asset-images",
-      "reference_path": "references/mengto/media/aura-asset-images.md",
+      "reference_path": "references/mengto/media/aura-asset-images/procedure.md",
       "sha256": "c902c2b2b8182b4738c7e6a93d5a33fe62a495844c2e0b4a7b0152812b93cd76",
       "source_id": "mengto-skills",
       "source_path": "agent-skills/media/aura-asset-images/SKILL.md"
@@ -813,7 +1018,7 @@
       "authority": "procedural-guidance",
       "decision": "included",
       "name": "unsplash-asset-images",
-      "reference_path": "references/mengto/media/unsplash-asset-images.md",
+      "reference_path": "references/mengto/media/unsplash-asset-images/procedure.md",
       "sha256": "cd057d9a7dcaf2de444aec22c1f3277392aab85b9a296beabc20ba3a7b48950c",
       "source_id": "mengto-skills",
       "source_path": "agent-skills/media/unsplash-asset-images/SKILL.md"
@@ -822,7 +1027,7 @@
       "authority": "procedural-guidance",
       "decision": "included",
       "name": "design-first-ui-prompting",
-      "reference_path": "references/mengto/ui/design-first-ui-prompting.md",
+      "reference_path": "references/mengto/ui/design-first-ui-prompting/procedure.md",
       "sha256": "5e3d4db0eb0ea983f2bedb90f28f358901c292388a7889e2f66ac133ceff743c",
       "source_id": "mengto-skills",
       "source_path": "agent-skills/ui/design-first-ui-prompting/SKILL.md"
@@ -831,7 +1036,7 @@
       "authority": "procedural-guidance",
       "decision": "included",
       "name": "design-taste-frontend",
-      "reference_path": "references/mengto/ui/design-taste-frontend.md",
+      "reference_path": "references/mengto/ui/design-taste-frontend/procedure.md",
       "sha256": "740502c9deccec6d096396f4f417a171a940d97c9f7fb45b914f07159e588b16",
       "source_id": "mengto-skills",
       "source_path": "agent-skills/ui/design-taste-frontend/SKILL.md"
@@ -858,7 +1063,7 @@
       "authority": "procedural-guidance",
       "decision": "included",
       "name": "full-output-enforcement",
-      "reference_path": "references/mengto/ui/full-output-enforcement.md",
+      "reference_path": "references/mengto/ui/full-output-enforcement/procedure.md",
       "sha256": "e5bf48b1ae561511439cf71672209a10a88cee0968cc925909ff861dfa0a96a7",
       "source_id": "mengto-skills",
       "source_path": "agent-skills/ui/full-output-enforcement/SKILL.md"
@@ -867,7 +1072,7 @@
       "authority": "procedural-guidance",
       "decision": "included",
       "name": "gpt-taste",
-      "reference_path": "references/mengto/ui/gpt-taste.md",
+      "reference_path": "references/mengto/ui/gpt-taste/procedure.md",
       "sha256": "6424b6186abb393084f383bbbf3a01cda74536ccb25b07b1c7458ac9c8704c32",
       "source_id": "mengto-skills",
       "source_path": "agent-skills/ui/gpt-taste/SKILL.md"
@@ -876,7 +1081,7 @@
       "authority": "procedural-guidance",
       "decision": "included",
       "name": "high-end-visual-design",
-      "reference_path": "references/mengto/ui/high-end-visual-design.md",
+      "reference_path": "references/mengto/ui/high-end-visual-design/procedure.md",
       "sha256": "30bbbb87ff40cb2169fe6acfc3d14da0a3294c379278cd32da8f4af9ed91faa0",
       "source_id": "mengto-skills",
       "source_path": "agent-skills/ui/high-end-visual-design/SKILL.md"
@@ -885,7 +1090,7 @@
       "authority": "procedural-guidance",
       "decision": "included",
       "name": "image-to-code",
-      "reference_path": "references/mengto/ui/image-to-code.md",
+      "reference_path": "references/mengto/ui/image-to-code/procedure.md",
       "sha256": "1982b382302124fae3d9c8543790710a7e48aa58773b0530a4c116998c913044",
       "source_id": "mengto-skills",
       "source_path": "agent-skills/ui/image-to-code/SKILL.md"
@@ -894,7 +1099,7 @@
       "authority": "procedural-guidance",
       "decision": "included",
       "name": "industrial-brutalist-ui",
-      "reference_path": "references/mengto/ui/industrial-brutalist-ui.md",
+      "reference_path": "references/mengto/ui/industrial-brutalist-ui/procedure.md",
       "sha256": "fffbaac8597f07679e9d87145533567658aedba3b5eca6f16a7075a333048caa",
       "source_id": "mengto-skills",
       "source_path": "agent-skills/ui/industrial-brutalist-ui/SKILL.md"
@@ -903,7 +1108,7 @@
       "authority": "procedural-guidance",
       "decision": "included",
       "name": "minimalist-ui",
-      "reference_path": "references/mengto/ui/minimalist-ui.md",
+      "reference_path": "references/mengto/ui/minimalist-ui/procedure.md",
       "sha256": "75a5ff3ebd586daf4ea181ab095c6d16187eef609105a8bdc022cc31ca615b41",
       "source_id": "mengto-skills",
       "source_path": "agent-skills/ui/minimalist-ui/SKILL.md"
@@ -912,7 +1117,7 @@
       "authority": "procedural-guidance",
       "decision": "included",
       "name": "redesign-existing-projects",
-      "reference_path": "references/mengto/ui/redesign-existing-projects.md",
+      "reference_path": "references/mengto/ui/redesign-existing-projects/procedure.md",
       "sha256": "2edc195899c718e0eedc1418455770a018b6785b6226160775ff8c91335fc1d4",
       "source_id": "mengto-skills",
       "source_path": "agent-skills/ui/redesign-existing-projects/SKILL.md"
@@ -921,16 +1126,27 @@
       "authority": "procedural-guidance",
       "decision": "included",
       "name": "seo-audit",
-      "reference_path": "references/mengto/ui/seo-audit.md",
+      "reference_path": "references/mengto/ui/seo-audit/procedure.md",
       "sha256": "4efff2546fecadb054122b77f78beda1fe130bd0aa39293cf82b2a29181571fd",
       "source_id": "mengto-skills",
-      "source_path": "agent-skills/ui/seo-audit/SKILL.md"
+      "source_path": "agent-skills/ui/seo-audit/SKILL.md",
+      "supporting_files": [
+        {
+          "authority": "original-upstream-byte-identical",
+          "reference_path": "references/mengto/ui/seo-audit/references/ai-writing-detection.md",
+          "role": "mengto-procedure-dependency",
+          "sha256": "f1e273f56ce7e2215ff218bf903680ddcec0fd026ab90c3ebfb3439ed0edfaa4",
+          "source_id": "marketing-skills",
+          "source_path": "skills/seo-audit/references/ai-writing-detection.md",
+          "target_path": "references/ai-writing-detection.md"
+        }
+      ]
     },
     {
       "authority": "procedural-guidance",
       "decision": "included",
       "name": "stitch-design-taste",
-      "reference_path": "references/mengto/ui/stitch-design-taste.md",
+      "reference_path": "references/mengto/ui/stitch-design-taste/procedure.md",
       "sha256": "1cd55cf8643f3828bc9a3aaadb5da97ee28f98f745b7071d7e217ffeab92fd2a",
       "source_id": "mengto-skills",
       "source_path": "agent-skills/ui/stitch-design-taste/SKILL.md"
@@ -939,16 +1155,99 @@
       "authority": "procedural-guidance",
       "decision": "included",
       "name": "swiftui-pro",
-      "reference_path": "references/mengto/ui/swiftui-pro.md",
+      "reference_path": "references/mengto/ui/swiftui-pro/procedure.md",
       "sha256": "016a4fb9cad11596fa2038dd3eb4c8ff10b1a054025fe8fea104ad3cc5d9ff89",
       "source_id": "mengto-skills",
-      "source_path": "agent-skills/ui/swiftui-pro/SKILL.md"
+      "source_path": "agent-skills/ui/swiftui-pro/SKILL.md",
+      "supporting_files": [
+        {
+          "authority": "original-upstream-byte-identical",
+          "reference_path": "references/mengto/ui/swiftui-pro/references/accessibility.md",
+          "role": "mengto-procedure-dependency",
+          "sha256": "708d09a35c950fd4c118bbb3cfcab13bb146e7d02084615307bbabc19e00a0e3",
+          "source_id": "swiftui-agent-skill",
+          "source_path": "swiftui-pro/references/accessibility.md",
+          "target_path": "references/accessibility.md"
+        },
+        {
+          "authority": "original-upstream-byte-identical",
+          "reference_path": "references/mengto/ui/swiftui-pro/references/api.md",
+          "role": "mengto-procedure-dependency",
+          "sha256": "12fa73d65a19c9d08224f925801db8eec914b1cedf5b2f86a38cdda04a66377a",
+          "source_id": "swiftui-agent-skill",
+          "source_path": "swiftui-pro/references/api.md",
+          "target_path": "references/api.md"
+        },
+        {
+          "authority": "original-upstream-byte-identical",
+          "reference_path": "references/mengto/ui/swiftui-pro/references/data.md",
+          "role": "mengto-procedure-dependency",
+          "sha256": "5cc50484c525f748839e12174c065f7ea5fdd4380ce04b6885a906ecd6e6a318",
+          "source_id": "swiftui-agent-skill",
+          "source_path": "swiftui-pro/references/data.md",
+          "target_path": "references/data.md"
+        },
+        {
+          "authority": "original-upstream-byte-identical",
+          "reference_path": "references/mengto/ui/swiftui-pro/references/design.md",
+          "role": "mengto-procedure-dependency",
+          "sha256": "03e35d46865cc6807255f3c8481cdbac7b3b0f61924185af84c1913d6c983c69",
+          "source_id": "swiftui-agent-skill",
+          "source_path": "swiftui-pro/references/design.md",
+          "target_path": "references/design.md"
+        },
+        {
+          "authority": "original-upstream-byte-identical",
+          "reference_path": "references/mengto/ui/swiftui-pro/references/hygiene.md",
+          "role": "mengto-procedure-dependency",
+          "sha256": "91d96f45f3ffa02f5553c288415f3c3d5f317cab7d8d9c6c60240ea6c44a2b01",
+          "source_id": "swiftui-agent-skill",
+          "source_path": "swiftui-pro/references/hygiene.md",
+          "target_path": "references/hygiene.md"
+        },
+        {
+          "authority": "original-upstream-byte-identical",
+          "reference_path": "references/mengto/ui/swiftui-pro/references/navigation.md",
+          "role": "mengto-procedure-dependency",
+          "sha256": "a3adb302455993aff85bbb6b5845ed2fcffa137c8b2ded99c937f3e4b7fcd77b",
+          "source_id": "swiftui-agent-skill",
+          "source_path": "swiftui-pro/references/navigation.md",
+          "target_path": "references/navigation.md"
+        },
+        {
+          "authority": "original-upstream-byte-identical",
+          "reference_path": "references/mengto/ui/swiftui-pro/references/performance.md",
+          "role": "mengto-procedure-dependency",
+          "sha256": "1b503e3807e216d6b34b45f18bfba89214cea2fa1b88dd7ae8f482ebf0f03616",
+          "source_id": "swiftui-agent-skill",
+          "source_path": "swiftui-pro/references/performance.md",
+          "target_path": "references/performance.md"
+        },
+        {
+          "authority": "original-upstream-byte-identical",
+          "reference_path": "references/mengto/ui/swiftui-pro/references/swift.md",
+          "role": "mengto-procedure-dependency",
+          "sha256": "8c31c5f5f99b3fa9586f0260cd1a4b1688dc7bda5e8de2891eb3f9d6a791125a",
+          "source_id": "swiftui-agent-skill",
+          "source_path": "swiftui-pro/references/swift.md",
+          "target_path": "references/swift.md"
+        },
+        {
+          "authority": "original-upstream-byte-identical",
+          "reference_path": "references/mengto/ui/swiftui-pro/references/views.md",
+          "role": "mengto-procedure-dependency",
+          "sha256": "87cdd3d96e8e562aefe35070a59664e3536cfcc014bd8437cff603477f7e5a1d",
+          "source_id": "swiftui-agent-skill",
+          "source_path": "swiftui-pro/references/views.md",
+          "target_path": "references/views.md"
+        }
+      ]
     },
     {
       "authority": "procedural-guidance",
       "decision": "included",
       "name": "agency-grid-layout-minimal",
-      "reference_path": "references/mengto/web-design/agency-grid-layout-minimal.md",
+      "reference_path": "references/mengto/web-design/agency-grid-layout-minimal/procedure.md",
       "sha256": "1787eba87fef34cf72219d0016de89910e19e383f6b01d250a11e9490a93018e",
       "source_id": "mengto-skills",
       "source_path": "agent-skills/web-design/agency-grid-layout-minimal/SKILL.md"
@@ -957,7 +1256,7 @@
       "authority": "procedural-guidance",
       "decision": "included",
       "name": "animation-on-scroll",
-      "reference_path": "references/mengto/web-design/animation-on-scroll.md",
+      "reference_path": "references/mengto/web-design/animation-on-scroll/procedure.md",
       "sha256": "4c9c795a9d5d8f7baf0b141394ebc0a4fd30e22234b37ff63fbf38e7cceefadf",
       "source_id": "mengto-skills",
       "source_path": "agent-skills/web-design/animation-on-scroll/SKILL.md"
@@ -966,7 +1265,7 @@
       "authority": "procedural-guidance",
       "decision": "included",
       "name": "animation-systems",
-      "reference_path": "references/mengto/web-design/animation-systems.md",
+      "reference_path": "references/mengto/web-design/animation-systems/procedure.md",
       "sha256": "ae1e51b8eede6f4d05fda5388f61bbc1d29ea88b7a5d7a488c3ecfed5f18e262",
       "source_id": "mengto-skills",
       "source_path": "agent-skills/web-design/animation-systems/SKILL.md"
@@ -975,7 +1274,7 @@
       "authority": "procedural-guidance",
       "decision": "included",
       "name": "atmosphere-background",
-      "reference_path": "references/mengto/web-design/atmosphere-background.md",
+      "reference_path": "references/mengto/web-design/atmosphere-background/procedure.md",
       "sha256": "ded4a155cf5676f2aab3f1873634e08766ad31aa6ae1107e5a29c114dc1cf213",
       "source_id": "mengto-skills",
       "source_path": "agent-skills/web-design/atmosphere-background/SKILL.md"
@@ -984,7 +1283,7 @@
       "authority": "procedural-guidance",
       "decision": "included",
       "name": "background-grid-webgl",
-      "reference_path": "references/mengto/web-design/background-grid-webgl.md",
+      "reference_path": "references/mengto/web-design/background-grid-webgl/procedure.md",
       "sha256": "07c155855b67a96cbb4d51d82696fe9550c2670a13a30fb6b71506d5c0685457",
       "source_id": "mengto-skills",
       "source_path": "agent-skills/web-design/background-grid-webgl/SKILL.md"
@@ -993,7 +1292,7 @@
       "authority": "procedural-guidance",
       "decision": "included",
       "name": "beautiful-shadows",
-      "reference_path": "references/mengto/web-design/beautiful-shadows.md",
+      "reference_path": "references/mengto/web-design/beautiful-shadows/procedure.md",
       "sha256": "10b6cc0964919118218ffe0845e4a00954f39788d89d4ec29827d100f254e135",
       "source_id": "mengto-skills",
       "source_path": "agent-skills/web-design/beautiful-shadows/SKILL.md"
@@ -1002,7 +1301,7 @@
       "authority": "procedural-guidance",
       "decision": "included",
       "name": "blue-cloudy-clean-modern",
-      "reference_path": "references/mengto/web-design/blue-cloudy-clean-modern.md",
+      "reference_path": "references/mengto/web-design/blue-cloudy-clean-modern/procedure.md",
       "sha256": "212618080012349f13e1c8819048e62e9c6193b8b2d2a5e33d219ce487c5e305",
       "source_id": "mengto-skills",
       "source_path": "agent-skills/web-design/blue-cloudy-clean-modern/SKILL.md"
@@ -1011,7 +1310,7 @@
       "authority": "procedural-guidance",
       "decision": "included",
       "name": "blue-laser-clean-glass-layout",
-      "reference_path": "references/mengto/web-design/blue-laser-clean-glass-layout.md",
+      "reference_path": "references/mengto/web-design/blue-laser-clean-glass-layout/procedure.md",
       "sha256": "63cbabae394a24c1b8c4cc98dafc3bfe8c045652b20713f8a3d8edc1061530e0",
       "source_id": "mengto-skills",
       "source_path": "agent-skills/web-design/blue-laser-clean-glass-layout/SKILL.md"
@@ -1020,7 +1319,7 @@
       "authority": "procedural-guidance",
       "decision": "included",
       "name": "book-serif-index",
-      "reference_path": "references/mengto/web-design/book-serif-index.md",
+      "reference_path": "references/mengto/web-design/book-serif-index/procedure.md",
       "sha256": "d53a95a47bb0fc7b047445a15e59a2b4bb126d6c8d9caac163378b19bf3948be",
       "source_id": "mengto-skills",
       "source_path": "agent-skills/web-design/book-serif-index/SKILL.md"
@@ -1029,7 +1328,7 @@
       "authority": "procedural-guidance",
       "decision": "included",
       "name": "bright-green-tech-system-webgl",
-      "reference_path": "references/mengto/web-design/bright-green-tech-system-webgl.md",
+      "reference_path": "references/mengto/web-design/bright-green-tech-system-webgl/procedure.md",
       "sha256": "ba4cf84328189502dbd9c95f42bba68346d303f9b3f41cbc6c922f52fdec2fbf",
       "source_id": "mengto-skills",
       "source_path": "agent-skills/web-design/bright-green-tech-system-webgl/SKILL.md"
@@ -1038,7 +1337,7 @@
       "authority": "procedural-guidance",
       "decision": "included",
       "name": "cinematic-gsap-lenis-motion-system",
-      "reference_path": "references/mengto/web-design/cinematic-gsap-lenis-motion-system.md",
+      "reference_path": "references/mengto/web-design/cinematic-gsap-lenis-motion-system/procedure.md",
       "sha256": "7b8f5745f34ef4ba507e19fabd6acf9cd3b8d70efda81746d0f4090af0f84e06",
       "source_id": "mengto-skills",
       "source_path": "agent-skills/web-design/cinematic-gsap-lenis-motion-system/SKILL.md"
@@ -1047,7 +1346,7 @@
       "authority": "procedural-guidance",
       "decision": "included",
       "name": "cinematic-scroll-storytelling",
-      "reference_path": "references/mengto/web-design/cinematic-scroll-storytelling.md",
+      "reference_path": "references/mengto/web-design/cinematic-scroll-storytelling/procedure.md",
       "sha256": "3e203d1a38917004396f07b5887418e9e13dc832506754f5a4ad6303525b1572",
       "source_id": "mengto-skills",
       "source_path": "agent-skills/web-design/cinematic-scroll-storytelling/SKILL.md"
@@ -1056,7 +1355,7 @@
       "authority": "procedural-guidance",
       "decision": "included",
       "name": "clean-minimal-beige-light-mode",
-      "reference_path": "references/mengto/web-design/clean-minimal-beige-light-mode.md",
+      "reference_path": "references/mengto/web-design/clean-minimal-beige-light-mode/procedure.md",
       "sha256": "675e5d268ae36ae4aa59ff06cdaf19f67169defedc7a2cf5e7ca03a8f3eadb05",
       "source_id": "mengto-skills",
       "source_path": "agent-skills/web-design/clean-minimal-beige-light-mode/SKILL.md"
@@ -1065,7 +1364,7 @@
       "authority": "procedural-guidance",
       "decision": "included",
       "name": "cobejs",
-      "reference_path": "references/mengto/web-design/cobejs.md",
+      "reference_path": "references/mengto/web-design/cobejs/procedure.md",
       "sha256": "4f050b7495a5b19d05fb89736c6c61df4feacab07f23aae20cf8a8a79a53bbef",
       "source_id": "mengto-skills",
       "source_path": "agent-skills/web-design/cobejs/SKILL.md"
@@ -1074,7 +1373,7 @@
       "authority": "procedural-guidance",
       "decision": "included",
       "name": "company-logos",
-      "reference_path": "references/mengto/web-design/company-logos.md",
+      "reference_path": "references/mengto/web-design/company-logos/procedure.md",
       "sha256": "d089dd870e8f4012acc3bc1bf55855346a7e39fa4e975868f6ed2d495eb82729",
       "source_id": "mengto-skills",
       "source_path": "agent-skills/web-design/company-logos/SKILL.md"
@@ -1083,7 +1382,7 @@
       "authority": "procedural-guidance",
       "decision": "included",
       "name": "container-lines",
-      "reference_path": "references/mengto/web-design/container-lines.md",
+      "reference_path": "references/mengto/web-design/container-lines/procedure.md",
       "sha256": "b2eb19356c14c034d8e077452ede319835b841b7aa046ec3cd0a4460cc7911b6",
       "source_id": "mengto-skills",
       "source_path": "agent-skills/web-design/container-lines/SKILL.md"
@@ -1092,7 +1391,7 @@
       "authority": "procedural-guidance",
       "decision": "included",
       "name": "corner-diagonals",
-      "reference_path": "references/mengto/web-design/corner-diagonals.md",
+      "reference_path": "references/mengto/web-design/corner-diagonals/procedure.md",
       "sha256": "ffb61cc0a8fae762d6ff59e526aa26e7b18349ae040f125502811b63c289a310",
       "source_id": "mengto-skills",
       "source_path": "agent-skills/web-design/corner-diagonals/SKILL.md"
@@ -1101,7 +1400,7 @@
       "authority": "procedural-guidance",
       "decision": "included",
       "name": "corner-lasers",
-      "reference_path": "references/mengto/web-design/corner-lasers.md",
+      "reference_path": "references/mengto/web-design/corner-lasers/procedure.md",
       "sha256": "7a6766480ca8f5aa98d7f8dd92ccd378c8b32db139cb5ef0f3fd1c9930aee565",
       "source_id": "mengto-skills",
       "source_path": "agent-skills/web-design/corner-lasers/SKILL.md"
@@ -1110,7 +1409,7 @@
       "authority": "procedural-guidance",
       "decision": "included",
       "name": "css-alpha-masking",
-      "reference_path": "references/mengto/web-design/css-alpha-masking.md",
+      "reference_path": "references/mengto/web-design/css-alpha-masking/procedure.md",
       "sha256": "049241d4c086b0f95af2ab68857435f604fee07e5744a856b385e3c212a638e1",
       "source_id": "mengto-skills",
       "source_path": "agent-skills/web-design/css-alpha-masking/SKILL.md"
@@ -1119,7 +1418,7 @@
       "authority": "procedural-guidance",
       "decision": "included",
       "name": "css-border-gradient",
-      "reference_path": "references/mengto/web-design/css-border-gradient.md",
+      "reference_path": "references/mengto/web-design/css-border-gradient/procedure.md",
       "sha256": "6c5e1924a7ec55044aca52801cd30efb06cb922fa47e4c4b85d16b39471c922a",
       "source_id": "mengto-skills",
       "source_path": "agent-skills/web-design/css-border-gradient/SKILL.md"
@@ -1128,7 +1427,7 @@
       "authority": "procedural-guidance",
       "decision": "included",
       "name": "dark-blue-contrasting-clean",
-      "reference_path": "references/mengto/web-design/dark-blue-contrasting-clean.md",
+      "reference_path": "references/mengto/web-design/dark-blue-contrasting-clean/procedure.md",
       "sha256": "d92603c74fc0835e1ca4ed1c8b367ea453e67c5f4c990e60d3e2c3178c341aeb",
       "source_id": "mengto-skills",
       "source_path": "agent-skills/web-design/dark-blue-contrasting-clean/SKILL.md"
@@ -1137,7 +1436,7 @@
       "authority": "procedural-guidance",
       "decision": "included",
       "name": "dark-glass-clean-layout",
-      "reference_path": "references/mengto/web-design/dark-glass-clean-layout.md",
+      "reference_path": "references/mengto/web-design/dark-glass-clean-layout/procedure.md",
       "sha256": "e51661080ce76a5386f2490406c95d5ad8e50f0d44ef55b0d972fb87a0baa560",
       "source_id": "mengto-skills",
       "source_path": "agent-skills/web-design/dark-glass-clean-layout/SKILL.md"
@@ -1146,7 +1445,7 @@
       "authority": "procedural-guidance",
       "decision": "included",
       "name": "dither-background",
-      "reference_path": "references/mengto/web-design/dither-background.md",
+      "reference_path": "references/mengto/web-design/dither-background/procedure.md",
       "sha256": "aa6520dc7dcb8dc3dc9a382a4363b57cad01a6745fbc05ce609539d38663c40b",
       "source_id": "mengto-skills",
       "source_path": "agent-skills/web-design/dither-background/SKILL.md"
@@ -1155,7 +1454,7 @@
       "authority": "procedural-guidance",
       "decision": "included",
       "name": "dither-laser-dark-mode",
-      "reference_path": "references/mengto/web-design/dither-laser-dark-mode.md",
+      "reference_path": "references/mengto/web-design/dither-laser-dark-mode/procedure.md",
       "sha256": "afbf1b3161ea8c5b92f69fef0abdeb299f128aaa055730998cae32d1896d7e57",
       "source_id": "mengto-skills",
       "source_path": "agent-skills/web-design/dither-laser-dark-mode/SKILL.md"
@@ -1164,7 +1463,7 @@
       "authority": "procedural-guidance",
       "decision": "included",
       "name": "editorial-tech",
-      "reference_path": "references/mengto/web-design/editorial-tech.md",
+      "reference_path": "references/mengto/web-design/editorial-tech/procedure.md",
       "sha256": "9f032de321c81b2e7ae7fa451d6b3c7bdb7dfbf082ff735e5af4868e3a0b9300",
       "source_id": "mengto-skills",
       "source_path": "agent-skills/web-design/editorial-tech/SKILL.md"
@@ -1173,7 +1472,7 @@
       "authority": "procedural-guidance",
       "decision": "included",
       "name": "framed-grid-layout",
-      "reference_path": "references/mengto/web-design/framed-grid-layout.md",
+      "reference_path": "references/mengto/web-design/framed-grid-layout/procedure.md",
       "sha256": "0888e311ada1a4d8967a26a3650b5a521cce54bb2aad627f6c32ff12b3b03da9",
       "source_id": "mengto-skills",
       "source_path": "agent-skills/web-design/framed-grid-layout/SKILL.md"
@@ -1182,7 +1481,7 @@
       "authority": "procedural-guidance",
       "decision": "included",
       "name": "framed-tech-dark-border-gradient",
-      "reference_path": "references/mengto/web-design/framed-tech-dark-border-gradient.md",
+      "reference_path": "references/mengto/web-design/framed-tech-dark-border-gradient/procedure.md",
       "sha256": "ab553a6dceadfc4b391d4e3927a64b9c408eb60f41468d02d0d153902295c154",
       "source_id": "mengto-skills",
       "source_path": "agent-skills/web-design/framed-tech-dark-border-gradient/SKILL.md"
@@ -1191,7 +1490,7 @@
       "authority": "procedural-guidance",
       "decision": "included",
       "name": "funky-purple-container-tech",
-      "reference_path": "references/mengto/web-design/funky-purple-container-tech.md",
+      "reference_path": "references/mengto/web-design/funky-purple-container-tech/procedure.md",
       "sha256": "101e990d553e0cb13c6aeb485865e706e5fa7456a105a039f2439554b0a31dae",
       "source_id": "mengto-skills",
       "source_path": "agent-skills/web-design/funky-purple-container-tech/SKILL.md"
@@ -1200,7 +1499,7 @@
       "authority": "procedural-guidance",
       "decision": "included",
       "name": "glass-dark-mode-clock",
-      "reference_path": "references/mengto/web-design/glass-dark-mode-clock.md",
+      "reference_path": "references/mengto/web-design/glass-dark-mode-clock/procedure.md",
       "sha256": "7be1a8d076cd1e940f33ae6a6f5b9aaaa91c1078c15b511623a38da30b3397ce",
       "source_id": "mengto-skills",
       "source_path": "agent-skills/web-design/glass-dark-mode-clock/SKILL.md"
@@ -1209,7 +1508,7 @@
       "authority": "procedural-guidance",
       "decision": "included",
       "name": "glass-dark-ui",
-      "reference_path": "references/mengto/web-design/glass-dark-ui.md",
+      "reference_path": "references/mengto/web-design/glass-dark-ui/procedure.md",
       "sha256": "ff607716e434e6aecb53e738122d28cd149034f51ff35c4e3bf4690d7b69c9d3",
       "source_id": "mengto-skills",
       "source_path": "agent-skills/web-design/glass-dark-ui/SKILL.md"
@@ -1218,7 +1517,7 @@
       "authority": "procedural-guidance",
       "decision": "included",
       "name": "globe-gl",
-      "reference_path": "references/mengto/web-design/globe-gl.md",
+      "reference_path": "references/mengto/web-design/globe-gl/procedure.md",
       "sha256": "e2739e1f035f78aba3268ff2ce2a5b0b13fa33422781071f94c22e87a58de912",
       "source_id": "mengto-skills",
       "source_path": "agent-skills/web-design/globe-gl/SKILL.md"
@@ -1227,7 +1526,7 @@
       "authority": "procedural-guidance",
       "decision": "included",
       "name": "globe-particles",
-      "reference_path": "references/mengto/web-design/globe-particles.md",
+      "reference_path": "references/mengto/web-design/globe-particles/procedure.md",
       "sha256": "b29b372a1790954ea97746dc1ca62d82cc605c00ba4b88d95c3a1f0dcba4e171",
       "source_id": "mengto-skills",
       "source_path": "agent-skills/web-design/globe-particles/SKILL.md"
@@ -1236,7 +1535,7 @@
       "authority": "procedural-guidance",
       "decision": "included",
       "name": "gooey-blob-system",
-      "reference_path": "references/mengto/web-design/gooey-blob-system.md",
+      "reference_path": "references/mengto/web-design/gooey-blob-system/procedure.md",
       "sha256": "48cef691946621cb90b0891a19b9bf9076fddfe54961847f78223515475894bd",
       "source_id": "mengto-skills",
       "source_path": "agent-skills/web-design/gooey-blob-system/SKILL.md"
@@ -1245,7 +1544,7 @@
       "authority": "procedural-guidance",
       "decision": "included",
       "name": "gsap-scrolltrigger-storytelling",
-      "reference_path": "references/mengto/web-design/gsap-scrolltrigger-storytelling.md",
+      "reference_path": "references/mengto/web-design/gsap-scrolltrigger-storytelling/procedure.md",
       "sha256": "c388738853064f4bbb4293b910efc0fb82f957298a49c94214c2522b138ae939",
       "source_id": "mengto-skills",
       "source_path": "agent-skills/web-design/gsap-scrolltrigger-storytelling/SKILL.md"
@@ -1254,7 +1553,7 @@
       "authority": "procedural-guidance",
       "decision": "included",
       "name": "gsap",
-      "reference_path": "references/mengto/web-design/gsap.md",
+      "reference_path": "references/mengto/web-design/gsap/procedure.md",
       "sha256": "eb9a0a84f0747fa19ce693cf776328945aebee1205ddc42c518c133c2ab6cb42",
       "source_id": "mengto-skills",
       "source_path": "agent-skills/web-design/gsap/SKILL.md"
@@ -1263,7 +1562,7 @@
       "authority": "procedural-guidance",
       "decision": "included",
       "name": "high-contrast-skeuomorphic-clean",
-      "reference_path": "references/mengto/web-design/high-contrast-skeuomorphic-clean.md",
+      "reference_path": "references/mengto/web-design/high-contrast-skeuomorphic-clean/procedure.md",
       "sha256": "6381a8257a1a42df490a12ce0902fb7b70acd50c8d231e86aaaed29d33fdee81",
       "source_id": "mengto-skills",
       "source_path": "agent-skills/web-design/high-contrast-skeuomorphic-clean/SKILL.md"
@@ -1272,7 +1571,7 @@
       "authority": "procedural-guidance",
       "decision": "included",
       "name": "image-first-grid-layout",
-      "reference_path": "references/mengto/web-design/image-first-grid-layout.md",
+      "reference_path": "references/mengto/web-design/image-first-grid-layout/procedure.md",
       "sha256": "76aa7e263f9c5b81920622c6c9e175a09eef10bf3d8c11a7d3edf5c95fe58abf",
       "source_id": "mengto-skills",
       "source_path": "agent-skills/web-design/image-first-grid-layout/SKILL.md"
@@ -1281,7 +1580,7 @@
       "authority": "procedural-guidance",
       "decision": "included",
       "name": "landing-page",
-      "reference_path": "references/mengto/web-design/landing-page.md",
+      "reference_path": "references/mengto/web-design/landing-page/procedure.md",
       "sha256": "6ad9965bc6b8f682340998ddd17c7700f5529ae40603d47c3b4610892c459cad",
       "source_id": "mengto-skills",
       "source_path": "agent-skills/web-design/landing-page/SKILL.md"
@@ -1290,7 +1589,7 @@
       "authority": "procedural-guidance",
       "decision": "included",
       "name": "light-mode-paper-technical",
-      "reference_path": "references/mengto/web-design/light-mode-paper-technical.md",
+      "reference_path": "references/mengto/web-design/light-mode-paper-technical/procedure.md",
       "sha256": "f09d5b7cb8263b19d0aecc2e305a4d5f249a71187004860b8ff72272026a3f31",
       "source_id": "mengto-skills",
       "source_path": "agent-skills/web-design/light-mode-paper-technical/SKILL.md"
@@ -1299,7 +1598,7 @@
       "authority": "procedural-guidance",
       "decision": "included",
       "name": "marquee-loop",
-      "reference_path": "references/mengto/web-design/marquee-loop.md",
+      "reference_path": "references/mengto/web-design/marquee-loop/procedure.md",
       "sha256": "53f705e5f245f414d4e88b88e5f997b3201d8f782d407a2f2b5794e7b2aea8ed",
       "source_id": "mengto-skills",
       "source_path": "agent-skills/web-design/marquee-loop/SKILL.md"
@@ -1308,7 +1607,7 @@
       "authority": "procedural-guidance",
       "decision": "included",
       "name": "masked-reveal",
-      "reference_path": "references/mengto/web-design/masked-reveal.md",
+      "reference_path": "references/mengto/web-design/masked-reveal/procedure.md",
       "sha256": "a3e4fb96f6092ac382530db24fdd15da559e959c5b7e02d0503918c1358dcf03",
       "source_id": "mengto-skills",
       "source_path": "agent-skills/web-design/masked-reveal/SKILL.md"
@@ -1317,7 +1616,7 @@
       "authority": "procedural-guidance",
       "decision": "included",
       "name": "matterjs",
-      "reference_path": "references/mengto/web-design/matterjs.md",
+      "reference_path": "references/mengto/web-design/matterjs/procedure.md",
       "sha256": "eeb1d2f6521e337dd5a5f0743ba00c00dd81f6e22b22a6f26c5d77fc44f16be4",
       "source_id": "mengto-skills",
       "source_path": "agent-skills/web-design/matterjs/SKILL.md"
@@ -1326,7 +1625,7 @@
       "authority": "procedural-guidance",
       "decision": "included",
       "name": "mesh-gradient-dark-blue-clean",
-      "reference_path": "references/mengto/web-design/mesh-gradient-dark-blue-clean.md",
+      "reference_path": "references/mengto/web-design/mesh-gradient-dark-blue-clean/procedure.md",
       "sha256": "4c91c0ba4ccd73389f6bd0fc15b5065dc6c64866ee829249f98fb669c152ce33",
       "source_id": "mengto-skills",
       "source_path": "agent-skills/web-design/mesh-gradient-dark-blue-clean/SKILL.md"
@@ -1335,7 +1634,7 @@
       "authority": "procedural-guidance",
       "decision": "included",
       "name": "nested-container-clean-agency",
-      "reference_path": "references/mengto/web-design/nested-container-clean-agency.md",
+      "reference_path": "references/mengto/web-design/nested-container-clean-agency/procedure.md",
       "sha256": "99a761f4c95316a649b54782bbb23666882c98ec2eddce393f86a5601c270e23",
       "source_id": "mengto-skills",
       "source_path": "agent-skills/web-design/nested-container-clean-agency/SKILL.md"
@@ -1344,7 +1643,7 @@
       "authority": "procedural-guidance",
       "decision": "included",
       "name": "nested-container-frames",
-      "reference_path": "references/mengto/web-design/nested-container-frames.md",
+      "reference_path": "references/mengto/web-design/nested-container-frames/procedure.md",
       "sha256": "02fde1df60f9d13015a4a25a2d935831da78f665c263b5d166117e1889c151b0",
       "source_id": "mengto-skills",
       "source_path": "agent-skills/web-design/nested-container-frames/SKILL.md"
@@ -1353,7 +1652,7 @@
       "authority": "procedural-guidance",
       "decision": "included",
       "name": "number-details",
-      "reference_path": "references/mengto/web-design/number-details.md",
+      "reference_path": "references/mengto/web-design/number-details/procedure.md",
       "sha256": "bd526d953244b8f05a578892640a86e550d062094866e4d9958b538313ef271a",
       "source_id": "mengto-skills",
       "source_path": "agent-skills/web-design/number-details/SKILL.md"
@@ -1362,7 +1661,7 @@
       "authority": "procedural-guidance",
       "decision": "included",
       "name": "orange-clean-paper-saas",
-      "reference_path": "references/mengto/web-design/orange-clean-paper-saas.md",
+      "reference_path": "references/mengto/web-design/orange-clean-paper-saas/procedure.md",
       "sha256": "4f532470971c92edd7407dfba5ec6656e0377c213903bd68bd82281b7ea39788",
       "source_id": "mengto-skills",
       "source_path": "agent-skills/web-design/orange-clean-paper-saas/SKILL.md"
@@ -1371,7 +1670,7 @@
       "authority": "procedural-guidance",
       "decision": "included",
       "name": "pricing-page",
-      "reference_path": "references/mengto/web-design/pricing-page.md",
+      "reference_path": "references/mengto/web-design/pricing-page/procedure.md",
       "sha256": "9b3af6174e379042ea1579f5d62b6fb0030fe6298d35b417488ac1e5ef8159db",
       "source_id": "mengto-skills",
       "source_path": "agent-skills/web-design/pricing-page/SKILL.md"
@@ -1380,7 +1679,7 @@
       "authority": "procedural-guidance",
       "decision": "included",
       "name": "progressive-blur",
-      "reference_path": "references/mengto/web-design/progressive-blur.md",
+      "reference_path": "references/mengto/web-design/progressive-blur/procedure.md",
       "sha256": "202004db5ff37fb8add044cf00288d984c9a680c2fb07e4bb2dacc3df90ac2a1",
       "source_id": "mengto-skills",
       "source_path": "agent-skills/web-design/progressive-blur/SKILL.md"
@@ -1389,7 +1688,7 @@
       "authority": "procedural-guidance",
       "decision": "included",
       "name": "skeuomorphic-ui",
-      "reference_path": "references/mengto/web-design/skeuomorphic-ui.md",
+      "reference_path": "references/mengto/web-design/skeuomorphic-ui/procedure.md",
       "sha256": "2de1673864f136b05b10a17fcf987f39864f30a716250b98e09ce669525292e4",
       "source_id": "mengto-skills",
       "source_path": "agent-skills/web-design/skeuomorphic-ui/SKILL.md"
@@ -1398,7 +1697,7 @@
       "authority": "procedural-guidance",
       "decision": "included",
       "name": "solar-duotone-bold",
-      "reference_path": "references/mengto/web-design/solar-duotone-bold.md",
+      "reference_path": "references/mengto/web-design/solar-duotone-bold/procedure.md",
       "sha256": "fd99604acf317b21dea735558e3ac9ae98ab5751d4addbffe640bde79da41b51",
       "source_id": "mengto-skills",
       "source_path": "agent-skills/web-design/solar-duotone-bold/SKILL.md"
@@ -1407,7 +1706,7 @@
       "authority": "procedural-guidance",
       "decision": "included",
       "name": "split-layout-technical",
-      "reference_path": "references/mengto/web-design/split-layout-technical.md",
+      "reference_path": "references/mengto/web-design/split-layout-technical/procedure.md",
       "sha256": "ae8e02a4461773e0d4c04a3ef367cad1a7b6933565549d3296e4a0e54a8b1c0b",
       "source_id": "mengto-skills",
       "source_path": "agent-skills/web-design/split-layout-technical/SKILL.md"
@@ -1416,7 +1715,7 @@
       "authority": "procedural-guidance",
       "decision": "included",
       "name": "staggered-word-reveal",
-      "reference_path": "references/mengto/web-design/staggered-word-reveal.md",
+      "reference_path": "references/mengto/web-design/staggered-word-reveal/procedure.md",
       "sha256": "79061529376810788b1d824e0f16a18c048d1c426d6909442888c9507ead08c9",
       "source_id": "mengto-skills",
       "source_path": "agent-skills/web-design/staggered-word-reveal/SKILL.md"
@@ -1425,7 +1724,7 @@
       "authority": "procedural-guidance",
       "decision": "included",
       "name": "tailwindcss",
-      "reference_path": "references/mengto/web-design/tailwindcss.md",
+      "reference_path": "references/mengto/web-design/tailwindcss/procedure.md",
       "sha256": "90d2150c24c7453d3f75914791d5356c87606a7c1b933d3371a6120624720c4e",
       "source_id": "mengto-skills",
       "source_path": "agent-skills/web-design/tailwindcss/SKILL.md"
@@ -1434,7 +1733,7 @@
       "authority": "procedural-guidance",
       "decision": "included",
       "name": "tech-green-dark-mode-modern",
-      "reference_path": "references/mengto/web-design/tech-green-dark-mode-modern.md",
+      "reference_path": "references/mengto/web-design/tech-green-dark-mode-modern/procedure.md",
       "sha256": "9c47f3929ebd3c3290b6d759f39a32a5ceada51f1a75404d90c391da862b9403",
       "source_id": "mengto-skills",
       "source_path": "agent-skills/web-design/tech-green-dark-mode-modern/SKILL.md"
@@ -1443,7 +1742,7 @@
       "authority": "procedural-guidance",
       "decision": "included",
       "name": "technical-wireframe-info-layout",
-      "reference_path": "references/mengto/web-design/technical-wireframe-info-layout.md",
+      "reference_path": "references/mengto/web-design/technical-wireframe-info-layout/procedure.md",
       "sha256": "1960e7805000cece8f3d5edd87d89232e31caa5d43a9000842bb29cad4de5597",
       "source_id": "mengto-skills",
       "source_path": "agent-skills/web-design/technical-wireframe-info-layout/SKILL.md"
@@ -1452,7 +1751,7 @@
       "authority": "procedural-guidance",
       "decision": "included",
       "name": "threejs",
-      "reference_path": "references/mengto/web-design/threejs.md",
+      "reference_path": "references/mengto/web-design/threejs/procedure.md",
       "sha256": "e6ebd6e0354b7d05fbfb87a63403b6c2a8c62450f86ff7a9316d55283d586813",
       "source_id": "mengto-skills",
       "source_path": "agent-skills/web-design/threejs/SKILL.md"
@@ -1461,7 +1760,7 @@
       "authority": "procedural-guidance",
       "decision": "included",
       "name": "unicorn-studio",
-      "reference_path": "references/mengto/web-design/unicorn-studio.md",
+      "reference_path": "references/mengto/web-design/unicorn-studio/procedure.md",
       "sha256": "580b4ff727af5aa3d3909ee5e8cfe8e955949df597769a141b7548e8cd9f089c",
       "source_id": "mengto-skills",
       "source_path": "agent-skills/web-design/unicorn-studio/SKILL.md"
@@ -1470,7 +1769,7 @@
       "authority": "procedural-guidance",
       "decision": "included",
       "name": "vantajs",
-      "reference_path": "references/mengto/web-design/vantajs.md",
+      "reference_path": "references/mengto/web-design/vantajs/procedure.md",
       "sha256": "eeacf653ac518fccf3102d85cffb4002ecc2b0b8a4238757b2945a354b9afea0",
       "source_id": "mengto-skills",
       "source_path": "agent-skills/web-design/vantajs/SKILL.md"
@@ -1479,7 +1778,7 @@
       "authority": "procedural-guidance",
       "decision": "included",
       "name": "webgl-3d-object",
-      "reference_path": "references/mengto/web-design/webgl-3d-object.md",
+      "reference_path": "references/mengto/web-design/webgl-3d-object/procedure.md",
       "sha256": "8b4c8fca568309a6156389bb21b7077a27abe24213789d7f1b2c7d5ab79f3e45",
       "source_id": "mengto-skills",
       "source_path": "agent-skills/web-design/webgl-3d-object/SKILL.md"
@@ -1488,7 +1787,7 @@
       "authority": "procedural-guidance",
       "decision": "included",
       "name": "webgl-landing-steering",
-      "reference_path": "references/mengto/web-design/webgl-landing-steering.md",
+      "reference_path": "references/mengto/web-design/webgl-landing-steering/procedure.md",
       "sha256": "a5310ca2912c1c5ae8eb38f14284e5876da88bdbb9ee8034838aafba462a5127",
       "source_id": "mengto-skills",
       "source_path": "agent-skills/web-design/webgl-landing-steering/SKILL.md"
@@ -1497,7 +1796,7 @@
       "authority": "procedural-guidance",
       "decision": "included",
       "name": "webgl-laser",
-      "reference_path": "references/mengto/web-design/webgl-laser.md",
+      "reference_path": "references/mengto/web-design/webgl-laser/procedure.md",
       "sha256": "da5aef6c1b15ae0a98b545a5d51ac323c4614484e7faaa2346ec15d2b76dc21e",
       "source_id": "mengto-skills",
       "source_path": "agent-skills/web-design/webgl-laser/SKILL.md"
@@ -1507,6 +1806,7 @@
   "vercel_interface": {
     "authority": "official",
     "reference_path": "references/vercel/web-interface-guidelines.md",
+    "sha256": "eea73cb6dd46fee9faec9973e8e7fe198b5f07ec326f14d276a56e50287e1cab",
     "source_id": "vercel-web-interface-guidelines",
     "source_path": "command.md"
   }

@@ -72,6 +72,10 @@
 | `vercel-web-interface-guidelines` | `vercel-labs/web-interface-guidelines@d0a657bfe87e86dd3a4753d7ec28c7e7dd7a88fe` | Official UI review quality gate. |
 | `anthropic-frontend-design` | `anthropics/skills@9d2f1ae187231d8199c64b5b762e1bdf2244733d` | Preserve official frontend-design provenance and notice for the mapped MengTo duplicate. |
 | `open-design` | `nexu-io/open-design@81b20dc6a214da2228bdd08f8850656b98f9bcea` | Registry-only on-demand provider; do not vendor the complete checkout. |
+| `marketing-skills` | `coreyhaines31/marketingskills@33218ff1ca025b977da902ecb18d40e808f00c26` | Supply hash-locked, byte-identical copywriting and SEO dependencies omitted by the pinned MengTo tree. |
+| `openai-netlify-deploy` | `openai/skills@49f948faa9258a0c61caceaf225e179651397431` | Supply the original Apache-2.0 Netlify companion references. |
+| `swiftui-agent-skill` | `twostraws/SwiftUI-Agent-Skill@f7309bdc9eb7231ac40317abd2b08a451a14e0aa` | Supply the byte-identical SwiftUI Pro reference set. |
+| `apple-swiftui-debugging` | `rshankras/claude-code-apple-skills@1a16fa57e2039a6db2f510b10b64899d91e11c10` | Supply labeled original-source substitutions and attribution for SwiftUI debugging. |
 
 ### Task 1: Remove Public Model Entitlement Assumptions
 
@@ -271,7 +275,7 @@ Use `git archive` against the already reviewed immutable checkouts. Create one a
 
 - [ ] **Step 4: Implement deterministic rendering**
 
-Render from the lock and provenance ledger into a temporary destination, use sorted traversal and canonical JSON with trailing newlines, normalize only generated metadata, copy imported bytes unchanged, emit `THIRD_PARTY_NOTICES.md`, and atomically replace tracked output. Extend the existing marketplace renderer so both plugin entries remain stable when either bundle is regenerated.
+Render from the lock, dependency map, and provenance ledger into a same-filesystem temporary destination, use sorted traversal and canonical JSON with trailing newlines, normalize only generated metadata, copy imported bytes unchanged, emit `THIRD_PARTY_NOTICES.md`, validate recursive local dependencies, and replace tracked output through a recovery-journaled swap. Reject repository ancestors and every in-repo destination except `plugins/frontend-design-pack`. Extend the existing marketplace renderer so both plugin entries remain stable when either bundle is regenerated.
 
 - [ ] **Step 5: Render and validate the tracked plugin**
 

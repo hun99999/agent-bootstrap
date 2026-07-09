@@ -657,21 +657,63 @@ class FrontendDesignCommittedRegistryTests(unittest.TestCase):
         cls.provenance = json.loads(
             (REPO_ROOT / "design-stack/provenance.json").read_text(encoding="utf-8")
         )
+        cls.dependencies = json.loads(
+            (REPO_ROOT / "design-stack/mengto-dependencies.json").read_text(
+                encoding="utf-8"
+            )
+        )
 
     def test_committed_metadata_contract_is_valid(self) -> None:
         design_stack.validate_repository(REPO_ROOT, metadata_only=True)
 
+    def test_mengto_dependencies_resolve_locked_included_provenance(self) -> None:
+        design_stack.validate_mengto_dependencies(
+            self.registry,
+            self.lock,
+            self.provenance,
+            self.dependencies,
+        )
+
+    def test_mengto_dependency_rejects_unlocked_or_unsafe_target(self) -> None:
+        dependencies = copy.deepcopy(self.dependencies)
+        dependencies["procedures"][0]["dependencies"][0]["source_path"] = (
+            "missing/reference.md"
+        )
+        with self.assertRaisesRegex(ValueError, "locked vendored file"):
+            design_stack.validate_mengto_dependencies(
+                self.registry,
+                self.lock,
+                self.provenance,
+                dependencies,
+            )
+
+        dependencies = copy.deepcopy(self.dependencies)
+        dependencies["procedures"][0]["dependencies"][0]["target_path"] = (
+            "../escape.md"
+        )
+        with self.assertRaisesRegex(ValueError, "safe relative"):
+            design_stack.validate_mengto_dependencies(
+                self.registry,
+                self.lock,
+                self.provenance,
+                dependencies,
+            )
+
     def test_committed_registry_contains_all_locked_sources(self) -> None:
         sources = self.registry["sources"]
-        self.assertEqual(len(sources), 7)
+        self.assertEqual(len(sources), 11)
         self.assertEqual(
             {source["id"] for source in sources},
             {
                 "anthropic-frontend-design",
+                "apple-swiftui-debugging",
                 "awesome-design-md",
                 "google-design-md",
+                "marketing-skills",
                 "mengto-skills",
                 "open-design",
+                "openai-netlify-deploy",
+                "swiftui-agent-skill",
                 "vercel-agent-skills",
                 "vercel-web-interface-guidelines",
             },
@@ -679,6 +721,24 @@ class FrontendDesignCommittedRegistryTests(unittest.TestCase):
         for source in sources:
             with self.subTest(source=source["id"]):
                 self.assertLessEqual(REQUIRED_SOURCE_FIELDS, set(source))
+
+    def test_mengto_dependency_sources_are_pinned_and_license_verified(self) -> None:
+        sources = {source["id"]: source for source in self.registry["sources"]}
+        expected = {
+            "apple-swiftui-debugging": "MIT",
+            "marketing-skills": "MIT",
+            "openai-netlify-deploy": "Apache-2.0",
+            "swiftui-agent-skill": "MIT",
+        }
+
+        for source_id, spdx in expected.items():
+            with self.subTest(source=source_id):
+                source = sources[source_id]
+                self.assertRegex(source["revision"], r"^[0-9a-f]{40}$")
+                self.assertEqual(source["distribution"], "vendored")
+                self.assertEqual(source["role"], "mengto-procedure-dependency")
+                self.assertEqual(source["license"]["status"], "verified")
+                self.assertEqual(source["license"]["spdx"], spdx)
 
     def test_every_verified_source_notice_is_hash_locked(self) -> None:
         lock_by_id = {source["id"]: source for source in self.lock["sources"]}

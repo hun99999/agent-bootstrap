@@ -23,6 +23,48 @@
       ]
     },
     {
+      "id": "apple-swiftui-debugging",
+      "revision": "1a16fa57e2039a6db2f510b10b64899d91e11c10",
+      "tree": "06240ca1727d98b2c229ee3f4558e6b5aff7d658",
+      "files": [
+        {
+          "path": "LICENSE",
+          "size": 1068,
+          "mode": "0644",
+          "sha256": "7c90586a6b5c334e403c5fd11397926d85b1f063d68f6d1199b005cd61b148b3",
+          "materialization": "vendored"
+        },
+        {
+          "path": "skills/performance/swiftui-debugging/body-reevaluation.md",
+          "size": 11576,
+          "mode": "0644",
+          "sha256": "fc5599a5007e92d4a2d429d51a1230fd9cd8b647f11aca794ce8a8fe49e9e689",
+          "materialization": "vendored"
+        },
+        {
+          "path": "skills/performance/swiftui-debugging/common-pitfalls.md",
+          "size": 13307,
+          "mode": "0644",
+          "sha256": "dcf44203d24457686e61cda15d31623de76f299e95eea008b53f897e14ad9e89",
+          "materialization": "vendored"
+        },
+        {
+          "path": "skills/performance/swiftui-debugging/lazy-loading.md",
+          "size": 9809,
+          "mode": "0644",
+          "sha256": "d07b91aba3e705617b851a9ea61dbe3c318b6b52a991061181bee5c2aa95806b",
+          "materialization": "vendored"
+        },
+        {
+          "path": "skills/performance/swiftui-debugging/view-identity.md",
+          "size": 8090,
+          "mode": "0644",
+          "sha256": "435a90f22d68da8de596ba76d160d158b9a18ab3892e061d6e59eb8fe2d02d3e",
+          "materialization": "vendored"
+        }
+      ]
+    },
+    {
       "id": "awesome-design-md",
       "revision": "664b3e78fd1a298ba11973822da988483256d4b4",
       "tree": "729c989b192948644e446da114e0da07195ee461",
@@ -576,6 +618,41 @@
       ]
     },
     {
+      "id": "marketing-skills",
+      "revision": "33218ff1ca025b977da902ecb18d40e808f00c26",
+      "tree": "0baded9ae37358f9e011591e8a16891148f8eda4",
+      "files": [
+        {
+          "path": "LICENSE",
+          "size": 1069,
+          "mode": "0644",
+          "sha256": "b70d71e24e40fce5da8f4b6f9cd862096a048e433db7f3c8cac5e348e6d34591",
+          "materialization": "vendored"
+        },
+        {
+          "path": "skills/copywriting/references/copy-frameworks.md",
+          "size": 7887,
+          "mode": "0644",
+          "sha256": "f387b6ed4b510efa9f0d3c459f4898971c8b0176e8c34185040cb264eca50186",
+          "materialization": "vendored"
+        },
+        {
+          "path": "skills/copywriting/references/natural-transitions.md",
+          "size": 5684,
+          "mode": "0644",
+          "sha256": "4ff23f8943af2f65b072f26f1c53ce55f19cc26d7be211c11cae8e34b43e859f",
+          "materialization": "vendored"
+        },
+        {
+          "path": "skills/seo-audit/references/ai-writing-detection.md",
+          "size": 6528,
+          "mode": "0644",
+          "sha256": "f1e273f56ce7e2215ff218bf903680ddcec0fd026ab90c3ebfb3439ed0edfaa4",
+          "materialization": "vendored"
+        }
+      ]
+    },
+    {
       "id": "mengto-skills",
       "revision": "25f872a94e3bbee85ecacba4041fa52c21cb0e44",
       "tree": "a5cf69004c1bd111725d56e3e918b44e2283fbe3",
@@ -609,6 +686,13 @@
           "materialization": "vendored"
         },
         {
+          "path": "agent-skills/codex/customer-email-draft-threads/references/runbook.md",
+          "size": 5153,
+          "mode": "0644",
+          "sha256": "bb12af26f29788561427faf025d1c0aa9a70815f4fcaf7104c327195868ccd4c",
+          "materialization": "vendored"
+        },
+        {
           "path": "agent-skills/codex/customer-support-verification/SKILL.md",
           "size": 4725,
           "mode": "0644",
@@ -627,6 +711,13 @@
           "size": 3526,
           "mode": "0644",
           "sha256": "066b56c8711ebf935222b4f02f7c67485e88299574a5dc6f1d4347cfefb86196",
+          "materialization": "vendored"
+        },
+        {
+          "path": "agent-skills/codex/elevenlabs-tts/scripts/generate_voice.py",
+          "size": 13235,
+          "mode": "0755",
+          "sha256": "0255ad49ff55b08e3cc4447b4d6b04d6b446cbba3b0b85a17a2ba05cf0a512f7",
           "materialization": "vendored"
         },
         {
@@ -651,6 +742,13 @@
           "materialization": "vendored"
         },
         {
+          "path": "agent-skills/codex/optimize-web-animations/references/browser-profiling.md",
+          "size": 11212,
+          "mode": "0644",
+          "sha256": "69df1bc96bdd4ee2d149527b7fce4065801b83afff33b5b70a2d654bb300f53d",
+          "materialization": "vendored"
+        },
+        {
           "path": "agent-skills/codex/pdf/SKILL.md",
           "size": 2517,
           "mode": "0644",
@@ -662,6 +760,34 @@
           "size": 6157,
           "mode": "0644",
           "sha256": "e2301598090cf01a0d3b726a039ef4c5c9b05f64d20fb17f52a2271994945c5a",
+          "materialization": "vendored"
+        },
+        {
+          "path": "agent-skills/codex/performance-profiling/references/energy-diagnostics.md",
+          "size": 10057,
+          "mode": "0644",
+          "sha256": "e8064c505c2d015907d5b588f6b3d7b31e30c3aafbe5095dc0ef9d60c5ad1e46",
+          "materialization": "vendored"
+        },
+        {
+          "path": "agent-skills/codex/performance-profiling/references/launch-optimization.md",
+          "size": 10012,
+          "mode": "0644",
+          "sha256": "117cc130c62a9565155239818ab847fdda240f5ea246e659725f771611b2460b",
+          "materialization": "vendored"
+        },
+        {
+          "path": "agent-skills/codex/performance-profiling/references/memory-profiling.md",
+          "size": 8963,
+          "mode": "0644",
+          "sha256": "1d06b26c04391229d4ba96bfa962051100c7e41285e76671013fed9a018ed1c9",
+          "materialization": "vendored"
+        },
+        {
+          "path": "agent-skills/codex/performance-profiling/references/time-profiler.md",
+          "size": 6576,
+          "mode": "0644",
+          "sha256": "7744b8791a936418221ade47c50269535982acaf970fa35d3ec5aa680e167149",
           "materialization": "vendored"
         },
         {
@@ -693,6 +819,13 @@
           "materialization": "vendored"
         },
         {
+          "path": "agent-skills/codex/stitched-full-page-capture/scripts/stitch_full_page_capture.mjs",
+          "size": 7954,
+          "mode": "0755",
+          "sha256": "0c29b22061882ffd1db8714340a58bfd3f645aa3c0c14a7ba828a74e1fdb6303",
+          "materialization": "vendored"
+        },
+        {
           "path": "agent-skills/codex/swiftui-debugging/SKILL.md",
           "size": 6017,
           "mode": "0644",
@@ -704,6 +837,13 @@
           "size": 5538,
           "mode": "0644",
           "sha256": "2b0db0096fb715f9e5c6be419f2be5caf0df5e1991ac019308185e2d72c2f950",
+          "materialization": "vendored"
+        },
+        {
+          "path": "agent-skills/codex/video-to-superprompt/references/superprompt-template.md",
+          "size": 2243,
+          "mode": "0644",
+          "sha256": "8f5d73d56a453a754ad325f3f512a455f34711ea07677539d445672b7016361d",
           "materialization": "vendored"
         },
         {
@@ -1265,6 +1405,118 @@
           "mode": "0644",
           "sha256": "9d95806a26532623360eb84bb17d298f394b55ef73fb4c0796d99b4319b2b0da",
           "materialization": "metadata-only"
+        }
+      ]
+    },
+    {
+      "id": "openai-netlify-deploy",
+      "revision": "49f948faa9258a0c61caceaf225e179651397431",
+      "tree": "224b363928698e143876aef008232ed73d8e6f81",
+      "files": [
+        {
+          "path": "skills/.curated/netlify-deploy/LICENSE.txt",
+          "size": 10776,
+          "mode": "0644",
+          "sha256": "4dd13869245e356246a5b770723247bbb80a8f07a181d1d3d873a1734297cdb9",
+          "materialization": "vendored"
+        },
+        {
+          "path": "skills/.curated/netlify-deploy/references/cli-commands.md",
+          "size": 2652,
+          "mode": "0644",
+          "sha256": "a24b08401b8c796e4a58933a71441b3341b61afc840d690d9127b27ab00cfe05",
+          "materialization": "vendored"
+        },
+        {
+          "path": "skills/.curated/netlify-deploy/references/deployment-patterns.md",
+          "size": 6702,
+          "mode": "0644",
+          "sha256": "fdb8c3b96fe03099826e4207b4933df3ff97571415f5e283567979bdc86cdc85",
+          "materialization": "vendored"
+        },
+        {
+          "path": "skills/.curated/netlify-deploy/references/netlify-toml.md",
+          "size": 3972,
+          "mode": "0644",
+          "sha256": "436ea3c2e0ce04abb34895db993d91b8660423977d9c52a89f2dfa014cad0b9c",
+          "materialization": "vendored"
+        }
+      ]
+    },
+    {
+      "id": "swiftui-agent-skill",
+      "revision": "f7309bdc9eb7231ac40317abd2b08a451a14e0aa",
+      "tree": "2765897a6eb7c90d7e4599f359f9c1477535322d",
+      "files": [
+        {
+          "path": "LICENSE",
+          "size": 1068,
+          "mode": "0644",
+          "sha256": "b9b479e6df9f27cbc8e7abe91f771b396f3f0fa114d070c7c0b02c820c6b74dc",
+          "materialization": "vendored"
+        },
+        {
+          "path": "swiftui-pro/references/accessibility.md",
+          "size": 2377,
+          "mode": "0644",
+          "sha256": "708d09a35c950fd4c118bbb3cfcab13bb146e7d02084615307bbabc19e00a0e3",
+          "materialization": "vendored"
+        },
+        {
+          "path": "swiftui-pro/references/api.md",
+          "size": 3090,
+          "mode": "0644",
+          "sha256": "12fa73d65a19c9d08224f925801db8eec914b1cedf5b2f86a38cdda04a66377a",
+          "materialization": "vendored"
+        },
+        {
+          "path": "swiftui-pro/references/data.md",
+          "size": 2987,
+          "mode": "0644",
+          "sha256": "5cc50484c525f748839e12174c065f7ea5fdd4380ce04b6885a906ecd6e6a318",
+          "materialization": "vendored"
+        },
+        {
+          "path": "swiftui-pro/references/design.md",
+          "size": 2683,
+          "mode": "0644",
+          "sha256": "03e35d46865cc6807255f3c8481cdbac7b3b0f61924185af84c1913d6c983c69",
+          "materialization": "vendored"
+        },
+        {
+          "path": "swiftui-pro/references/hygiene.md",
+          "size": 1082,
+          "mode": "0644",
+          "sha256": "91d96f45f3ffa02f5553c288415f3c3d5f317cab7d8d9c6c60240ea6c44a2b01",
+          "materialization": "vendored"
+        },
+        {
+          "path": "swiftui-pro/references/navigation.md",
+          "size": 1300,
+          "mode": "0644",
+          "sha256": "a3adb302455993aff85bbb6b5845ed2fcffa137c8b2ded99c937f3e4b7fcd77b",
+          "materialization": "vendored"
+        },
+        {
+          "path": "swiftui-pro/references/performance.md",
+          "size": 2781,
+          "mode": "0644",
+          "sha256": "1b503e3807e216d6b34b45f18bfba89214cea2fa1b88dd7ae8f482ebf0f03616",
+          "materialization": "vendored"
+        },
+        {
+          "path": "swiftui-pro/references/swift.md",
+          "size": 4138,
+          "mode": "0644",
+          "sha256": "8c31c5f5f99b3fa9586f0260cd1a4b1688dc7bda5e8de2891eb3f9d6a791125a",
+          "materialization": "vendored"
+        },
+        {
+          "path": "swiftui-pro/references/views.md",
+          "size": 2933,
+          "mode": "0644",
+          "sha256": "87cdd3d96e8e562aefe35070a59664e3536cfcc014bd8437cff603477f7e5a1d",
+          "materialization": "vendored"
         }
       ]
     },

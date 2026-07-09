@@ -153,6 +153,10 @@ def write_sync_repo(
     write_json(repo_root / "design-stack/sources.json", registry)
     write_json(repo_root / "design-stack/sources.lock.json", lock)
     write_json(repo_root / "design-stack/provenance.json", provenance)
+    write_json(
+        repo_root / "design-stack/mengto-dependencies.json",
+        {"schema_version": 1, "procedures": []},
+    )
     vendor_files = {"LICENSE": LICENSE}
     if decision == "included":
         vendor_files["skills/fixture/SKILL.md"] = installed_skill

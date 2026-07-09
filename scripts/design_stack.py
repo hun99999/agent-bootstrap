@@ -678,6 +678,158 @@ def validate_provenance(
         )
 
 
+def validate_mengto_dependencies(
+    registry: Mapping[str, Any],
+    lock: Mapping[str, Any],
+    provenance: Mapping[str, Any],
+    dependencies: Mapping[str, Any],
+) -> None:
+    dependencies = _require_mapping(dependencies, "mengto_dependencies")
+    _require_schema(dependencies, "mengto_dependencies")
+    procedures = _require_list(
+        dependencies.get("procedures"),
+        "mengto_dependencies.procedures",
+    )
+    sources = _source_map(registry)
+    locked_files = {
+        (source["id"], file_record["path"]): file_record
+        for source in lock["sources"]
+        for file_record in source["files"]
+    }
+    provenance_records = {
+        (record["source_id"], record["upstream_path"]): record
+        for record in provenance["records"]
+    }
+    mengto_catalog = {
+        entry["path"] for entry in lock["catalogs"]["mengto_skills"]
+    }
+    seen_procedures: Set[str] = set()
+    for procedure_index, raw_procedure in enumerate(procedures):
+        context = f"mengto_dependencies.procedures[{procedure_index}]"
+        procedure = _require_mapping(raw_procedure, context)
+        allowed_procedure_fields = {
+            "source_path",
+            "dependencies",
+            "external_runtime_requirements",
+        }
+        unknown_fields = sorted(set(procedure) - allowed_procedure_fields)
+        if unknown_fields:
+            raise ValidationError(
+                f"{context} has unsupported fields: {unknown_fields}"
+            )
+        source_path = _require_safe_relative_path(
+            procedure.get("source_path"),
+            f"{context}.source_path",
+        )
+        if source_path in seen_procedures:
+            raise ValidationError(f"duplicate MengTo dependency procedure: {source_path}")
+        seen_procedures.add(source_path)
+        if source_path not in mengto_catalog:
+            raise ValidationError(
+                f"{context}.source_path does not resolve to the MengTo catalog"
+            )
+        procedure_provenance = provenance_records.get(("mengto-skills", source_path))
+        if (
+            procedure_provenance is None
+            or procedure_provenance.get("decision") != "included"
+        ):
+            raise ValidationError(
+                f"{context}.source_path must resolve to included MengTo provenance"
+            )
+
+        raw_dependencies = _require_list(
+            procedure.get("dependencies"),
+            f"{context}.dependencies",
+        )
+        if not raw_dependencies:
+            raise ValidationError(f"{context}.dependencies must not be empty")
+        seen_targets: Set[str] = set()
+        for dependency_index, raw_dependency in enumerate(raw_dependencies):
+            dependency_context = f"{context}.dependencies[{dependency_index}]"
+            dependency = _require_mapping(raw_dependency, dependency_context)
+            if set(dependency) != {"target_path", "source_id", "source_path"}:
+                raise ValidationError(
+                    f"{dependency_context} must contain target_path, source_id, and source_path"
+                )
+            target_path = _require_safe_relative_path(
+                dependency["target_path"],
+                f"{dependency_context}.target_path",
+            )
+            if PurePosixPath(target_path).parts[0] not in {
+                "references",
+                "scripts",
+                "assets",
+            }:
+                raise ValidationError(
+                    f"{dependency_context}.target_path must use references, scripts, or assets"
+                )
+            if target_path in seen_targets:
+                raise ValidationError(
+                    f"duplicate MengTo dependency target: {source_path}:{target_path}"
+                )
+            seen_targets.add(target_path)
+            source_id = _require_nonempty_string(
+                dependency["source_id"],
+                f"{dependency_context}.source_id",
+            )
+            dependency_source_path = _require_safe_relative_path(
+                dependency["source_path"],
+                f"{dependency_context}.source_path",
+            )
+            source = sources.get(source_id)
+            locked_file = locked_files.get((source_id, dependency_source_path))
+            if (
+                source is None
+                or source["distribution"] != "vendored"
+                or locked_file is None
+                or locked_file["materialization"] != "vendored"
+            ):
+                raise ValidationError(
+                    f"{dependency_context} must resolve to a locked vendored file"
+                )
+            dependency_provenance = provenance_records.get(
+                (source_id, dependency_source_path)
+            )
+            if (
+                dependency_provenance is None
+                or dependency_provenance.get("decision") != "included"
+                or dependency_provenance.get("sha256") != locked_file["sha256"]
+            ):
+                raise ValidationError(
+                    f"{dependency_context} must resolve to included hash-matched provenance"
+                )
+
+        external_requirements = _require_list(
+            procedure.get("external_runtime_requirements", []),
+            f"{context}.external_runtime_requirements",
+        )
+        for requirement_index, raw_requirement in enumerate(external_requirements):
+            requirement_context = (
+                f"{context}.external_runtime_requirements[{requirement_index}]"
+            )
+            requirement = _require_mapping(raw_requirement, requirement_context)
+            if set(requirement) != {"capability", "required_file", "resolution"}:
+                raise ValidationError(
+                    f"{requirement_context} must contain capability, required_file, and resolution"
+                )
+            _require_nonempty_string(
+                requirement["capability"],
+                f"{requirement_context}.capability",
+            )
+            _require_safe_relative_path(
+                requirement["required_file"],
+                f"{requirement_context}.required_file",
+            )
+            resolution = _require_nonempty_string(
+                requirement["resolution"],
+                f"{requirement_context}.resolution",
+            )
+            if resolution != "discover-installed-plugin":
+                raise ValidationError(
+                    f"{requirement_context}.resolution must be discover-installed-plugin"
+                )
+
+
 def _strip_yaml_scalar(value: str) -> str:
     value = value.strip()
     if len(value) >= 2 and value[0] == value[-1] == '"':
@@ -731,6 +883,7 @@ def validate_repository(repo_root: Path, metadata_only: bool = False) -> None:
     registry = load_json(design_root / "sources.json")
     lock = load_json(design_root / "sources.lock.json")
     provenance = load_json(design_root / "provenance.json")
+    dependencies = load_json(design_root / "mengto-dependencies.json")
     validate_registry(registry)
     validate_lock(
         registry,
@@ -739,3 +892,4 @@ def validate_repository(repo_root: Path, metadata_only: bool = False) -> None:
         metadata_only=metadata_only,
     )
     validate_provenance(registry, lock, provenance)
+    validate_mengto_dependencies(registry, lock, provenance, dependencies)

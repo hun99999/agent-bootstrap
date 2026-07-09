@@ -1,10 +1,12 @@
 import json
+import os
 import re
 import shutil
 import subprocess
 import tempfile
 import unittest
-from pathlib import Path
+from pathlib import Path, PurePosixPath
+from unittest import mock
 
 from tests.frontend_design_test_support import (
     load_script_module,
@@ -16,9 +18,35 @@ from tests.frontend_design_test_support import (
 REPO_ROOT = Path(__file__).resolve().parents[1]
 PLUGIN_ROOT = REPO_ROOT / "plugins/frontend-design-pack"
 SEMVER_PATTERN = re.compile(r"^\d+\.\d+\.\d+$")
+SKILL_ROOT_DEPENDENCY_PATTERN = re.compile(
+    r"(?<![A-Za-z0-9_:/.-])"
+    r"(?:<skill-root>/|<skills-root>/[A-Za-z0-9._-]+/)"
+    r"((?:references|scripts|assets)/[A-Za-z0-9._/-]+)"
+)
+REFERENCE_DEPENDENCY_PATTERN = re.compile(
+    r"(?<![A-Za-z0-9_:/.-])(references/[A-Za-z0-9._/-]+)"
+)
+MARKDOWN_DEPENDENCY_PATTERN = re.compile(
+    r"\]\(((?:references|scripts|assets)/[A-Za-z0-9._/-]+)\)"
+)
+EXPECTED_MENGTO_DEPENDENCY_SOURCES = {
+    "apple-swiftui-debugging",
+    "marketing-skills",
+    "mengto-skills",
+    "openai-netlify-deploy",
+    "swiftui-agent-skill",
+}
 
 
 renderer = load_script_module("render_frontend_design_plugin.py")
+
+
+def copy_render_repository(destination: Path) -> None:
+    shutil.copytree(
+        REPO_ROOT,
+        destination,
+        ignore=shutil.ignore_patterns(".git", "__pycache__", "plugins"),
+    )
 
 
 class FrontendDesignPluginTests(unittest.TestCase):
@@ -37,6 +65,11 @@ class FrontendDesignPluginTests(unittest.TestCase):
                 encoding="utf-8"
             )
         )
+        cls.dependencies = json.loads(
+            (REPO_ROOT / "design-stack/mengto-dependencies.json").read_text(
+                encoding="utf-8"
+            )
+        )
 
     def test_renderer_is_deterministic_and_tracked_output_is_fresh(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -50,6 +83,139 @@ class FrontendDesignPluginTests(unittest.TestCase):
             first_snapshot = snapshot_tree(first)
             self.assertEqual(first_snapshot, snapshot_tree(second))
             self.assertEqual(first_snapshot, snapshot_tree(PLUGIN_ROOT))
+
+    def test_renderer_rejects_repository_ancestor_output_without_deleting_it(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            ancestor = Path(temp_dir) / "ancestor"
+            repo_root = ancestor / "checkout"
+            copy_render_repository(repo_root)
+            sentinel = ancestor / "keep.txt"
+            sentinel.write_text("keep\n", encoding="utf-8")
+
+            with self.assertRaisesRegex(ValueError, "ancestor"):
+                renderer.render_plugin(repo_root, ancestor)
+
+            self.assertTrue(repo_root.is_dir())
+            self.assertEqual(sentinel.read_text(encoding="utf-8"), "keep\n")
+
+    def test_renderer_rejects_unapproved_repository_destination(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            repo_root = Path(temp_dir) / "checkout"
+            copy_render_repository(repo_root)
+            protected_root = repo_root / "tests"
+            before = snapshot_tree(protected_root)
+
+            with self.assertRaisesRegex(ValueError, "approved plugin destination"):
+                renderer.render_plugin(repo_root, protected_root)
+
+            self.assertEqual(snapshot_tree(protected_root), before)
+
+    def test_renderer_rejects_direct_output_symlink_without_touching_target(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            target = root / "target"
+            target.mkdir()
+            sentinel = target / "keep.txt"
+            sentinel.write_text("keep\n", encoding="utf-8")
+            plugin_root = root / "frontend-design-pack"
+            plugin_root.symlink_to(target, target_is_directory=True)
+
+            with self.assertRaisesRegex(ValueError, "symlink"):
+                renderer.render_plugin(REPO_ROOT, plugin_root)
+
+            self.assertTrue(plugin_root.is_symlink())
+            self.assertEqual(sentinel.read_text(encoding="utf-8"), "keep\n")
+
+    def test_late_render_failure_preserves_previous_complete_output(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            repo_root = root / "checkout"
+            copy_render_repository(repo_root)
+            plugin_root = root / "frontend-design-pack"
+            plugin_root.mkdir()
+            sentinel = plugin_root / "previous.txt"
+            sentinel.write_text("previous\n", encoding="utf-8")
+            before = snapshot_tree(plugin_root)
+
+            broken_reference = (
+                repo_root
+                / "design-stack/router/references/source-precedence.md"
+            )
+            broken_reference.unlink()
+            broken_reference.mkdir()
+
+            with self.assertRaises(OSError):
+                renderer.render_plugin(repo_root, plugin_root)
+
+            self.assertEqual(snapshot_tree(plugin_root), before)
+
+    def test_atomic_swap_failure_restores_previous_output(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            plugin_root = root / "frontend-design-pack"
+            renderer.render_plugin(REPO_ROOT, plugin_root)
+            sentinel = plugin_root / "previous.txt"
+            sentinel.write_text("previous\n", encoding="utf-8")
+            before = snapshot_tree(plugin_root)
+            real_replace = os.replace
+            failed_install = False
+            canonical_plugin_root = plugin_root.resolve()
+
+            def fail_new_tree_swap(source: Path, destination: Path) -> None:
+                nonlocal failed_install
+                source = Path(source)
+                destination = Path(destination)
+                if (
+                    not failed_install
+                    and destination == canonical_plugin_root
+                    and source.parent == canonical_plugin_root.parent
+                    and source.name.startswith(
+                        f".{canonical_plugin_root.name}.render-"
+                    )
+                ):
+                    failed_install = True
+                    raise OSError("injected swap failure")
+                real_replace(source, destination)
+
+            with mock.patch.object(
+                renderer.os,
+                "replace",
+                side_effect=fail_new_tree_swap,
+            ):
+                with self.assertRaisesRegex(OSError, "injected swap failure"):
+                    renderer.render_plugin(REPO_ROOT, plugin_root)
+
+            self.assertEqual(snapshot_tree(plugin_root), before)
+
+    def test_interrupted_render_transaction_restores_previous_output(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            plugin_root = root / "frontend-design-pack"
+            plugin_root.mkdir()
+            (plugin_root / "partial.txt").write_text("partial\n", encoding="utf-8")
+            transaction_root = root / ".frontend-design-pack.render-transaction"
+            backup = transaction_root / "backup"
+            backup.mkdir(parents=True)
+            (backup / "previous.txt").write_text("previous\n", encoding="utf-8")
+            (transaction_root / "journal.json").write_text(
+                json.dumps(
+                    {
+                        "schema_version": 1,
+                        "target": "frontend-design-pack",
+                        "had_target": True,
+                    }
+                )
+                + "\n",
+                encoding="utf-8",
+            )
+
+            renderer._recover_render_transaction(plugin_root)
+
+            self.assertEqual(
+                snapshot_tree(plugin_root),
+                {"previous.txt": b"previous\n"},
+            )
+            self.assertFalse(transaction_root.exists())
 
     def test_codex_and_claude_manifests_share_name_and_semver(self) -> None:
         codex = json.loads(
@@ -123,6 +289,49 @@ class FrontendDesignPluginTests(unittest.TestCase):
                 relative_path,
             )
 
+    def test_packaged_routing_references_resolve_from_skill_root(self) -> None:
+        skill_root = PLUGIN_ROOT / "skills/frontend-design"
+        routing = json.loads(
+            (skill_root / "references/routing.json").read_text(encoding="utf-8")
+        )
+
+        self.assertEqual(
+            routing["references"],
+            {
+                "source-precedence": "references/source-precedence.md",
+                "quality-gates": "references/quality-gates.md",
+            },
+        )
+        for key, relative_path in routing["references"].items():
+            with self.subTest(reference=key):
+                path = PurePosixPath(relative_path)
+                self.assertFalse(path.is_absolute())
+                self.assertNotIn("..", path.parts)
+                self.assertNotIn(".", path.parts)
+                self.assertTrue(skill_root.joinpath(*path.parts).is_file())
+
+    def test_plugin_validation_rejects_unresolved_routing_reference(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            plugin_root = Path(temp_dir) / "frontend-design-pack"
+            shutil.copytree(PLUGIN_ROOT, plugin_root)
+            routing_path = (
+                plugin_root / "skills/frontend-design/references/routing.json"
+            )
+            routing = json.loads(routing_path.read_text(encoding="utf-8"))
+            routing["references"]["source-precedence"] = (
+                "router/references/source-precedence.md"
+            )
+            routing_path.write_text(
+                json.dumps(routing, indent=2, ensure_ascii=False) + "\n",
+                encoding="utf-8",
+            )
+
+            with self.assertRaisesRegex(
+                ValueError,
+                "routing reference.*source-precedence.*missing",
+            ):
+                renderer.validate_plugin_tree(plugin_root)
+
     def test_reference_catalog_resolves_every_approved_source_decision(self) -> None:
         skill_root = PLUGIN_ROOT / "skills/frontend-design"
         catalog = json.loads(
@@ -163,12 +372,204 @@ class FrontendDesignPluginTests(unittest.TestCase):
                 for entry in design_entries
             )
         )
-        self.assertTrue(
-            (skill_root / catalog["vercel_interface"]["reference_path"]).is_file()
+        for catalog_key in ("vercel_interface", "google_design_md"):
+            reference = catalog[catalog_key]
+            reference_path = skill_root / reference["reference_path"]
+            self.assertTrue(reference_path.is_file())
+            self.assertEqual(
+                sha256_bytes(reference_path.read_bytes()),
+                reference["sha256"],
+            )
+
+    def test_all_mengto_procedures_are_included_or_mapped_to_official(self) -> None:
+        skill_root = PLUGIN_ROOT / "skills/frontend-design"
+        catalog = json.loads(
+            (skill_root / "references/reference-catalog.json").read_text(
+                encoding="utf-8"
+            )
         )
-        self.assertTrue(
-            (skill_root / catalog["google_design_md"]["reference_path"]).is_file()
+        unavailable = {
+            entry["source_path"]: entry["decision"]
+            for entry in catalog["mengto_skills"]
+            if entry["decision"] not in {"included", "mapped-to-official"}
+        }
+
+        self.assertEqual(unavailable, {})
+
+    def test_mengto_dependency_map_covers_29_sources_and_30_destinations(self) -> None:
+        dependencies = [
+            dependency
+            for procedure in self.dependencies["procedures"]
+            for dependency in procedure["dependencies"]
+        ]
+
+        self.assertEqual(self.dependencies["schema_version"], 1)
+        self.assertEqual(len(dependencies), 30)
+        self.assertEqual(
+            {dependency["source_id"] for dependency in dependencies},
+            EXPECTED_MENGTO_DEPENDENCY_SOURCES,
         )
+        self.assertEqual(
+            len(
+                {
+                    (procedure["source_path"], dependency["target_path"])
+                    for procedure in self.dependencies["procedures"]
+                    for dependency in procedure["dependencies"]
+                }
+            ),
+            30,
+        )
+        self.assertEqual(
+            len(
+                {
+                    (dependency["source_id"], dependency["source_path"])
+                    for dependency in dependencies
+                }
+            ),
+            29,
+        )
+
+    def test_browser_evaluator_uses_discoverable_external_runtime_contract(self) -> None:
+        catalog = json.loads(
+            (
+                PLUGIN_ROOT
+                / "skills/frontend-design/references/reference-catalog.json"
+            ).read_text(encoding="utf-8")
+        )
+        optimize = next(
+            entry
+            for entry in catalog["mengto_skills"]
+            if entry["name"] == "optimize-web-animations"
+        )
+
+        self.assertEqual(
+            optimize["external_runtime_requirements"],
+            [
+                {
+                    "capability": "browser:control-in-app-browser",
+                    "required_file": "scripts/browser-client.mjs",
+                    "resolution": "discover-installed-plugin",
+                }
+            ],
+        )
+        self.assertNotIn("/Users/", json.dumps(optimize))
+
+    def test_imported_helper_scripts_preserve_mode_as_data_but_are_inert(self) -> None:
+        skill_root = PLUGIN_ROOT / "skills/frontend-design"
+        catalog = json.loads(
+            (skill_root / "references/reference-catalog.json").read_text(
+                encoding="utf-8"
+            )
+        )
+        locked_files = {
+            (source["id"], item["path"]): item
+            for source in self.lock["sources"]
+            for item in source["files"]
+        }
+        scripts = [
+            supporting_file
+            for entry in catalog["mengto_skills"]
+            for supporting_file in entry.get("supporting_files", [])
+            if PurePosixPath(supporting_file["target_path"]).parts[0] == "scripts"
+        ]
+
+        self.assertEqual(
+            {PurePosixPath(item["target_path"]).name for item in scripts},
+            {"generate_voice.py", "stitch_full_page_capture.mjs"},
+        )
+        for item in scripts:
+            with self.subTest(path=item["reference_path"]):
+                self.assertEqual(
+                    locked_files[(item["source_id"], item["source_path"])]["mode"],
+                    "0755",
+                )
+                self.assertEqual(
+                    (skill_root / item["reference_path"]).stat().st_mode & 0o111,
+                    0,
+                )
+
+    def test_included_mengto_procedures_resolve_all_local_dependencies(self) -> None:
+        skill_root = PLUGIN_ROOT / "skills/frontend-design"
+        catalog = json.loads(
+            (skill_root / "references/reference-catalog.json").read_text(
+                encoding="utf-8"
+            )
+        )
+
+        for entry in catalog["mengto_skills"]:
+            if entry["decision"] != "included":
+                continue
+            procedure_path = skill_root / entry["reference_path"]
+            with self.subTest(source_path=entry["source_path"]):
+                self.assertEqual(procedure_path.name, "procedure.md")
+                dependency_contents = [
+                    procedure_path.read_text(encoding="utf-8")
+                ]
+                for supporting_file in entry.get("supporting_files", []):
+                    packaged_path = skill_root / supporting_file["reference_path"]
+                    self.assertTrue(packaged_path.is_file())
+                    self.assertEqual(
+                        sha256_bytes(packaged_path.read_bytes()),
+                        supporting_file["sha256"],
+                    )
+                    if packaged_path.suffix.lower() == ".md":
+                        dependency_contents.append(
+                            packaged_path.read_text(encoding="utf-8")
+                        )
+                dependencies = sorted(
+                    {
+                        dependency
+                        for content in dependency_contents
+                        for dependency in (
+                            set(SKILL_ROOT_DEPENDENCY_PATTERN.findall(content))
+                            | set(REFERENCE_DEPENDENCY_PATTERN.findall(content))
+                            | set(MARKDOWN_DEPENDENCY_PATTERN.findall(content))
+                        )
+                    }
+                )
+                for dependency in dependencies:
+                    dependency_path = PurePosixPath(dependency)
+                    self.assertNotIn("..", dependency_path.parts)
+                    self.assertTrue(
+                        procedure_path.parent.joinpath(*dependency_path.parts).is_file(),
+                        f"{entry['source_path']} -> {dependency}",
+                    )
+
+    def test_plugin_validation_rejects_missing_local_procedure_dependency(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            plugin_root = Path(temp_dir) / "frontend-design-pack"
+            shutil.copytree(PLUGIN_ROOT, plugin_root)
+            catalog = json.loads(
+                (
+                    plugin_root
+                    / "skills/frontend-design/references/reference-catalog.json"
+                ).read_text(encoding="utf-8")
+            )
+            entry = next(
+                item
+                for item in catalog["mengto_skills"]
+                if item["decision"] == "included"
+            )
+            procedure_path = (
+                plugin_root / "skills/frontend-design" / entry["reference_path"]
+            )
+            procedure_path.write_text(
+                procedure_path.read_text(encoding="utf-8")
+                + "\n[Missing](references/not-packaged.md)\n",
+                encoding="utf-8",
+            )
+            entry["sha256"] = sha256_bytes(procedure_path.read_bytes())
+            catalog_path = (
+                plugin_root
+                / "skills/frontend-design/references/reference-catalog.json"
+            )
+            catalog_path.write_text(
+                json.dumps(catalog, indent=2, ensure_ascii=False, sort_keys=True) + "\n",
+                encoding="utf-8",
+            )
+
+            with self.assertRaisesRegex(ValueError, "local dependency.*not-packaged"):
+                renderer.validate_plugin_tree(plugin_root)
 
     def test_plugin_carries_required_notices_for_every_copied_source(self) -> None:
         notices = (PLUGIN_ROOT / "THIRD_PARTY_NOTICES.md").read_text(

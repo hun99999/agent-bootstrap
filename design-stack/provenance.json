@@ -2,6 +2,136 @@
   "schema_version": 1,
   "records": [
     {
+      "source_id": "apple-swiftui-debugging",
+      "upstream_path": "LICENSE",
+      "revision": "1a16fa57e2039a6db2f510b10b64899d91e11c10",
+      "authority": "original-upstream-substitution",
+      "role": "mengto-procedure-dependency",
+      "license": {
+        "spdx": "MIT",
+        "status": "verified",
+        "notice_path": "LICENSE",
+        "notice_sha256": "7c90586a6b5c334e403c5fd11397926d85b1f063d68f6d1199b005cd61b148b3",
+        "basis": "reviewed dependency file against pinned source notice"
+      },
+      "sha256": "7c90586a6b5c334e403c5fd11397926d85b1f063d68f6d1199b005cd61b148b3",
+      "decision": "included",
+      "origin": {
+        "repository": "https://github.com/rshankras/claude-code-apple-skills",
+        "path": "LICENSE",
+        "revision": "1a16fa57e2039a6db2f510b10b64899d91e11c10",
+        "content_sha256": "7c90586a6b5c334e403c5fd11397926d85b1f063d68f6d1199b005cd61b148b3",
+        "basis": "reviewed original-source substitution for a declared MengTo dependency",
+        "publisher": "Ravi Shankar",
+        "introduced_revision": "d5973b10eee39a7a3ecd4ae5ef1890612207c7b9"
+      },
+      "catalog": null
+    },
+    {
+      "source_id": "apple-swiftui-debugging",
+      "upstream_path": "skills/performance/swiftui-debugging/body-reevaluation.md",
+      "revision": "1a16fa57e2039a6db2f510b10b64899d91e11c10",
+      "authority": "original-upstream-substitution",
+      "role": "mengto-procedure-dependency",
+      "license": {
+        "spdx": "MIT",
+        "status": "verified",
+        "notice_path": "LICENSE",
+        "notice_sha256": "7c90586a6b5c334e403c5fd11397926d85b1f063d68f6d1199b005cd61b148b3",
+        "basis": "reviewed dependency file against pinned source notice"
+      },
+      "sha256": "fc5599a5007e92d4a2d429d51a1230fd9cd8b647f11aca794ce8a8fe49e9e689",
+      "decision": "included",
+      "origin": {
+        "repository": "https://github.com/rshankras/claude-code-apple-skills",
+        "path": "skills/performance/swiftui-debugging/body-reevaluation.md",
+        "revision": "1a16fa57e2039a6db2f510b10b64899d91e11c10",
+        "content_sha256": "fc5599a5007e92d4a2d429d51a1230fd9cd8b647f11aca794ce8a8fe49e9e689",
+        "basis": "reviewed original-source substitution for a declared MengTo dependency",
+        "publisher": "Ravi Shankar",
+        "introduced_revision": "455362ae3a2d863bc607cd1278a4b02074587d19"
+      },
+      "catalog": null
+    },
+    {
+      "source_id": "apple-swiftui-debugging",
+      "upstream_path": "skills/performance/swiftui-debugging/common-pitfalls.md",
+      "revision": "1a16fa57e2039a6db2f510b10b64899d91e11c10",
+      "authority": "original-upstream-substitution",
+      "role": "mengto-procedure-dependency",
+      "license": {
+        "spdx": "MIT",
+        "status": "verified",
+        "notice_path": "LICENSE",
+        "notice_sha256": "7c90586a6b5c334e403c5fd11397926d85b1f063d68f6d1199b005cd61b148b3",
+        "basis": "reviewed dependency file against pinned source notice"
+      },
+      "sha256": "dcf44203d24457686e61cda15d31623de76f299e95eea008b53f897e14ad9e89",
+      "decision": "included",
+      "origin": {
+        "repository": "https://github.com/rshankras/claude-code-apple-skills",
+        "path": "skills/performance/swiftui-debugging/common-pitfalls.md",
+        "revision": "1a16fa57e2039a6db2f510b10b64899d91e11c10",
+        "content_sha256": "dcf44203d24457686e61cda15d31623de76f299e95eea008b53f897e14ad9e89",
+        "basis": "reviewed original-source substitution for a declared MengTo dependency",
+        "publisher": "Ravi Shankar",
+        "introduced_revision": "455362ae3a2d863bc607cd1278a4b02074587d19"
+      },
+      "catalog": null
+    },
+    {
+      "source_id": "apple-swiftui-debugging",
+      "upstream_path": "skills/performance/swiftui-debugging/lazy-loading.md",
+      "revision": "1a16fa57e2039a6db2f510b10b64899d91e11c10",
+      "authority": "original-upstream-substitution",
+      "role": "mengto-procedure-dependency",
+      "license": {
+        "spdx": "MIT",
+        "status": "verified",
+        "notice_path": "LICENSE",
+        "notice_sha256": "7c90586a6b5c334e403c5fd11397926d85b1f063d68f6d1199b005cd61b148b3",
+        "basis": "reviewed dependency file against pinned source notice"
+      },
+      "sha256": "d07b91aba3e705617b851a9ea61dbe3c318b6b52a991061181bee5c2aa95806b",
+      "decision": "included",
+      "origin": {
+        "repository": "https://github.com/rshankras/claude-code-apple-skills",
+        "path": "skills/performance/swiftui-debugging/lazy-loading.md",
+        "revision": "1a16fa57e2039a6db2f510b10b64899d91e11c10",
+        "content_sha256": "d07b91aba3e705617b851a9ea61dbe3c318b6b52a991061181bee5c2aa95806b",
+        "basis": "reviewed original-source substitution for a declared MengTo dependency",
+        "publisher": "Ravi Shankar",
+        "introduced_revision": "455362ae3a2d863bc607cd1278a4b02074587d19"
+      },
+      "catalog": null
+    },
+    {
+      "source_id": "apple-swiftui-debugging",
+      "upstream_path": "skills/performance/swiftui-debugging/view-identity.md",
+      "revision": "1a16fa57e2039a6db2f510b10b64899d91e11c10",
+      "authority": "original-upstream-substitution",
+      "role": "mengto-procedure-dependency",
+      "license": {
+        "spdx": "MIT",
+        "status": "verified",
+        "notice_path": "LICENSE",
+        "notice_sha256": "7c90586a6b5c334e403c5fd11397926d85b1f063d68f6d1199b005cd61b148b3",
+        "basis": "reviewed dependency file against pinned source notice"
+      },
+      "sha256": "435a90f22d68da8de596ba76d160d158b9a18ab3892e061d6e59eb8fe2d02d3e",
+      "decision": "included",
+      "origin": {
+        "repository": "https://github.com/rshankras/claude-code-apple-skills",
+        "path": "skills/performance/swiftui-debugging/view-identity.md",
+        "revision": "1a16fa57e2039a6db2f510b10b64899d91e11c10",
+        "content_sha256": "435a90f22d68da8de596ba76d160d158b9a18ab3892e061d6e59eb8fe2d02d3e",
+        "basis": "reviewed original-source substitution for a declared MengTo dependency",
+        "publisher": "Ravi Shankar",
+        "introduced_revision": "455362ae3a2d863bc607cd1278a4b02074587d19"
+      },
+      "catalog": null
+    },
+    {
       "source_id": "awesome-design-md",
       "upstream_path": "design-md/airbnb/DESIGN.md",
       "revision": "664b3e78fd1a298ba11973822da988483256d4b4",
@@ -1926,6 +2056,84 @@
       "catalog": "design_md"
     },
     {
+      "source_id": "marketing-skills",
+      "upstream_path": "skills/copywriting/references/copy-frameworks.md",
+      "revision": "33218ff1ca025b977da902ecb18d40e808f00c26",
+      "authority": "original-upstream-byte-identical",
+      "role": "mengto-procedure-dependency",
+      "license": {
+        "spdx": "MIT",
+        "status": "verified",
+        "notice_path": "LICENSE",
+        "notice_sha256": "b70d71e24e40fce5da8f4b6f9cd862096a048e433db7f3c8cac5e348e6d34591",
+        "basis": "reviewed dependency file against pinned source notice"
+      },
+      "sha256": "f387b6ed4b510efa9f0d3c459f4898971c8b0176e8c34185040cb264eca50186",
+      "decision": "included",
+      "origin": {
+        "repository": "https://github.com/coreyhaines31/marketingskills",
+        "path": "skills/copywriting/references/copy-frameworks.md",
+        "revision": "33218ff1ca025b977da902ecb18d40e808f00c26",
+        "content_sha256": "f387b6ed4b510efa9f0d3c459f4898971c8b0176e8c34185040cb264eca50186",
+        "basis": "reviewed byte-identical original source for a declared MengTo dependency",
+        "publisher": "Corey Haines",
+        "introduced_revision": "98e74b79d7bf7979606d592bee26d9360c5e38d1"
+      },
+      "catalog": null
+    },
+    {
+      "source_id": "marketing-skills",
+      "upstream_path": "skills/copywriting/references/natural-transitions.md",
+      "revision": "33218ff1ca025b977da902ecb18d40e808f00c26",
+      "authority": "original-upstream-byte-identical",
+      "role": "mengto-procedure-dependency",
+      "license": {
+        "spdx": "MIT",
+        "status": "verified",
+        "notice_path": "LICENSE",
+        "notice_sha256": "b70d71e24e40fce5da8f4b6f9cd862096a048e433db7f3c8cac5e348e6d34591",
+        "basis": "reviewed dependency file against pinned source notice"
+      },
+      "sha256": "4ff23f8943af2f65b072f26f1c53ce55f19cc26d7be211c11cae8e34b43e859f",
+      "decision": "included",
+      "origin": {
+        "repository": "https://github.com/coreyhaines31/marketingskills",
+        "path": "skills/copywriting/references/natural-transitions.md",
+        "revision": "33218ff1ca025b977da902ecb18d40e808f00c26",
+        "content_sha256": "4ff23f8943af2f65b072f26f1c53ce55f19cc26d7be211c11cae8e34b43e859f",
+        "basis": "reviewed byte-identical original source for a declared MengTo dependency",
+        "publisher": "Corey Haines",
+        "introduced_revision": "91d2e6d5f98b36eed33a5b893ee086532e804419"
+      },
+      "catalog": null
+    },
+    {
+      "source_id": "marketing-skills",
+      "upstream_path": "skills/seo-audit/references/ai-writing-detection.md",
+      "revision": "33218ff1ca025b977da902ecb18d40e808f00c26",
+      "authority": "original-upstream-byte-identical",
+      "role": "mengto-procedure-dependency",
+      "license": {
+        "spdx": "MIT",
+        "status": "verified",
+        "notice_path": "LICENSE",
+        "notice_sha256": "b70d71e24e40fce5da8f4b6f9cd862096a048e433db7f3c8cac5e348e6d34591",
+        "basis": "reviewed dependency file against pinned source notice"
+      },
+      "sha256": "f1e273f56ce7e2215ff218bf903680ddcec0fd026ab90c3ebfb3439ed0edfaa4",
+      "decision": "included",
+      "origin": {
+        "repository": "https://github.com/coreyhaines31/marketingskills",
+        "path": "skills/seo-audit/references/ai-writing-detection.md",
+        "revision": "33218ff1ca025b977da902ecb18d40e808f00c26",
+        "content_sha256": "f1e273f56ce7e2215ff218bf903680ddcec0fd026ab90c3ebfb3439ed0edfaa4",
+        "basis": "reviewed byte-identical original source for a declared MengTo dependency",
+        "publisher": "Corey Haines",
+        "introduced_revision": "91d2e6d5f98b36eed33a5b893ee086532e804419"
+      },
+      "catalog": null
+    },
+    {
       "source_id": "mengto-skills",
       "upstream_path": "agent-skills/codex/audit-verify-explain-grade-5/SKILL.md",
       "revision": "25f872a94e3bbee85ecacba4041fa52c21cb0e44",
@@ -2002,6 +2210,32 @@
         "introduced_revision": "f1edc8aa62c279f150d20611f174ef7a8f35f05d"
       },
       "catalog": "mengto_skills"
+    },
+    {
+      "source_id": "mengto-skills",
+      "upstream_path": "agent-skills/codex/customer-email-draft-threads/references/runbook.md",
+      "revision": "25f872a94e3bbee85ecacba4041fa52c21cb0e44",
+      "authority": "procedural-guidance",
+      "role": "frontend-procedure-reference",
+      "license": {
+        "spdx": "MIT",
+        "status": "verified",
+        "notice_path": "LICENSE",
+        "notice_sha256": "b2a071ba22fefd803f4e9d1f5c777dd79c62d191695586a1a73fd4d0ebd051c6",
+        "basis": "reviewed dependency file against pinned source notice"
+      },
+      "sha256": "bb12af26f29788561427faf025d1c0aa9a70815f4fcaf7104c327195868ccd4c",
+      "decision": "included",
+      "origin": {
+        "repository": "https://github.com/MengTo/Skills",
+        "path": "agent-skills/codex/customer-email-draft-threads/references/runbook.md",
+        "revision": "25f872a94e3bbee85ecacba4041fa52c21cb0e44",
+        "content_sha256": "bb12af26f29788561427faf025d1c0aa9a70815f4fcaf7104c327195868ccd4c",
+        "basis": "reviewed dependency present in the pinned MengTo revision",
+        "publisher": "MengTo",
+        "introduced_revision": "f1edc8aa62c279f150d20611f174ef7a8f35f05d"
+      },
+      "catalog": null
     },
     {
       "source_id": "mengto-skills",
@@ -2083,6 +2317,32 @@
     },
     {
       "source_id": "mengto-skills",
+      "upstream_path": "agent-skills/codex/elevenlabs-tts/scripts/generate_voice.py",
+      "revision": "25f872a94e3bbee85ecacba4041fa52c21cb0e44",
+      "authority": "procedural-guidance",
+      "role": "frontend-procedure-reference",
+      "license": {
+        "spdx": "MIT",
+        "status": "verified",
+        "notice_path": "LICENSE",
+        "notice_sha256": "b2a071ba22fefd803f4e9d1f5c777dd79c62d191695586a1a73fd4d0ebd051c6",
+        "basis": "reviewed dependency file against pinned source notice"
+      },
+      "sha256": "0255ad49ff55b08e3cc4447b4d6b04d6b446cbba3b0b85a17a2ba05cf0a512f7",
+      "decision": "included",
+      "origin": {
+        "repository": "https://github.com/MengTo/Skills",
+        "path": "agent-skills/codex/elevenlabs-tts/scripts/generate_voice.py",
+        "revision": "25f872a94e3bbee85ecacba4041fa52c21cb0e44",
+        "content_sha256": "0255ad49ff55b08e3cc4447b4d6b04d6b446cbba3b0b85a17a2ba05cf0a512f7",
+        "basis": "reviewed dependency present in the pinned MengTo revision",
+        "publisher": "MengTo",
+        "introduced_revision": "3a827375d2ca69808948f8761a44c558eb2479e6"
+      },
+      "catalog": null
+    },
+    {
+      "source_id": "mengto-skills",
       "upstream_path": "agent-skills/codex/html-to-interaction-prompts/SKILL.md",
       "revision": "25f872a94e3bbee85ecacba4041fa52c21cb0e44",
       "authority": "procedural-guidance",
@@ -2161,6 +2421,32 @@
     },
     {
       "source_id": "mengto-skills",
+      "upstream_path": "agent-skills/codex/optimize-web-animations/references/browser-profiling.md",
+      "revision": "25f872a94e3bbee85ecacba4041fa52c21cb0e44",
+      "authority": "procedural-guidance",
+      "role": "frontend-procedure-reference",
+      "license": {
+        "spdx": "MIT",
+        "status": "verified",
+        "notice_path": "LICENSE",
+        "notice_sha256": "b2a071ba22fefd803f4e9d1f5c777dd79c62d191695586a1a73fd4d0ebd051c6",
+        "basis": "reviewed dependency file against pinned source notice"
+      },
+      "sha256": "69df1bc96bdd4ee2d149527b7fce4065801b83afff33b5b70a2d654bb300f53d",
+      "decision": "included",
+      "origin": {
+        "repository": "https://github.com/MengTo/Skills",
+        "path": "agent-skills/codex/optimize-web-animations/references/browser-profiling.md",
+        "revision": "25f872a94e3bbee85ecacba4041fa52c21cb0e44",
+        "content_sha256": "69df1bc96bdd4ee2d149527b7fce4065801b83afff33b5b70a2d654bb300f53d",
+        "basis": "reviewed dependency present in the pinned MengTo revision",
+        "publisher": "MengTo",
+        "introduced_revision": "f1edc8aa62c279f150d20611f174ef7a8f35f05d"
+      },
+      "catalog": null
+    },
+    {
+      "source_id": "mengto-skills",
       "upstream_path": "agent-skills/codex/pdf/SKILL.md",
       "revision": "25f872a94e3bbee85ecacba4041fa52c21cb0e44",
       "authority": "procedural-guidance",
@@ -2220,6 +2506,110 @@
         "introduced_revision": "f1edc8aa62c279f150d20611f174ef7a8f35f05d"
       },
       "catalog": "mengto_skills"
+    },
+    {
+      "source_id": "mengto-skills",
+      "upstream_path": "agent-skills/codex/performance-profiling/references/energy-diagnostics.md",
+      "revision": "25f872a94e3bbee85ecacba4041fa52c21cb0e44",
+      "authority": "procedural-guidance",
+      "role": "frontend-procedure-reference",
+      "license": {
+        "spdx": "MIT",
+        "status": "verified",
+        "notice_path": "LICENSE",
+        "notice_sha256": "b2a071ba22fefd803f4e9d1f5c777dd79c62d191695586a1a73fd4d0ebd051c6",
+        "basis": "reviewed dependency file against pinned source notice"
+      },
+      "sha256": "e8064c505c2d015907d5b588f6b3d7b31e30c3aafbe5095dc0ef9d60c5ad1e46",
+      "decision": "included",
+      "origin": {
+        "repository": "https://github.com/MengTo/Skills",
+        "path": "agent-skills/codex/performance-profiling/references/energy-diagnostics.md",
+        "revision": "25f872a94e3bbee85ecacba4041fa52c21cb0e44",
+        "content_sha256": "e8064c505c2d015907d5b588f6b3d7b31e30c3aafbe5095dc0ef9d60c5ad1e46",
+        "basis": "reviewed dependency present in the pinned MengTo revision",
+        "publisher": "MengTo",
+        "introduced_revision": "f1edc8aa62c279f150d20611f174ef7a8f35f05d"
+      },
+      "catalog": null
+    },
+    {
+      "source_id": "mengto-skills",
+      "upstream_path": "agent-skills/codex/performance-profiling/references/launch-optimization.md",
+      "revision": "25f872a94e3bbee85ecacba4041fa52c21cb0e44",
+      "authority": "procedural-guidance",
+      "role": "frontend-procedure-reference",
+      "license": {
+        "spdx": "MIT",
+        "status": "verified",
+        "notice_path": "LICENSE",
+        "notice_sha256": "b2a071ba22fefd803f4e9d1f5c777dd79c62d191695586a1a73fd4d0ebd051c6",
+        "basis": "reviewed dependency file against pinned source notice"
+      },
+      "sha256": "117cc130c62a9565155239818ab847fdda240f5ea246e659725f771611b2460b",
+      "decision": "included",
+      "origin": {
+        "repository": "https://github.com/MengTo/Skills",
+        "path": "agent-skills/codex/performance-profiling/references/launch-optimization.md",
+        "revision": "25f872a94e3bbee85ecacba4041fa52c21cb0e44",
+        "content_sha256": "117cc130c62a9565155239818ab847fdda240f5ea246e659725f771611b2460b",
+        "basis": "reviewed dependency present in the pinned MengTo revision",
+        "publisher": "MengTo",
+        "introduced_revision": "f1edc8aa62c279f150d20611f174ef7a8f35f05d"
+      },
+      "catalog": null
+    },
+    {
+      "source_id": "mengto-skills",
+      "upstream_path": "agent-skills/codex/performance-profiling/references/memory-profiling.md",
+      "revision": "25f872a94e3bbee85ecacba4041fa52c21cb0e44",
+      "authority": "procedural-guidance",
+      "role": "frontend-procedure-reference",
+      "license": {
+        "spdx": "MIT",
+        "status": "verified",
+        "notice_path": "LICENSE",
+        "notice_sha256": "b2a071ba22fefd803f4e9d1f5c777dd79c62d191695586a1a73fd4d0ebd051c6",
+        "basis": "reviewed dependency file against pinned source notice"
+      },
+      "sha256": "1d06b26c04391229d4ba96bfa962051100c7e41285e76671013fed9a018ed1c9",
+      "decision": "included",
+      "origin": {
+        "repository": "https://github.com/MengTo/Skills",
+        "path": "agent-skills/codex/performance-profiling/references/memory-profiling.md",
+        "revision": "25f872a94e3bbee85ecacba4041fa52c21cb0e44",
+        "content_sha256": "1d06b26c04391229d4ba96bfa962051100c7e41285e76671013fed9a018ed1c9",
+        "basis": "reviewed dependency present in the pinned MengTo revision",
+        "publisher": "MengTo",
+        "introduced_revision": "f1edc8aa62c279f150d20611f174ef7a8f35f05d"
+      },
+      "catalog": null
+    },
+    {
+      "source_id": "mengto-skills",
+      "upstream_path": "agent-skills/codex/performance-profiling/references/time-profiler.md",
+      "revision": "25f872a94e3bbee85ecacba4041fa52c21cb0e44",
+      "authority": "procedural-guidance",
+      "role": "frontend-procedure-reference",
+      "license": {
+        "spdx": "MIT",
+        "status": "verified",
+        "notice_path": "LICENSE",
+        "notice_sha256": "b2a071ba22fefd803f4e9d1f5c777dd79c62d191695586a1a73fd4d0ebd051c6",
+        "basis": "reviewed dependency file against pinned source notice"
+      },
+      "sha256": "7744b8791a936418221ade47c50269535982acaf970fa35d3ec5aa680e167149",
+      "decision": "included",
+      "origin": {
+        "repository": "https://github.com/MengTo/Skills",
+        "path": "agent-skills/codex/performance-profiling/references/time-profiler.md",
+        "revision": "25f872a94e3bbee85ecacba4041fa52c21cb0e44",
+        "content_sha256": "7744b8791a936418221ade47c50269535982acaf970fa35d3ec5aa680e167149",
+        "basis": "reviewed dependency present in the pinned MengTo revision",
+        "publisher": "MengTo",
+        "introduced_revision": "f1edc8aa62c279f150d20611f174ef7a8f35f05d"
+      },
+      "catalog": null
     },
     {
       "source_id": "mengto-skills",
@@ -2357,6 +2747,32 @@
     },
     {
       "source_id": "mengto-skills",
+      "upstream_path": "agent-skills/codex/stitched-full-page-capture/scripts/stitch_full_page_capture.mjs",
+      "revision": "25f872a94e3bbee85ecacba4041fa52c21cb0e44",
+      "authority": "procedural-guidance",
+      "role": "frontend-procedure-reference",
+      "license": {
+        "spdx": "MIT",
+        "status": "verified",
+        "notice_path": "LICENSE",
+        "notice_sha256": "b2a071ba22fefd803f4e9d1f5c777dd79c62d191695586a1a73fd4d0ebd051c6",
+        "basis": "reviewed dependency file against pinned source notice"
+      },
+      "sha256": "0c29b22061882ffd1db8714340a58bfd3f645aa3c0c14a7ba828a74e1fdb6303",
+      "decision": "included",
+      "origin": {
+        "repository": "https://github.com/MengTo/Skills",
+        "path": "agent-skills/codex/stitched-full-page-capture/scripts/stitch_full_page_capture.mjs",
+        "revision": "25f872a94e3bbee85ecacba4041fa52c21cb0e44",
+        "content_sha256": "0c29b22061882ffd1db8714340a58bfd3f645aa3c0c14a7ba828a74e1fdb6303",
+        "basis": "reviewed dependency present in the pinned MengTo revision",
+        "publisher": "MengTo",
+        "introduced_revision": "f1edc8aa62c279f150d20611f174ef7a8f35f05d"
+      },
+      "catalog": null
+    },
+    {
+      "source_id": "mengto-skills",
       "upstream_path": "agent-skills/codex/swiftui-debugging/SKILL.md",
       "revision": "25f872a94e3bbee85ecacba4041fa52c21cb0e44",
       "authority": "procedural-guidance",
@@ -2406,6 +2822,32 @@
         "introduced_revision": "f1edc8aa62c279f150d20611f174ef7a8f35f05d"
       },
       "catalog": "mengto_skills"
+    },
+    {
+      "source_id": "mengto-skills",
+      "upstream_path": "agent-skills/codex/video-to-superprompt/references/superprompt-template.md",
+      "revision": "25f872a94e3bbee85ecacba4041fa52c21cb0e44",
+      "authority": "procedural-guidance",
+      "role": "frontend-procedure-reference",
+      "license": {
+        "spdx": "MIT",
+        "status": "verified",
+        "notice_path": "LICENSE",
+        "notice_sha256": "b2a071ba22fefd803f4e9d1f5c777dd79c62d191695586a1a73fd4d0ebd051c6",
+        "basis": "reviewed dependency file against pinned source notice"
+      },
+      "sha256": "8f5d73d56a453a754ad325f3f512a455f34711ea07677539d445672b7016361d",
+      "decision": "included",
+      "origin": {
+        "repository": "https://github.com/MengTo/Skills",
+        "path": "agent-skills/codex/video-to-superprompt/references/superprompt-template.md",
+        "revision": "25f872a94e3bbee85ecacba4041fa52c21cb0e44",
+        "content_sha256": "8f5d73d56a453a754ad325f3f512a455f34711ea07677539d445672b7016361d",
+        "basis": "reviewed dependency present in the pinned MengTo revision",
+        "publisher": "MengTo",
+        "introduced_revision": "f1edc8aa62c279f150d20611f174ef7a8f35f05d"
+      },
+      "catalog": null
     },
     {
       "source_id": "mengto-skills",
@@ -4444,6 +4886,318 @@
         "introduced_revision": "582fa357e819de82e9930bd1693264d5f0ac2fcf"
       },
       "catalog": "mengto_skills"
+    },
+    {
+      "source_id": "openai-netlify-deploy",
+      "upstream_path": "skills/.curated/netlify-deploy/references/cli-commands.md",
+      "revision": "49f948faa9258a0c61caceaf225e179651397431",
+      "authority": "official-upstream-byte-identical",
+      "role": "mengto-procedure-dependency",
+      "license": {
+        "spdx": "Apache-2.0",
+        "status": "verified",
+        "notice_path": "skills/.curated/netlify-deploy/LICENSE.txt",
+        "notice_sha256": "4dd13869245e356246a5b770723247bbb80a8f07a181d1d3d873a1734297cdb9",
+        "basis": "reviewed dependency file against pinned source notice"
+      },
+      "sha256": "a24b08401b8c796e4a58933a71441b3341b61afc840d690d9127b27ab00cfe05",
+      "decision": "included",
+      "origin": {
+        "repository": "https://github.com/openai/skills",
+        "path": "skills/.curated/netlify-deploy/references/cli-commands.md",
+        "revision": "49f948faa9258a0c61caceaf225e179651397431",
+        "content_sha256": "a24b08401b8c796e4a58933a71441b3341b61afc840d690d9127b27ab00cfe05",
+        "basis": "reviewed byte-identical official source for a declared MengTo dependency",
+        "publisher": "OpenAI",
+        "introduced_revision": "425ed2fc57d0f324158fad9d624502f84ad1239c"
+      },
+      "catalog": null
+    },
+    {
+      "source_id": "openai-netlify-deploy",
+      "upstream_path": "skills/.curated/netlify-deploy/references/deployment-patterns.md",
+      "revision": "49f948faa9258a0c61caceaf225e179651397431",
+      "authority": "official-upstream-byte-identical",
+      "role": "mengto-procedure-dependency",
+      "license": {
+        "spdx": "Apache-2.0",
+        "status": "verified",
+        "notice_path": "skills/.curated/netlify-deploy/LICENSE.txt",
+        "notice_sha256": "4dd13869245e356246a5b770723247bbb80a8f07a181d1d3d873a1734297cdb9",
+        "basis": "reviewed dependency file against pinned source notice"
+      },
+      "sha256": "fdb8c3b96fe03099826e4207b4933df3ff97571415f5e283567979bdc86cdc85",
+      "decision": "included",
+      "origin": {
+        "repository": "https://github.com/openai/skills",
+        "path": "skills/.curated/netlify-deploy/references/deployment-patterns.md",
+        "revision": "49f948faa9258a0c61caceaf225e179651397431",
+        "content_sha256": "fdb8c3b96fe03099826e4207b4933df3ff97571415f5e283567979bdc86cdc85",
+        "basis": "reviewed byte-identical official source for a declared MengTo dependency",
+        "publisher": "OpenAI",
+        "introduced_revision": "425ed2fc57d0f324158fad9d624502f84ad1239c"
+      },
+      "catalog": null
+    },
+    {
+      "source_id": "openai-netlify-deploy",
+      "upstream_path": "skills/.curated/netlify-deploy/references/netlify-toml.md",
+      "revision": "49f948faa9258a0c61caceaf225e179651397431",
+      "authority": "official-upstream-byte-identical",
+      "role": "mengto-procedure-dependency",
+      "license": {
+        "spdx": "Apache-2.0",
+        "status": "verified",
+        "notice_path": "skills/.curated/netlify-deploy/LICENSE.txt",
+        "notice_sha256": "4dd13869245e356246a5b770723247bbb80a8f07a181d1d3d873a1734297cdb9",
+        "basis": "reviewed dependency file against pinned source notice"
+      },
+      "sha256": "436ea3c2e0ce04abb34895db993d91b8660423977d9c52a89f2dfa014cad0b9c",
+      "decision": "included",
+      "origin": {
+        "repository": "https://github.com/openai/skills",
+        "path": "skills/.curated/netlify-deploy/references/netlify-toml.md",
+        "revision": "49f948faa9258a0c61caceaf225e179651397431",
+        "content_sha256": "436ea3c2e0ce04abb34895db993d91b8660423977d9c52a89f2dfa014cad0b9c",
+        "basis": "reviewed byte-identical official source for a declared MengTo dependency",
+        "publisher": "OpenAI",
+        "introduced_revision": "425ed2fc57d0f324158fad9d624502f84ad1239c"
+      },
+      "catalog": null
+    },
+    {
+      "source_id": "swiftui-agent-skill",
+      "upstream_path": "swiftui-pro/references/accessibility.md",
+      "revision": "f7309bdc9eb7231ac40317abd2b08a451a14e0aa",
+      "authority": "original-upstream-byte-identical",
+      "role": "mengto-procedure-dependency",
+      "license": {
+        "spdx": "MIT",
+        "status": "verified",
+        "notice_path": "LICENSE",
+        "notice_sha256": "b9b479e6df9f27cbc8e7abe91f771b396f3f0fa114d070c7c0b02c820c6b74dc",
+        "basis": "reviewed dependency file against pinned source notice"
+      },
+      "sha256": "708d09a35c950fd4c118bbb3cfcab13bb146e7d02084615307bbabc19e00a0e3",
+      "decision": "included",
+      "origin": {
+        "repository": "https://github.com/twostraws/SwiftUI-Agent-Skill",
+        "path": "swiftui-pro/references/accessibility.md",
+        "revision": "f7309bdc9eb7231ac40317abd2b08a451a14e0aa",
+        "content_sha256": "708d09a35c950fd4c118bbb3cfcab13bb146e7d02084615307bbabc19e00a0e3",
+        "basis": "reviewed byte-identical original source for a declared MengTo dependency",
+        "publisher": "Paul Hudson",
+        "introduced_revision": "36163743db0f7bc6d64723f0bc0a8fa69d08fc4b"
+      },
+      "catalog": null
+    },
+    {
+      "source_id": "swiftui-agent-skill",
+      "upstream_path": "swiftui-pro/references/api.md",
+      "revision": "f7309bdc9eb7231ac40317abd2b08a451a14e0aa",
+      "authority": "original-upstream-byte-identical",
+      "role": "mengto-procedure-dependency",
+      "license": {
+        "spdx": "MIT",
+        "status": "verified",
+        "notice_path": "LICENSE",
+        "notice_sha256": "b9b479e6df9f27cbc8e7abe91f771b396f3f0fa114d070c7c0b02c820c6b74dc",
+        "basis": "reviewed dependency file against pinned source notice"
+      },
+      "sha256": "12fa73d65a19c9d08224f925801db8eec914b1cedf5b2f86a38cdda04a66377a",
+      "decision": "included",
+      "origin": {
+        "repository": "https://github.com/twostraws/SwiftUI-Agent-Skill",
+        "path": "swiftui-pro/references/api.md",
+        "revision": "f7309bdc9eb7231ac40317abd2b08a451a14e0aa",
+        "content_sha256": "12fa73d65a19c9d08224f925801db8eec914b1cedf5b2f86a38cdda04a66377a",
+        "basis": "reviewed byte-identical original source for a declared MengTo dependency",
+        "publisher": "Paul Hudson",
+        "introduced_revision": "36163743db0f7bc6d64723f0bc0a8fa69d08fc4b"
+      },
+      "catalog": null
+    },
+    {
+      "source_id": "swiftui-agent-skill",
+      "upstream_path": "swiftui-pro/references/data.md",
+      "revision": "f7309bdc9eb7231ac40317abd2b08a451a14e0aa",
+      "authority": "original-upstream-byte-identical",
+      "role": "mengto-procedure-dependency",
+      "license": {
+        "spdx": "MIT",
+        "status": "verified",
+        "notice_path": "LICENSE",
+        "notice_sha256": "b9b479e6df9f27cbc8e7abe91f771b396f3f0fa114d070c7c0b02c820c6b74dc",
+        "basis": "reviewed dependency file against pinned source notice"
+      },
+      "sha256": "5cc50484c525f748839e12174c065f7ea5fdd4380ce04b6885a906ecd6e6a318",
+      "decision": "included",
+      "origin": {
+        "repository": "https://github.com/twostraws/SwiftUI-Agent-Skill",
+        "path": "swiftui-pro/references/data.md",
+        "revision": "f7309bdc9eb7231ac40317abd2b08a451a14e0aa",
+        "content_sha256": "5cc50484c525f748839e12174c065f7ea5fdd4380ce04b6885a906ecd6e6a318",
+        "basis": "reviewed byte-identical original source for a declared MengTo dependency",
+        "publisher": "Paul Hudson",
+        "introduced_revision": "36163743db0f7bc6d64723f0bc0a8fa69d08fc4b"
+      },
+      "catalog": null
+    },
+    {
+      "source_id": "swiftui-agent-skill",
+      "upstream_path": "swiftui-pro/references/design.md",
+      "revision": "f7309bdc9eb7231ac40317abd2b08a451a14e0aa",
+      "authority": "original-upstream-byte-identical",
+      "role": "mengto-procedure-dependency",
+      "license": {
+        "spdx": "MIT",
+        "status": "verified",
+        "notice_path": "LICENSE",
+        "notice_sha256": "b9b479e6df9f27cbc8e7abe91f771b396f3f0fa114d070c7c0b02c820c6b74dc",
+        "basis": "reviewed dependency file against pinned source notice"
+      },
+      "sha256": "03e35d46865cc6807255f3c8481cdbac7b3b0f61924185af84c1913d6c983c69",
+      "decision": "included",
+      "origin": {
+        "repository": "https://github.com/twostraws/SwiftUI-Agent-Skill",
+        "path": "swiftui-pro/references/design.md",
+        "revision": "f7309bdc9eb7231ac40317abd2b08a451a14e0aa",
+        "content_sha256": "03e35d46865cc6807255f3c8481cdbac7b3b0f61924185af84c1913d6c983c69",
+        "basis": "reviewed byte-identical original source for a declared MengTo dependency",
+        "publisher": "Paul Hudson",
+        "introduced_revision": "36163743db0f7bc6d64723f0bc0a8fa69d08fc4b"
+      },
+      "catalog": null
+    },
+    {
+      "source_id": "swiftui-agent-skill",
+      "upstream_path": "swiftui-pro/references/hygiene.md",
+      "revision": "f7309bdc9eb7231ac40317abd2b08a451a14e0aa",
+      "authority": "original-upstream-byte-identical",
+      "role": "mengto-procedure-dependency",
+      "license": {
+        "spdx": "MIT",
+        "status": "verified",
+        "notice_path": "LICENSE",
+        "notice_sha256": "b9b479e6df9f27cbc8e7abe91f771b396f3f0fa114d070c7c0b02c820c6b74dc",
+        "basis": "reviewed dependency file against pinned source notice"
+      },
+      "sha256": "91d96f45f3ffa02f5553c288415f3c3d5f317cab7d8d9c6c60240ea6c44a2b01",
+      "decision": "included",
+      "origin": {
+        "repository": "https://github.com/twostraws/SwiftUI-Agent-Skill",
+        "path": "swiftui-pro/references/hygiene.md",
+        "revision": "f7309bdc9eb7231ac40317abd2b08a451a14e0aa",
+        "content_sha256": "91d96f45f3ffa02f5553c288415f3c3d5f317cab7d8d9c6c60240ea6c44a2b01",
+        "basis": "reviewed byte-identical original source for a declared MengTo dependency",
+        "publisher": "Paul Hudson",
+        "introduced_revision": "36163743db0f7bc6d64723f0bc0a8fa69d08fc4b"
+      },
+      "catalog": null
+    },
+    {
+      "source_id": "swiftui-agent-skill",
+      "upstream_path": "swiftui-pro/references/navigation.md",
+      "revision": "f7309bdc9eb7231ac40317abd2b08a451a14e0aa",
+      "authority": "original-upstream-byte-identical",
+      "role": "mengto-procedure-dependency",
+      "license": {
+        "spdx": "MIT",
+        "status": "verified",
+        "notice_path": "LICENSE",
+        "notice_sha256": "b9b479e6df9f27cbc8e7abe91f771b396f3f0fa114d070c7c0b02c820c6b74dc",
+        "basis": "reviewed dependency file against pinned source notice"
+      },
+      "sha256": "a3adb302455993aff85bbb6b5845ed2fcffa137c8b2ded99c937f3e4b7fcd77b",
+      "decision": "included",
+      "origin": {
+        "repository": "https://github.com/twostraws/SwiftUI-Agent-Skill",
+        "path": "swiftui-pro/references/navigation.md",
+        "revision": "f7309bdc9eb7231ac40317abd2b08a451a14e0aa",
+        "content_sha256": "a3adb302455993aff85bbb6b5845ed2fcffa137c8b2ded99c937f3e4b7fcd77b",
+        "basis": "reviewed byte-identical original source for a declared MengTo dependency",
+        "publisher": "Paul Hudson",
+        "introduced_revision": "36163743db0f7bc6d64723f0bc0a8fa69d08fc4b"
+      },
+      "catalog": null
+    },
+    {
+      "source_id": "swiftui-agent-skill",
+      "upstream_path": "swiftui-pro/references/performance.md",
+      "revision": "f7309bdc9eb7231ac40317abd2b08a451a14e0aa",
+      "authority": "original-upstream-byte-identical",
+      "role": "mengto-procedure-dependency",
+      "license": {
+        "spdx": "MIT",
+        "status": "verified",
+        "notice_path": "LICENSE",
+        "notice_sha256": "b9b479e6df9f27cbc8e7abe91f771b396f3f0fa114d070c7c0b02c820c6b74dc",
+        "basis": "reviewed dependency file against pinned source notice"
+      },
+      "sha256": "1b503e3807e216d6b34b45f18bfba89214cea2fa1b88dd7ae8f482ebf0f03616",
+      "decision": "included",
+      "origin": {
+        "repository": "https://github.com/twostraws/SwiftUI-Agent-Skill",
+        "path": "swiftui-pro/references/performance.md",
+        "revision": "f7309bdc9eb7231ac40317abd2b08a451a14e0aa",
+        "content_sha256": "1b503e3807e216d6b34b45f18bfba89214cea2fa1b88dd7ae8f482ebf0f03616",
+        "basis": "reviewed byte-identical original source for a declared MengTo dependency",
+        "publisher": "Paul Hudson",
+        "introduced_revision": "36163743db0f7bc6d64723f0bc0a8fa69d08fc4b"
+      },
+      "catalog": null
+    },
+    {
+      "source_id": "swiftui-agent-skill",
+      "upstream_path": "swiftui-pro/references/swift.md",
+      "revision": "f7309bdc9eb7231ac40317abd2b08a451a14e0aa",
+      "authority": "original-upstream-byte-identical",
+      "role": "mengto-procedure-dependency",
+      "license": {
+        "spdx": "MIT",
+        "status": "verified",
+        "notice_path": "LICENSE",
+        "notice_sha256": "b9b479e6df9f27cbc8e7abe91f771b396f3f0fa114d070c7c0b02c820c6b74dc",
+        "basis": "reviewed dependency file against pinned source notice"
+      },
+      "sha256": "8c31c5f5f99b3fa9586f0260cd1a4b1688dc7bda5e8de2891eb3f9d6a791125a",
+      "decision": "included",
+      "origin": {
+        "repository": "https://github.com/twostraws/SwiftUI-Agent-Skill",
+        "path": "swiftui-pro/references/swift.md",
+        "revision": "f7309bdc9eb7231ac40317abd2b08a451a14e0aa",
+        "content_sha256": "8c31c5f5f99b3fa9586f0260cd1a4b1688dc7bda5e8de2891eb3f9d6a791125a",
+        "basis": "reviewed byte-identical original source for a declared MengTo dependency",
+        "publisher": "Paul Hudson",
+        "introduced_revision": "36163743db0f7bc6d64723f0bc0a8fa69d08fc4b"
+      },
+      "catalog": null
+    },
+    {
+      "source_id": "swiftui-agent-skill",
+      "upstream_path": "swiftui-pro/references/views.md",
+      "revision": "f7309bdc9eb7231ac40317abd2b08a451a14e0aa",
+      "authority": "original-upstream-byte-identical",
+      "role": "mengto-procedure-dependency",
+      "license": {
+        "spdx": "MIT",
+        "status": "verified",
+        "notice_path": "LICENSE",
+        "notice_sha256": "b9b479e6df9f27cbc8e7abe91f771b396f3f0fa114d070c7c0b02c820c6b74dc",
+        "basis": "reviewed dependency file against pinned source notice"
+      },
+      "sha256": "87cdd3d96e8e562aefe35070a59664e3536cfcc014bd8437cff603477f7e5a1d",
+      "decision": "included",
+      "origin": {
+        "repository": "https://github.com/twostraws/SwiftUI-Agent-Skill",
+        "path": "swiftui-pro/references/views.md",
+        "revision": "f7309bdc9eb7231ac40317abd2b08a451a14e0aa",
+        "content_sha256": "87cdd3d96e8e562aefe35070a59664e3536cfcc014bd8437cff603477f7e5a1d",
+        "basis": "reviewed byte-identical original source for a declared MengTo dependency",
+        "publisher": "Paul Hudson",
+        "introduced_revision": "36163743db0f7bc6d64723f0bc0a8fa69d08fc4b"
+      },
+      "catalog": null
     },
     {
       "source_id": "vercel-web-interface-guidelines",
