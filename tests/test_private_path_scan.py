@@ -145,6 +145,27 @@ class PrivatePathScanTests(unittest.TestCase):
                         )
                         self.assertTrue(findings)
 
+    def test_baseline_rejects_unrecognized_fields_instead_of_hiding_them(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            repo_root = Path(tmpdir)
+            baseline_path = repo_root / "design-stack/vendor-scan-baseline.json"
+            baseline_path.parent.mkdir(parents=True)
+            baseline_path.write_text(
+                json.dumps(
+                    {
+                        "schema_version": 1,
+                        "entries": [],
+                        "unreviewed": "/" + "Users/example/private",
+                    }
+                ),
+                encoding="utf-8",
+            )
+
+            with self.assertRaisesRegex(ValueError, "field"):
+                check_private_paths.scan_repository_paths(
+                    repo_root, [baseline_path]
+                )
+
 
 if __name__ == "__main__":
     unittest.main()

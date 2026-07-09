@@ -121,6 +121,8 @@ def _load_baseline(repo_root: Path) -> dict[str, dict[str, object]]:
         raise BaselineError(f"invalid private-scan baseline JSON: {error}") from error
     if not isinstance(payload, dict) or payload.get("schema_version") != 1:
         raise BaselineError("private-scan baseline schema_version must be 1")
+    if set(payload) != {"schema_version", "entries"}:
+        raise BaselineError("private-scan baseline has an unrecognized field")
     entries = payload.get("entries")
     if not isinstance(entries, list):
         raise BaselineError("private-scan baseline entries must be a list")
@@ -130,6 +132,8 @@ def _load_baseline(repo_root: Path) -> dict[str, dict[str, object]]:
         context = f"private-scan baseline entry {index}"
         if not isinstance(raw_entry, dict):
             raise BaselineError(f"{context} must be an object")
+        if set(raw_entry) != {"path", "sha256", "findings"}:
+            raise BaselineError(f"{context} has an unrecognized field")
         relative_path = raw_entry.get("path")
         if not isinstance(relative_path, str) or not relative_path:
             raise BaselineError(f"{context} path must be a non-empty string")
@@ -156,6 +160,8 @@ def _load_baseline(repo_root: Path) -> dict[str, dict[str, object]]:
             finding_context = f"{context} finding {finding_index}"
             if not isinstance(raw_finding, dict):
                 raise BaselineError(f"{finding_context} must be an object")
+            if set(raw_finding) != {"label", "line", "excerpt"}:
+                raise BaselineError(f"{finding_context} has an unrecognized field")
             label = raw_finding.get("label")
             line = raw_finding.get("line")
             excerpt = raw_finding.get("excerpt")
@@ -193,7 +199,13 @@ def scan_repository_paths(repo_root: Path, paths: list[Path]) -> list[Finding]:
     repo_root = repo_root.resolve()
     scanned_paths = _relative_scanned_paths(repo_root, paths)
     baseline = _load_baseline(repo_root)
-    raw_findings = scan_paths(paths)
+    raw_findings = scan_paths(
+        [
+            path
+            for relative, path in scanned_paths.items()
+            if relative != BASELINE_PATH.as_posix()
+        ]
+    )
     findings_by_path: dict[str, list[Finding]] = {}
     for finding in raw_findings:
         relative = Path(finding.path).resolve().relative_to(repo_root).as_posix()
