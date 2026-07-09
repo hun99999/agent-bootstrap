@@ -34,19 +34,19 @@
     },
     {
       "authority": "third-party-analysis",
-      "name": "bmw",
-      "reference_path": "references/design-md/bmw.md",
-      "sha256": "b7268279e7c98e85fb80890e06765f4ee8340ba1ea1ccb5a8a5b134de43dac3e",
-      "source_id": "awesome-design-md",
-      "source_path": "design-md/bmw/DESIGN.md"
-    },
-    {
-      "authority": "third-party-analysis",
       "name": "bmw-m",
       "reference_path": "references/design-md/bmw-m.md",
       "sha256": "824a1707c0a8d1609d72477d0fa211b9ebe4bdeb3e1fd701790af7b7bb669a4a",
       "source_id": "awesome-design-md",
       "source_path": "design-md/bmw-m/DESIGN.md"
+    },
+    {
+      "authority": "third-party-analysis",
+      "name": "bmw",
+      "reference_path": "references/design-md/bmw.md",
+      "sha256": "b7268279e7c98e85fb80890e06765f4ee8340ba1ea1ccb5a8a5b134de43dac3e",
+      "source_id": "awesome-design-md",
+      "source_path": "design-md/bmw/DESIGN.md"
     },
     {
       "authority": "third-party-analysis",
@@ -713,24 +713,6 @@
     {
       "authority": "procedural-guidance",
       "decision": "mapped-to-official",
-      "name": "playwright",
-      "official_mapping": {
-        "content_sha256": "0ffaabcc8e0990627c4725f18bf1c7955534a796c1c199e872909de2013ce6a8",
-        "license_path": "skills/.curated/playwright/LICENSE.txt",
-        "license_sha256": "9a7110fc2d2f964038e5dc49128f908f29f47a574c961cba16085914e879cbda",
-        "path": "skills/.curated/playwright/SKILL.md",
-        "repository": "https://github.com/openai/skills",
-        "revision": "49f948faa9258a0c61caceaf225e179651397431",
-        "tree": "224b363928698e143876aef008232ed73d8e6f81"
-      },
-      "reason": "The MengTo copy lacks complete original notice evidence. Use the pinned OpenAI official skill and its content-addressed Apache-2.0 notice instead.",
-      "sha256": "09fd63fe9ba29ee4f13d343eadbba8643a36c920591bbe6d56fd438aa404b47f",
-      "source_id": "mengto-skills",
-      "source_path": "agent-skills/codex/playwright/SKILL.md"
-    },
-    {
-      "authority": "procedural-guidance",
-      "decision": "mapped-to-official",
       "name": "playwright-interactive",
       "official_mapping": {
         "content_sha256": "f6c1155d923e6ae3ccc12abfef2266f119f8e9546df2ddeee1f5eb369845a0a1",
@@ -745,6 +727,24 @@
       "sha256": "46cf9c30b70b68f13a91ad532b61dedfb8f432495eaebd3c9e3fabd5e2aee877",
       "source_id": "mengto-skills",
       "source_path": "agent-skills/codex/playwright-interactive/SKILL.md"
+    },
+    {
+      "authority": "procedural-guidance",
+      "decision": "mapped-to-official",
+      "name": "playwright",
+      "official_mapping": {
+        "content_sha256": "0ffaabcc8e0990627c4725f18bf1c7955534a796c1c199e872909de2013ce6a8",
+        "license_path": "skills/.curated/playwright/LICENSE.txt",
+        "license_sha256": "9a7110fc2d2f964038e5dc49128f908f29f47a574c961cba16085914e879cbda",
+        "path": "skills/.curated/playwright/SKILL.md",
+        "repository": "https://github.com/openai/skills",
+        "revision": "49f948faa9258a0c61caceaf225e179651397431",
+        "tree": "224b363928698e143876aef008232ed73d8e6f81"
+      },
+      "reason": "The MengTo copy lacks complete original notice evidence. Use the pinned OpenAI official skill and its content-addressed Apache-2.0 notice instead.",
+      "sha256": "09fd63fe9ba29ee4f13d343eadbba8643a36c920591bbe6d56fd438aa404b47f",
+      "source_id": "mengto-skills",
+      "source_path": "agent-skills/codex/playwright/SKILL.md"
     },
     {
       "authority": "procedural-guidance",
@@ -1244,20 +1244,20 @@
     {
       "authority": "procedural-guidance",
       "decision": "included",
-      "name": "gsap",
-      "reference_path": "references/mengto/web-design/gsap.md",
-      "sha256": "eb9a0a84f0747fa19ce693cf776328945aebee1205ddc42c518c133c2ab6cb42",
-      "source_id": "mengto-skills",
-      "source_path": "agent-skills/web-design/gsap/SKILL.md"
-    },
-    {
-      "authority": "procedural-guidance",
-      "decision": "included",
       "name": "gsap-scrolltrigger-storytelling",
       "reference_path": "references/mengto/web-design/gsap-scrolltrigger-storytelling.md",
       "sha256": "c388738853064f4bbb4293b910efc0fb82f957298a49c94214c2522b138ae939",
       "source_id": "mengto-skills",
       "source_path": "agent-skills/web-design/gsap-scrolltrigger-storytelling/SKILL.md"
+    },
+    {
+      "authority": "procedural-guidance",
+      "decision": "included",
+      "name": "gsap",
+      "reference_path": "references/mengto/web-design/gsap.md",
+      "sha256": "eb9a0a84f0747fa19ce693cf776328945aebee1205ddc42c518c133c2ab6cb42",
+      "source_id": "mengto-skills",
+      "source_path": "agent-skills/web-design/gsap/SKILL.md"
     },
     {
       "authority": "procedural-guidance",

@@ -63,17 +63,17 @@
           "materialization": "vendored"
         },
         {
-          "path": "design-md/bmw-m/DESIGN.md",
-          "size": 30697,
-          "mode": "0644",
-          "sha256": "824a1707c0a8d1609d72477d0fa211b9ebe4bdeb3e1fd701790af7b7bb669a4a",
-          "materialization": "vendored"
-        },
-        {
           "path": "design-md/bmw/DESIGN.md",
           "size": 27907,
           "mode": "0644",
           "sha256": "b7268279e7c98e85fb80890e06765f4ee8340ba1ea1ccb5a8a5b134de43dac3e",
+          "materialization": "vendored"
+        },
+        {
+          "path": "design-md/bmw-m/DESIGN.md",
+          "size": 30697,
+          "mode": "0644",
+          "sha256": "824a1707c0a8d1609d72477d0fa211b9ebe4bdeb3e1fd701790af7b7bb669a4a",
           "materialization": "vendored"
         },
         {
@@ -665,17 +665,17 @@
           "materialization": "vendored"
         },
         {
-          "path": "agent-skills/codex/playwright-interactive/SKILL.md",
-          "size": 31711,
-          "mode": "0644",
-          "sha256": "46cf9c30b70b68f13a91ad532b61dedfb8f432495eaebd3c9e3fabd5e2aee877",
-          "materialization": "metadata-only"
-        },
-        {
           "path": "agent-skills/codex/playwright/SKILL.md",
           "size": 3715,
           "mode": "0644",
           "sha256": "09fd63fe9ba29ee4f13d343eadbba8643a36c920591bbe6d56fd438aa404b47f",
+          "materialization": "metadata-only"
+        },
+        {
+          "path": "agent-skills/codex/playwright-interactive/SKILL.md",
+          "size": 31711,
+          "mode": "0644",
+          "sha256": "46cf9c30b70b68f13a91ad532b61dedfb8f432495eaebd3c9e3fabd5e2aee877",
           "materialization": "metadata-only"
         },
         {
@@ -1050,17 +1050,17 @@
           "materialization": "vendored"
         },
         {
-          "path": "agent-skills/web-design/gsap-scrolltrigger-storytelling/SKILL.md",
-          "size": 4034,
-          "mode": "0644",
-          "sha256": "c388738853064f4bbb4293b910efc0fb82f957298a49c94214c2522b138ae939",
-          "materialization": "vendored"
-        },
-        {
           "path": "agent-skills/web-design/gsap/SKILL.md",
           "size": 3084,
           "mode": "0644",
           "sha256": "eb9a0a84f0747fa19ce693cf776328945aebee1205ddc42c518c133c2ab6cb42",
+          "materialization": "vendored"
+        },
+        {
+          "path": "agent-skills/web-design/gsap-scrolltrigger-storytelling/SKILL.md",
+          "size": 4034,
+          "mode": "0644",
+          "sha256": "c388738853064f4bbb4293b910efc0fb82f957298a49c94214c2522b138ae939",
           "materialization": "vendored"
         },
         {
@@ -1377,17 +1377,17 @@
       },
       {
         "source_id": "mengto-skills",
-        "name": "playwright",
-        "description": "Use when the task requires automating a real browser from the terminal (navigation, form filling, snapshots, screenshots, data extraction, UI-flow debugging) via `playwright-cli` or the bundled wrapper script.",
-        "path": "agent-skills/codex/playwright/SKILL.md",
-        "sha256": "09fd63fe9ba29ee4f13d343eadbba8643a36c920591bbe6d56fd438aa404b47f"
-      },
-      {
-        "source_id": "mengto-skills",
         "name": "playwright-interactive",
         "description": "Persistent browser and Electron interaction through `js_repl` for fast iterative UI debugging.",
         "path": "agent-skills/codex/playwright-interactive/SKILL.md",
         "sha256": "46cf9c30b70b68f13a91ad532b61dedfb8f432495eaebd3c9e3fabd5e2aee877"
+      },
+      {
+        "source_id": "mengto-skills",
+        "name": "playwright",
+        "description": "Use when the task requires automating a real browser from the terminal (navigation, form filling, snapshots, screenshots, data extraction, UI-flow debugging) via `playwright-cli` or the bundled wrapper script.",
+        "path": "agent-skills/codex/playwright/SKILL.md",
+        "sha256": "09fd63fe9ba29ee4f13d343eadbba8643a36c920591bbe6d56fd438aa404b47f"
       },
       {
         "source_id": "mengto-skills",
@@ -1762,17 +1762,17 @@
       },
       {
         "source_id": "mengto-skills",
-        "name": "gsap",
-        "description": "Use when you need to add or debug professional web animations with GSAP (timelines, ScrollTrigger, stagger, transforms) in HTML/CSS/JS/React. Includes patterns for smooth motion, performance, and common pitfalls.",
-        "path": "agent-skills/web-design/gsap/SKILL.md",
-        "sha256": "eb9a0a84f0747fa19ce693cf776328945aebee1205ddc42c518c133c2ab6cb42"
-      },
-      {
-        "source_id": "mengto-skills",
         "name": "gsap-scrolltrigger-storytelling",
         "description": "Build cinematic sticky product storytelling with GSAP ScrollTrigger, progressive UI reveals, scroll-synced animation, smooth interpolation, and immersive section transitions.",
         "path": "agent-skills/web-design/gsap-scrolltrigger-storytelling/SKILL.md",
         "sha256": "c388738853064f4bbb4293b910efc0fb82f957298a49c94214c2522b138ae939"
+      },
+      {
+        "source_id": "mengto-skills",
+        "name": "gsap",
+        "description": "Use when you need to add or debug professional web animations with GSAP (timelines, ScrollTrigger, stagger, transforms) in HTML/CSS/JS/React. Includes patterns for smooth motion, performance, and common pitfalls.",
+        "path": "agent-skills/web-design/gsap/SKILL.md",
+        "sha256": "eb9a0a84f0747fa19ce693cf776328945aebee1205ddc42c518c133c2ab6cb42"
       },
       {
         "source_id": "mengto-skills",
@@ -1995,16 +1995,16 @@
       },
       {
         "source_id": "awesome-design-md",
-        "name": "bmw",
-        "path": "design-md/bmw/DESIGN.md",
-        "sha256": "b7268279e7c98e85fb80890e06765f4ee8340ba1ea1ccb5a8a5b134de43dac3e",
+        "name": "bmw-m",
+        "path": "design-md/bmw-m/DESIGN.md",
+        "sha256": "824a1707c0a8d1609d72477d0fa211b9ebe4bdeb3e1fd701790af7b7bb669a4a",
         "authority": "third-party-analysis"
       },
       {
         "source_id": "awesome-design-md",
-        "name": "bmw-m",
-        "path": "design-md/bmw-m/DESIGN.md",
-        "sha256": "824a1707c0a8d1609d72477d0fa211b9ebe4bdeb3e1fd701790af7b7bb669a4a",
+        "name": "bmw",
+        "path": "design-md/bmw/DESIGN.md",
+        "sha256": "b7268279e7c98e85fb80890e06765f4ee8340ba1ea1ccb5a8a5b134de43dac3e",
         "authority": "third-party-analysis"
       },
       {
