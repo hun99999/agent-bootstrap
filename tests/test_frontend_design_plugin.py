@@ -194,7 +194,7 @@ class FrontendDesignPluginTests(unittest.TestCase):
             plugin_root.mkdir()
             (plugin_root / "partial.txt").write_text("partial\n", encoding="utf-8")
             transaction_root = root / ".frontend-design-pack.render-transaction"
-            backup = transaction_root / "backup"
+            backup = (transaction_root / "backup").resolve()
             backup.mkdir(parents=True)
             (backup / "previous.txt").write_text("previous\n", encoding="utf-8")
             (transaction_root / "journal.json").write_text(
@@ -215,6 +215,47 @@ class FrontendDesignPluginTests(unittest.TestCase):
                 snapshot_tree(plugin_root),
                 {"previous.txt": b"previous\n"},
             )
+            self.assertFalse(transaction_root.exists())
+
+    def test_recovery_preserves_committed_output_after_partial_backup_cleanup(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            plugin_root = root / "frontend-design-pack"
+            plugin_root.mkdir()
+            (plugin_root / "a.txt").write_text("old a\n", encoding="utf-8")
+            (plugin_root / "b.txt").write_text("old b\n", encoding="utf-8")
+            transaction_root = root / ".frontend-design-pack.render-transaction"
+            backup = (transaction_root / "backup").resolve()
+            real_rmtree = renderer.shutil.rmtree
+            cleanup_failed = False
+
+            def fail_partway_through_backup_cleanup(path: Path, *args, **kwargs) -> None:
+                nonlocal cleanup_failed
+                candidate = Path(path)
+                if candidate.resolve() == backup and not cleanup_failed:
+                    cleanup_failed = True
+                    (backup / "a.txt").unlink()
+                    raise OSError("injected partial cleanup failure")
+                real_rmtree(candidate, *args, **kwargs)
+
+            with mock.patch.object(
+                renderer.shutil,
+                "rmtree",
+                side_effect=fail_partway_through_backup_cleanup,
+            ), self.assertRaisesRegex(OSError, "partial cleanup failure"):
+                renderer.render_plugin(REPO_ROOT, plugin_root)
+
+            self.assertTrue(
+                (plugin_root / ".codex-plugin/plugin.json").is_file(),
+                "the complete new output was installed before backup cleanup failed",
+            )
+            self.assertTrue(transaction_root.is_dir())
+
+            renderer._recover_render_transaction(plugin_root)
+
+            self.assertTrue((plugin_root / ".codex-plugin/plugin.json").is_file())
+            self.assertFalse((plugin_root / "a.txt").exists())
+            self.assertFalse((plugin_root / "b.txt").exists())
             self.assertFalse(transaction_root.exists())
 
     def test_codex_and_claude_manifests_share_name_and_semver(self) -> None:

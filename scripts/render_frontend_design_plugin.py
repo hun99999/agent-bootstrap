@@ -172,6 +172,16 @@ def _transaction_root(plugin_root: Path) -> Path:
     return plugin_root.parent / f".{plugin_root.name}.render-transaction"
 
 
+def _mark_render_transaction_committed(transaction_root: Path) -> None:
+    marker = transaction_root / "committed"
+    descriptor = os.open(marker, os.O_CREAT | os.O_EXCL | os.O_WRONLY, 0o600)
+    try:
+        os.write(descriptor, b"committed\n")
+        os.fsync(descriptor)
+    finally:
+        os.close(descriptor)
+
+
 def _recover_render_transaction(plugin_root: Path) -> None:
     transaction_root = _transaction_root(plugin_root)
     if not transaction_root.exists() and not transaction_root.is_symlink():
@@ -181,6 +191,26 @@ def _recover_render_transaction(plugin_root: Path) -> None:
             f"render transaction must be a real directory: {transaction_root}"
         )
     journal_path = transaction_root / "journal.json"
+    committed_marker = transaction_root / "committed"
+    if committed_marker.is_symlink() or (
+        committed_marker.exists() and not committed_marker.is_file()
+    ):
+        raise ValidationError(
+            f"render commit marker must be a real file: {committed_marker}"
+        )
+    if not journal_path.exists():
+        if committed_marker.exists():
+            if not plugin_root.is_dir():
+                raise ValidationError(
+                    f"committed plugin output is missing: {plugin_root}"
+                )
+            committed_marker.unlink()
+        if any(transaction_root.iterdir()):
+            raise ValidationError(
+                f"render transaction journal is missing: {journal_path}"
+            )
+        transaction_root.rmdir()
+        return
     journal = load_json(journal_path)
     if (
         journal.get("schema_version") != 1
@@ -193,19 +223,24 @@ def _recover_render_transaction(plugin_root: Path) -> None:
         raise ValidationError(f"render backup must not be a symlink: {backup}")
     if backup.exists() and not backup.is_dir():
         raise ValidationError(f"render backup must be a directory: {backup}")
-    if journal["had_target"]:
-        if backup.exists():
-            _remove_path(plugin_root)
-            os.replace(backup, plugin_root)
-        elif not plugin_root.exists():
-            raise ValidationError(
-                f"cannot recover missing plugin output and backup: {plugin_root}"
-            )
+    if committed_marker.exists():
+        if not plugin_root.is_dir():
+            raise ValidationError(f"committed plugin output is missing: {plugin_root}")
     else:
-        _remove_path(plugin_root)
+        if journal["had_target"]:
+            if backup.exists():
+                _remove_path(plugin_root)
+                os.replace(backup, plugin_root)
+            elif not plugin_root.exists():
+                raise ValidationError(
+                    f"cannot recover missing plugin output and backup: {plugin_root}"
+                )
+        else:
+            _remove_path(plugin_root)
     if backup.exists():
         shutil.rmtree(backup)
     journal_path.unlink(missing_ok=True)
+    committed_marker.unlink(missing_ok=True)
     transaction_root.rmdir()
 
 
@@ -228,13 +263,11 @@ def _replace_output_atomically(staged_root: Path, plugin_root: Path) -> None:
         if had_target:
             os.replace(plugin_root, backup)
         os.replace(staged_root, plugin_root)
+        _mark_render_transaction_committed(transaction_root)
     except BaseException:
         _recover_render_transaction(plugin_root)
         raise
-    if backup.exists():
-        shutil.rmtree(backup)
-    (transaction_root / "journal.json").unlink()
-    transaction_root.rmdir()
+    _recover_render_transaction(plugin_root)
 
 
 def _manifest(include_skills: bool) -> Dict[str, Any]:

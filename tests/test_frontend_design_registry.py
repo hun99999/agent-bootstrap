@@ -190,6 +190,23 @@ class FrontendDesignRegistryUnitTests(unittest.TestCase):
         with self.assertRaisesRegex(design_stack.ValidationError, "destination"):
             design_stack.validate_registry(registry)
 
+    def test_registry_requires_source_scoped_vendor_destination(self) -> None:
+        for destination in (
+            "scripts",
+            "README.md",
+            "design-stack",
+            "design-stack/vendor/other-source",
+            "design-stack/vendor/mengto-skills/nested",
+        ):
+            with self.subTest(destination=destination):
+                registry = registry_payload()
+                registry["sources"][0]["destination"] = destination
+                with self.assertRaisesRegex(
+                    design_stack.ValidationError,
+                    "destination",
+                ):
+                    design_stack.validate_registry(registry)
+
     def test_registry_rejects_unsafe_source_ids(self) -> None:
         for source_id in ("../source", "Source", "source/name", ".source", "source_name"):
             with self.subTest(source_id=source_id):
@@ -437,6 +454,9 @@ class FrontendDesignRegistryUnitTests(unittest.TestCase):
     def test_catalog_rejects_an_entry_from_the_wrong_source(self) -> None:
         registry = registry_payload()
         registry["sources"][0]["id"] = "awesome-design-md"
+        registry["sources"][0][
+            "destination"
+        ] = "design-stack/vendor/awesome-design-md"
         lock = lock_payload()
         lock["sources"][0]["id"] = "awesome-design-md"
         lock["catalogs"]["mengto_skills"][0]["source_id"] = "awesome-design-md"

@@ -12,6 +12,7 @@ from tests.frontend_design_test_support import (
     commit_all,
     init_git_repo,
     load_script_module,
+    run_git,
     sha256_bytes,
     snapshot_tree,
     write_files,
@@ -545,6 +546,51 @@ class FrontendDesignSyncTests(unittest.TestCase):
             self.assertEqual(target.read_bytes(), b"old")
             self.assertFalse(transaction.exists())
 
+    def test_recovery_preserves_committed_targets_after_partial_backup_cleanup(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            target = root / "target"
+            staged = root / "staged"
+            transaction = (root / "transaction").resolve()
+            backups = transaction / "backups"
+            target.mkdir()
+            staged.mkdir()
+            (target / "a.txt").write_bytes(b"old a")
+            (target / "b.txt").write_bytes(b"old b")
+            (staged / "new.txt").write_bytes(b"complete new")
+            real_rmtree = sync.shutil.rmtree
+            cleanup_failed = False
+
+            def fail_partway_through_transaction_cleanup(
+                path: Path, *args, **kwargs
+            ) -> None:
+                nonlocal cleanup_failed
+                candidate = Path(path)
+                if candidate.resolve() == backups and not cleanup_failed:
+                    cleanup_failed = True
+                    (backups / "0/a.txt").unlink()
+                    raise OSError("injected partial transaction cleanup failure")
+                real_rmtree(candidate, *args, **kwargs)
+
+            with mock.patch.object(
+                sync.shutil,
+                "rmtree",
+                side_effect=fail_partway_through_transaction_cleanup,
+            ), self.assertRaisesRegex(OSError, "partial transaction cleanup failure"):
+                sync._replace_paths_atomically(
+                    [(staged, target)],
+                    transaction,
+                    root,
+                )
+
+            self.assertEqual(snapshot_tree(target), {"new.txt": b"complete new"})
+            self.assertTrue(transaction.is_dir())
+
+            sync._recover_incomplete_transaction(transaction, root)
+
+            self.assertEqual(snapshot_tree(target), {"new.txt": b"complete new"})
+            self.assertFalse(transaction.exists())
+
     def test_sync_requires_clean_non_default_task_branch(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             root = Path(temp_dir)
@@ -564,6 +610,35 @@ class FrontendDesignSyncTests(unittest.TestCase):
             (repo_root / "dirty.txt").write_text("dirty\n", encoding="utf-8")
             with self.assertRaisesRegex(ValueError, "clean"):
                 sync.sync_source(repo_root, "mengto-skills", archive)
+
+    def test_sync_rejects_common_default_branch_names(self) -> None:
+        for branch in ("trunk", "develop"):
+            with self.subTest(branch=branch), tempfile.TemporaryDirectory() as temp_dir:
+                repo_root = Path(temp_dir) / "repo"
+                write_sync_repo(repo_root, branch=branch)
+
+                with self.assertRaisesRegex(ValueError, "default|task branch"):
+                    sync.require_clean_task_branch(repo_root)
+
+    def test_sync_rejects_the_default_branch_reported_by_origin_head(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            repo_root = Path(temp_dir) / "repo"
+            write_sync_repo(repo_root, branch="release")
+            run_git(
+                repo_root,
+                "update-ref",
+                "refs/remotes/origin/release",
+                "HEAD",
+            )
+            run_git(
+                repo_root,
+                "symbolic-ref",
+                "refs/remotes/origin/HEAD",
+                "refs/remotes/origin/release",
+            )
+
+            with self.assertRaisesRegex(ValueError, "default|task branch"):
+                sync.require_clean_task_branch(repo_root)
 
     def test_sync_rejects_invalid_or_duplicate_skill_frontmatter(self) -> None:
         invalid_skills = (

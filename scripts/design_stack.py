@@ -190,6 +190,11 @@ def validate_registry(registry: Mapping[str, Any]) -> None:
             destination = _require_safe_relative_path(
                 destination, f"{context}.destination"
             )
+            expected_destination = f"design-stack/vendor/{source_id}"
+            if destination != expected_destination:
+                raise ValidationError(
+                    f"{context}.destination must be {expected_destination}"
+                )
             if destination in destinations:
                 raise ValidationError(f"duplicate source destination: {destination}")
             destinations.add(destination)

@@ -136,9 +136,40 @@ def _run_git(repo_root: Path, *args: str) -> str:
     return result.stdout.strip()
 
 
+def _origin_default_branch(repo_root: Path) -> Optional[str]:
+    result = subprocess.run(
+        [
+            "git",
+            "-C",
+            str(repo_root),
+            "symbolic-ref",
+            "--quiet",
+            "--short",
+            "refs/remotes/origin/HEAD",
+        ],
+        capture_output=True,
+        text=True,
+    )
+    if result.returncode == 1:
+        return None
+    if result.returncode != 0:
+        raise ValidationError(
+            result.stderr.strip() or "cannot resolve the origin default branch"
+        )
+    reference = result.stdout.strip()
+    prefix = "origin/"
+    if not reference.startswith(prefix) or reference == prefix:
+        raise ValidationError(f"invalid origin default branch reference: {reference}")
+    return reference[len(prefix) :]
+
+
 def require_clean_task_branch(repo_root: Path) -> str:
     branch = _run_git(repo_root, "branch", "--show-current")
-    if not branch or branch in {"main", "master"}:
+    default_branches = {"main", "master", "trunk", "develop"}
+    origin_default = _origin_default_branch(repo_root)
+    if origin_default is not None:
+        default_branches.add(origin_default)
+    if not branch or branch in default_branches:
         raise ValidationError("design sync requires a non-default task branch")
     status = _run_git(repo_root, "status", "--porcelain", "--untracked-files=all")
     if status:
@@ -468,6 +499,16 @@ def _safe_transaction_path(root: Path, relative_path: str) -> Path:
     return target
 
 
+def _mark_transaction_committed(transaction_root: Path) -> None:
+    marker = transaction_root / "committed"
+    descriptor = os.open(marker, os.O_CREAT | os.O_EXCL | os.O_WRONLY, 0o600)
+    try:
+        os.write(descriptor, b"committed\n")
+        os.fsync(descriptor)
+    finally:
+        os.close(descriptor)
+
+
 def _recover_incomplete_transaction(
     transaction_root: Path,
     allowed_root: Path,
@@ -475,11 +516,28 @@ def _recover_incomplete_transaction(
     journal_path = transaction_root / "journal.json"
     if not transaction_root.exists():
         return
+    committed_marker = transaction_root / "committed"
+    if committed_marker.is_symlink() or (
+        committed_marker.exists() and not committed_marker.is_file()
+    ):
+        raise ValidationError(
+            f"design sync commit marker must be a real file: {committed_marker}"
+        )
+    if not journal_path.exists():
+        if committed_marker.exists():
+            committed_marker.unlink()
+        if any(transaction_root.iterdir()):
+            raise ValidationError(
+                f"design sync transaction journal is missing: {journal_path}"
+            )
+        transaction_root.rmdir()
+        return
     journal = load_json(journal_path)
     if journal.get("schema_version") != 1 or not isinstance(
         journal.get("targets"), list
     ):
         raise ValidationError(f"invalid design sync transaction journal: {journal_path}")
+    committed = committed_marker.exists()
     for state in reversed(journal["targets"]):
         if not isinstance(state, dict) or not isinstance(state.get("had_target"), bool):
             raise ValidationError(f"invalid transaction target in {journal_path}")
@@ -489,18 +547,33 @@ def _recover_incomplete_transaction(
         )
         if backup.is_symlink():
             raise ValidationError(f"transaction backup must not be a symlink: {backup}")
-        if state["had_target"]:
-            if backup.exists():
-                _remove_path(target)
-                target.parent.mkdir(parents=True, exist_ok=True)
-                os.replace(backup, target)
-            elif not (target.exists() or target.is_symlink()):
-                raise ValidationError(
-                    f"cannot recover missing target and backup: {target}"
-                )
+        if committed:
+            if not (target.exists() or target.is_symlink()):
+                raise ValidationError(f"committed sync target is missing: {target}")
         else:
-            _remove_path(target)
-    shutil.rmtree(transaction_root)
+            if state["had_target"]:
+                if backup.exists():
+                    _remove_path(target)
+                    target.parent.mkdir(parents=True, exist_ok=True)
+                    os.replace(backup, target)
+                elif not (target.exists() or target.is_symlink()):
+                    raise ValidationError(
+                        f"cannot recover missing target and backup: {target}"
+                    )
+            else:
+                _remove_path(target)
+    backups_root = transaction_root / "backups"
+    if backups_root.is_symlink():
+        raise ValidationError(f"transaction backups must not be a symlink: {backups_root}")
+    if backups_root.exists():
+        if not backups_root.is_dir():
+            raise ValidationError(
+                f"transaction backups must be a directory: {backups_root}"
+            )
+        shutil.rmtree(backups_root)
+    journal_path.unlink(missing_ok=True)
+    committed_marker.unlink(missing_ok=True)
+    transaction_root.rmdir()
 
 
 def _replace_paths_atomically(
@@ -537,10 +610,11 @@ def _replace_paths_atomically(
                 os.replace(target, backup)
         for staged, target in replacement_list:
             os.replace(staged, target)
+        _mark_transaction_committed(transaction_root)
     except BaseException:
         _recover_incomplete_transaction(transaction_root, allowed_root)
         raise
-    shutil.rmtree(transaction_root)
+    _recover_incomplete_transaction(transaction_root, allowed_root)
 
 
 def sync_sources(
