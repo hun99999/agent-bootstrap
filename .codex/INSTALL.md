@@ -15,15 +15,18 @@ Codex App can use the Codex App curated Superpowers plugin; this installer still
 
 ## Installation
 
+Ask the user what name Codex should use, then keep that chosen value local. Substitute it for
+`<chosen-name>`; do not commit it as a public default.
+
 ```bash
-bash .codex/install.sh --partner-name "Hun"
+bash .codex/install.sh --partner-name "<chosen-name>"
 ```
 
 If you want custom locations:
 
 ```bash
 bash .codex/install.sh \
-  --partner-name "Hun" \
+  --partner-name "<chosen-name>" \
   --codex-home "/absolute/path/to/.codex" \
   --agents-home "/absolute/path/to/.agents"
 ```
@@ -42,5 +45,16 @@ Re-run the installer after pulling the latest repo changes:
 
 ```bash
 git pull
-bash .codex/install.sh --partner-name "Hun"
+bash .codex/install.sh --partner-name "<chosen-name>"
 ```
+
+## Frontend Design Pack
+
+`frontend-design-pack` is distributed as a plugin, not by this core installer. Validate the tracked
+plugin and ask before installing or replacing its runtime copy. Follow
+[the frontend design stack guide](../docs/frontend-design-stack.md) for Codex marketplace commands,
+separate runtime validation, Figma availability reporting without authentication, and the required
+fresh task after installation.
+
+The shared templates carry no model or reasoning pin. Inspect the active runtime and inherit the
+models and reasoning levels the user's account and organization actually support.

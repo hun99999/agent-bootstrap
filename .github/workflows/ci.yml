@@ -21,6 +21,9 @@ jobs:
       - name: Run tests
         run: python3 -m unittest discover -s tests -p 'test_*.py'
 
+      - name: Validate frontend design source and plugin
+        run: python3 scripts/validate_frontend_design_stack.py --repo-root .
+
       - name: Audit repository-generated agent stack
         run: python3 scripts/audit_agent_stack.py --repo-only
 

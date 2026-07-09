@@ -23,8 +23,11 @@ In this session, you may use sub-agents or parallel agents for independently sep
 
 ## Install
 
+Ask the user what name Codex should use before rendering. Keep that choice local and substitute it
+for `<chosen-name>` below; do not commit the rendered name.
+
 ```bash
-bash .codex/install.sh --partner-name "Hun"
+bash .codex/install.sh --partner-name "<chosen-name>"
 ```
 
 This is a global Codex setup for the current user. It writes user-level defaults under `~/.codex`, so new Codex sessions in any project can inherit the shared constitution, role agents, and vibe-coding guardrails.
@@ -43,7 +46,7 @@ Codex App can use the Codex App curated Superpowers plugin; the installer still 
 
 ```bash
 git pull
-bash .codex/install.sh --partner-name "Hun"
+bash .codex/install.sh --partner-name "<chosen-name>"
 ```
 
 ## Audit
@@ -54,6 +57,25 @@ python3 scripts/audit_agent_stack.py
 
 The default audit is offline and read-only. It checks the local Codex CLI, Claude Code CLI, the `~/.codex/superpowers` checkout, the `~/.agents/skills/superpowers` symlink, and the generated Claude plugin bundle. Use `--online` only when you want current npm and remote git drift checks.
 
-## Profiles
+## Models And Reasoning
 
-The default Codex profile prioritizes quality with `gpt-5.5` and high reasoning settings. The `balanced` profile keeps `gpt-5.5` but uses medium reasoning and verbosity for lower-latency work. The `previous` profile pins the immediately previous supported model, `gpt-5.4`.
+The public Codex templates do not pin a model, reasoning level, verbosity, or paid-plan ceiling.
+Inspect what the active Codex and Claude runtimes actually support, report the result, and let each
+runtime inherit its available selection. If the supported ceiling cannot be discovered, ask instead
+of guessing.
+
+## Frontend Design Pack
+
+The reviewed `frontend-design-pack` is an optional runtime install, separate from the core Codex
+installer. It provides one native `frontend-design` router backed by reviewed MengTo procedures,
+official Vercel guidance, Google DESIGN.md contract metadata, and labeled third-party DESIGN.md
+inspiration.
+
+Read [frontend-design-stack.md](../docs/frontend-design-stack.md) for tracked validation, approval-gated
+installation, runtime-copy validation, update/rollback, Figma boundaries, and fresh-task discovery.
+Do not install or replace the plugin merely because the repository contains it.
+
+## Figma
+
+Report whether the official Figma integration is available in current plugin/tool state. Do not
+authenticate Figma, change accounts, or inspect private Figma files without separate approval.

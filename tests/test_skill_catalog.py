@@ -256,6 +256,14 @@ class SkillCatalogTests(unittest.TestCase):
 
         self.assertNotIn(PRIVATE_HOME_PATH, catalog)
 
+    def test_frontend_design_is_a_plugin_not_a_catalog_skill(self) -> None:
+        catalog = (REPO_ROOT / "skills" / "README.md").read_text(encoding="utf-8")
+
+        self.assertFalse((REPO_ROOT / "skills/frontend-design").exists())
+        self.assertIn("frontend-design-pack", catalog)
+        self.assertIn("docs/frontend-design-stack.md", catalog)
+        self.assertIn("distributed as one plugin skill", catalog)
+
 
 if __name__ == "__main__":
     unittest.main()

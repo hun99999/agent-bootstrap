@@ -14,6 +14,7 @@ class CiWorkflowTests(unittest.TestCase):
 
         expected_phrases = (
             "python3 -m unittest discover -s tests -p 'test_*.py'",
+            "python3 scripts/validate_frontend_design_stack.py --repo-root .",
             "python3 scripts/audit_agent_stack.py",
             "python3 scripts/check_private_paths.py",
             "python3 scripts/inventory_optional_tools.py --json",
@@ -21,6 +22,19 @@ class CiWorkflowTests(unittest.TestCase):
         )
         for phrase in expected_phrases:
             self.assertIn(phrase, workflow)
+
+        self.assertLess(
+            workflow.index("python3 -m unittest discover"),
+            workflow.index("python3 scripts/validate_frontend_design_stack.py"),
+        )
+        self.assertLess(
+            workflow.index("python3 scripts/validate_frontend_design_stack.py"),
+            workflow.index("python3 scripts/audit_agent_stack.py"),
+        )
+        self.assertLess(
+            workflow.index("python3 scripts/validate_frontend_design_stack.py"),
+            workflow.index("python3 scripts/check_private_paths.py"),
+        )
 
 
 if __name__ == "__main__":

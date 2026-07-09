@@ -13,6 +13,10 @@
 
 ファイルを変更する前に git status --short --branch を実行してください。未コミット変更や untracked file があれば停止し、どう扱うか確認してください。現在のハーネスが Codex か Claude Code かを確認し、私が要求した範囲を確認してください。
 
+ローカル設定を render する前に、エージェントが私を何と呼ぶか質問してください。現在の Codex と Claude runtime が実際に利用できる model と reasoning level を確認し、最新 model 名や paid plan を固定せず、利用可能な選択を継承してください。選んだ名前を tracked file に入れないでください。
+
+docs/frontend-design-stack.md を読んでください。tracked frontend-design-pack を検証し、Figma は認証せず利用可否だけを報告し、runtime plugin copy の install または replacement 前に承認を求めてください。承認後は installed root を別に検証し、fresh task/session で discovery を確認してください。
+
 最小の有効スコープを選んでください:
 - すでに Codex の中にいる場合、私が Claude Code も明示的に要求しない限り Codex だけを設定してください。
 - すでに Claude Code の中にいる場合、私が Codex も明示的に要求しない限り Claude Code だけを設定してください。
@@ -173,6 +177,7 @@ Optional tools は workflow を支えるためのものです。Obsidian, Lumin 
 
 - Codex: [docs/README.codex.md](docs/README.codex.md)
 - Claude Code: [docs/README.claude.md](docs/README.claude.md)
+- Codex・Claude Code frontend design pack: [docs/frontend-design-stack.md](docs/frontend-design-stack.md)
 - Codex skills: [docs/codex-skills.md](docs/codex-skills.md)
 - Claude Code skills: [docs/claude-skills.md](docs/claude-skills.md)
 

@@ -13,6 +13,10 @@ First read AGENTS.md, README.md, docs/agent-setup-playbook.md, docs/global-guard
 
 Before changing anything, run git status --short --branch. If there is uncommitted or untracked user work, stop and ask how to handle it. Identify whether the current harness is Codex or Claude Code. Identify my requested scope.
 
+Before rendering local configuration, ask what name the active agent should use to address me. Inspect the models and reasoning levels the active Codex and Claude runtimes actually support, then inherit those available selections instead of hard-coding a latest model or paid-plan assumption. Keep the chosen name out of tracked files.
+
+Read docs/frontend-design-stack.md. Validate the tracked frontend-design-pack, report whether Figma is available without authenticating it, and ask before installing or replacing any runtime plugin copy. If installation is approved, validate the installed root separately and use a fresh task or session to prove discovery.
+
 Choose the smallest valid scope:
 - If you are already inside Codex, configure Codex only unless I explicitly ask for Claude Code too.
 - If you are already inside Claude Code, configure Claude Code only unless I explicitly ask for Codex too.
@@ -224,6 +228,7 @@ Do not install optional tools just because they are mentioned. Inventory the cur
 
 - Codex: [docs/README.codex.md](docs/README.codex.md)
 - Claude Code: [docs/README.claude.md](docs/README.claude.md)
+- Frontend design pack for Codex and Claude Code: [docs/frontend-design-stack.md](docs/frontend-design-stack.md)
 - Codex skills: [docs/codex-skills.md](docs/codex-skills.md)
 - Claude Code skills: [docs/claude-skills.md](docs/claude-skills.md)
 

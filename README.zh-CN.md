@@ -13,6 +13,10 @@
 
 修改文件之前，运行 git status --short --branch。如果有未提交修改或 untracked file，停止并询问如何处理。确认当前 harness 是 Codex 还是 Claude Code，并确认我要求的范围。
 
+渲染本地配置之前，先询问代理应如何称呼我。检查当前 Codex 和 Claude runtime 实际支持的 model 与 reasoning level，不要硬编码最新 model 名或 paid plan，而应继承可用选择。不要把选定名称写入 tracked file。
+
+阅读 docs/frontend-design-stack.md。验证 tracked frontend-design-pack；只报告 Figma 是否可用，不要进行认证；安装或替换 runtime plugin copy 前先询问。获得批准后，单独验证 installed root，并在 fresh task/session 中确认 discovery。
+
 选择最小有效范围:
 - 如果已经在 Codex 中，除非我明确要求 Claude Code，否则只配置 Codex。
 - 如果已经在 Claude Code 中，除非我明确要求 Codex，否则只配置 Claude Code。
@@ -173,6 +177,7 @@ Optional tools 应支持 workflow，而不是替代 workflow。Obsidian、Lumin 
 
 - Codex: [docs/README.codex.md](docs/README.codex.md)
 - Claude Code: [docs/README.claude.md](docs/README.claude.md)
+- Codex 与 Claude Code frontend design pack: [docs/frontend-design-stack.md](docs/frontend-design-stack.md)
 - Codex skills: [docs/codex-skills.md](docs/codex-skills.md)
 - Claude Code skills: [docs/claude-skills.md](docs/claude-skills.md)
 
