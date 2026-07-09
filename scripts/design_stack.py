@@ -29,6 +29,7 @@ PROVENANCE_FIELDS = {
     "authority",
     "role",
     "license",
+    "origin",
     "sha256",
     "decision",
 }
@@ -115,7 +116,7 @@ def _require_schema(payload: Mapping[str, Any], context: str) -> None:
 
 def _validate_license(value: Any, context: str) -> Mapping[str, Any]:
     license_record = _require_mapping(value, context)
-    for field in ("spdx", "status", "notice_path"):
+    for field in ("spdx", "status", "notice_path", "notice_sha256"):
         if field not in license_record:
             raise ValidationError(f"{context} is missing required field '{field}'")
     _require_nonempty_string(license_record["spdx"], f"{context}.spdx")
@@ -123,8 +124,14 @@ def _validate_license(value: Any, context: str) -> Mapping[str, Any]:
     if status not in {"verified", "unresolved"}:
         raise ValidationError(f"{context}.status must be verified or unresolved")
     notice_path = license_record["notice_path"]
-    if notice_path is not None:
+    notice_sha256 = license_record["notice_sha256"]
+    if status == "verified":
         _require_safe_relative_path(notice_path, f"{context}.notice_path")
+        _require_sha256(notice_sha256, f"{context}.notice_sha256")
+    elif notice_path is not None or notice_sha256 is not None:
+        raise ValidationError(
+            f"{context} unresolved license must not claim a notice path or hash"
+        )
     return license_record
 
 
@@ -247,6 +254,74 @@ def _validate_catalogs(
     return catalog_keys
 
 
+def _validate_contracts(
+    registry: Mapping[str, Any],
+    lock: Mapping[str, Any],
+    locked_files: Mapping[Tuple[str, str], Mapping[str, Any]],
+    repo_root: Optional[Path],
+    metadata_only: bool,
+) -> None:
+    registry_sources = _source_map(registry)
+    if "google-design-md" not in registry_sources:
+        return
+    contracts = _require_mapping(lock.get("contracts"), "lock.contracts")
+    contract = _require_mapping(
+        contracts.get("google_design_md_cli"),
+        "lock.contracts.google_design_md_cli",
+    )
+    context = "lock.contracts.google_design_md_cli"
+    for field in ("source_id", "path", "sha256", "version"):
+        if field not in contract:
+            raise ValidationError(f"{context} is missing required field '{field}'")
+    source_id = _require_nonempty_string(contract["source_id"], f"{context}.source_id")
+    if source_id != "google-design-md":
+        raise ValidationError(f"{context}.source_id must be google-design-md")
+    path = _require_safe_relative_path(contract["path"], f"{context}.path")
+    digest = _require_sha256(contract["sha256"], f"{context}.sha256")
+    locked_file = locked_files.get((source_id, path))
+    if locked_file is None or locked_file["sha256"] != digest:
+        raise ValidationError(f"{context} must resolve to the hash-locked CLI manifest")
+    version = _require_nonempty_string(contract["version"], f"{context}.version")
+    if version != registry["google_design_md_cli_version"]:
+        raise ValidationError(
+            f"{context}.version does not match registry.google_design_md_cli_version"
+        )
+    if metadata_only:
+        return
+    if repo_root is None:
+        raise ValidationError("repo_root is required to parse the Google CLI manifest")
+    source = registry_sources[source_id]
+    manifest_path = repo_root / source["destination"] / Path(path)
+    manifest = load_json(manifest_path)
+    actual_version = _require_nonempty_string(
+        _require_mapping(manifest, str(manifest_path)).get("version"),
+        f"{manifest_path}.version",
+    )
+    if actual_version != version:
+        raise ValidationError(
+            f"Google DESIGN.md CLI manifest reports {actual_version}, expected {version}"
+        )
+
+
+def _validate_source_license_locks(
+    registry: Mapping[str, Any],
+    locked_files: Mapping[Tuple[str, str], Mapping[str, Any]],
+) -> None:
+    for source in registry["sources"]:
+        license_record = source["license"]
+        if license_record["status"] != "verified":
+            continue
+        key = (source["id"], license_record["notice_path"])
+        locked_notice = locked_files.get(key)
+        if (
+            locked_notice is None
+            or locked_notice["sha256"] != license_record["notice_sha256"]
+        ):
+            raise ValidationError(
+                f"source '{source['id']}' license notice is not hash-locked"
+            )
+
+
 def validate_lock(
     registry: Mapping[str, Any],
     lock: Mapping[str, Any],
@@ -319,7 +394,50 @@ def validate_lock(
         missing = sorted(set(registry_sources) - locked_source_ids)
         extra = sorted(locked_source_ids - set(registry_sources))
         raise ValidationError(f"lock source set mismatch; missing={missing}, extra={extra}")
+    _validate_source_license_locks(registry, locked_files)
+    _validate_contracts(
+        registry,
+        lock,
+        locked_files,
+        repo_root=repo_root,
+        metadata_only=metadata_only,
+    )
     return _validate_catalogs(lock.get("catalogs"), locked_files)
+
+
+def _validate_origin(
+    value: Any,
+    record_revision: str,
+    record_sha256: str,
+    context: str,
+) -> None:
+    origin = _require_mapping(value, context)
+    for field in (
+        "repository",
+        "path",
+        "revision",
+        "content_sha256",
+        "basis",
+        "introduced_revision",
+        "publisher",
+    ):
+        if field not in origin:
+            raise ValidationError(f"{context} is missing required field '{field}'")
+    _require_nonempty_string(origin["repository"], f"{context}.repository")
+    _require_safe_relative_path(origin["path"], f"{context}.path")
+    origin_revision = _require_revision(origin["revision"], f"{context}.revision")
+    if origin_revision != record_revision:
+        raise ValidationError(f"{context}.revision must match the reviewed record revision")
+    origin_sha256 = _require_sha256(
+        origin["content_sha256"], f"{context}.content_sha256"
+    )
+    if origin_sha256 != record_sha256:
+        raise ValidationError(f"{context}.content_sha256 must match the locked file")
+    _require_nonempty_string(origin["basis"], f"{context}.basis")
+    _require_revision(
+        origin["introduced_revision"], f"{context}.introduced_revision"
+    )
+    _require_nonempty_string(origin["publisher"], f"{context}.publisher")
 
 
 def validate_provenance(
@@ -365,6 +483,12 @@ def validate_provenance(
         _require_nonempty_string(record["role"], f"{context}.role")
         license_record = _validate_license(record["license"], f"{context}.license")
         digest = _require_sha256(record["sha256"], f"{context}.sha256")
+        _validate_origin(
+            record["origin"],
+            revision,
+            digest,
+            f"{context}.origin",
+        )
         locked_file = locked_files.get(key)
         if locked_file is None:
             raise ValidationError(f"{context} does not resolve to a locked file")
@@ -379,25 +503,64 @@ def validate_provenance(
         if decision != "included":
             _require_nonempty_string(record.get("reason"), f"{context}.reason")
         if decision in VERIFIED_LICENSE_DECISIONS:
-            if license_record["status"] != "verified" or not license_record["notice_path"]:
+            if license_record["status"] != "verified":
                 raise ValidationError(
                     f"{context}.license must be verified and name a notice for {decision} material"
+                )
+        if decision == "included":
+            locked_notice = locked_files.get(
+                (source_id, license_record["notice_path"])
+            )
+            if (
+                locked_notice is None
+                or locked_notice["sha256"] != license_record["notice_sha256"]
+            ):
+                raise ValidationError(
+                    f"{context}.license notice does not match a hash-locked source notice"
                 )
         if decision == "mapped-to-official":
             mapping = _require_mapping(
                 record.get("official_mapping"), f"{context}.official_mapping"
             )
-            for field in ("source", "path", "content_sha256"):
+            for field in (
+                "repository",
+                "revision",
+                "tree",
+                "path",
+                "content_sha256",
+                "license_path",
+                "license_sha256",
+            ):
                 if field not in mapping:
                     raise ValidationError(
                         f"{context}.official_mapping is missing required field '{field}'"
                     )
-            _require_nonempty_string(mapping["source"], f"{context}.official_mapping.source")
+            _require_nonempty_string(
+                mapping["repository"], f"{context}.official_mapping.repository"
+            )
+            _require_revision(
+                mapping["revision"], f"{context}.official_mapping.revision"
+            )
+            _require_revision(mapping["tree"], f"{context}.official_mapping.tree")
             _require_safe_relative_path(mapping["path"], f"{context}.official_mapping.path")
             _require_sha256(
                 mapping["content_sha256"],
                 f"{context}.official_mapping.content_sha256",
             )
+            _require_safe_relative_path(
+                mapping["license_path"], f"{context}.official_mapping.license_path"
+            )
+            _require_sha256(
+                mapping["license_sha256"],
+                f"{context}.official_mapping.license_sha256",
+            )
+            if (
+                license_record["notice_path"] != mapping["license_path"]
+                or license_record["notice_sha256"] != mapping["license_sha256"]
+            ):
+                raise ValidationError(
+                    f"{context}.license notice must match official_mapping license evidence"
+                )
 
     missing_catalog_records = sorted(catalog_keys - seen)
     if missing_catalog_records:

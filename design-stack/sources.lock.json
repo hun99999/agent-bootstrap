@@ -5,13 +5,29 @@
       "id": "anthropic-frontend-design",
       "revision": "9d2f1ae187231d8199c64b5b762e1bdf2244733d",
       "tree": "a1aa084ffa767c20525eb79bea0dacba3b50a2eb",
-      "files": []
+      "files": [
+        {
+          "path": "skills/frontend-design/LICENSE.txt",
+          "size": 10174,
+          "sha256": "0d542e0c8804e39aa7f37eb00da5a762149dc682d7829451287e11b938e94594"
+        },
+        {
+          "path": "skills/frontend-design/SKILL.md",
+          "size": 8260,
+          "sha256": "1608ea77fbb6fc30d13a97d12cfa8ebf31358d40f0dd97beed24829d6b3f45dd"
+        }
+      ]
     },
     {
       "id": "awesome-design-md",
       "revision": "664b3e78fd1a298ba11973822da988483256d4b4",
       "tree": "729c989b192948644e446da114e0da07195ee461",
       "files": [
+        {
+          "path": "LICENSE",
+          "size": 1066,
+          "sha256": "6d4bdc9a9cf30e7beb593475fdcdbf29f981ea6bd7923f202866145409f87b44"
+        },
         {
           "path": "design-md/airbnb/DESIGN.md",
           "size": 30517,
@@ -33,14 +49,14 @@
           "sha256": "378ff97d568ccbc316519b9d45a29d6649ed8961c9c486c3ed4cea7501d72371"
         },
         {
-          "path": "design-md/bmw/DESIGN.md",
-          "size": 27907,
-          "sha256": "b7268279e7c98e85fb80890e06765f4ee8340ba1ea1ccb5a8a5b134de43dac3e"
-        },
-        {
           "path": "design-md/bmw-m/DESIGN.md",
           "size": 30697,
           "sha256": "824a1707c0a8d1609d72477d0fa211b9ebe4bdeb3e1fd701790af7b7bb669a4a"
+        },
+        {
+          "path": "design-md/bmw/DESIGN.md",
+          "size": 27907,
+          "sha256": "b7268279e7c98e85fb80890e06765f4ee8340ba1ea1ccb5a8a5b134de43dac3e"
         },
         {
           "path": "design-md/bugatti/DESIGN.md",
@@ -388,13 +404,29 @@
       "id": "google-design-md",
       "revision": "ea4a3240d4c0d06778b9e39efeb553851be27c17",
       "tree": "c5d988518bde5258f2db51ed0fb41295ac044633",
-      "files": []
+      "files": [
+        {
+          "path": "LICENSE",
+          "size": 11360,
+          "sha256": "1bdd03995456d191707e379eb06ceac20cf30d520bec90c97c2b6d220906c66e"
+        },
+        {
+          "path": "packages/cli/package.json",
+          "size": 1963,
+          "sha256": "c0abab090ee1f3522810631a0a46f47d3903027826d286b46fe2fbfb1122cbc1"
+        }
+      ]
     },
     {
       "id": "mengto-skills",
       "revision": "25f872a94e3bbee85ecacba4041fa52c21cb0e44",
       "tree": "a5cf69004c1bd111725d56e3e918b44e2283fbe3",
       "files": [
+        {
+          "path": "LICENSE",
+          "size": 1064,
+          "sha256": "b2a071ba22fefd803f4e9d1f5c777dd79c62d191695586a1a73fd4d0ebd051c6"
+        },
         {
           "path": "agent-skills/codex/audit-verify-explain-grade-5/SKILL.md",
           "size": 3679,
@@ -451,14 +483,14 @@
           "sha256": "e2301598090cf01a0d3b726a039ef4c5c9b05f64d20fb17f52a2271994945c5a"
         },
         {
-          "path": "agent-skills/codex/playwright/SKILL.md",
-          "size": 3715,
-          "sha256": "09fd63fe9ba29ee4f13d343eadbba8643a36c920591bbe6d56fd438aa404b47f"
-        },
-        {
           "path": "agent-skills/codex/playwright-interactive/SKILL.md",
           "size": 31711,
           "sha256": "46cf9c30b70b68f13a91ad532b61dedfb8f432495eaebd3c9e3fabd5e2aee877"
+        },
+        {
+          "path": "agent-skills/codex/playwright/SKILL.md",
+          "size": 3715,
+          "sha256": "09fd63fe9ba29ee4f13d343eadbba8643a36c920591bbe6d56fd438aa404b47f"
         },
         {
           "path": "agent-skills/codex/screenshot/SKILL.md",
@@ -726,14 +758,14 @@
           "sha256": "48cef691946621cb90b0891a19b9bf9076fddfe54961847f78223515475894bd"
         },
         {
-          "path": "agent-skills/web-design/gsap/SKILL.md",
-          "size": 3084,
-          "sha256": "eb9a0a84f0747fa19ce693cf776328945aebee1205ddc42c518c133c2ab6cb42"
-        },
-        {
           "path": "agent-skills/web-design/gsap-scrolltrigger-storytelling/SKILL.md",
           "size": 4034,
           "sha256": "c388738853064f4bbb4293b910efc0fb82f957298a49c94214c2522b138ae939"
+        },
+        {
+          "path": "agent-skills/web-design/gsap/SKILL.md",
+          "size": 3084,
+          "sha256": "eb9a0a84f0747fa19ce693cf776328945aebee1205ddc42c518c133c2ab6cb42"
         },
         {
           "path": "agent-skills/web-design/high-contrast-skeuomorphic-clean/SKILL.md",
@@ -876,7 +908,13 @@
       "id": "open-design",
       "revision": "81b20dc6a214da2228bdd08f8850656b98f9bcea",
       "tree": "f3b4e7ab9e965c26e07be1104b4e0977f780807a",
-      "files": []
+      "files": [
+        {
+          "path": "LICENSE",
+          "size": 11296,
+          "sha256": "9d95806a26532623360eb84bb17d298f394b55ef73fb4c0796d99b4319b2b0da"
+        }
+      ]
     },
     {
       "id": "vercel-agent-skills",
@@ -888,7 +926,13 @@
       "id": "vercel-web-interface-guidelines",
       "revision": "d0a657bfe87e86dd3a4753d7ec28c7e7dd7a88fe",
       "tree": "94d94ddaaeefb5f272c11ee7a68296cf185525f6",
-      "files": []
+      "files": [
+        {
+          "path": "LICENSE",
+          "size": 1068,
+          "sha256": "6cd1609c9c12233507cdd2ce0d32e9a721e3c27494951be06b90090deeeb7af2"
+        }
+      ]
     }
   ],
   "catalogs": {
@@ -2079,5 +2123,13 @@
         "authority": "third-party-analysis"
       }
     ]
+  },
+  "contracts": {
+    "google_design_md_cli": {
+      "source_id": "google-design-md",
+      "path": "packages/cli/package.json",
+      "sha256": "c0abab090ee1f3522810631a0a46f47d3903027826d286b46fe2fbfb1122cbc1",
+      "version": "0.3.0"
+    }
   }
 }

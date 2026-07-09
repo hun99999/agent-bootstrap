@@ -11,9 +11,10 @@
         "skills/frontend-design/**"
       ],
       "license": {
-        "spdx": "NOASSERTION",
-        "status": "unresolved",
-        "notice_path": null
+        "spdx": "Apache-2.0",
+        "status": "verified",
+        "notice_path": "skills/frontend-design/LICENSE.txt",
+        "notice_sha256": "0d542e0c8804e39aa7f37eb00da5a762149dc682d7829451287e11b938e94594"
       },
       "role": "frontend-design-provenance-evidence",
       "update_method": "review-only-until-license-resolved",
@@ -31,7 +32,8 @@
       "license": {
         "spdx": "MIT",
         "status": "verified",
-        "notice_path": "LICENSE"
+        "notice_path": "LICENSE",
+        "notice_sha256": "6d4bdc9a9cf30e7beb593475fdcdbf29f981ea6bd7923f202866145409f87b44"
       },
       "role": "visual-inspiration",
       "update_method": "reviewed-local-tar",
@@ -51,7 +53,8 @@
       "license": {
         "spdx": "Apache-2.0",
         "status": "verified",
-        "notice_path": "LICENSE"
+        "notice_path": "LICENSE",
+        "notice_sha256": "1bdd03995456d191707e379eb06ceac20cf30d520bec90c97c2b6d220906c66e"
       },
       "role": "design-md-validation",
       "update_method": "reviewed-local-tar",
@@ -69,7 +72,8 @@
       "license": {
         "spdx": "MIT",
         "status": "verified",
-        "notice_path": "LICENSE"
+        "notice_path": "LICENSE",
+        "notice_sha256": "b2a071ba22fefd803f4e9d1f5c777dd79c62d191695586a1a73fd4d0ebd051c6"
       },
       "role": "frontend-procedure-reference",
       "update_method": "reviewed-local-tar",
@@ -87,7 +91,8 @@
       "license": {
         "spdx": "Apache-2.0",
         "status": "verified",
-        "notice_path": "LICENSE"
+        "notice_path": "LICENSE",
+        "notice_sha256": "9d95806a26532623360eb84bb17d298f394b55ef73fb4c0796d99b4319b2b0da"
       },
       "role": "on-demand-design-system-package",
       "update_method": "explicit-package-selection",
@@ -109,7 +114,8 @@
       "license": {
         "spdx": "NOASSERTION",
         "status": "unresolved",
-        "notice_path": null
+        "notice_path": null,
+        "notice_sha256": null
       },
       "role": "react-and-interface-quality",
       "update_method": "review-and-map-official-source",
@@ -128,7 +134,8 @@
       "license": {
         "spdx": "MIT",
         "status": "verified",
-        "notice_path": "LICENSE"
+        "notice_path": "LICENSE",
+        "notice_sha256": "6cd1609c9c12233507cdd2ce0d32e9a721e3c27494951be06b90090deeeb7af2"
       },
       "role": "interface-quality-gate",
       "update_method": "reviewed-local-tar",
