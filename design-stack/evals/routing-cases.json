@@ -1,0 +1,91 @@
+{
+  "schema_version": 1,
+  "purpose": "Guidance-application pressure cases. Trigger boundaries live in trigger-cases.json.",
+  "cases": [
+    {
+      "id": "shape-account-recovery",
+      "request": "Design the account-recovery flow and identify states before anyone edits code.",
+      "expected_mode": "shape",
+      "target_surface": "account recovery flow",
+      "loaded_reference_keys": [
+        "source-precedence"
+      ],
+      "inspiration_sources": []
+    },
+    {
+      "id": "explore-marketing-directions",
+      "request": "Explore three materially different directions for the product landing page.",
+      "expected_mode": "explore",
+      "target_surface": "product landing page",
+      "loaded_reference_keys": [
+        "source-precedence"
+      ],
+      "inspiration_sources": [
+        {
+          "label": "MengTo high-end visual procedure",
+          "authority": "procedural-guidance"
+        },
+        {
+          "label": "Meta public-site DESIGN.md analysis",
+          "authority": "third-party-analysis"
+        },
+        {
+          "label": "Vercel public-site DESIGN.md analysis",
+          "authority": "third-party-analysis"
+        }
+      ]
+    },
+    {
+      "id": "implement-figma-checkout",
+      "request": "Implement the approved Figma checkout summary using the existing component library.",
+      "expected_mode": "implement",
+      "target_surface": "checkout summary",
+      "loaded_reference_keys": [
+        "source-precedence",
+        "quality-gates"
+      ],
+      "inspiration_sources": [
+        {
+          "label": "Vercel interface quality guidance",
+          "authority": "official"
+        }
+      ]
+    },
+    {
+      "id": "review-settings-screenshot",
+      "request": "Audit this settings screenshot and component diff; report findings only.",
+      "expected_mode": "review",
+      "target_surface": "settings screen",
+      "loaded_reference_keys": [
+        "quality-gates"
+      ],
+      "inspiration_sources": []
+    },
+    {
+      "id": "copy-onboarding-errors",
+      "request": "Improve the onboarding error messages without changing the flow.",
+      "expected_mode": "copy",
+      "target_surface": "onboarding error messages",
+      "loaded_reference_keys": [
+        "source-precedence",
+        "quality-gates"
+      ],
+      "inspiration_sources": []
+    },
+    {
+      "id": "harden-responsive-dashboard",
+      "request": "Polish the approved dashboard for production across compact and wide layouts.",
+      "expected_mode": "harden",
+      "target_surface": "responsive dashboard",
+      "loaded_reference_keys": [
+        "quality-gates"
+      ],
+      "inspiration_sources": [
+        {
+          "label": "Vercel interface quality guidance",
+          "authority": "official"
+        }
+      ]
+    }
+  ]
+}

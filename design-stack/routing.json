@@ -1,0 +1,215 @@
+{
+  "schema_version": 1,
+  "native_skills": [
+    "frontend-design"
+  ],
+  "references": {
+    "source-precedence": "router/references/source-precedence.md",
+    "quality-gates": "router/references/quality-gates.md"
+  },
+  "source_precedence": [
+    "current-user-instruction-and-approved-scope",
+    "verified-project-behavior-and-product-evidence",
+    "project-components-tokens-figma-and-design-md",
+    "accessibility-legal-compliance-and-brand-requirements",
+    "vercel-official-guidance",
+    "mengto-procedural-and-visual-guidance",
+    "third-party-design-md-inspiration",
+    "router-defaults"
+  ],
+  "selection_policy": {
+    "smallest_sufficient_source_set": true,
+    "max_default_references": 2,
+    "max_loaded_references": 4,
+    "max_inspiration_sources": 3,
+    "require_authority_labels": true,
+    "external_side_effect_material": "explicit-use-only",
+    "open_design": "explicit-demand-only",
+    "project_design_system_override": "explicit-material-decision-only"
+  },
+  "modes": {
+    "shape": {
+      "description": "Frame how a product flow or feature should work before implementation.",
+      "edit_policy": "read-only-unless-explicit",
+      "default_reference_keys": [
+        "source-precedence"
+      ],
+      "required_outputs": [
+        "mode",
+        "target_surface",
+        "loaded_references",
+        "user-job-outcome",
+        "reachable-states",
+        "alternatives-risks-open-decisions"
+      ]
+    },
+    "explore": {
+      "description": "Compare materially different visual directions or design languages.",
+      "edit_policy": "artifacts-only-when-requested",
+      "default_reference_keys": [
+        "source-precedence"
+      ],
+      "required_outputs": [
+        "mode",
+        "target_surface",
+        "loaded_references",
+        "labeled-directions",
+        "tradeoffs",
+        "recommended-decision"
+      ]
+    },
+    "implement": {
+      "description": "Build, redesign, or fix a user-facing surface through project-owned components and tokens.",
+      "edit_policy": "requested-surface-only",
+      "requires_tdd": true,
+      "default_reference_keys": [
+        "source-precedence",
+        "quality-gates"
+      ],
+      "required_outputs": [
+        "mode",
+        "target_surface",
+        "loaded_references",
+        "material-decisions",
+        "tests-and-implementation",
+        "verification"
+      ]
+    },
+    "review": {
+      "description": "Audit a URL, screenshot, component, flow, or diff using source and rendered evidence.",
+      "edit_policy": "read-only-unless-explicit",
+      "default_reference_keys": [
+        "quality-gates"
+      ],
+      "required_outputs": [
+        "mode",
+        "target_surface",
+        "loaded_references",
+        "prioritized-findings",
+        "evidence",
+        "verification-boundary"
+      ]
+    },
+    "copy": {
+      "description": "Improve user-facing language without silently redesigning the product.",
+      "edit_policy": "copy-scope-only",
+      "allowed_change_scope": [
+        "copy",
+        "accessible-names",
+        "directly-required-markup"
+      ],
+      "default_reference_keys": [
+        "source-precedence",
+        "quality-gates"
+      ],
+      "required_outputs": [
+        "mode",
+        "target_surface",
+        "loaded_references",
+        "copy-changes",
+        "structural-blockers"
+      ]
+    },
+    "harden": {
+      "description": "Preserve an approved direction while closing production-readiness gaps.",
+      "edit_policy": "finish-defects-only",
+      "default_reference_keys": [
+        "quality-gates"
+      ],
+      "required_outputs": [
+        "mode",
+        "target_surface",
+        "loaded_references",
+        "reachable-state-coverage",
+        "resilience-accessibility-responsive-finish",
+        "verification"
+      ]
+    }
+  },
+  "mengto_resolution_rules": [
+    {
+      "path_pattern": "agent-skills/codex/pdf/SKILL.md",
+      "delivery": "official-mapping",
+      "authority": "official",
+      "use_condition": "Use the pinned official OpenAI skill mapping."
+    },
+    {
+      "path_pattern": "agent-skills/codex/playwright-interactive/SKILL.md",
+      "delivery": "official-mapping",
+      "authority": "official",
+      "use_condition": "Use the pinned official OpenAI skill mapping."
+    },
+    {
+      "path_pattern": "agent-skills/codex/playwright/SKILL.md",
+      "delivery": "official-mapping",
+      "authority": "official",
+      "use_condition": "Use the pinned official OpenAI skill mapping."
+    },
+    {
+      "path_pattern": "agent-skills/codex/screenshot/SKILL.md",
+      "delivery": "official-mapping",
+      "authority": "official",
+      "use_condition": "Use the pinned official OpenAI skill mapping."
+    },
+    {
+      "path_pattern": "agent-skills/ui/frontend-design/SKILL.md",
+      "delivery": "official-mapping",
+      "authority": "official",
+      "use_condition": "Use the pinned official Anthropic skill mapping."
+    },
+    {
+      "path_pattern": "agent-skills/codex/elevenlabs-tts/SKILL.md",
+      "delivery": "explicit-use-only",
+      "authority": "procedural-guidance",
+      "use_condition": "Load only when the user explicitly requests this external service."
+    },
+    {
+      "path_pattern": "agent-skills/codex/netlify-deploy/SKILL.md",
+      "delivery": "explicit-use-only",
+      "authority": "procedural-guidance",
+      "use_condition": "Load only when the user explicitly requests deployment."
+    },
+    {
+      "path_pattern": "agent-skills/codex/x-bookmark-quote-posts/SKILL.md",
+      "delivery": "explicit-use-only",
+      "authority": "procedural-guidance",
+      "use_condition": "Load only when the user explicitly requests the external posting workflow."
+    },
+    {
+      "path_pattern": "agent-skills/media/aura-asset-images/SKILL.md",
+      "delivery": "explicit-use-only",
+      "authority": "procedural-guidance",
+      "use_condition": "Load only when the user explicitly requests the external asset service."
+    },
+    {
+      "path_pattern": "agent-skills/media/unsplash-asset-images/SKILL.md",
+      "delivery": "explicit-use-only",
+      "authority": "procedural-guidance",
+      "use_condition": "Load only when the user explicitly requests external stock imagery."
+    },
+    {
+      "path_pattern": "agent-skills/codex/*/SKILL.md",
+      "delivery": "reference-corpus",
+      "authority": "procedural-guidance",
+      "use_condition": "Load only when its named procedure is required by the selected mode."
+    },
+    {
+      "path_pattern": "agent-skills/media/*/SKILL.md",
+      "delivery": "reference-corpus",
+      "authority": "procedural-guidance",
+      "use_condition": "Load only when the selected surface needs that asset procedure."
+    },
+    {
+      "path_pattern": "agent-skills/ui/*/SKILL.md",
+      "delivery": "reference-corpus",
+      "authority": "procedural-guidance",
+      "use_condition": "Load only for a matching UI task or approved direction."
+    },
+    {
+      "path_pattern": "agent-skills/web-design/*/SKILL.md",
+      "delivery": "reference-corpus",
+      "authority": "procedural-guidance",
+      "use_condition": "Load only for a matching visual pattern, implementation detail, or approved direction."
+    }
+  ]
+}

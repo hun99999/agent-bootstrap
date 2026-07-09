@@ -1,0 +1,66 @@
+{
+  "schema_version": 1,
+  "purpose": "Positive and negative discovery boundaries for the frontend-design router.",
+  "cases": [
+    {
+      "id": "positive-shape-flow",
+      "request": "Help me design how this subscription-upgrade flow should work.",
+      "should_trigger": true,
+      "expected_mode": "shape"
+    },
+    {
+      "id": "positive-explore-visuals",
+      "request": "Give me three visual directions for this SaaS landing page.",
+      "should_trigger": true,
+      "expected_mode": "explore"
+    },
+    {
+      "id": "positive-implement-ui",
+      "request": "Build this responsive profile screen in the existing frontend.",
+      "should_trigger": true,
+      "expected_mode": "implement"
+    },
+    {
+      "id": "positive-review-url",
+      "request": "Review the UX and visual quality of this deployed checkout page.",
+      "should_trigger": true,
+      "expected_mode": "review"
+    },
+    {
+      "id": "positive-copy",
+      "request": "Rewrite the empty-state copy and accessible label.",
+      "should_trigger": true,
+      "expected_mode": "copy"
+    },
+    {
+      "id": "positive-harden",
+      "request": "Make the approved interface production-ready and accessible.",
+      "should_trigger": true,
+      "expected_mode": "harden"
+    },
+    {
+      "id": "negative-image-generation",
+      "request": "Generate a standalone watercolor hero illustration.",
+      "should_trigger": false,
+      "expected_mode": null
+    },
+    {
+      "id": "negative-backend-migration",
+      "request": "Write the database migration for the orders table.",
+      "should_trigger": false,
+      "expected_mode": null
+    },
+    {
+      "id": "negative-data-analysis",
+      "request": "Analyze this CSV and calculate monthly retention.",
+      "should_trigger": false,
+      "expected_mode": null
+    },
+    {
+      "id": "negative-infrastructure",
+      "request": "Configure the worker queue and deployment secrets.",
+      "should_trigger": false,
+      "expected_mode": null
+    }
+  ]
+}
