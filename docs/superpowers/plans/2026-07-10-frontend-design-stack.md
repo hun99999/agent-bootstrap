@@ -425,7 +425,7 @@ Expected: the commands succeed; preserve unrelated installed plugins, including 
 
 - [ ] **Step 2: Add or refresh the local repository marketplace**
 
-Use the current Codex CLI's documented `plugin marketplace add` command with `/Users/hooooonje/codex-dotfiles`. If the marketplace already exists, use only the documented non-destructive refresh/update path; do not remove unrelated marketplaces or plugins.
+Use the current Codex CLI's documented `plugin marketplace add` command with the absolute path to `<repository-root>`. If the marketplace already exists, use only the documented non-destructive refresh/update path; do not remove unrelated marketplaces or plugins.
 
 - [ ] **Step 3: Install the approved plugin**
 
