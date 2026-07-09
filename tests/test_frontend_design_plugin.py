@@ -77,6 +77,32 @@ class FrontendDesignPluginTests(unittest.TestCase):
             marketplace_entry["source"], "./plugins/frontend-design-pack"
         )
 
+    def test_codex_manifest_includes_required_interface_metadata(self) -> None:
+        codex = json.loads(
+            (PLUGIN_ROOT / ".codex-plugin/plugin.json").read_text(encoding="utf-8")
+        )
+
+        self.assertEqual(
+            codex["interface"],
+            {
+                "capabilities": ["Interactive", "Read", "Write"],
+                "category": "Creativity",
+                "defaultPrompt": [
+                    "Shape a frontend brief and choose the right design workflow",
+                    "Explore three evidence-backed visual directions",
+                    "Review this frontend for UX, accessibility, and polish",
+                ],
+                "developerName": "Hun",
+                "displayName": "Frontend Design Pack",
+                "longDescription": (
+                    "Shape, explore, implement, review, write, and harden frontend "
+                    "experiences with one evidence-first router and a reviewed "
+                    "reference corpus."
+                ),
+                "shortDescription": "Evidence-first frontend design workflows",
+            },
+        )
+
     def test_plugin_contains_exactly_one_native_self_contained_skill(self) -> None:
         skill_files = sorted(PLUGIN_ROOT.rglob("SKILL.md"))
         self.assertEqual(

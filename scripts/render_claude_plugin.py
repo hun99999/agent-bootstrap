@@ -143,6 +143,11 @@ def render_marketplace(repo_root: Path) -> None:
         "name": "agent-bootstrap",
         "owner": MARKETPLACE_OWNER,
         "description": "Marketplace for process-first agents and reviewed design workflows",
+        "metadata": {
+            "description": (
+                "Marketplace for process-first agents and reviewed design workflows"
+            )
+        },
         "plugins": [
             {
                 "name": "process-first-agents",

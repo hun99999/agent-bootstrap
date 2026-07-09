@@ -38,6 +38,22 @@ PLUGIN_KEYWORDS = [
     "responsive-design",
     "design-system",
 ]
+CODEX_INTERFACE = {
+    "displayName": "Frontend Design Pack",
+    "shortDescription": "Evidence-first frontend design workflows",
+    "longDescription": (
+        "Shape, explore, implement, review, write, and harden frontend experiences "
+        "with one evidence-first router and a reviewed reference corpus."
+    ),
+    "developerName": "Hun",
+    "category": "Creativity",
+    "capabilities": ["Interactive", "Read", "Write"],
+    "defaultPrompt": [
+        "Shape a frontend brief and choose the right design workflow",
+        "Explore three evidence-backed visual directions",
+        "Review this frontend for UX, accessibility, and polish",
+    ],
+}
 PLUGIN_ROOT = Path("plugins/frontend-design-pack")
 MIT_LICENSE = """MIT License
 
@@ -122,6 +138,7 @@ def _manifest(include_skills: bool) -> Dict[str, Any]:
     }
     if include_skills:
         manifest["skills"] = "./skills/"
+        manifest["interface"] = CODEX_INTERFACE
     return manifest
 
 

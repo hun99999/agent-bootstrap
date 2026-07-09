@@ -5,6 +5,23 @@
   },
   "description": "One evidence-first frontend design router with reviewed MengTo procedures, official quality guidance, and labeled DESIGN.md inspiration.",
   "homepage": "https://github.com/hun99999/agent-bootstrap",
+  "interface": {
+    "capabilities": [
+      "Interactive",
+      "Read",
+      "Write"
+    ],
+    "category": "Creativity",
+    "defaultPrompt": [
+      "Shape a frontend brief and choose the right design workflow",
+      "Explore three evidence-backed visual directions",
+      "Review this frontend for UX, accessibility, and polish"
+    ],
+    "developerName": "Hun",
+    "displayName": "Frontend Design Pack",
+    "longDescription": "Shape, explore, implement, review, write, and harden frontend experiences with one evidence-first router and a reviewed reference corpus.",
+    "shortDescription": "Evidence-first frontend design workflows"
+  },
   "keywords": [
     "frontend-design",
     "product-design",

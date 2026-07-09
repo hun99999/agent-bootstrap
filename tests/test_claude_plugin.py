@@ -88,6 +88,10 @@ class ClaudePluginTests(unittest.TestCase):
         self.assertEqual(marketplace["name"], "agent-bootstrap")
         self.assertEqual(marketplace["owner"], {"name": "Hun"})
         self.assertEqual(
+            marketplace["metadata"]["description"],
+            "Marketplace for process-first agents and reviewed design workflows",
+        )
+        self.assertEqual(
             set(plugins), {"process-first-agents", "frontend-design-pack"}
         )
         self.assertEqual(
@@ -110,6 +114,7 @@ class ClaudePluginTests(unittest.TestCase):
             0,
             msg=result.stdout + result.stderr,
         )
+        self.assertNotIn("warning", (result.stdout + result.stderr).lower())
 
     def test_plugin_manifest_and_settings_enable_eng_lead(self) -> None:
         manifest = json.loads(PLUGIN_MANIFEST_PATH.read_text(encoding="utf-8"))
