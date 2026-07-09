@@ -128,8 +128,7 @@
       "revision": "d0a657bfe87e86dd3a4753d7ec28c7e7dd7a88fe",
       "authority": "official-quality-guidance",
       "scope": [
-        "README.md",
-        "src/**"
+        "command.md"
       ],
       "license": {
         "spdx": "MIT",

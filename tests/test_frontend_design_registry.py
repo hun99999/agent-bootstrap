@@ -742,6 +742,32 @@ class FrontendDesignCommittedRegistryTests(unittest.TestCase):
         )
         self.assertEqual(manifest["sha256"], contract["sha256"])
 
+    def test_vercel_interface_guidance_is_hash_locked_and_included(self) -> None:
+        source = next(
+            source
+            for source in self.registry["sources"]
+            if source["id"] == "vercel-web-interface-guidelines"
+        )
+        self.assertEqual(source["scope"], ["command.md"])
+        locked_source = next(
+            source
+            for source in self.lock["sources"]
+            if source["id"] == "vercel-web-interface-guidelines"
+        )
+        command = next(
+            record for record in locked_source["files"] if record["path"] == "command.md"
+        )
+        self.assertEqual(command["materialization"], "vendored")
+        provenance = next(
+            record
+            for record in self.provenance["records"]
+            if record["source_id"] == "vercel-web-interface-guidelines"
+            and record["upstream_path"] == "command.md"
+        )
+        self.assertEqual(provenance["decision"], "included")
+        self.assertEqual(provenance["sha256"], command["sha256"])
+        self.assertEqual(provenance["authority"], "official")
+
     def test_anthropic_frontend_design_skill_and_license_are_hash_locked(self) -> None:
         source = next(
             source

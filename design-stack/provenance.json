@@ -4444,6 +4444,31 @@
         "introduced_revision": "582fa357e819de82e9930bd1693264d5f0ac2fcf"
       },
       "catalog": "mengto_skills"
+    },
+    {
+      "source_id": "vercel-web-interface-guidelines",
+      "upstream_path": "command.md",
+      "revision": "d0a657bfe87e86dd3a4753d7ec28c7e7dd7a88fe",
+      "authority": "official",
+      "catalog": null,
+      "role": "interface-quality-gate",
+      "license": {
+        "spdx": "MIT",
+        "status": "verified",
+        "notice_path": "LICENSE",
+        "notice_sha256": "6cd1609c9c12233507cdd2ce0d32e9a721e3c27494951be06b90090deeeb7af2"
+      },
+      "origin": {
+        "repository": "https://github.com/vercel-labs/web-interface-guidelines",
+        "path": "command.md",
+        "revision": "d0a657bfe87e86dd3a4753d7ec28c7e7dd7a88fe",
+        "content_sha256": "eea73cb6dd46fee9faec9973e8e7fe198b5f07ec326f14d276a56e50287e1cab",
+        "basis": "reviewed-git-introduction-under-repository-license",
+        "introduced_revision": "30abf89e95e3e7d15c84e7bdd4a294551afb971f",
+        "publisher": "John Pham, Vercel"
+      },
+      "sha256": "eea73cb6dd46fee9faec9973e8e7fe198b5f07ec326f14d276a56e50287e1cab",
+      "decision": "included"
     }
   ]
 }

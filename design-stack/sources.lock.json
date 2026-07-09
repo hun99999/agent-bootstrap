@@ -1285,6 +1285,13 @@
           "mode": "0644",
           "sha256": "6cd1609c9c12233507cdd2ce0d32e9a721e3c27494951be06b90090deeeb7af2",
           "materialization": "vendored"
+        },
+        {
+          "path": "command.md",
+          "size": 6939,
+          "mode": "0644",
+          "sha256": "eea73cb6dd46fee9faec9973e8e7fe198b5f07ec326f14d276a56e50287e1cab",
+          "materialization": "vendored"
         }
       ]
     }
