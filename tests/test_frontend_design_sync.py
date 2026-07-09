@@ -5,6 +5,7 @@ import tarfile
 import tempfile
 import unittest
 from pathlib import Path
+from unittest import mock
 
 from tests.frontend_design_test_support import (
     commit_all,
@@ -64,12 +65,14 @@ def fixture_payloads(
                     {
                         "path": "LICENSE",
                         "size": len(LICENSE),
+                        "mode": "0644",
                         "sha256": sha256_bytes(LICENSE),
                         "materialization": "vendored",
                     },
                     {
                         "path": "skills/fixture/SKILL.md",
                         "size": len(skill_content),
+                        "mode": "0644",
                         "sha256": sha256_bytes(skill_content),
                         "materialization": "vendored",
                     },
@@ -140,7 +143,7 @@ def write_sync_repo(
     locked_skill: bytes = SKILL,
     installed_skill: bytes = SKILL,
     branch: str = "codex/test",
-    with_renderer: bool = False,
+    with_renderer: bool = True,
     decision: str = "included",
 ) -> None:
     init_git_repo(repo_root, branch=branch)
@@ -162,6 +165,8 @@ def write_sync_repo(
         renderer.write_text(
             """#!/usr/bin/env python3
 import argparse
+import json
+import shutil
 from pathlib import Path
 p = argparse.ArgumentParser()
 p.add_argument('--repo-root', required=True)
@@ -169,8 +174,19 @@ p.add_argument('--plugin-root', required=True)
 a = p.parse_args()
 root = Path(a.repo_root)
 out = Path(a.plugin_root)
-out.mkdir(parents=True, exist_ok=True)
-skill = (root / 'design-stack/vendor/mengto-skills/skills/fixture/SKILL.md').read_bytes()
+if out.exists():
+    shutil.rmtree(out)
+(out / '.codex-plugin').mkdir(parents=True)
+(out / '.claude-plugin').mkdir(parents=True)
+(out / 'skills/frontend-design').mkdir(parents=True)
+manifest = {'name': 'frontend-design-pack', 'version': '1.0.0'}
+(out / '.codex-plugin/plugin.json').write_text(json.dumps(manifest))
+(out / '.claude-plugin/plugin.json').write_text(json.dumps(manifest))
+(out / 'skills/frontend-design/SKILL.md').write_text(
+    '---\\nname: frontend-design\\ndescription: Fixture router.\\n---\\n'
+)
+source_skill = root / 'design-stack/vendor/mengto-skills/skills/fixture/SKILL.md'
+skill = source_skill.read_bytes() if source_skill.exists() else b'mapped-only'
 (out / 'render.txt').write_bytes(b'rendered:' + skill)
 """,
             encoding="utf-8",
@@ -325,11 +341,74 @@ class FrontendDesignSyncTests(unittest.TestCase):
                         (first_staged, first_target),
                         (missing_staged, second_target),
                     ],
-                    root / "backup",
+                    root / "transaction",
+                    root,
                 )
 
             self.assertEqual(first_target.read_bytes(), b"first old")
             self.assertEqual(second_target.read_bytes(), b"second old")
+
+    def test_atomic_replacement_rolls_back_keyboard_interrupt(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            first_target = root / "first.txt"
+            second_target = root / "second.txt"
+            first_staged = root / "first.new"
+            second_staged = root / "second.new"
+            first_target.write_bytes(b"first old")
+            second_target.write_bytes(b"second old")
+            first_staged.write_bytes(b"first new")
+            second_staged.write_bytes(b"second new")
+            real_replace = sync.os.replace
+
+            def interrupt_second_install(source: Path, target: Path) -> None:
+                if Path(source) == second_staged:
+                    raise KeyboardInterrupt()
+                real_replace(source, target)
+
+            with mock.patch.object(
+                sync.os, "replace", side_effect=interrupt_second_install
+            ), self.assertRaises(KeyboardInterrupt):
+                sync._replace_paths_atomically(
+                    [
+                        (first_staged, first_target),
+                        (second_staged, second_target),
+                    ],
+                    root / "transaction",
+                    root,
+                )
+
+            self.assertEqual(first_target.read_bytes(), b"first old")
+            self.assertEqual(second_target.read_bytes(), b"second old")
+            self.assertFalse((root / "transaction").exists())
+
+    def test_recovery_restores_an_interrupted_transaction_before_next_sync(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            transaction = root / "transaction"
+            backup = transaction / "backups/0"
+            target = root / "target.txt"
+            backup.parent.mkdir(parents=True)
+            backup.write_bytes(b"old")
+            target.write_bytes(b"partially installed new")
+            write_json(
+                transaction / "journal.json",
+                {
+                    "schema_version": 1,
+                    "targets": [
+                        {
+                            "target": "target.txt",
+                            "backup": "backups/0",
+                            "had_target": True,
+                        }
+                    ],
+                },
+            )
+
+            sync._recover_incomplete_transaction(transaction, root)
+
+            self.assertEqual(target.read_bytes(), b"old")
+            self.assertFalse(transaction.exists())
 
     def test_sync_requires_clean_non_default_task_branch(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -427,6 +506,43 @@ class FrontendDesignSyncTests(unittest.TestCase):
 
             self.assertEqual(watched_snapshot(repo_root), before)
 
+    def test_sync_requires_renderer_and_post_render_safety_gates(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            repo_root = root / "repo"
+            archive = root / "source.tar"
+            write_sync_repo(repo_root, with_renderer=False)
+            standard_archive(archive)
+            before = watched_snapshot(repo_root)
+
+            with self.assertRaisesRegex(ValueError, "renderer"):
+                sync.sync_source(repo_root, "mengto-skills", archive)
+
+            self.assertEqual(watched_snapshot(repo_root), before)
+
+        private_path_marker = ("/" + "Users/example/private/project").encode()
+        aws_key_marker = ("AKIA" + "ABCDEFGHIJKLMNOP").encode()
+        dangerous_skill = (
+            SKILL
+            + b"\n"
+            + private_path_marker
+            + b"\nAWS access key: "
+            + aws_key_marker
+            + b"\n"
+        )
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            repo_root = root / "repo"
+            archive = root / "source.tar"
+            write_sync_repo(repo_root, locked_skill=dangerous_skill)
+            standard_archive(archive, dangerous_skill)
+            before = watched_snapshot(repo_root)
+
+            with self.assertRaisesRegex(ValueError, "private|secret|safety"):
+                sync.sync_source(repo_root, "mengto-skills", archive)
+
+            self.assertEqual(watched_snapshot(repo_root), before)
+
     def test_success_replaces_tree_records_inventory_and_renders_when_available(self) -> None:
         changed_skill = SKILL.replace(b"# Fixture", b"# Reviewed fixture")
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -439,7 +555,7 @@ class FrontendDesignSyncTests(unittest.TestCase):
                 installed_skill=SKILL,
                 with_renderer=True,
             )
-            standard_archive(archive, changed_skill)
+            standard_archive(archive, changed_skill, mode=0o755)
 
             report = sync.sync_source(repo_root, "mengto-skills", archive)
 
@@ -459,6 +575,7 @@ class FrontendDesignSyncTests(unittest.TestCase):
                 if item["path"] == "skills/fixture/SKILL.md"
             )
             self.assertEqual(locked_skill["size"], len(changed_skill))
+            self.assertEqual(locked_skill["mode"], "0755")
             self.assertEqual(locked_skill["sha256"], sha256_bytes(changed_skill))
             self.assertEqual(
                 {item["path"] for item in lock["sources"][0]["files"]},
@@ -466,7 +583,8 @@ class FrontendDesignSyncTests(unittest.TestCase):
             )
             self.assertTrue(
                 all(
-                    {"path", "size", "sha256", "materialization"} <= set(item)
+                    {"path", "size", "mode", "sha256", "materialization"}
+                    <= set(item)
                     for item in lock["sources"][0]["files"]
                 )
             )
@@ -474,6 +592,7 @@ class FrontendDesignSyncTests(unittest.TestCase):
                 repo_root / "plugins/frontend-design-pack/render.txt"
             ).read_bytes()
             self.assertEqual(rendered, b"rendered:" + changed_skill)
+            self.assertEqual(installed.stat().st_mode & 0o111, 0)
             self.assertTrue(report["plugin_rendered"])
 
     def test_sync_never_executes_executable_imported_script(self) -> None:
@@ -526,7 +645,7 @@ class FrontendDesignSyncTests(unittest.TestCase):
                 if item["path"] == "skills/fixture/SKILL.md"
             )
             self.assertEqual(locked_skill["materialization"], "metadata-only")
-            self.assertFalse(report["plugin_rendered"])
+            self.assertTrue(report["plugin_rendered"])
 
 
 if __name__ == "__main__":

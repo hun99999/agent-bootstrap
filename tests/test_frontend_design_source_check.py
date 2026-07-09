@@ -1,5 +1,6 @@
 import copy
 import json
+import shutil
 import tempfile
 import unittest
 from pathlib import Path
@@ -55,18 +56,21 @@ def write_check_fixture(repo_root: Path, candidate_root: Path) -> None:
                     {
                         "path": "LICENSE",
                         "size": len(LICENSE),
+                        "mode": "0644",
                         "sha256": sha256_bytes(LICENSE),
                         "materialization": "vendored",
                     },
                     {
                         "path": "skills/fixture/SKILL.md",
                         "size": len(OLD_SKILL),
+                        "mode": "0644",
                         "sha256": sha256_bytes(OLD_SKILL),
                         "materialization": "vendored",
                     },
                     {
                         "path": "skills/old-name.txt",
                         "size": len(b"renamed\n"),
+                        "mode": "0644",
                         "sha256": sha256_bytes(b"renamed\n"),
                         "materialization": "vendored",
                     },
@@ -209,6 +213,37 @@ class FrontendDesignSourceCheckTests(unittest.TestCase):
         self.assertFalse(report["removed"])
         self.assertFalse(report["renamed"])
 
+    def test_source_check_reports_permission_only_changes(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            repo_root = root / "repo"
+            initial_candidate = root / "initial-candidate"
+            candidate_root = root / "candidate"
+            write_check_fixture(repo_root, initial_candidate)
+            source = json.loads(
+                (repo_root / "design-stack/sources.json").read_text(encoding="utf-8")
+            )["sources"][0]
+            shutil.copytree(repo_root / source["destination"], candidate_root)
+            changed_path = candidate_root / "skills/fixture/SKILL.md"
+            changed_path.chmod(0o755)
+
+            report = source_check.compare_source_tree(
+                repo_root, "mengto-skills", candidate_root
+            )
+
+        self.assertFalse(report["changed"])
+        self.assertEqual(
+            report["mode_changes"],
+            [
+                {
+                    "path": "skills/fixture/SKILL.md",
+                    "before": "0644",
+                    "after": "0755",
+                }
+            ],
+        )
+        self.assertIn("skills/fixture/SKILL.md", report["provenance_changes"])
+
     def test_unknown_source_is_rejected(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             root = Path(temp_dir)
@@ -225,6 +260,7 @@ class FrontendDesignSourceCheckTests(unittest.TestCase):
             "added": ["skills/new/SKILL.md"],
             "removed": [],
             "changed": ["skills/fixture/SKILL.md"],
+            "mode_changes": [],
             "renamed": [],
             "description_changes": [],
             "instruction_changes": ["skills/fixture/SKILL.md"],
@@ -247,6 +283,7 @@ class FrontendDesignSourceCheckTests(unittest.TestCase):
             "Added",
             "Removed",
             "Changed",
+            "Modes",
             "Renamed",
             "Descriptions",
             "Instructions",

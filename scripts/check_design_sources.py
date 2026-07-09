@@ -8,7 +8,7 @@ import json
 import re
 import subprocess
 from pathlib import Path
-from typing import Any, Dict, Iterable, List, Mapping
+from typing import Any, Dict, Iterable, List, Mapping, Optional
 
 from design_stack import ValidationError, load_json, parse_skill_frontmatter, sha256_file
 
@@ -71,6 +71,7 @@ def path_is_in_scope(path: str, source: Mapping[str, Any]) -> bool:
 def _snapshot_candidate(
     candidate_root: Path,
     source: Mapping[str, Any],
+    mode_overrides: Optional[Mapping[str, str]] = None,
 ) -> Dict[str, Dict[str, Any]]:
     if not candidate_root.is_dir():
         raise ValidationError(f"candidate source tree does not exist: {candidate_root}")
@@ -85,6 +86,9 @@ def _snapshot_candidate(
         records[relative_path] = {
             "path": relative_path,
             "size": path.stat().st_size,
+            "mode": (mode_overrides or {}).get(
+                relative_path, f"{path.stat().st_mode & 0o7777:04o}"
+            ),
             "sha256": sha256_file(path),
         }
     return records
@@ -123,6 +127,7 @@ def compare_source_tree(
     repo_root: Path,
     source_id: str,
     candidate_root: Path,
+    mode_overrides: Optional[Mapping[str, str]] = None,
 ) -> Dict[str, Any]:
     registry = load_json(repo_root / "design-stack/sources.json")
     lock = load_json(repo_root / "design-stack/sources.lock.json")
@@ -136,7 +141,7 @@ def compare_source_tree(
         raise ValidationError(f"source is missing from lock: {source_id}")
 
     old = {record["path"]: record for record in locked_source["files"]}
-    new = _snapshot_candidate(candidate_root, source)
+    new = _snapshot_candidate(candidate_root, source, mode_overrides)
     old_paths = set(old)
     new_paths = set(new)
     added = sorted(new_paths - old_paths)
@@ -146,7 +151,20 @@ def compare_source_tree(
         for path in old_paths & new_paths
         if old[path]["sha256"] != new[path]["sha256"]
     )
-    affected = sorted(set(added) | set(changed))
+    mode_changed_paths = sorted(
+        path
+        for path in old_paths & new_paths
+        if old[path]["mode"] != new[path]["mode"]
+    )
+    mode_changes = [
+        {
+            "path": path,
+            "before": old[path]["mode"],
+            "after": new[path]["mode"],
+        }
+        for path in mode_changed_paths
+    ]
+    affected = sorted(set(added) | set(changed) | set(mode_changed_paths))
     old_catalog = {
         entry["path"]: entry
         for entries in lock["catalogs"].values()
@@ -196,6 +214,7 @@ def compare_source_tree(
         for path in (set(affected) | set(removed))
         if (source_id, path) not in provenance_records
         or path in removed
+        or path in mode_changed_paths
         or provenance_records[(source_id, path)]["sha256"]
         != new.get(path, {}).get("sha256")
     )
@@ -211,6 +230,7 @@ def compare_source_tree(
         "added": added,
         "removed": removed,
         "changed": changed,
+        "mode_changes": mode_changes,
         "renamed": _renames(removed, added, old, new),
         "description_changes": description_changes,
         "instruction_changes": instruction_changes,
@@ -251,6 +271,7 @@ def format_human_report(report: Mapping[str, Any]) -> str:
         ("Added", "added"),
         ("Removed", "removed"),
         ("Changed", "changed"),
+        ("Modes", "mode_changes"),
         ("Renamed", "renamed"),
         ("Descriptions", "description_changes"),
         ("Instructions", "instruction_changes"),

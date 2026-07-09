@@ -6,6 +6,7 @@ import argparse
 import copy
 import json
 import os
+import re
 import shutil
 import subprocess
 import sys
@@ -15,6 +16,7 @@ from pathlib import Path, PurePosixPath
 from typing import Any, Dict, Iterable, List, Mapping, Optional, Set, Tuple
 
 from check_design_sources import compare_source_tree, path_is_in_scope
+from check_private_paths import scan_paths
 from design_stack import (
     ValidationError,
     load_json,
@@ -29,6 +31,12 @@ from design_stack import (
 
 MAX_ARCHIVE_FILE_BYTES = 64 * 1024 * 1024
 MAX_ARCHIVE_TOTAL_BYTES = 512 * 1024 * 1024
+HIGH_CONFIDENCE_SECRET_PATTERNS = (
+    re.compile(r"\b(?:AKIA|ASIA)[A-Z0-9]{16}\b"),
+    re.compile(r"\bgh[pousr]_[A-Za-z0-9]{30,}\b"),
+    re.compile(r"\bsk-(?:proj-)?[A-Za-z0-9_-]{20,}\b"),
+    re.compile(r"-----BEGIN [A-Z ]*PRIVATE KEY-----"),
+)
 
 
 def _safe_archive_name(name: str, is_directory: bool) -> str:
@@ -53,6 +61,7 @@ def extract_reviewed_tar(
     destination: Path,
     source_id: str,
     revision: str,
+    mode_inventory: Optional[Dict[str, str]] = None,
 ) -> Path:
     if not archive_path.is_file():
         raise ValidationError(f"explicit local archive does not exist: {archive_path}")
@@ -106,6 +115,8 @@ def extract_reviewed_tar(
             with target.open("wb") as output:
                 shutil.copyfileobj(stream, output)
             target.chmod(0o644)
+            if mode_inventory is not None:
+                mode_inventory[relative_name] = f"{member.mode & 0o7777:04o}"
 
     if not extracted_root.is_dir():
         raise ValidationError(
@@ -170,11 +181,16 @@ def _selected_files(
     return selected
 
 
-def _file_records(paths: Iterable[Path], root: Path) -> List[Dict[str, Any]]:
+def _file_records(
+    paths: Iterable[Path],
+    root: Path,
+    mode_inventory: Mapping[str, str],
+) -> List[Dict[str, Any]]:
     return [
         {
             "path": path.relative_to(root).as_posix(),
             "size": path.stat().st_size,
+            "mode": mode_inventory[path.relative_to(root).as_posix()],
             "sha256": sha256_file(path),
         }
         for path in paths
@@ -321,10 +337,12 @@ def _write_json(path: Path, payload: Any) -> None:
     )
 
 
-def _run_renderer_if_present(repo_root: Path, staged_repo: Path) -> bool:
+def _run_renderer(repo_root: Path, staged_repo: Path) -> None:
     renderer = repo_root / "scripts/render_frontend_design_plugin.py"
     if not renderer.is_file():
-        return False
+        raise ValidationError(
+            "frontend design renderer is required before approved source sync"
+        )
     plugin_root = staged_repo / "plugins/frontend-design-pack"
     result = subprocess.run(
         [
@@ -343,7 +361,87 @@ def _run_renderer_if_present(repo_root: Path, staged_repo: Path) -> bool:
             "frontend design plugin render failed: "
             + (result.stdout + result.stderr).strip()
         )
-    return True
+
+
+def _regular_files(root: Path) -> List[Path]:
+    if not root.is_dir():
+        raise ValidationError(f"missing rendered plugin directory: {root}")
+    files: List[Path] = []
+    for path in sorted(root.rglob("*")):
+        if path.is_symlink():
+            raise ValidationError(f"rendered plugin must not contain symlinks: {path}")
+        if path.is_dir():
+            continue
+        if not path.is_file():
+            raise ValidationError(f"rendered plugin contains a special file: {path}")
+        files.append(path)
+    return files
+
+
+def _validate_plugin_output(staged_repo: Path) -> None:
+    plugin_root = staged_repo / "plugins/frontend-design-pack"
+    _regular_files(plugin_root)
+    manifests = []
+    for relative_path in (
+        ".codex-plugin/plugin.json",
+        ".claude-plugin/plugin.json",
+    ):
+        manifest_path = plugin_root / relative_path
+        manifest = load_json(manifest_path)
+        if manifest.get("name") != "frontend-design-pack":
+            raise ValidationError(
+                f"rendered plugin manifest has an invalid name: {manifest_path}"
+            )
+        if not isinstance(manifest.get("version"), str) or not manifest["version"]:
+            raise ValidationError(
+                f"rendered plugin manifest is missing a version: {manifest_path}"
+            )
+        manifests.append(manifest)
+    if manifests[0]["version"] != manifests[1]["version"]:
+        raise ValidationError("Codex and Claude plugin versions must match")
+    native_skills = sorted(plugin_root.glob("skills/*/SKILL.md"))
+    nested_skill_files = sorted(plugin_root.rglob("SKILL.md"))
+    if len(native_skills) != 1 or native_skills != nested_skill_files:
+        raise ValidationError(
+            "rendered plugin must contain exactly one native SKILL.md"
+        )
+    metadata = parse_skill_frontmatter(
+        native_skills[0].read_text(encoding="utf-8"),
+        native_skills[0].relative_to(plugin_root).as_posix(),
+    )
+    if metadata["name"] != "frontend-design":
+        raise ValidationError("rendered native skill must be named frontend-design")
+
+
+def _validate_staged_safety(staged_repo: Path) -> None:
+    roots = [
+        staged_repo / "design-stack",
+        staged_repo / "plugins/frontend-design-pack",
+    ]
+    paths = [path for root in roots for path in _regular_files(root)]
+    private_findings = scan_paths(paths)
+    if private_findings:
+        first = private_findings[0]
+        raise ValidationError(
+            f"staged private-path or secret-assignment safety scan failed: "
+            f"{first.path}:{first.line}: {first.label}"
+        )
+    for path in paths:
+        try:
+            text = path.read_text(encoding="utf-8")
+        except UnicodeDecodeError:
+            continue
+        for pattern in HIGH_CONFIDENCE_SECRET_PATTERNS:
+            if pattern.search(text):
+                raise ValidationError(
+                    f"staged high-confidence secret safety scan failed: {path}"
+                )
+
+
+def _validate_staged_outputs(staged_repo: Path) -> None:
+    validate_repository(staged_repo, metadata_only=False)
+    _validate_plugin_output(staged_repo)
+    _validate_staged_safety(staged_repo)
 
 
 def _remove_path(path: Path) -> None:
@@ -353,34 +451,96 @@ def _remove_path(path: Path) -> None:
         path.unlink()
 
 
+def _safe_transaction_path(root: Path, relative_path: str) -> Path:
+    posix_path = PurePosixPath(relative_path)
+    if (
+        posix_path.is_absolute()
+        or ".." in posix_path.parts
+        or "." in posix_path.parts
+        or posix_path.as_posix() != relative_path
+    ):
+        raise ValidationError(f"unsafe transaction path: {relative_path}")
+    target = root.joinpath(*posix_path.parts)
+    root_resolved = root.resolve()
+    target_resolved = target.resolve(strict=False)
+    if target_resolved != root_resolved and root_resolved not in target_resolved.parents:
+        raise ValidationError(f"transaction path escapes its allowed root: {relative_path}")
+    return target
+
+
+def _recover_incomplete_transaction(
+    transaction_root: Path,
+    allowed_root: Path,
+) -> None:
+    journal_path = transaction_root / "journal.json"
+    if not transaction_root.exists():
+        return
+    journal = load_json(journal_path)
+    if journal.get("schema_version") != 1 or not isinstance(
+        journal.get("targets"), list
+    ):
+        raise ValidationError(f"invalid design sync transaction journal: {journal_path}")
+    for state in reversed(journal["targets"]):
+        if not isinstance(state, dict) or not isinstance(state.get("had_target"), bool):
+            raise ValidationError(f"invalid transaction target in {journal_path}")
+        target = _safe_transaction_path(allowed_root, state.get("target", ""))
+        backup = _safe_transaction_path(
+            transaction_root, state.get("backup", "")
+        )
+        if backup.is_symlink():
+            raise ValidationError(f"transaction backup must not be a symlink: {backup}")
+        if state["had_target"]:
+            if backup.exists():
+                _remove_path(target)
+                target.parent.mkdir(parents=True, exist_ok=True)
+                os.replace(backup, target)
+            elif not (target.exists() or target.is_symlink()):
+                raise ValidationError(
+                    f"cannot recover missing target and backup: {target}"
+                )
+        else:
+            _remove_path(target)
+    shutil.rmtree(transaction_root)
+
+
 def _replace_paths_atomically(
     replacements: Iterable[Tuple[Path, Path]],
-    backup_root: Path,
+    transaction_root: Path,
+    allowed_root: Path,
 ) -> None:
-    backup_root.mkdir(parents=True, exist_ok=True)
+    if transaction_root.exists():
+        _recover_incomplete_transaction(transaction_root, allowed_root)
     states: List[Dict[str, Any]] = []
+    replacement_list = list(replacements)
+    for index, (_, target) in enumerate(replacement_list):
+        target_relative = target.resolve(strict=False).relative_to(
+            allowed_root.resolve()
+        ).as_posix()
+        states.append(
+            {
+                "target": target_relative,
+                "backup": f"backups/{index}",
+                "had_target": target.exists() or target.is_symlink(),
+            }
+        )
+    transaction_root.mkdir(parents=True)
+    _write_json(
+        transaction_root / "journal.json",
+        {"schema_version": 1, "targets": states},
+    )
     try:
-        for index, (staged, target) in enumerate(replacements):
+        for state, (_, target) in zip(states, replacement_list):
             target.parent.mkdir(parents=True, exist_ok=True)
-            backup = backup_root / str(index)
-            if target.exists() or target.is_symlink():
+            backup = _safe_transaction_path(transaction_root, state["backup"])
+            backup.parent.mkdir(parents=True, exist_ok=True)
+            if state["had_target"]:
                 os.replace(target, backup)
-            else:
-                backup = None
-            state = {"target": target, "backup": backup, "installed": False}
-            states.append(state)
+        for staged, target in replacement_list:
             os.replace(staged, target)
-            state["installed"] = True
-    except Exception:
-        for state in reversed(states):
-            target = state["target"]
-            backup = state["backup"]
-            if state["installed"]:
-                _remove_path(target)
-            if backup is not None and backup.exists():
-                _remove_path(target)
-                os.replace(backup, target)
+    except BaseException:
+        _recover_incomplete_transaction(transaction_root, allowed_root)
         raise
+    shutil.rmtree(transaction_root)
 
 
 def sync_source(
@@ -388,6 +548,15 @@ def sync_source(
     source_id: str,
     archive_path: Path,
 ) -> Dict[str, Any]:
+    git_transaction_path = Path(
+        _run_git(repo_root, "rev-parse", "--git-path", "frontend-design-sync")
+    )
+    transaction_root = (
+        git_transaction_path
+        if git_transaction_path.is_absolute()
+        else repo_root / git_transaction_path
+    )
+    _recover_incomplete_transaction(transaction_root, repo_root)
     require_clean_task_branch(repo_root)
     registry = load_json(repo_root / "design-stack/sources.json")
     lock = load_json(repo_root / "design-stack/sources.lock.json")
@@ -401,15 +570,26 @@ def sync_source(
         prefix="frontend-design-sync-", dir=str(repo_root.parent)
     ) as temp_dir:
         temp_root = Path(temp_dir)
+        mode_inventory: Dict[str, str] = {}
         extracted_root = extract_reviewed_tar(
             archive_path,
             temp_root / "extracted",
             source_id,
             source["revision"],
+            mode_inventory,
         )
-        change_report = compare_source_tree(repo_root, source_id, extracted_root)
+        change_report = compare_source_tree(
+            repo_root,
+            source_id,
+            extracted_root,
+            mode_overrides=mode_inventory,
+        )
         selected_files = _selected_files(extracted_root, source)
-        file_records = _file_records(selected_files, extracted_root)
+        file_records = _file_records(
+            selected_files,
+            extracted_root,
+            mode_inventory,
+        )
         _assign_materialization(source, lock, provenance, file_records)
         new_lock = copy.deepcopy(lock)
         locked_source = _locked_source_by_id(new_lock, source_id)
@@ -446,20 +626,25 @@ def sync_source(
         staged_lock = staged_repo / "design-stack/sources.lock.json"
         _write_json(staged_lock, new_lock)
         validate_repository(staged_repo, metadata_only=False)
-        plugin_rendered = _run_renderer_if_present(repo_root, staged_repo)
+        _run_renderer(repo_root, staged_repo)
+        _validate_staged_outputs(staged_repo)
+        plugin_rendered = True
 
         replacements: List[Tuple[Path, Path]] = [
             (staged_lock, repo_root / "design-stack/sources.lock.json"),
             (staged_vendor, repo_root / source["destination"]),
         ]
-        if plugin_rendered:
-            replacements.append(
-                (
-                    staged_repo / "plugins/frontend-design-pack",
-                    repo_root / "plugins/frontend-design-pack",
-                )
+        replacements.append(
+            (
+                staged_repo / "plugins/frontend-design-pack",
+                repo_root / "plugins/frontend-design-pack",
             )
-        _replace_paths_atomically(replacements, temp_root / "rollback")
+        )
+        _replace_paths_atomically(
+            replacements,
+            transaction_root,
+            repo_root,
+        )
 
     return {
         "source_id": source_id,

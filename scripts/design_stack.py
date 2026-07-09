@@ -39,6 +39,7 @@ VERIFIED_LICENSE_DECISIONS = {"included", "mapped-to-official"}
 HEX_40_PATTERN = re.compile(r"^[0-9a-f]{40}$")
 SHA256_PATTERN = re.compile(r"^[0-9a-f]{64}$")
 SOURCE_ID_PATTERN = re.compile(r"^[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$")
+FILE_MODE_PATTERN = re.compile(r"^[0-7]{4}$")
 
 
 class ValidationError(ValueError):
@@ -387,7 +388,7 @@ def validate_lock(
         for file_index, raw_file in enumerate(files):
             file_context = f"{context}.files[{file_index}]"
             file_record = _require_mapping(raw_file, file_context)
-            for field in ("path", "size", "sha256", "materialization"):
+            for field in ("path", "size", "mode", "sha256", "materialization"):
                 if field not in file_record:
                     raise ValidationError(
                         f"{file_context} is missing required field '{field}'"
@@ -401,6 +402,13 @@ def validate_lock(
             size = file_record["size"]
             if not isinstance(size, int) or isinstance(size, bool) or size < 0:
                 raise ValidationError(f"{file_context}.size must be a non-negative integer")
+            mode = _require_nonempty_string(
+                file_record["mode"], f"{file_context}.mode"
+            )
+            if FILE_MODE_PATTERN.fullmatch(mode) is None:
+                raise ValidationError(
+                    f"{file_context}.mode must be a four-digit octal mode"
+                )
             digest = _require_sha256(
                 file_record["sha256"], f"{file_context}.sha256"
             )

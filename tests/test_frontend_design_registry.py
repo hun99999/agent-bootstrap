@@ -88,12 +88,14 @@ def lock_payload(content: bytes = b"fixture\n") -> dict:
                     {
                         "path": "LICENSE",
                         "size": len(FIXTURE_LICENSE),
+                        "mode": "0644",
                         "sha256": sha256_bytes(FIXTURE_LICENSE),
                         "materialization": "vendored",
                     },
                     {
                         "path": "skills/fixture/SKILL.md",
                         "size": len(content),
+                        "mode": "0644",
                         "sha256": sha256_bytes(content),
                         "materialization": "vendored",
                     }
@@ -201,6 +203,16 @@ class FrontendDesignRegistryUnitTests(unittest.TestCase):
         lock["sources"][0]["revision"] = "c" * 40
         with self.assertRaisesRegex(design_stack.ValidationError, "revision"):
             design_stack.validate_lock(registry_payload(), lock, metadata_only=True)
+
+    def test_lock_rejects_invalid_source_mode(self) -> None:
+        for mode in ("755", "100755", "09ff", 0o755):
+            with self.subTest(mode=mode):
+                lock = lock_payload()
+                lock["sources"][0]["files"][0]["mode"] = mode
+                with self.assertRaisesRegex(design_stack.ValidationError, "mode"):
+                    design_stack.validate_lock(
+                        registry_payload(), lock, metadata_only=True
+                    )
 
     def test_lock_binds_each_verified_source_license_notice(self) -> None:
         registry = registry_payload()
