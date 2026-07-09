@@ -3,13 +3,19 @@
   "owner": {
     "name": "Hun"
   },
-  "description": "Marketplace for process-first Claude Code agents",
+  "description": "Marketplace for process-first agents and reviewed design workflows",
   "plugins": [
     {
       "name": "process-first-agents",
       "description": "Process-first shared agents for Claude Code",
       "version": "1.0.0",
       "source": "./plugins/process-first-agents"
+    },
+    {
+      "name": "frontend-design-pack",
+      "description": "Evidence-first frontend design router and reviewed reference corpus",
+      "version": "0.1.0",
+      "source": "./plugins/frontend-design-pack"
     }
   ]
 }

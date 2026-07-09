@@ -23,6 +23,12 @@ CLAUDE_READ_ONLY_GUARD = "\n".join(
 MARKETPLACE_OWNER = {"name": "Hun"}
 PLUGIN_AUTHOR = {"name": "Hun", "email": "48903443+hun99999@users.noreply.github.com"}
 PLUGIN_REPOSITORY = "https://github.com/hun99999/agent-bootstrap"
+FRONTEND_DESIGN_PLUGIN = {
+    "name": "frontend-design-pack",
+    "description": "Evidence-first frontend design router and reviewed reference corpus",
+    "version": "0.1.0",
+    "source": "./plugins/frontend-design-pack",
+}
 
 
 def parse_args() -> argparse.Namespace:
@@ -136,14 +142,15 @@ def render_marketplace(repo_root: Path) -> None:
     marketplace = {
         "name": "agent-bootstrap",
         "owner": MARKETPLACE_OWNER,
-        "description": "Marketplace for process-first Claude Code agents",
+        "description": "Marketplace for process-first agents and reviewed design workflows",
         "plugins": [
             {
                 "name": "process-first-agents",
                 "description": "Process-first shared agents for Claude Code",
                 "version": "1.0.0",
                 "source": "./plugins/process-first-agents",
-            }
+            },
+            FRONTEND_DESIGN_PLUGIN,
         ],
     }
     (marketplace_dir / "marketplace.json").write_text(

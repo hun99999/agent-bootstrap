@@ -83,14 +83,20 @@ class ClaudePluginTests(unittest.TestCase):
 
     def test_marketplace_points_at_plugin_package(self) -> None:
         marketplace = json.loads(MARKETPLACE_PATH.read_text(encoding="utf-8"))
+        plugins = {plugin["name"]: plugin for plugin in marketplace["plugins"]}
 
         self.assertEqual(marketplace["name"], "agent-bootstrap")
         self.assertEqual(marketplace["owner"], {"name": "Hun"})
-        self.assertEqual(len(marketplace["plugins"]), 1)
-        self.assertEqual(marketplace["plugins"][0]["name"], "process-first-agents")
         self.assertEqual(
-            marketplace["plugins"][0]["source"],
+            set(plugins), {"process-first-agents", "frontend-design-pack"}
+        )
+        self.assertEqual(
+            plugins["process-first-agents"]["source"],
             "./plugins/process-first-agents",
+        )
+        self.assertEqual(
+            plugins["frontend-design-pack"]["source"],
+            "./plugins/frontend-design-pack",
         )
 
     def test_marketplace_manifest_passes_claude_validation(self) -> None:

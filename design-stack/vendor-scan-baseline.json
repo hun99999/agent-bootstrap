@@ -1,0 +1,27 @@
+{
+  "schema_version": 1,
+  "entries": [
+    {
+      "path": "design-stack/vendor/mengto-skills/agent-skills/codex/netlify-deploy/SKILL.md",
+      "sha256": "0de932710f4e73605b8a8c413b79d6b2b2d1a9e387e6ea1dc7cbcd500101a378",
+      "findings": [
+        {
+          "label": "secret-assignment",
+          "line": 65,
+          "excerpt": "export NETLIFY_AUTH_TOKEN=your_token_here"
+        }
+      ]
+    },
+    {
+      "path": "plugins/frontend-design-pack/skills/frontend-design/references/mengto/codex/netlify-deploy.md",
+      "sha256": "0de932710f4e73605b8a8c413b79d6b2b2d1a9e387e6ea1dc7cbcd500101a378",
+      "findings": [
+        {
+          "label": "secret-assignment",
+          "line": 65,
+          "excerpt": "export NETLIFY_AUTH_TOKEN=your_token_here"
+        }
+      ]
+    }
+  ]
+}

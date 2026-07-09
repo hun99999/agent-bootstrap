@@ -1,6 +1,7 @@
 import copy
 import io
 import json
+import shutil
 import tarfile
 import tempfile
 import unittest
@@ -24,6 +25,7 @@ sync = load_script_module("sync_design_sources.py")
 
 LICENSE = b"fixture license\n"
 SKILL = b"---\nname: fixture\ndescription: Fixture skill.\n---\n\n# Fixture\n"
+DESIGN = b"# Fixture design\n"
 REVISION = "a" * 40
 PREFIX = f"mengto-skills-{REVISION}"
 
@@ -324,6 +326,135 @@ class FrontendDesignArchiveSafetyTests(unittest.TestCase):
 
 
 class FrontendDesignSyncTests(unittest.TestCase):
+    def test_batch_sync_bootstraps_all_missing_vendored_sources(self) -> None:
+        second_revision = "c" * 40
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            repo_root = root / "repo"
+            mengto_archive = root / "mengto.tar"
+            design_archive = root / "design.tar"
+            write_sync_repo(repo_root)
+            registry_path = repo_root / "design-stack/sources.json"
+            lock_path = repo_root / "design-stack/sources.lock.json"
+            provenance_path = repo_root / "design-stack/provenance.json"
+            registry = json.loads(registry_path.read_text(encoding="utf-8"))
+            lock = json.loads(lock_path.read_text(encoding="utf-8"))
+            provenance = json.loads(provenance_path.read_text(encoding="utf-8"))
+            second_source = {
+                "id": "awesome-design-md",
+                "repository": "https://example.invalid/design-source",
+                "revision": second_revision,
+                "authority": "third-party-analysis",
+                "scope": ["design-md/*/DESIGN.md"],
+                "license": {
+                    "spdx": "MIT",
+                    "status": "verified",
+                    "notice_path": "LICENSE",
+                    "notice_sha256": sha256_bytes(LICENSE),
+                },
+                "role": "fixture designs",
+                "update_method": "reviewed-local-tar",
+                "distribution": "vendored",
+                "destination": "design-stack/vendor/awesome-design-md",
+            }
+            registry["sources"].append(second_source)
+            lock["sources"].append(
+                {
+                    "id": "awesome-design-md",
+                    "revision": second_revision,
+                    "tree": "d" * 40,
+                    "files": [
+                        {
+                            "path": "LICENSE",
+                            "size": len(LICENSE),
+                            "mode": "0644",
+                            "sha256": sha256_bytes(LICENSE),
+                            "materialization": "vendored",
+                        },
+                        {
+                            "path": "design-md/fixture/DESIGN.md",
+                            "size": len(DESIGN),
+                            "mode": "0644",
+                            "sha256": sha256_bytes(DESIGN),
+                            "materialization": "vendored",
+                        },
+                    ],
+                }
+            )
+            lock["catalogs"]["design_md"] = [
+                {
+                    "source_id": "awesome-design-md",
+                    "name": "fixture",
+                    "path": "design-md/fixture/DESIGN.md",
+                    "sha256": sha256_bytes(DESIGN),
+                    "authority": "third-party-analysis",
+                }
+            ]
+            provenance["records"].append(
+                {
+                    "source_id": "awesome-design-md",
+                    "upstream_path": "design-md/fixture/DESIGN.md",
+                    "revision": second_revision,
+                    "authority": "third-party-analysis",
+                    "catalog": "design_md",
+                    "role": "fixture design",
+                    "license": copy.deepcopy(second_source["license"]),
+                    "origin": {
+                        "repository": second_source["repository"],
+                        "path": "design-md/fixture/DESIGN.md",
+                        "revision": second_revision,
+                        "content_sha256": sha256_bytes(DESIGN),
+                        "basis": "fixture",
+                        "introduced_revision": second_revision,
+                        "publisher": "Fixture",
+                    },
+                    "sha256": sha256_bytes(DESIGN),
+                    "decision": "included",
+                }
+            )
+            write_json(registry_path, registry)
+            write_json(lock_path, lock)
+            write_json(provenance_path, provenance)
+            shutil.rmtree(repo_root / "design-stack/vendor")
+            commit_all(repo_root, "add bootstrap metadata")
+            standard_archive(mengto_archive)
+            write_tar(
+                design_archive,
+                f"awesome-design-md-{second_revision}",
+                {
+                    "LICENSE": LICENSE,
+                    "design-md/fixture/DESIGN.md": DESIGN,
+                },
+            )
+
+            report = sync.sync_sources(
+                repo_root,
+                {
+                    "mengto-skills": mengto_archive,
+                    "awesome-design-md": design_archive,
+                },
+            )
+
+            self.assertEqual(
+                {
+                    source_report["source_id"]
+                    for source_report in report["sources"]
+                },
+                {"mengto-skills", "awesome-design-md"},
+            )
+            self.assertTrue(
+                (
+                    repo_root
+                    / "design-stack/vendor/mengto-skills/skills/fixture/SKILL.md"
+                ).is_file()
+            )
+            self.assertTrue(
+                (
+                    repo_root
+                    / "design-stack/vendor/awesome-design-md/design-md/fixture/DESIGN.md"
+                ).is_file()
+            )
+
     def test_atomic_replacement_restores_every_target_on_late_failure(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             root = Path(temp_dir)

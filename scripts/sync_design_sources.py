@@ -16,7 +16,7 @@ from pathlib import Path, PurePosixPath
 from typing import Any, Dict, Iterable, List, Mapping, Optional, Set, Tuple
 
 from check_design_sources import compare_source_tree, path_is_in_scope
-from check_private_paths import scan_paths
+from check_private_paths import scan_repository_paths
 from design_stack import (
     ValidationError,
     load_json,
@@ -419,7 +419,7 @@ def _validate_staged_safety(staged_repo: Path) -> None:
         staged_repo / "plugins/frontend-design-pack",
     ]
     paths = [path for root in roots for path in _regular_files(root)]
-    private_findings = scan_paths(paths)
+    private_findings = scan_repository_paths(staged_repo, paths)
     if private_findings:
         first = private_findings[0]
         raise ValidationError(
@@ -543,11 +543,12 @@ def _replace_paths_atomically(
     shutil.rmtree(transaction_root)
 
 
-def sync_source(
+def sync_sources(
     repo_root: Path,
-    source_id: str,
-    archive_path: Path,
+    archive_paths: Mapping[str, Path],
 ) -> Dict[str, Any]:
+    if not archive_paths:
+        raise ValidationError("design sync requires at least one source archive")
     git_transaction_path = Path(
         _run_git(repo_root, "rev-parse", "--git-path", "frontend-design-sync")
     )
@@ -562,45 +563,65 @@ def sync_source(
     lock = load_json(repo_root / "design-stack/sources.lock.json")
     provenance = load_json(repo_root / "design-stack/provenance.json")
     validate_registry(registry)
-    source = _source_by_id(registry, source_id)
-    if source["distribution"] != "vendored":
-        raise ValidationError(f"source is not approved for vendored sync: {source_id}")
+    validate_lock(registry, lock, metadata_only=True)
+    validate_provenance(registry, lock, provenance)
+    sources = {
+        source_id: _source_by_id(registry, source_id)
+        for source_id in archive_paths
+    }
+    for source_id, source in sources.items():
+        if source["distribution"] != "vendored":
+            raise ValidationError(
+                f"source is not approved for vendored sync: {source_id}"
+            )
 
     with tempfile.TemporaryDirectory(
         prefix="frontend-design-sync-", dir=str(repo_root.parent)
     ) as temp_dir:
         temp_root = Path(temp_dir)
-        mode_inventory: Dict[str, str] = {}
-        extracted_root = extract_reviewed_tar(
-            archive_path,
-            temp_root / "extracted",
-            source_id,
-            source["revision"],
-            mode_inventory,
-        )
-        change_report = compare_source_tree(
-            repo_root,
-            source_id,
-            extracted_root,
-            mode_overrides=mode_inventory,
-        )
-        selected_files = _selected_files(extracted_root, source)
-        file_records = _file_records(
-            selected_files,
-            extracted_root,
-            mode_inventory,
-        )
-        _assign_materialization(source, lock, provenance, file_records)
         new_lock = copy.deepcopy(lock)
-        locked_source = _locked_source_by_id(new_lock, source_id)
-        locked_source["files"] = file_records
-        catalog = _catalog_for_source(
-            source_id, extracted_root, file_records
-        )
-        if catalog is not None:
-            catalog_name, entries = catalog
-            new_lock["catalogs"][catalog_name] = entries
-        _enforce_provenance_gate(source, new_lock, provenance, file_records)
+        prepared: Dict[str, Dict[str, Any]] = {}
+        for source_id in sorted(archive_paths):
+            source = sources[source_id]
+            mode_inventory: Dict[str, str] = {}
+            extracted_root = extract_reviewed_tar(
+                archive_paths[source_id],
+                temp_root / "extracted" / source_id,
+                source_id,
+                source["revision"],
+                mode_inventory,
+            )
+            change_report = compare_source_tree(
+                repo_root,
+                source_id,
+                extracted_root,
+                mode_overrides=mode_inventory,
+            )
+            selected_files = _selected_files(extracted_root, source)
+            file_records = _file_records(
+                selected_files,
+                extracted_root,
+                mode_inventory,
+            )
+            _assign_materialization(source, new_lock, provenance, file_records)
+            locked_source = _locked_source_by_id(new_lock, source_id)
+            locked_source["files"] = file_records
+            catalog = _catalog_for_source(
+                source_id, extracted_root, file_records
+            )
+            if catalog is not None:
+                catalog_name, entries = catalog
+                new_lock["catalogs"][catalog_name] = entries
+            _enforce_provenance_gate(
+                source, new_lock, provenance, file_records
+            )
+            prepared[source_id] = {
+                "source": source,
+                "extracted_root": extracted_root,
+                "selected_files": selected_files,
+                "file_records": file_records,
+                "changes": change_report,
+            }
         validate_lock(registry, new_lock, metadata_only=True)
         validate_provenance(registry, new_lock, provenance)
 
@@ -608,21 +629,29 @@ def sync_source(
         shutil.copytree(repo_root / "design-stack", staged_repo / "design-stack")
         if (repo_root / "plugins").is_dir():
             shutil.copytree(repo_root / "plugins", staged_repo / "plugins")
-        staged_vendor = staged_repo / source["destination"]
-        materialized_paths = {
-            record["path"]
-            for record in file_records
-            if record["materialization"] == "vendored"
-        }
-        _copy_selected_files(
-            [
-                path
-                for path in selected_files
-                if path.relative_to(extracted_root).as_posix() in materialized_paths
-            ],
-            extracted_root,
-            staged_vendor,
-        )
+        staged_vendors: Dict[str, Path] = {}
+        for source_id in sorted(prepared):
+            item = prepared[source_id]
+            source = item["source"]
+            extracted_root = item["extracted_root"]
+            file_records = item["file_records"]
+            materialized_paths = {
+                record["path"]
+                for record in file_records
+                if record["materialization"] == "vendored"
+            }
+            staged_vendor = staged_repo / source["destination"]
+            _copy_selected_files(
+                [
+                    path
+                    for path in item["selected_files"]
+                    if path.relative_to(extracted_root).as_posix()
+                    in materialized_paths
+                ],
+                extracted_root,
+                staged_vendor,
+            )
+            staged_vendors[source_id] = staged_vendor
         staged_lock = staged_repo / "design-stack/sources.lock.json"
         _write_json(staged_lock, new_lock)
         validate_repository(staged_repo, metadata_only=False)
@@ -632,8 +661,14 @@ def sync_source(
 
         replacements: List[Tuple[Path, Path]] = [
             (staged_lock, repo_root / "design-stack/sources.lock.json"),
-            (staged_vendor, repo_root / source["destination"]),
         ]
+        replacements.extend(
+            (
+                staged_vendors[source_id],
+                repo_root / prepared[source_id]["source"]["destination"],
+            )
+            for source_id in sorted(prepared)
+        )
         replacements.append(
             (
                 staged_repo / "plugins/frontend-design-pack",
@@ -647,12 +682,28 @@ def sync_source(
         )
 
     return {
-        "source_id": source_id,
-        "revision": source["revision"],
-        "files": len(file_records),
+        "sources": [
+            {
+                "source_id": source_id,
+                "revision": prepared[source_id]["source"]["revision"],
+                "files": len(prepared[source_id]["file_records"]),
+                "changes": prepared[source_id]["changes"],
+            }
+            for source_id in sorted(prepared)
+        ],
         "plugin_rendered": plugin_rendered,
-        "changes": change_report,
     }
+
+
+def sync_source(
+    repo_root: Path,
+    source_id: str,
+    archive_path: Path,
+) -> Dict[str, Any]:
+    batch_report = sync_sources(repo_root, {source_id: archive_path})
+    report = dict(batch_report["sources"][0])
+    report["plugin_rendered"] = batch_report["plugin_rendered"]
+    return report
 
 
 def parse_args() -> argparse.Namespace:
@@ -660,8 +711,18 @@ def parse_args() -> argparse.Namespace:
         description="Import a reviewed immutable tar archive into the frontend design stack."
     )
     parser.add_argument("--repo-root", default=None)
-    parser.add_argument("--source", required=True)
-    parser.add_argument("--archive", required=True)
+    parser.add_argument(
+        "--source",
+        action="append",
+        required=True,
+        help="Source id. Repeat with --archive for an atomic batch bootstrap.",
+    )
+    parser.add_argument(
+        "--archive",
+        action="append",
+        required=True,
+        help="Explicit local tar archive paired by position with --source.",
+    )
     return parser.parse_args()
 
 
@@ -673,10 +734,18 @@ def main() -> int:
         else Path(__file__).resolve().parents[1]
     )
     try:
-        report = sync_source(
+        if len(args.source) != len(args.archive):
+            raise ValidationError(
+                "every --source must have one positionally paired --archive"
+            )
+        if len(set(args.source)) != len(args.source):
+            raise ValidationError("duplicate --source values are not allowed")
+        report = sync_sources(
             repo_root,
-            args.source,
-            Path(args.archive).expanduser().resolve(),
+            {
+                source_id: Path(archive).expanduser().resolve()
+                for source_id, archive in zip(args.source, args.archive)
+            },
         )
     except (OSError, ValidationError) as error:
         print(f"Design source sync failed: {error}")
