@@ -598,16 +598,21 @@ def validate_provenance(
                 )
 
         catalog_name = record["catalog"]
-        if catalog_name is not None:
+        expected_catalog = catalog_entries.get(key)
+        if expected_catalog is not None:
+            if catalog_name != expected_catalog:
+                raise ValidationError(
+                    f"{context}.catalog must match the locked catalog entry"
+                )
+        elif catalog_name is not None:
             catalog_name = _require_nonempty_string(
                 catalog_name, f"{context}.catalog"
             )
             if catalog_name not in {"mengto_skills", "design_md"}:
                 raise ValidationError(f"{context}.catalog is not recognized")
-            if catalog_entries.get(key) != catalog_name:
-                raise ValidationError(
-                    f"{context}.catalog does not resolve to the matching catalog entry"
-                )
+            raise ValidationError(
+                f"{context}.catalog does not resolve to a locked catalog entry"
+            )
         elif (
             decision in {"included", "mapped-to-official"}
             and upstream_path.endswith(("/SKILL.md", "/DESIGN.md"))

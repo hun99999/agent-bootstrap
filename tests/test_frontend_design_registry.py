@@ -368,6 +368,23 @@ class FrontendDesignRegistryUnitTests(unittest.TestCase):
                 registry_payload(), lock, provenance_payload()
             )
 
+    def test_cataloged_material_cannot_opt_out_by_becoming_blocked(self) -> None:
+        provenance = provenance_payload()
+        record = provenance["records"][0]
+        record["catalog"] = None
+        record["decision"] = "blocked"
+        record["reason"] = "Fixture block."
+        record["license"] = {
+            "spdx": "NOASSERTION",
+            "status": "unresolved",
+            "notice_path": None,
+            "notice_sha256": None,
+        }
+        with self.assertRaisesRegex(design_stack.ValidationError, "catalog"):
+            design_stack.validate_provenance(
+                registry_payload(), lock_payload(), provenance
+            )
+
     def test_unresolved_material_is_allowed_only_when_blocked_or_excluded(self) -> None:
         for decision in ("blocked", "excluded"):
             with self.subTest(decision=decision):
