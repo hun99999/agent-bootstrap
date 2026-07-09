@@ -27,6 +27,7 @@ PROVENANCE_FIELDS = {
     "upstream_path",
     "revision",
     "authority",
+    "catalog",
     "role",
     "license",
     "origin",
@@ -199,7 +200,7 @@ def _source_map(registry: Mapping[str, Any]) -> Dict[str, Mapping[str, Any]]:
 def _validate_catalogs(
     catalogs: Any,
     locked_files: Mapping[Tuple[str, str], Mapping[str, Any]],
-) -> Set[Tuple[str, str]]:
+) -> Dict[Tuple[str, str], str]:
     catalogs = _require_mapping(catalogs, "lock.catalogs")
     expected_catalogs = {"mengto_skills", "design_md"}
     if set(catalogs) != expected_catalogs:
@@ -207,7 +208,11 @@ def _validate_catalogs(
             "lock.catalogs must contain exactly mengto_skills and design_md"
         )
 
-    catalog_keys: Set[Tuple[str, str]] = set()
+    catalog_keys: Dict[Tuple[str, str], str] = {}
+    expected_sources = {
+        "mengto_skills": "mengto-skills",
+        "design_md": "awesome-design-md",
+    }
     for catalog_name in sorted(expected_catalogs):
         entries = _require_list(catalogs[catalog_name], f"lock.catalogs.{catalog_name}")
         names: Set[str] = set()
@@ -221,6 +226,11 @@ def _validate_catalogs(
             source_id = _require_nonempty_string(
                 entry["source_id"], f"{context}.source_id"
             )
+            expected_source = expected_sources[catalog_name]
+            if source_id != expected_source:
+                raise ValidationError(
+                    f"{context}.source_id must be {expected_source}"
+                )
             name = _require_nonempty_string(entry["name"], f"{context}.name")
             path = _require_safe_relative_path(entry["path"], f"{context}.path")
             digest = _require_sha256(entry["sha256"], f"{context}.sha256")
@@ -231,7 +241,11 @@ def _validate_catalogs(
                 raise ValidationError(f"duplicate {catalog_name} path: {source_id}:{path}")
             names.add(name)
             paths.add(key)
-            catalog_keys.add(key)
+            if key in catalog_keys:
+                raise ValidationError(
+                    f"source file appears in multiple catalogs: {source_id}:{path}"
+                )
+            catalog_keys[key] = catalog_name
             locked_file = locked_files.get(key)
             if locked_file is None:
                 raise ValidationError(
@@ -327,7 +341,7 @@ def validate_lock(
     lock: Mapping[str, Any],
     repo_root: Optional[Path] = None,
     metadata_only: bool = False,
-) -> Set[Tuple[str, str]]:
+) -> Dict[Tuple[str, str], str]:
     validate_registry(registry)
     lock = _require_mapping(lock, "lock")
     _require_schema(lock, "lock")
@@ -407,6 +421,8 @@ def validate_lock(
 
 def _validate_origin(
     value: Any,
+    source: Mapping[str, Any],
+    upstream_path: str,
     record_revision: str,
     record_sha256: str,
     context: str,
@@ -423,8 +439,14 @@ def _validate_origin(
     ):
         if field not in origin:
             raise ValidationError(f"{context} is missing required field '{field}'")
-    _require_nonempty_string(origin["repository"], f"{context}.repository")
-    _require_safe_relative_path(origin["path"], f"{context}.path")
+    origin_repository = _require_nonempty_string(
+        origin["repository"], f"{context}.repository"
+    )
+    if origin_repository != source["repository"]:
+        raise ValidationError(f"{context}.repository must match the registry source")
+    origin_path = _require_safe_relative_path(origin["path"], f"{context}.path")
+    if origin_path != upstream_path:
+        raise ValidationError(f"{context}.path must match the provenance upstream_path")
     origin_revision = _require_revision(origin["revision"], f"{context}.revision")
     if origin_revision != record_revision:
         raise ValidationError(f"{context}.revision must match the reviewed record revision")
@@ -445,7 +467,7 @@ def validate_provenance(
     lock: Mapping[str, Any],
     provenance: Mapping[str, Any],
 ) -> None:
-    catalog_keys = validate_lock(registry, lock, metadata_only=True)
+    catalog_entries = validate_lock(registry, lock, metadata_only=True)
     provenance = _require_mapping(provenance, "provenance")
     _require_schema(provenance, "provenance")
     records = _require_list(provenance.get("records"), "provenance.records")
@@ -485,6 +507,8 @@ def validate_provenance(
         digest = _require_sha256(record["sha256"], f"{context}.sha256")
         _validate_origin(
             record["origin"],
+            source,
+            upstream_path,
             revision,
             digest,
             f"{context}.origin",
@@ -508,6 +532,17 @@ def validate_provenance(
                     f"{context}.license must be verified and name a notice for {decision} material"
                 )
         if decision == "included":
+            source_license = source["license"]
+            for license_field in (
+                "spdx",
+                "status",
+                "notice_path",
+                "notice_sha256",
+            ):
+                if license_record[license_field] != source_license[license_field]:
+                    raise ValidationError(
+                        f"{context}.license must match the verified source license"
+                    )
             locked_notice = locked_files.get(
                 (source_id, license_record["notice_path"])
             )
@@ -562,7 +597,26 @@ def validate_provenance(
                     f"{context}.license notice must match official_mapping license evidence"
                 )
 
-    missing_catalog_records = sorted(catalog_keys - seen)
+        catalog_name = record["catalog"]
+        if catalog_name is not None:
+            catalog_name = _require_nonempty_string(
+                catalog_name, f"{context}.catalog"
+            )
+            if catalog_name not in {"mengto_skills", "design_md"}:
+                raise ValidationError(f"{context}.catalog is not recognized")
+            if catalog_entries.get(key) != catalog_name:
+                raise ValidationError(
+                    f"{context}.catalog does not resolve to the matching catalog entry"
+                )
+        elif (
+            decision in {"included", "mapped-to-official"}
+            and upstream_path.endswith(("/SKILL.md", "/DESIGN.md"))
+        ):
+            raise ValidationError(
+                f"{context}.catalog is required for included or mapped skill/design material"
+            )
+
+    missing_catalog_records = sorted(set(catalog_entries) - seen)
     if missing_catalog_records:
         raise ValidationError(
             f"catalog entries missing provenance records: {missing_catalog_records}"

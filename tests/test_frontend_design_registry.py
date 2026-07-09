@@ -31,6 +31,7 @@ REQUIRED_PROVENANCE_FIELDS = {
     "upstream_path",
     "revision",
     "authority",
+    "catalog",
     "role",
     "license",
     "origin",
@@ -49,7 +50,7 @@ FIXTURE_LICENSE = b"fixture license\n"
 
 def source_record() -> dict:
     return {
-        "id": "fixture-source",
+        "id": "mengto-skills",
         "repository": "https://example.invalid/source",
         "revision": "a" * 40,
         "authority": "procedural-guidance",
@@ -63,7 +64,7 @@ def source_record() -> dict:
         "role": "test-reference",
         "update_method": "reviewed-local-tar",
         "distribution": "vendored",
-        "destination": "design-stack/vendor/fixture-source",
+        "destination": "design-stack/vendor/mengto-skills",
     }
 
 
@@ -80,7 +81,7 @@ def lock_payload(content: bytes = b"fixture\n") -> dict:
         "schema_version": 1,
         "sources": [
             {
-                "id": "fixture-source",
+                "id": "mengto-skills",
                 "revision": "a" * 40,
                 "tree": "b" * 40,
                 "files": [
@@ -100,7 +101,7 @@ def lock_payload(content: bytes = b"fixture\n") -> dict:
         "catalogs": {
             "mengto_skills": [
                 {
-                    "source_id": "fixture-source",
+                    "source_id": "mengto-skills",
                     "name": "fixture",
                     "description": "Fixture skill.",
                     "path": "skills/fixture/SKILL.md",
@@ -117,10 +118,11 @@ def provenance_payload(content: bytes = b"fixture\n") -> dict:
         "schema_version": 1,
         "records": [
             {
-                "source_id": "fixture-source",
+                "source_id": "mengto-skills",
                 "upstream_path": "skills/fixture/SKILL.md",
                 "revision": "a" * 40,
                 "authority": "procedural-guidance",
+                "catalog": "mengto_skills",
                 "role": "test-reference",
                 "license": {
                     "spdx": "MIT",
@@ -183,7 +185,9 @@ class FrontendDesignRegistryUnitTests(unittest.TestCase):
     def test_lock_binds_each_verified_source_license_notice(self) -> None:
         registry = registry_payload()
         registry["sources"][0]["license"]["notice_sha256"] = "e" * 64
-        with self.assertRaisesRegex(design_stack.ValidationError, "license notice"):
+        with self.assertRaisesRegex(
+            design_stack.ValidationError, "source license|license notice"
+        ):
             design_stack.validate_lock(registry, lock_payload(), metadata_only=True)
 
     def test_lock_rejects_duplicate_or_unsafe_file_paths(self) -> None:
@@ -213,11 +217,11 @@ class FrontendDesignRegistryUnitTests(unittest.TestCase):
             repo_root = Path(temp_dir)
             vendored_file = (
                 repo_root
-                / "design-stack/vendor/fixture-source/skills/fixture/SKILL.md"
+                / "design-stack/vendor/mengto-skills/skills/fixture/SKILL.md"
             )
             vendored_file.parent.mkdir(parents=True)
             vendored_file.write_bytes(b"changed\n")
-            (repo_root / "design-stack/vendor/fixture-source/LICENSE").write_bytes(
+            (repo_root / "design-stack/vendor/mengto-skills/LICENSE").write_bytes(
                 FIXTURE_LICENSE
             )
 
@@ -237,11 +241,11 @@ class FrontendDesignRegistryUnitTests(unittest.TestCase):
             repo_root = Path(temp_dir)
             vendored_file = (
                 repo_root
-                / "design-stack/vendor/fixture-source/skills/fixture/SKILL.md"
+                / "design-stack/vendor/mengto-skills/skills/fixture/SKILL.md"
             )
             vendored_file.parent.mkdir(parents=True)
             vendored_file.write_bytes(content)
-            (repo_root / "design-stack/vendor/fixture-source/LICENSE").write_bytes(
+            (repo_root / "design-stack/vendor/mengto-skills/LICENSE").write_bytes(
                 FIXTURE_LICENSE
             )
 
@@ -313,9 +317,55 @@ class FrontendDesignRegistryUnitTests(unittest.TestCase):
     def test_included_material_license_matches_its_locked_source_notice(self) -> None:
         provenance = provenance_payload()
         provenance["records"][0]["license"]["notice_sha256"] = "e" * 64
-        with self.assertRaisesRegex(design_stack.ValidationError, "license notice"):
+        with self.assertRaisesRegex(
+            design_stack.ValidationError, "source license|license notice"
+        ):
             design_stack.validate_provenance(
                 registry_payload(), lock_payload(), provenance
+            )
+
+    def test_included_material_license_matches_the_registry_license(self) -> None:
+        provenance = provenance_payload()
+        record = provenance["records"][0]
+        record["license"] = {
+            "spdx": "Apache-2.0",
+            "status": "verified",
+            "notice_path": "skills/fixture/SKILL.md",
+            "notice_sha256": sha256_bytes(b"fixture\n"),
+        }
+        with self.assertRaisesRegex(design_stack.ValidationError, "source license"):
+            design_stack.validate_provenance(
+                registry_payload(), lock_payload(), provenance
+            )
+
+    def test_origin_repository_and_path_match_the_registry_record(self) -> None:
+        for field, value in (
+            ("repository", "https://example.invalid/unrelated"),
+            ("path", "skills/unrelated/SKILL.md"),
+        ):
+            with self.subTest(field=field):
+                provenance = provenance_payload()
+                provenance["records"][0]["origin"][field] = value
+                with self.assertRaisesRegex(design_stack.ValidationError, field):
+                    design_stack.validate_provenance(
+                        registry_payload(), lock_payload(), provenance
+                    )
+
+    def test_catalog_rejects_an_entry_from_the_wrong_source(self) -> None:
+        registry = registry_payload()
+        registry["sources"][0]["id"] = "awesome-design-md"
+        lock = lock_payload()
+        lock["sources"][0]["id"] = "awesome-design-md"
+        lock["catalogs"]["mengto_skills"][0]["source_id"] = "awesome-design-md"
+        with self.assertRaisesRegex(design_stack.ValidationError, "mengto-skills"):
+            design_stack.validate_lock(registry, lock, metadata_only=True)
+
+    def test_included_skill_provenance_cannot_be_omitted_from_catalog(self) -> None:
+        lock = lock_payload()
+        lock["catalogs"]["mengto_skills"] = []
+        with self.assertRaisesRegex(design_stack.ValidationError, "catalog"):
+            design_stack.validate_provenance(
+                registry_payload(), lock, provenance_payload()
             )
 
     def test_unresolved_material_is_allowed_only_when_blocked_or_excluded(self) -> None:

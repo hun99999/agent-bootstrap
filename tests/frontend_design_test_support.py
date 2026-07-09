@@ -25,4 +25,3 @@ def sha256_bytes(content: bytes) -> str:
     import hashlib
 
     return hashlib.sha256(content).hexdigest()
-
