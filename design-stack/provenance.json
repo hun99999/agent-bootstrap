@@ -1,0 +1,2569 @@
+{
+  "schema_version": 1,
+  "records": [
+    {
+      "source_id": "awesome-design-md",
+      "upstream_path": "design-md/airbnb/DESIGN.md",
+      "revision": "664b3e78fd1a298ba11973822da988483256d4b4",
+      "authority": "third-party-analysis",
+      "role": "visual-inspiration",
+      "license": {
+        "spdx": "MIT",
+        "status": "verified",
+        "notice_path": "LICENSE",
+        "evidence": "reviewed repository notice"
+      },
+      "sha256": "add34130d67209ad105346d60fe2b290728b9711683969db4b7760e29477a5fe",
+      "decision": "included"
+    },
+    {
+      "source_id": "awesome-design-md",
+      "upstream_path": "design-md/airtable/DESIGN.md",
+      "revision": "664b3e78fd1a298ba11973822da988483256d4b4",
+      "authority": "third-party-analysis",
+      "role": "visual-inspiration",
+      "license": {
+        "spdx": "MIT",
+        "status": "verified",
+        "notice_path": "LICENSE",
+        "evidence": "reviewed repository notice"
+      },
+      "sha256": "1d225e511213044d3c705bde50265ad010932bfd8a15740a144dd4f480128889",
+      "decision": "included"
+    },
+    {
+      "source_id": "awesome-design-md",
+      "upstream_path": "design-md/apple/DESIGN.md",
+      "revision": "664b3e78fd1a298ba11973822da988483256d4b4",
+      "authority": "third-party-analysis",
+      "role": "visual-inspiration",
+      "license": {
+        "spdx": "MIT",
+        "status": "verified",
+        "notice_path": "LICENSE",
+        "evidence": "reviewed repository notice"
+      },
+      "sha256": "83fbc614443a9b3d7569e9956a43e7b8740f9d0f939f58b8154f7a7cec3002b2",
+      "decision": "included"
+    },
+    {
+      "source_id": "awesome-design-md",
+      "upstream_path": "design-md/binance/DESIGN.md",
+      "revision": "664b3e78fd1a298ba11973822da988483256d4b4",
+      "authority": "third-party-analysis",
+      "role": "visual-inspiration",
+      "license": {
+        "spdx": "MIT",
+        "status": "verified",
+        "notice_path": "LICENSE",
+        "evidence": "reviewed repository notice"
+      },
+      "sha256": "378ff97d568ccbc316519b9d45a29d6649ed8961c9c486c3ed4cea7501d72371",
+      "decision": "included"
+    },
+    {
+      "source_id": "awesome-design-md",
+      "upstream_path": "design-md/bmw-m/DESIGN.md",
+      "revision": "664b3e78fd1a298ba11973822da988483256d4b4",
+      "authority": "third-party-analysis",
+      "role": "visual-inspiration",
+      "license": {
+        "spdx": "MIT",
+        "status": "verified",
+        "notice_path": "LICENSE",
+        "evidence": "reviewed repository notice"
+      },
+      "sha256": "824a1707c0a8d1609d72477d0fa211b9ebe4bdeb3e1fd701790af7b7bb669a4a",
+      "decision": "included"
+    },
+    {
+      "source_id": "awesome-design-md",
+      "upstream_path": "design-md/bmw/DESIGN.md",
+      "revision": "664b3e78fd1a298ba11973822da988483256d4b4",
+      "authority": "third-party-analysis",
+      "role": "visual-inspiration",
+      "license": {
+        "spdx": "MIT",
+        "status": "verified",
+        "notice_path": "LICENSE",
+        "evidence": "reviewed repository notice"
+      },
+      "sha256": "b7268279e7c98e85fb80890e06765f4ee8340ba1ea1ccb5a8a5b134de43dac3e",
+      "decision": "included"
+    },
+    {
+      "source_id": "awesome-design-md",
+      "upstream_path": "design-md/bugatti/DESIGN.md",
+      "revision": "664b3e78fd1a298ba11973822da988483256d4b4",
+      "authority": "third-party-analysis",
+      "role": "visual-inspiration",
+      "license": {
+        "spdx": "MIT",
+        "status": "verified",
+        "notice_path": "LICENSE",
+        "evidence": "reviewed repository notice"
+      },
+      "sha256": "375f0a20ada88cdee5e995ca7edcfbd584ddf5f887024deebd1bc75bfd55b1bc",
+      "decision": "included"
+    },
+    {
+      "source_id": "awesome-design-md",
+      "upstream_path": "design-md/cal/DESIGN.md",
+      "revision": "664b3e78fd1a298ba11973822da988483256d4b4",
+      "authority": "third-party-analysis",
+      "role": "visual-inspiration",
+      "license": {
+        "spdx": "MIT",
+        "status": "verified",
+        "notice_path": "LICENSE",
+        "evidence": "reviewed repository notice"
+      },
+      "sha256": "8cd21b7d67e94c899843d517f4b426e4fee33d47354a433d6a63ebcf79d5a654",
+      "decision": "included"
+    },
+    {
+      "source_id": "awesome-design-md",
+      "upstream_path": "design-md/claude/DESIGN.md",
+      "revision": "664b3e78fd1a298ba11973822da988483256d4b4",
+      "authority": "third-party-analysis",
+      "role": "visual-inspiration",
+      "license": {
+        "spdx": "MIT",
+        "status": "verified",
+        "notice_path": "LICENSE",
+        "evidence": "reviewed repository notice"
+      },
+      "sha256": "3d972f34f8d4f33b442fa28220cf3b7ca2f13c0a97c468e3988148f82521f9df",
+      "decision": "included"
+    },
+    {
+      "source_id": "awesome-design-md",
+      "upstream_path": "design-md/clay/DESIGN.md",
+      "revision": "664b3e78fd1a298ba11973822da988483256d4b4",
+      "authority": "third-party-analysis",
+      "role": "visual-inspiration",
+      "license": {
+        "spdx": "MIT",
+        "status": "verified",
+        "notice_path": "LICENSE",
+        "evidence": "reviewed repository notice"
+      },
+      "sha256": "1abd803a207fbe950a06e155adcd6013c2e149b13e7b88844f5069f9d3d99eb3",
+      "decision": "included"
+    },
+    {
+      "source_id": "awesome-design-md",
+      "upstream_path": "design-md/clickhouse/DESIGN.md",
+      "revision": "664b3e78fd1a298ba11973822da988483256d4b4",
+      "authority": "third-party-analysis",
+      "role": "visual-inspiration",
+      "license": {
+        "spdx": "MIT",
+        "status": "verified",
+        "notice_path": "LICENSE",
+        "evidence": "reviewed repository notice"
+      },
+      "sha256": "50987e29b603cc7503ebe724af810fcf43845e96fdd4083e0fbe5fe00d2cdd2e",
+      "decision": "included"
+    },
+    {
+      "source_id": "awesome-design-md",
+      "upstream_path": "design-md/cohere/DESIGN.md",
+      "revision": "664b3e78fd1a298ba11973822da988483256d4b4",
+      "authority": "third-party-analysis",
+      "role": "visual-inspiration",
+      "license": {
+        "spdx": "MIT",
+        "status": "verified",
+        "notice_path": "LICENSE",
+        "evidence": "reviewed repository notice"
+      },
+      "sha256": "1c49a5a5f88d43841d4f4afa33831328d47a5715048700a3b75086a822575883",
+      "decision": "included"
+    },
+    {
+      "source_id": "awesome-design-md",
+      "upstream_path": "design-md/coinbase/DESIGN.md",
+      "revision": "664b3e78fd1a298ba11973822da988483256d4b4",
+      "authority": "third-party-analysis",
+      "role": "visual-inspiration",
+      "license": {
+        "spdx": "MIT",
+        "status": "verified",
+        "notice_path": "LICENSE",
+        "evidence": "reviewed repository notice"
+      },
+      "sha256": "c8c67800dd7f58fcc87ed7d267a3bba862e3419e499e8a66d67731a69d2de1d6",
+      "decision": "included"
+    },
+    {
+      "source_id": "awesome-design-md",
+      "upstream_path": "design-md/composio/DESIGN.md",
+      "revision": "664b3e78fd1a298ba11973822da988483256d4b4",
+      "authority": "third-party-analysis",
+      "role": "visual-inspiration",
+      "license": {
+        "spdx": "MIT",
+        "status": "verified",
+        "notice_path": "LICENSE",
+        "evidence": "reviewed repository notice"
+      },
+      "sha256": "e7db886dabecca61f29b83e8f46d7a1e8a43889d30b81bc6e48162ccaafcbb2f",
+      "decision": "included"
+    },
+    {
+      "source_id": "awesome-design-md",
+      "upstream_path": "design-md/cursor/DESIGN.md",
+      "revision": "664b3e78fd1a298ba11973822da988483256d4b4",
+      "authority": "third-party-analysis",
+      "role": "visual-inspiration",
+      "license": {
+        "spdx": "MIT",
+        "status": "verified",
+        "notice_path": "LICENSE",
+        "evidence": "reviewed repository notice"
+      },
+      "sha256": "a3db9b3019dc2f514fdee7cd0ca0a5232c0bd0119e23178e8eebaf6916258d9d",
+      "decision": "included"
+    },
+    {
+      "source_id": "awesome-design-md",
+      "upstream_path": "design-md/dell-1996/DESIGN.md",
+      "revision": "664b3e78fd1a298ba11973822da988483256d4b4",
+      "authority": "third-party-analysis",
+      "role": "visual-inspiration",
+      "license": {
+        "spdx": "MIT",
+        "status": "verified",
+        "notice_path": "LICENSE",
+        "evidence": "reviewed repository notice"
+      },
+      "sha256": "e186c614b1223fe7015670472ac6bc84b5b3fdd5de5325b3ce5bfb7fbe9c8d6e",
+      "decision": "included"
+    },
+    {
+      "source_id": "awesome-design-md",
+      "upstream_path": "design-md/elevenlabs/DESIGN.md",
+      "revision": "664b3e78fd1a298ba11973822da988483256d4b4",
+      "authority": "third-party-analysis",
+      "role": "visual-inspiration",
+      "license": {
+        "spdx": "MIT",
+        "status": "verified",
+        "notice_path": "LICENSE",
+        "evidence": "reviewed repository notice"
+      },
+      "sha256": "3b359acfaafadbb499c7ed3eebe813a76e0be497a7157b77de207fe275068a66",
+      "decision": "included"
+    },
+    {
+      "source_id": "awesome-design-md",
+      "upstream_path": "design-md/expo/DESIGN.md",
+      "revision": "664b3e78fd1a298ba11973822da988483256d4b4",
+      "authority": "third-party-analysis",
+      "role": "visual-inspiration",
+      "license": {
+        "spdx": "MIT",
+        "status": "verified",
+        "notice_path": "LICENSE",
+        "evidence": "reviewed repository notice"
+      },
+      "sha256": "1be7e129b6f75afaa12318a7c51ab22f6f74a214dec22c4827cecc519f112363",
+      "decision": "included"
+    },
+    {
+      "source_id": "awesome-design-md",
+      "upstream_path": "design-md/ferrari/DESIGN.md",
+      "revision": "664b3e78fd1a298ba11973822da988483256d4b4",
+      "authority": "third-party-analysis",
+      "role": "visual-inspiration",
+      "license": {
+        "spdx": "MIT",
+        "status": "verified",
+        "notice_path": "LICENSE",
+        "evidence": "reviewed repository notice"
+      },
+      "sha256": "1199e2832641cac7e384aaf3b1f3db87f992240cea5d3d1eee04d9dc00acb17c",
+      "decision": "included"
+    },
+    {
+      "source_id": "awesome-design-md",
+      "upstream_path": "design-md/figma/DESIGN.md",
+      "revision": "664b3e78fd1a298ba11973822da988483256d4b4",
+      "authority": "third-party-analysis",
+      "role": "visual-inspiration",
+      "license": {
+        "spdx": "MIT",
+        "status": "verified",
+        "notice_path": "LICENSE",
+        "evidence": "reviewed repository notice"
+      },
+      "sha256": "716ce8431f47eb8b8135552710e3c4d538bccccf1202e4ceac5428c9aada9972",
+      "decision": "included"
+    },
+    {
+      "source_id": "awesome-design-md",
+      "upstream_path": "design-md/framer/DESIGN.md",
+      "revision": "664b3e78fd1a298ba11973822da988483256d4b4",
+      "authority": "third-party-analysis",
+      "role": "visual-inspiration",
+      "license": {
+        "spdx": "MIT",
+        "status": "verified",
+        "notice_path": "LICENSE",
+        "evidence": "reviewed repository notice"
+      },
+      "sha256": "a5d47dddacf5a04577cec0be6fe0fc53b7402254c7686874af3e59bcc7588cb4",
+      "decision": "included"
+    },
+    {
+      "source_id": "awesome-design-md",
+      "upstream_path": "design-md/hashicorp/DESIGN.md",
+      "revision": "664b3e78fd1a298ba11973822da988483256d4b4",
+      "authority": "third-party-analysis",
+      "role": "visual-inspiration",
+      "license": {
+        "spdx": "MIT",
+        "status": "verified",
+        "notice_path": "LICENSE",
+        "evidence": "reviewed repository notice"
+      },
+      "sha256": "d2df9be72d867e48d318fd18db04e60a78357c27e392ab921fc2ba7f46951442",
+      "decision": "included"
+    },
+    {
+      "source_id": "awesome-design-md",
+      "upstream_path": "design-md/hp/DESIGN.md",
+      "revision": "664b3e78fd1a298ba11973822da988483256d4b4",
+      "authority": "third-party-analysis",
+      "role": "visual-inspiration",
+      "license": {
+        "spdx": "MIT",
+        "status": "verified",
+        "notice_path": "LICENSE",
+        "evidence": "reviewed repository notice"
+      },
+      "sha256": "4c9a248046684bdde5311a0c9881814f50e2381c2b0f3c75b02a35fc64bc8bb8",
+      "decision": "included"
+    },
+    {
+      "source_id": "awesome-design-md",
+      "upstream_path": "design-md/ibm/DESIGN.md",
+      "revision": "664b3e78fd1a298ba11973822da988483256d4b4",
+      "authority": "third-party-analysis",
+      "role": "visual-inspiration",
+      "license": {
+        "spdx": "MIT",
+        "status": "verified",
+        "notice_path": "LICENSE",
+        "evidence": "reviewed repository notice"
+      },
+      "sha256": "46f6fd65b5e7524fed1133b9b3c0dd619f9a0f145fbb2b87f3675c701a88f3bd",
+      "decision": "included"
+    },
+    {
+      "source_id": "awesome-design-md",
+      "upstream_path": "design-md/intercom/DESIGN.md",
+      "revision": "664b3e78fd1a298ba11973822da988483256d4b4",
+      "authority": "third-party-analysis",
+      "role": "visual-inspiration",
+      "license": {
+        "spdx": "MIT",
+        "status": "verified",
+        "notice_path": "LICENSE",
+        "evidence": "reviewed repository notice"
+      },
+      "sha256": "962be23cd947e87a86b2ffbc0440e9d0808243a6ef3af2aa04e8e7cc04d48ba3",
+      "decision": "included"
+    },
+    {
+      "source_id": "awesome-design-md",
+      "upstream_path": "design-md/kraken/DESIGN.md",
+      "revision": "664b3e78fd1a298ba11973822da988483256d4b4",
+      "authority": "third-party-analysis",
+      "role": "visual-inspiration",
+      "license": {
+        "spdx": "MIT",
+        "status": "verified",
+        "notice_path": "LICENSE",
+        "evidence": "reviewed repository notice"
+      },
+      "sha256": "41bcbd5642c926a549f0d50f1151484c5776b4536233240c8415cfb79bcf1f38",
+      "decision": "included"
+    },
+    {
+      "source_id": "awesome-design-md",
+      "upstream_path": "design-md/lamborghini/DESIGN.md",
+      "revision": "664b3e78fd1a298ba11973822da988483256d4b4",
+      "authority": "third-party-analysis",
+      "role": "visual-inspiration",
+      "license": {
+        "spdx": "MIT",
+        "status": "verified",
+        "notice_path": "LICENSE",
+        "evidence": "reviewed repository notice"
+      },
+      "sha256": "9aa68c53b481a0befdf72859db5625f85454122294509989aa58414aaee04b34",
+      "decision": "included"
+    },
+    {
+      "source_id": "awesome-design-md",
+      "upstream_path": "design-md/linear.app/DESIGN.md",
+      "revision": "664b3e78fd1a298ba11973822da988483256d4b4",
+      "authority": "third-party-analysis",
+      "role": "visual-inspiration",
+      "license": {
+        "spdx": "MIT",
+        "status": "verified",
+        "notice_path": "LICENSE",
+        "evidence": "reviewed repository notice"
+      },
+      "sha256": "30bd30e72c48a16e4bdbd010f2d1c85fab657c6fae3cc85389399aab10f9cb5f",
+      "decision": "included"
+    },
+    {
+      "source_id": "awesome-design-md",
+      "upstream_path": "design-md/lovable/DESIGN.md",
+      "revision": "664b3e78fd1a298ba11973822da988483256d4b4",
+      "authority": "third-party-analysis",
+      "role": "visual-inspiration",
+      "license": {
+        "spdx": "MIT",
+        "status": "verified",
+        "notice_path": "LICENSE",
+        "evidence": "reviewed repository notice"
+      },
+      "sha256": "92790895c833104072643929ba56ebbf42c8f88ffb7bff1926462545d0ace6c7",
+      "decision": "included"
+    },
+    {
+      "source_id": "awesome-design-md",
+      "upstream_path": "design-md/mastercard/DESIGN.md",
+      "revision": "664b3e78fd1a298ba11973822da988483256d4b4",
+      "authority": "third-party-analysis",
+      "role": "visual-inspiration",
+      "license": {
+        "spdx": "MIT",
+        "status": "verified",
+        "notice_path": "LICENSE",
+        "evidence": "reviewed repository notice"
+      },
+      "sha256": "e76ceaa187f43bd24b8338d2b2314e71e9225b36492e40f32a55782281a10437",
+      "decision": "included"
+    },
+    {
+      "source_id": "awesome-design-md",
+      "upstream_path": "design-md/meta/DESIGN.md",
+      "revision": "664b3e78fd1a298ba11973822da988483256d4b4",
+      "authority": "third-party-analysis",
+      "role": "visual-inspiration",
+      "license": {
+        "spdx": "MIT",
+        "status": "verified",
+        "notice_path": "LICENSE",
+        "evidence": "reviewed repository notice"
+      },
+      "sha256": "306dfad97c006d47b134fb0dbd55ff68d3baa526844d6eb37346373c9ef35339",
+      "decision": "included"
+    },
+    {
+      "source_id": "awesome-design-md",
+      "upstream_path": "design-md/minimax/DESIGN.md",
+      "revision": "664b3e78fd1a298ba11973822da988483256d4b4",
+      "authority": "third-party-analysis",
+      "role": "visual-inspiration",
+      "license": {
+        "spdx": "MIT",
+        "status": "verified",
+        "notice_path": "LICENSE",
+        "evidence": "reviewed repository notice"
+      },
+      "sha256": "2658b96488bb629749259b152c5ba2912a0e8feb6a03477e265879abd9264c50",
+      "decision": "included"
+    },
+    {
+      "source_id": "awesome-design-md",
+      "upstream_path": "design-md/mintlify/DESIGN.md",
+      "revision": "664b3e78fd1a298ba11973822da988483256d4b4",
+      "authority": "third-party-analysis",
+      "role": "visual-inspiration",
+      "license": {
+        "spdx": "MIT",
+        "status": "verified",
+        "notice_path": "LICENSE",
+        "evidence": "reviewed repository notice"
+      },
+      "sha256": "754ffcf35dcd39ef8aef450085ce936aaca5b872ff92caa66be99e91a5c3d5ec",
+      "decision": "included"
+    },
+    {
+      "source_id": "awesome-design-md",
+      "upstream_path": "design-md/miro/DESIGN.md",
+      "revision": "664b3e78fd1a298ba11973822da988483256d4b4",
+      "authority": "third-party-analysis",
+      "role": "visual-inspiration",
+      "license": {
+        "spdx": "MIT",
+        "status": "verified",
+        "notice_path": "LICENSE",
+        "evidence": "reviewed repository notice"
+      },
+      "sha256": "87c71f76297277d64f9679e015a50da88e72d86d7b41badf8733eae1e4cde335",
+      "decision": "included"
+    },
+    {
+      "source_id": "awesome-design-md",
+      "upstream_path": "design-md/mistral.ai/DESIGN.md",
+      "revision": "664b3e78fd1a298ba11973822da988483256d4b4",
+      "authority": "third-party-analysis",
+      "role": "visual-inspiration",
+      "license": {
+        "spdx": "MIT",
+        "status": "verified",
+        "notice_path": "LICENSE",
+        "evidence": "reviewed repository notice"
+      },
+      "sha256": "40e2c692d72c54bae1e43446e2d059b71d773668d39d71ccb7ededa9fa07d145",
+      "decision": "included"
+    },
+    {
+      "source_id": "awesome-design-md",
+      "upstream_path": "design-md/mongodb/DESIGN.md",
+      "revision": "664b3e78fd1a298ba11973822da988483256d4b4",
+      "authority": "third-party-analysis",
+      "role": "visual-inspiration",
+      "license": {
+        "spdx": "MIT",
+        "status": "verified",
+        "notice_path": "LICENSE",
+        "evidence": "reviewed repository notice"
+      },
+      "sha256": "4523f10efd5ccd46f9aeac3b98626e24bcf907bc0c1e46500cb0e3920f932e71",
+      "decision": "included"
+    },
+    {
+      "source_id": "awesome-design-md",
+      "upstream_path": "design-md/nike/DESIGN.md",
+      "revision": "664b3e78fd1a298ba11973822da988483256d4b4",
+      "authority": "third-party-analysis",
+      "role": "visual-inspiration",
+      "license": {
+        "spdx": "MIT",
+        "status": "verified",
+        "notice_path": "LICENSE",
+        "evidence": "reviewed repository notice"
+      },
+      "sha256": "d2a3d363665839e2ddc15c91b8a9f3e92b1962ff55a7ca5d964ab3bb88b8186c",
+      "decision": "included"
+    },
+    {
+      "source_id": "awesome-design-md",
+      "upstream_path": "design-md/nintendo-2001/DESIGN.md",
+      "revision": "664b3e78fd1a298ba11973822da988483256d4b4",
+      "authority": "third-party-analysis",
+      "role": "visual-inspiration",
+      "license": {
+        "spdx": "MIT",
+        "status": "verified",
+        "notice_path": "LICENSE",
+        "evidence": "reviewed repository notice"
+      },
+      "sha256": "9630af17090d5c39ba9d8b5915a597a96c7552efe1422b3b8c3f31fb3e636716",
+      "decision": "included"
+    },
+    {
+      "source_id": "awesome-design-md",
+      "upstream_path": "design-md/notion/DESIGN.md",
+      "revision": "664b3e78fd1a298ba11973822da988483256d4b4",
+      "authority": "third-party-analysis",
+      "role": "visual-inspiration",
+      "license": {
+        "spdx": "MIT",
+        "status": "verified",
+        "notice_path": "LICENSE",
+        "evidence": "reviewed repository notice"
+      },
+      "sha256": "fa9d6e78216d8f3e5d3990709ca2de6bc2e268e945bb94f255fd1bfb15455266",
+      "decision": "included"
+    },
+    {
+      "source_id": "awesome-design-md",
+      "upstream_path": "design-md/nvidia/DESIGN.md",
+      "revision": "664b3e78fd1a298ba11973822da988483256d4b4",
+      "authority": "third-party-analysis",
+      "role": "visual-inspiration",
+      "license": {
+        "spdx": "MIT",
+        "status": "verified",
+        "notice_path": "LICENSE",
+        "evidence": "reviewed repository notice"
+      },
+      "sha256": "d649be85daf075c98a17071e707e3901c6e19150044a81716acd01ef1169cc83",
+      "decision": "included"
+    },
+    {
+      "source_id": "awesome-design-md",
+      "upstream_path": "design-md/ollama/DESIGN.md",
+      "revision": "664b3e78fd1a298ba11973822da988483256d4b4",
+      "authority": "third-party-analysis",
+      "role": "visual-inspiration",
+      "license": {
+        "spdx": "MIT",
+        "status": "verified",
+        "notice_path": "LICENSE",
+        "evidence": "reviewed repository notice"
+      },
+      "sha256": "3f36f897e5aad870344dd97e282c8f125ad208dc99449bb08dd38b9259d2f451",
+      "decision": "included"
+    },
+    {
+      "source_id": "awesome-design-md",
+      "upstream_path": "design-md/opencode.ai/DESIGN.md",
+      "revision": "664b3e78fd1a298ba11973822da988483256d4b4",
+      "authority": "third-party-analysis",
+      "role": "visual-inspiration",
+      "license": {
+        "spdx": "MIT",
+        "status": "verified",
+        "notice_path": "LICENSE",
+        "evidence": "reviewed repository notice"
+      },
+      "sha256": "d1a8893c4b8ac90b1e86230eee2effa8bd15add3582853477920e32432336dda",
+      "decision": "included"
+    },
+    {
+      "source_id": "awesome-design-md",
+      "upstream_path": "design-md/pinterest/DESIGN.md",
+      "revision": "664b3e78fd1a298ba11973822da988483256d4b4",
+      "authority": "third-party-analysis",
+      "role": "visual-inspiration",
+      "license": {
+        "spdx": "MIT",
+        "status": "verified",
+        "notice_path": "LICENSE",
+        "evidence": "reviewed repository notice"
+      },
+      "sha256": "26a202fd244e9213d5e2475d81581828da1dd97e089e44639d9783d04f96e4a8",
+      "decision": "included"
+    },
+    {
+      "source_id": "awesome-design-md",
+      "upstream_path": "design-md/playstation/DESIGN.md",
+      "revision": "664b3e78fd1a298ba11973822da988483256d4b4",
+      "authority": "third-party-analysis",
+      "role": "visual-inspiration",
+      "license": {
+        "spdx": "MIT",
+        "status": "verified",
+        "notice_path": "LICENSE",
+        "evidence": "reviewed repository notice"
+      },
+      "sha256": "2a56c109af6cb847fa091b768f719b498ac56b582d010860e73ea5fb72a1590d",
+      "decision": "included"
+    },
+    {
+      "source_id": "awesome-design-md",
+      "upstream_path": "design-md/posthog/DESIGN.md",
+      "revision": "664b3e78fd1a298ba11973822da988483256d4b4",
+      "authority": "third-party-analysis",
+      "role": "visual-inspiration",
+      "license": {
+        "spdx": "MIT",
+        "status": "verified",
+        "notice_path": "LICENSE",
+        "evidence": "reviewed repository notice"
+      },
+      "sha256": "01f497f751d56296bfcd5eb8806325a4bb4786d364941ec6e65c65fa9ee6d362",
+      "decision": "included"
+    },
+    {
+      "source_id": "awesome-design-md",
+      "upstream_path": "design-md/raycast/DESIGN.md",
+      "revision": "664b3e78fd1a298ba11973822da988483256d4b4",
+      "authority": "third-party-analysis",
+      "role": "visual-inspiration",
+      "license": {
+        "spdx": "MIT",
+        "status": "verified",
+        "notice_path": "LICENSE",
+        "evidence": "reviewed repository notice"
+      },
+      "sha256": "6e2c5137e4d914b70996d589688374a801b6f29a35c9c019c22abb5e0170bda3",
+      "decision": "included"
+    },
+    {
+      "source_id": "awesome-design-md",
+      "upstream_path": "design-md/renault/DESIGN.md",
+      "revision": "664b3e78fd1a298ba11973822da988483256d4b4",
+      "authority": "third-party-analysis",
+      "role": "visual-inspiration",
+      "license": {
+        "spdx": "MIT",
+        "status": "verified",
+        "notice_path": "LICENSE",
+        "evidence": "reviewed repository notice"
+      },
+      "sha256": "b343df9a67e57f248e9eee704f52b17dff9cf6a46d1dc9f8d7ab36741940db59",
+      "decision": "included"
+    },
+    {
+      "source_id": "awesome-design-md",
+      "upstream_path": "design-md/replicate/DESIGN.md",
+      "revision": "664b3e78fd1a298ba11973822da988483256d4b4",
+      "authority": "third-party-analysis",
+      "role": "visual-inspiration",
+      "license": {
+        "spdx": "MIT",
+        "status": "verified",
+        "notice_path": "LICENSE",
+        "evidence": "reviewed repository notice"
+      },
+      "sha256": "c22062d7b4174bf9ced7bc61c48389086cf6eed96a958e098ee70389893b0a15",
+      "decision": "included"
+    },
+    {
+      "source_id": "awesome-design-md",
+      "upstream_path": "design-md/resend/DESIGN.md",
+      "revision": "664b3e78fd1a298ba11973822da988483256d4b4",
+      "authority": "third-party-analysis",
+      "role": "visual-inspiration",
+      "license": {
+        "spdx": "MIT",
+        "status": "verified",
+        "notice_path": "LICENSE",
+        "evidence": "reviewed repository notice"
+      },
+      "sha256": "99536f1b2380511a539f7f3466d46d351e4bf35a5af0c0df395bdc20af05c9be",
+      "decision": "included"
+    },
+    {
+      "source_id": "awesome-design-md",
+      "upstream_path": "design-md/revolut/DESIGN.md",
+      "revision": "664b3e78fd1a298ba11973822da988483256d4b4",
+      "authority": "third-party-analysis",
+      "role": "visual-inspiration",
+      "license": {
+        "spdx": "MIT",
+        "status": "verified",
+        "notice_path": "LICENSE",
+        "evidence": "reviewed repository notice"
+      },
+      "sha256": "b7fa8473315541f5d7e7d76f68a77105d255e6dae00d31d5eb34621d1d52de59",
+      "decision": "included"
+    },
+    {
+      "source_id": "awesome-design-md",
+      "upstream_path": "design-md/runwayml/DESIGN.md",
+      "revision": "664b3e78fd1a298ba11973822da988483256d4b4",
+      "authority": "third-party-analysis",
+      "role": "visual-inspiration",
+      "license": {
+        "spdx": "MIT",
+        "status": "verified",
+        "notice_path": "LICENSE",
+        "evidence": "reviewed repository notice"
+      },
+      "sha256": "b0e69bf643f89bb57ac0b82a3bf025e59ff1478c244cb0528ad1e38b3f80dac9",
+      "decision": "included"
+    },
+    {
+      "source_id": "awesome-design-md",
+      "upstream_path": "design-md/sanity/DESIGN.md",
+      "revision": "664b3e78fd1a298ba11973822da988483256d4b4",
+      "authority": "third-party-analysis",
+      "role": "visual-inspiration",
+      "license": {
+        "spdx": "MIT",
+        "status": "verified",
+        "notice_path": "LICENSE",
+        "evidence": "reviewed repository notice"
+      },
+      "sha256": "ea1c442de2b23443f79af46524a81f33951606c8ff043ea9c25ba886264fbdd8",
+      "decision": "included"
+    },
+    {
+      "source_id": "awesome-design-md",
+      "upstream_path": "design-md/sentry/DESIGN.md",
+      "revision": "664b3e78fd1a298ba11973822da988483256d4b4",
+      "authority": "third-party-analysis",
+      "role": "visual-inspiration",
+      "license": {
+        "spdx": "MIT",
+        "status": "verified",
+        "notice_path": "LICENSE",
+        "evidence": "reviewed repository notice"
+      },
+      "sha256": "655c91d7d23b5e869a966b7f1b63ae650567ad5d69003cfc64b0ee62c8e02c1f",
+      "decision": "included"
+    },
+    {
+      "source_id": "awesome-design-md",
+      "upstream_path": "design-md/shopify/DESIGN.md",
+      "revision": "664b3e78fd1a298ba11973822da988483256d4b4",
+      "authority": "third-party-analysis",
+      "role": "visual-inspiration",
+      "license": {
+        "spdx": "MIT",
+        "status": "verified",
+        "notice_path": "LICENSE",
+        "evidence": "reviewed repository notice"
+      },
+      "sha256": "495e89b8d0a1848ded013c040f7a2ae62077e9d87fc4385350e25dee02ccdb38",
+      "decision": "included"
+    },
+    {
+      "source_id": "awesome-design-md",
+      "upstream_path": "design-md/slack/DESIGN.md",
+      "revision": "664b3e78fd1a298ba11973822da988483256d4b4",
+      "authority": "third-party-analysis",
+      "role": "visual-inspiration",
+      "license": {
+        "spdx": "MIT",
+        "status": "verified",
+        "notice_path": "LICENSE",
+        "evidence": "reviewed repository notice"
+      },
+      "sha256": "03cb243015a2e11d0faf05caba7f3d0c7fda6839b1f5ce707a23e8d46d1a11bd",
+      "decision": "included"
+    },
+    {
+      "source_id": "awesome-design-md",
+      "upstream_path": "design-md/spacex/DESIGN.md",
+      "revision": "664b3e78fd1a298ba11973822da988483256d4b4",
+      "authority": "third-party-analysis",
+      "role": "visual-inspiration",
+      "license": {
+        "spdx": "MIT",
+        "status": "verified",
+        "notice_path": "LICENSE",
+        "evidence": "reviewed repository notice"
+      },
+      "sha256": "495450c79faab54d12d677649ca0a2c30a60f64f536a802e945ad54185c5baad",
+      "decision": "included"
+    },
+    {
+      "source_id": "awesome-design-md",
+      "upstream_path": "design-md/spotify/DESIGN.md",
+      "revision": "664b3e78fd1a298ba11973822da988483256d4b4",
+      "authority": "third-party-analysis",
+      "role": "visual-inspiration",
+      "license": {
+        "spdx": "MIT",
+        "status": "verified",
+        "notice_path": "LICENSE",
+        "evidence": "reviewed repository notice"
+      },
+      "sha256": "72e964a6cf551d0603f9854f2f42ee08e97ad4d9e17e037f50f6233508288295",
+      "decision": "included"
+    },
+    {
+      "source_id": "awesome-design-md",
+      "upstream_path": "design-md/starbucks/DESIGN.md",
+      "revision": "664b3e78fd1a298ba11973822da988483256d4b4",
+      "authority": "third-party-analysis",
+      "role": "visual-inspiration",
+      "license": {
+        "spdx": "MIT",
+        "status": "verified",
+        "notice_path": "LICENSE",
+        "evidence": "reviewed repository notice"
+      },
+      "sha256": "e20338ee10226c63cf2588207288c08e12d60754a53f681657adaf364dfe8fa7",
+      "decision": "included"
+    },
+    {
+      "source_id": "awesome-design-md",
+      "upstream_path": "design-md/stripe/DESIGN.md",
+      "revision": "664b3e78fd1a298ba11973822da988483256d4b4",
+      "authority": "third-party-analysis",
+      "role": "visual-inspiration",
+      "license": {
+        "spdx": "MIT",
+        "status": "verified",
+        "notice_path": "LICENSE",
+        "evidence": "reviewed repository notice"
+      },
+      "sha256": "5c8806b7dd3e0c2554ccba9d1e2a7c78e7c6e50e44fcf6ff5daea6026f8a9ed9",
+      "decision": "included"
+    },
+    {
+      "source_id": "awesome-design-md",
+      "upstream_path": "design-md/supabase/DESIGN.md",
+      "revision": "664b3e78fd1a298ba11973822da988483256d4b4",
+      "authority": "third-party-analysis",
+      "role": "visual-inspiration",
+      "license": {
+        "spdx": "MIT",
+        "status": "verified",
+        "notice_path": "LICENSE",
+        "evidence": "reviewed repository notice"
+      },
+      "sha256": "f57287d7f44d59e8169dc4b4304ff03c1a2efb37f5433b9c04460caae7710880",
+      "decision": "included"
+    },
+    {
+      "source_id": "awesome-design-md",
+      "upstream_path": "design-md/superhuman/DESIGN.md",
+      "revision": "664b3e78fd1a298ba11973822da988483256d4b4",
+      "authority": "third-party-analysis",
+      "role": "visual-inspiration",
+      "license": {
+        "spdx": "MIT",
+        "status": "verified",
+        "notice_path": "LICENSE",
+        "evidence": "reviewed repository notice"
+      },
+      "sha256": "3640298bd2957aee80ce88eb465a7541ba835ec105cba364a6a621d885c7f34f",
+      "decision": "included"
+    },
+    {
+      "source_id": "awesome-design-md",
+      "upstream_path": "design-md/tesla/DESIGN.md",
+      "revision": "664b3e78fd1a298ba11973822da988483256d4b4",
+      "authority": "third-party-analysis",
+      "role": "visual-inspiration",
+      "license": {
+        "spdx": "MIT",
+        "status": "verified",
+        "notice_path": "LICENSE",
+        "evidence": "reviewed repository notice"
+      },
+      "sha256": "19f2f7e6073d708f46d2512e6bab3c7c417cf2b4d9f57ff6ec6f2e056ea942b0",
+      "decision": "included"
+    },
+    {
+      "source_id": "awesome-design-md",
+      "upstream_path": "design-md/theverge/DESIGN.md",
+      "revision": "664b3e78fd1a298ba11973822da988483256d4b4",
+      "authority": "third-party-analysis",
+      "role": "visual-inspiration",
+      "license": {
+        "spdx": "MIT",
+        "status": "verified",
+        "notice_path": "LICENSE",
+        "evidence": "reviewed repository notice"
+      },
+      "sha256": "5da2c3116e6845826b043ac115a80896a399efda2cebc0188981fba2ef9bb526",
+      "decision": "included"
+    },
+    {
+      "source_id": "awesome-design-md",
+      "upstream_path": "design-md/together.ai/DESIGN.md",
+      "revision": "664b3e78fd1a298ba11973822da988483256d4b4",
+      "authority": "third-party-analysis",
+      "role": "visual-inspiration",
+      "license": {
+        "spdx": "MIT",
+        "status": "verified",
+        "notice_path": "LICENSE",
+        "evidence": "reviewed repository notice"
+      },
+      "sha256": "aee472c583f55a2f2c7ee1c403a96dddadb3ff6dc518335451f431e313bf43cf",
+      "decision": "included"
+    },
+    {
+      "source_id": "awesome-design-md",
+      "upstream_path": "design-md/uber/DESIGN.md",
+      "revision": "664b3e78fd1a298ba11973822da988483256d4b4",
+      "authority": "third-party-analysis",
+      "role": "visual-inspiration",
+      "license": {
+        "spdx": "MIT",
+        "status": "verified",
+        "notice_path": "LICENSE",
+        "evidence": "reviewed repository notice"
+      },
+      "sha256": "f30d2257d2d090790332d00ccb16cd2516c3c6008be61ad2ce83c4e991bcc803",
+      "decision": "included"
+    },
+    {
+      "source_id": "awesome-design-md",
+      "upstream_path": "design-md/vercel/DESIGN.md",
+      "revision": "664b3e78fd1a298ba11973822da988483256d4b4",
+      "authority": "third-party-analysis",
+      "role": "visual-inspiration",
+      "license": {
+        "spdx": "MIT",
+        "status": "verified",
+        "notice_path": "LICENSE",
+        "evidence": "reviewed repository notice"
+      },
+      "sha256": "d0951b93c2b4ce9840c715c9f9b3e58a386c6c58ae5cc0f804dec3b116b95bd8",
+      "decision": "included"
+    },
+    {
+      "source_id": "awesome-design-md",
+      "upstream_path": "design-md/vodafone/DESIGN.md",
+      "revision": "664b3e78fd1a298ba11973822da988483256d4b4",
+      "authority": "third-party-analysis",
+      "role": "visual-inspiration",
+      "license": {
+        "spdx": "MIT",
+        "status": "verified",
+        "notice_path": "LICENSE",
+        "evidence": "reviewed repository notice"
+      },
+      "sha256": "293a40951e654283978fa744b24177a159d8f2a60f402bc735bf081618af0ef6",
+      "decision": "included"
+    },
+    {
+      "source_id": "awesome-design-md",
+      "upstream_path": "design-md/voltagent/DESIGN.md",
+      "revision": "664b3e78fd1a298ba11973822da988483256d4b4",
+      "authority": "third-party-analysis",
+      "role": "visual-inspiration",
+      "license": {
+        "spdx": "MIT",
+        "status": "verified",
+        "notice_path": "LICENSE",
+        "evidence": "reviewed repository notice"
+      },
+      "sha256": "4457887741ae5e965e205282b03c4bff83e47dd7a03cd7f38c64623a17569fcd",
+      "decision": "included"
+    },
+    {
+      "source_id": "awesome-design-md",
+      "upstream_path": "design-md/warp/DESIGN.md",
+      "revision": "664b3e78fd1a298ba11973822da988483256d4b4",
+      "authority": "third-party-analysis",
+      "role": "visual-inspiration",
+      "license": {
+        "spdx": "MIT",
+        "status": "verified",
+        "notice_path": "LICENSE",
+        "evidence": "reviewed repository notice"
+      },
+      "sha256": "5b1201f7b1b4e72570d148d1f980fd1cb35e6e4122d48dd271787aa3538a25ad",
+      "decision": "included"
+    },
+    {
+      "source_id": "awesome-design-md",
+      "upstream_path": "design-md/webflow/DESIGN.md",
+      "revision": "664b3e78fd1a298ba11973822da988483256d4b4",
+      "authority": "third-party-analysis",
+      "role": "visual-inspiration",
+      "license": {
+        "spdx": "MIT",
+        "status": "verified",
+        "notice_path": "LICENSE",
+        "evidence": "reviewed repository notice"
+      },
+      "sha256": "9230c7b3951371fc2edc04958962e32bb7ec9a9b703aa6b72eaf5c7991b7c984",
+      "decision": "included"
+    },
+    {
+      "source_id": "awesome-design-md",
+      "upstream_path": "design-md/wired/DESIGN.md",
+      "revision": "664b3e78fd1a298ba11973822da988483256d4b4",
+      "authority": "third-party-analysis",
+      "role": "visual-inspiration",
+      "license": {
+        "spdx": "MIT",
+        "status": "verified",
+        "notice_path": "LICENSE",
+        "evidence": "reviewed repository notice"
+      },
+      "sha256": "eb439dcc573401dc30583f40e7eef8a60b769232da59e524de6dce56d5c3593e",
+      "decision": "included"
+    },
+    {
+      "source_id": "awesome-design-md",
+      "upstream_path": "design-md/wise/DESIGN.md",
+      "revision": "664b3e78fd1a298ba11973822da988483256d4b4",
+      "authority": "third-party-analysis",
+      "role": "visual-inspiration",
+      "license": {
+        "spdx": "MIT",
+        "status": "verified",
+        "notice_path": "LICENSE",
+        "evidence": "reviewed repository notice"
+      },
+      "sha256": "442df0ad7380efd8712f5574bdca34a73cfb41a2a43454ff459863a6258af547",
+      "decision": "included"
+    },
+    {
+      "source_id": "awesome-design-md",
+      "upstream_path": "design-md/x.ai/DESIGN.md",
+      "revision": "664b3e78fd1a298ba11973822da988483256d4b4",
+      "authority": "third-party-analysis",
+      "role": "visual-inspiration",
+      "license": {
+        "spdx": "MIT",
+        "status": "verified",
+        "notice_path": "LICENSE",
+        "evidence": "reviewed repository notice"
+      },
+      "sha256": "9c9ef45d8c0c3b9a7622833cdff8bd125ed6bf296a82cc7274215276706e52eb",
+      "decision": "included"
+    },
+    {
+      "source_id": "awesome-design-md",
+      "upstream_path": "design-md/zapier/DESIGN.md",
+      "revision": "664b3e78fd1a298ba11973822da988483256d4b4",
+      "authority": "third-party-analysis",
+      "role": "visual-inspiration",
+      "license": {
+        "spdx": "MIT",
+        "status": "verified",
+        "notice_path": "LICENSE",
+        "evidence": "reviewed repository notice"
+      },
+      "sha256": "9aee43ba8ece1b4fd0753b4cad0a29f3497331882fa376f0dd4fea8a018c32fc",
+      "decision": "included"
+    },
+    {
+      "source_id": "mengto-skills",
+      "upstream_path": "agent-skills/codex/audit-verify-explain-grade-5/SKILL.md",
+      "revision": "25f872a94e3bbee85ecacba4041fa52c21cb0e44",
+      "authority": "procedural-guidance",
+      "role": "mengto-codex-reference",
+      "license": {
+        "spdx": "MIT",
+        "status": "verified",
+        "notice_path": "LICENSE",
+        "evidence": "reviewed repository notice with no conflicting per-file marker"
+      },
+      "sha256": "d4b5ce0ccda298b75fc7927f88a67dd5528693085ee52fa92b0623544665ba32",
+      "decision": "included"
+    },
+    {
+      "source_id": "mengto-skills",
+      "upstream_path": "agent-skills/codex/copywriting/SKILL.md",
+      "revision": "25f872a94e3bbee85ecacba4041fa52c21cb0e44",
+      "authority": "procedural-guidance",
+      "role": "mengto-codex-reference",
+      "license": {
+        "spdx": "MIT",
+        "status": "verified",
+        "notice_path": "LICENSE",
+        "evidence": "reviewed repository notice with no conflicting per-file marker"
+      },
+      "sha256": "6c6753ffed0c3bd3bfc2eeef1109dbcfd6671000ee287a41d6fd05abf64b82c7",
+      "decision": "included"
+    },
+    {
+      "source_id": "mengto-skills",
+      "upstream_path": "agent-skills/codex/customer-email-draft-threads/SKILL.md",
+      "revision": "25f872a94e3bbee85ecacba4041fa52c21cb0e44",
+      "authority": "procedural-guidance",
+      "role": "mengto-codex-reference",
+      "license": {
+        "spdx": "MIT",
+        "status": "verified",
+        "notice_path": "LICENSE",
+        "evidence": "reviewed repository notice with no conflicting per-file marker"
+      },
+      "sha256": "914db381663d2c9fa9508af1f7265fd4a09493098bc64217d9d16b1d9a8ace02",
+      "decision": "included"
+    },
+    {
+      "source_id": "mengto-skills",
+      "upstream_path": "agent-skills/codex/customer-support-verification/SKILL.md",
+      "revision": "25f872a94e3bbee85ecacba4041fa52c21cb0e44",
+      "authority": "procedural-guidance",
+      "role": "mengto-codex-reference",
+      "license": {
+        "spdx": "MIT",
+        "status": "verified",
+        "notice_path": "LICENSE",
+        "evidence": "reviewed repository notice with no conflicting per-file marker"
+      },
+      "sha256": "ef0af78a0eafc8b9f4a06320d7a29bf9fe5408cde9bd29cc3428f34a9c09b308",
+      "decision": "included"
+    },
+    {
+      "source_id": "mengto-skills",
+      "upstream_path": "agent-skills/codex/daily-ui-inspiration-capture/SKILL.md",
+      "revision": "25f872a94e3bbee85ecacba4041fa52c21cb0e44",
+      "authority": "procedural-guidance",
+      "role": "mengto-codex-reference",
+      "license": {
+        "spdx": "MIT",
+        "status": "verified",
+        "notice_path": "LICENSE",
+        "evidence": "reviewed repository notice with no conflicting per-file marker"
+      },
+      "sha256": "26f316421cbb18f24a3aba96ff5d064b0f62f1ca74a6fa86160643a2f21460e0",
+      "decision": "included"
+    },
+    {
+      "source_id": "mengto-skills",
+      "upstream_path": "agent-skills/codex/elevenlabs-tts/SKILL.md",
+      "revision": "25f872a94e3bbee85ecacba4041fa52c21cb0e44",
+      "authority": "procedural-guidance",
+      "role": "mengto-codex-reference",
+      "license": {
+        "spdx": "MIT",
+        "status": "verified",
+        "notice_path": "LICENSE",
+        "evidence": "reviewed repository notice with no conflicting per-file marker"
+      },
+      "sha256": "066b56c8711ebf935222b4f02f7c67485e88299574a5dc6f1d4347cfefb86196",
+      "decision": "included"
+    },
+    {
+      "source_id": "mengto-skills",
+      "upstream_path": "agent-skills/codex/html-to-interaction-prompts/SKILL.md",
+      "revision": "25f872a94e3bbee85ecacba4041fa52c21cb0e44",
+      "authority": "procedural-guidance",
+      "role": "mengto-codex-reference",
+      "license": {
+        "spdx": "MIT",
+        "status": "verified",
+        "notice_path": "LICENSE",
+        "evidence": "reviewed repository notice with no conflicting per-file marker"
+      },
+      "sha256": "59b800616a70b89b2d5b3d85b8b138c3d22afc83a23fe7e565e08bd1610a8999",
+      "decision": "included"
+    },
+    {
+      "source_id": "mengto-skills",
+      "upstream_path": "agent-skills/codex/netlify-deploy/SKILL.md",
+      "revision": "25f872a94e3bbee85ecacba4041fa52c21cb0e44",
+      "authority": "procedural-guidance",
+      "role": "mengto-codex-reference",
+      "license": {
+        "spdx": "MIT",
+        "status": "verified",
+        "notice_path": "LICENSE",
+        "evidence": "reviewed repository notice with no conflicting per-file marker"
+      },
+      "sha256": "0de932710f4e73605b8a8c413b79d6b2b2d1a9e387e6ea1dc7cbcd500101a378",
+      "decision": "included"
+    },
+    {
+      "source_id": "mengto-skills",
+      "upstream_path": "agent-skills/codex/optimize-web-animations/SKILL.md",
+      "revision": "25f872a94e3bbee85ecacba4041fa52c21cb0e44",
+      "authority": "procedural-guidance",
+      "role": "mengto-codex-reference",
+      "license": {
+        "spdx": "MIT",
+        "status": "verified",
+        "notice_path": "LICENSE",
+        "evidence": "reviewed repository notice with no conflicting per-file marker"
+      },
+      "sha256": "37a8f512bb22a4f2112e4ed388068c0cd184d312d64ee00a993da5bf04ded947",
+      "decision": "included"
+    },
+    {
+      "source_id": "mengto-skills",
+      "upstream_path": "agent-skills/codex/pdf/SKILL.md",
+      "revision": "25f872a94e3bbee85ecacba4041fa52c21cb0e44",
+      "authority": "procedural-guidance",
+      "role": "mengto-codex-reference",
+      "license": {
+        "spdx": "Apache-2.0",
+        "status": "verified",
+        "notice_path": "skills/pdf/LICENSE.txt",
+        "evidence": "byte-identical reviewed Codex bundled skill"
+      },
+      "sha256": "d108cf2b36355ab37eb5962933f4d09785ec002f3105c506129320209306b9d2",
+      "decision": "mapped-to-official",
+      "reason": "The MengTo file is byte-identical to the reviewed Codex bundled skill; use the official copy and its Apache-2.0 notice instead of redistributing the notice-incomplete duplicate.",
+      "official_mapping": {
+        "source": "openai-codex-bundled-skill",
+        "path": "skills/pdf/SKILL.md",
+        "content_sha256": "d108cf2b36355ab37eb5962933f4d09785ec002f3105c506129320209306b9d2",
+        "notice_path": "skills/pdf/LICENSE.txt"
+      }
+    },
+    {
+      "source_id": "mengto-skills",
+      "upstream_path": "agent-skills/codex/performance-profiling/SKILL.md",
+      "revision": "25f872a94e3bbee85ecacba4041fa52c21cb0e44",
+      "authority": "procedural-guidance",
+      "role": "mengto-codex-reference",
+      "license": {
+        "spdx": "MIT",
+        "status": "verified",
+        "notice_path": "LICENSE",
+        "evidence": "reviewed repository notice with no conflicting per-file marker"
+      },
+      "sha256": "e2301598090cf01a0d3b726a039ef4c5c9b05f64d20fb17f52a2271994945c5a",
+      "decision": "included"
+    },
+    {
+      "source_id": "mengto-skills",
+      "upstream_path": "agent-skills/codex/playwright-interactive/SKILL.md",
+      "revision": "25f872a94e3bbee85ecacba4041fa52c21cb0e44",
+      "authority": "procedural-guidance",
+      "role": "mengto-codex-reference",
+      "license": {
+        "spdx": "Apache-2.0",
+        "status": "verified",
+        "notice_path": "skills/playwright-interactive/LICENSE.txt",
+        "evidence": "content-addressed reviewed Codex bundled replacement"
+      },
+      "sha256": "46cf9c30b70b68f13a91ad532b61dedfb8f432495eaebd3c9e3fabd5e2aee877",
+      "decision": "mapped-to-official",
+      "reason": "The reviewed MengTo copy lacks its source notice. Use the current content-addressed Codex bundled Playwright Interactive skill and Apache-2.0 notice instead of redistributing the MengTo file.",
+      "official_mapping": {
+        "source": "openai-codex-bundled-skill",
+        "path": "skills/playwright-interactive/SKILL.md",
+        "content_sha256": "92a0882bc34be10451c7b077f20bb915a2711e68e1baa9ccb10f6915b5568881",
+        "notice_path": "skills/playwright-interactive/LICENSE.txt"
+      }
+    },
+    {
+      "source_id": "mengto-skills",
+      "upstream_path": "agent-skills/codex/playwright/SKILL.md",
+      "revision": "25f872a94e3bbee85ecacba4041fa52c21cb0e44",
+      "authority": "procedural-guidance",
+      "role": "mengto-codex-reference",
+      "license": {
+        "spdx": "Apache-2.0",
+        "status": "verified",
+        "notice_path": "skills/playwright/LICENSE.txt",
+        "evidence": "content-addressed reviewed Codex bundled replacement"
+      },
+      "sha256": "09fd63fe9ba29ee4f13d343eadbba8643a36c920591bbe6d56fd438aa404b47f",
+      "decision": "mapped-to-official",
+      "reason": "The reviewed MengTo copy lacks its source notice. Use the current content-addressed Codex bundled Playwright skill and Apache-2.0 notice instead of redistributing the MengTo file.",
+      "official_mapping": {
+        "source": "openai-codex-bundled-skill",
+        "path": "skills/playwright/SKILL.md",
+        "content_sha256": "0ffaabcc8e0990627c4725f18bf1c7955534a796c1c199e872909de2013ce6a8",
+        "notice_path": "skills/playwright/LICENSE.txt"
+      }
+    },
+    {
+      "source_id": "mengto-skills",
+      "upstream_path": "agent-skills/codex/screenshot/SKILL.md",
+      "revision": "25f872a94e3bbee85ecacba4041fa52c21cb0e44",
+      "authority": "procedural-guidance",
+      "role": "mengto-codex-reference",
+      "license": {
+        "spdx": "Apache-2.0",
+        "status": "verified",
+        "notice_path": "skills/screenshot/LICENSE.txt",
+        "evidence": "byte-identical reviewed Codex bundled skill"
+      },
+      "sha256": "081935a6a163277537d46365f49d6b4a3cb40b4748347e7e88759c5927fa8cf5",
+      "decision": "mapped-to-official",
+      "reason": "The MengTo file is byte-identical to the reviewed Codex bundled skill; use the official copy and its Apache-2.0 notice instead of redistributing the notice-incomplete duplicate.",
+      "official_mapping": {
+        "source": "openai-codex-bundled-skill",
+        "path": "skills/screenshot/SKILL.md",
+        "content_sha256": "081935a6a163277537d46365f49d6b4a3cb40b4748347e7e88759c5927fa8cf5",
+        "notice_path": "skills/screenshot/LICENSE.txt"
+      }
+    },
+    {
+      "source_id": "mengto-skills",
+      "upstream_path": "agent-skills/codex/stitched-full-page-capture/SKILL.md",
+      "revision": "25f872a94e3bbee85ecacba4041fa52c21cb0e44",
+      "authority": "procedural-guidance",
+      "role": "mengto-codex-reference",
+      "license": {
+        "spdx": "MIT",
+        "status": "verified",
+        "notice_path": "LICENSE",
+        "evidence": "reviewed repository notice with no conflicting per-file marker"
+      },
+      "sha256": "0ff78c19ffd8162e4cb3c44d5e225ab570c55082d2098a73ffb7dad8d295ed01",
+      "decision": "included"
+    },
+    {
+      "source_id": "mengto-skills",
+      "upstream_path": "agent-skills/codex/swiftui-debugging/SKILL.md",
+      "revision": "25f872a94e3bbee85ecacba4041fa52c21cb0e44",
+      "authority": "procedural-guidance",
+      "role": "mengto-codex-reference",
+      "license": {
+        "spdx": "MIT",
+        "status": "verified",
+        "notice_path": "LICENSE",
+        "evidence": "reviewed repository notice with no conflicting per-file marker"
+      },
+      "sha256": "3c4b3665faf58cf03abebbceedc9e84325b002e17a9a16bd1f78f35bf0b073ca",
+      "decision": "included"
+    },
+    {
+      "source_id": "mengto-skills",
+      "upstream_path": "agent-skills/codex/video-to-superprompt/SKILL.md",
+      "revision": "25f872a94e3bbee85ecacba4041fa52c21cb0e44",
+      "authority": "procedural-guidance",
+      "role": "mengto-codex-reference",
+      "license": {
+        "spdx": "MIT",
+        "status": "verified",
+        "notice_path": "LICENSE",
+        "evidence": "reviewed repository notice with no conflicting per-file marker"
+      },
+      "sha256": "2b0db0096fb715f9e5c6be419f2be5caf0df5e1991ac019308185e2d72c2f950",
+      "decision": "included"
+    },
+    {
+      "source_id": "mengto-skills",
+      "upstream_path": "agent-skills/codex/x-bookmark-quote-posts/SKILL.md",
+      "revision": "25f872a94e3bbee85ecacba4041fa52c21cb0e44",
+      "authority": "procedural-guidance",
+      "role": "mengto-codex-reference",
+      "license": {
+        "spdx": "MIT",
+        "status": "verified",
+        "notice_path": "LICENSE",
+        "evidence": "reviewed repository notice with no conflicting per-file marker"
+      },
+      "sha256": "0426567c701ee9f03c7f532cb49eec982c8ce2e37c8f0e32d12410e201b7a37f",
+      "decision": "included"
+    },
+    {
+      "source_id": "mengto-skills",
+      "upstream_path": "agent-skills/media/aura-asset-images/SKILL.md",
+      "revision": "25f872a94e3bbee85ecacba4041fa52c21cb0e44",
+      "authority": "procedural-guidance",
+      "role": "mengto-media-reference",
+      "license": {
+        "spdx": "MIT",
+        "status": "verified",
+        "notice_path": "LICENSE",
+        "evidence": "reviewed repository notice with no conflicting per-file marker"
+      },
+      "sha256": "c902c2b2b8182b4738c7e6a93d5a33fe62a495844c2e0b4a7b0152812b93cd76",
+      "decision": "included"
+    },
+    {
+      "source_id": "mengto-skills",
+      "upstream_path": "agent-skills/media/unsplash-asset-images/SKILL.md",
+      "revision": "25f872a94e3bbee85ecacba4041fa52c21cb0e44",
+      "authority": "procedural-guidance",
+      "role": "mengto-media-reference",
+      "license": {
+        "spdx": "MIT",
+        "status": "verified",
+        "notice_path": "LICENSE",
+        "evidence": "reviewed repository notice with no conflicting per-file marker"
+      },
+      "sha256": "cd057d9a7dcaf2de444aec22c1f3277392aab85b9a296beabc20ba3a7b48950c",
+      "decision": "included"
+    },
+    {
+      "source_id": "mengto-skills",
+      "upstream_path": "agent-skills/ui/design-first-ui-prompting/SKILL.md",
+      "revision": "25f872a94e3bbee85ecacba4041fa52c21cb0e44",
+      "authority": "procedural-guidance",
+      "role": "mengto-ui-reference",
+      "license": {
+        "spdx": "MIT",
+        "status": "verified",
+        "notice_path": "LICENSE",
+        "evidence": "reviewed repository notice with no conflicting per-file marker"
+      },
+      "sha256": "5e3d4db0eb0ea983f2bedb90f28f358901c292388a7889e2f66ac133ceff743c",
+      "decision": "included"
+    },
+    {
+      "source_id": "mengto-skills",
+      "upstream_path": "agent-skills/ui/design-taste-frontend/SKILL.md",
+      "revision": "25f872a94e3bbee85ecacba4041fa52c21cb0e44",
+      "authority": "procedural-guidance",
+      "role": "mengto-ui-reference",
+      "license": {
+        "spdx": "MIT",
+        "status": "verified",
+        "notice_path": "LICENSE",
+        "evidence": "reviewed repository notice with no conflicting per-file marker"
+      },
+      "sha256": "740502c9deccec6d096396f4f417a171a940d97c9f7fb45b914f07159e588b16",
+      "decision": "included"
+    },
+    {
+      "source_id": "mengto-skills",
+      "upstream_path": "agent-skills/ui/frontend-design/SKILL.md",
+      "revision": "25f872a94e3bbee85ecacba4041fa52c21cb0e44",
+      "authority": "procedural-guidance",
+      "role": "mengto-ui-reference",
+      "license": {
+        "spdx": "NOASSERTION",
+        "status": "unresolved",
+        "notice_path": null,
+        "evidence": "required notice absent at reviewed revision"
+      },
+      "sha256": "b81e2ff87ed8fa4d6c377ccb127a7254c9e6a77e3ae94f21e6b514f7bb2945a0",
+      "decision": "blocked",
+      "reason": "The frontmatter names LICENSE.txt, but the reviewed MengTo and Anthropic frontend-design trees do not contain that notice."
+    },
+    {
+      "source_id": "mengto-skills",
+      "upstream_path": "agent-skills/ui/full-output-enforcement/SKILL.md",
+      "revision": "25f872a94e3bbee85ecacba4041fa52c21cb0e44",
+      "authority": "procedural-guidance",
+      "role": "mengto-ui-reference",
+      "license": {
+        "spdx": "MIT",
+        "status": "verified",
+        "notice_path": "LICENSE",
+        "evidence": "reviewed repository notice with no conflicting per-file marker"
+      },
+      "sha256": "e5bf48b1ae561511439cf71672209a10a88cee0968cc925909ff861dfa0a96a7",
+      "decision": "included"
+    },
+    {
+      "source_id": "mengto-skills",
+      "upstream_path": "agent-skills/ui/gpt-taste/SKILL.md",
+      "revision": "25f872a94e3bbee85ecacba4041fa52c21cb0e44",
+      "authority": "procedural-guidance",
+      "role": "mengto-ui-reference",
+      "license": {
+        "spdx": "MIT",
+        "status": "verified",
+        "notice_path": "LICENSE",
+        "evidence": "reviewed repository notice with no conflicting per-file marker"
+      },
+      "sha256": "6424b6186abb393084f383bbbf3a01cda74536ccb25b07b1c7458ac9c8704c32",
+      "decision": "included"
+    },
+    {
+      "source_id": "mengto-skills",
+      "upstream_path": "agent-skills/ui/high-end-visual-design/SKILL.md",
+      "revision": "25f872a94e3bbee85ecacba4041fa52c21cb0e44",
+      "authority": "procedural-guidance",
+      "role": "mengto-ui-reference",
+      "license": {
+        "spdx": "MIT",
+        "status": "verified",
+        "notice_path": "LICENSE",
+        "evidence": "reviewed repository notice with no conflicting per-file marker"
+      },
+      "sha256": "30bbbb87ff40cb2169fe6acfc3d14da0a3294c379278cd32da8f4af9ed91faa0",
+      "decision": "included"
+    },
+    {
+      "source_id": "mengto-skills",
+      "upstream_path": "agent-skills/ui/image-to-code/SKILL.md",
+      "revision": "25f872a94e3bbee85ecacba4041fa52c21cb0e44",
+      "authority": "procedural-guidance",
+      "role": "mengto-ui-reference",
+      "license": {
+        "spdx": "MIT",
+        "status": "verified",
+        "notice_path": "LICENSE",
+        "evidence": "reviewed repository notice with no conflicting per-file marker"
+      },
+      "sha256": "1982b382302124fae3d9c8543790710a7e48aa58773b0530a4c116998c913044",
+      "decision": "included"
+    },
+    {
+      "source_id": "mengto-skills",
+      "upstream_path": "agent-skills/ui/industrial-brutalist-ui/SKILL.md",
+      "revision": "25f872a94e3bbee85ecacba4041fa52c21cb0e44",
+      "authority": "procedural-guidance",
+      "role": "mengto-ui-reference",
+      "license": {
+        "spdx": "MIT",
+        "status": "verified",
+        "notice_path": "LICENSE",
+        "evidence": "reviewed repository notice with no conflicting per-file marker"
+      },
+      "sha256": "fffbaac8597f07679e9d87145533567658aedba3b5eca6f16a7075a333048caa",
+      "decision": "included"
+    },
+    {
+      "source_id": "mengto-skills",
+      "upstream_path": "agent-skills/ui/minimalist-ui/SKILL.md",
+      "revision": "25f872a94e3bbee85ecacba4041fa52c21cb0e44",
+      "authority": "procedural-guidance",
+      "role": "mengto-ui-reference",
+      "license": {
+        "spdx": "MIT",
+        "status": "verified",
+        "notice_path": "LICENSE",
+        "evidence": "reviewed repository notice with no conflicting per-file marker"
+      },
+      "sha256": "75a5ff3ebd586daf4ea181ab095c6d16187eef609105a8bdc022cc31ca615b41",
+      "decision": "included"
+    },
+    {
+      "source_id": "mengto-skills",
+      "upstream_path": "agent-skills/ui/redesign-existing-projects/SKILL.md",
+      "revision": "25f872a94e3bbee85ecacba4041fa52c21cb0e44",
+      "authority": "procedural-guidance",
+      "role": "mengto-ui-reference",
+      "license": {
+        "spdx": "MIT",
+        "status": "verified",
+        "notice_path": "LICENSE",
+        "evidence": "reviewed repository notice with no conflicting per-file marker"
+      },
+      "sha256": "2edc195899c718e0eedc1418455770a018b6785b6226160775ff8c91335fc1d4",
+      "decision": "included"
+    },
+    {
+      "source_id": "mengto-skills",
+      "upstream_path": "agent-skills/ui/seo-audit/SKILL.md",
+      "revision": "25f872a94e3bbee85ecacba4041fa52c21cb0e44",
+      "authority": "procedural-guidance",
+      "role": "mengto-ui-reference",
+      "license": {
+        "spdx": "MIT",
+        "status": "verified",
+        "notice_path": "LICENSE",
+        "evidence": "reviewed repository notice with no conflicting per-file marker"
+      },
+      "sha256": "4efff2546fecadb054122b77f78beda1fe130bd0aa39293cf82b2a29181571fd",
+      "decision": "included"
+    },
+    {
+      "source_id": "mengto-skills",
+      "upstream_path": "agent-skills/ui/stitch-design-taste/SKILL.md",
+      "revision": "25f872a94e3bbee85ecacba4041fa52c21cb0e44",
+      "authority": "procedural-guidance",
+      "role": "mengto-ui-reference",
+      "license": {
+        "spdx": "MIT",
+        "status": "verified",
+        "notice_path": "LICENSE",
+        "evidence": "reviewed repository notice with no conflicting per-file marker"
+      },
+      "sha256": "1cd55cf8643f3828bc9a3aaadb5da97ee28f98f745b7071d7e217ffeab92fd2a",
+      "decision": "included"
+    },
+    {
+      "source_id": "mengto-skills",
+      "upstream_path": "agent-skills/ui/swiftui-pro/SKILL.md",
+      "revision": "25f872a94e3bbee85ecacba4041fa52c21cb0e44",
+      "authority": "procedural-guidance",
+      "role": "mengto-ui-reference",
+      "license": {
+        "spdx": "MIT",
+        "status": "verified",
+        "notice_path": "LICENSE",
+        "evidence": "reviewed repository notice with no conflicting per-file marker"
+      },
+      "sha256": "016a4fb9cad11596fa2038dd3eb4c8ff10b1a054025fe8fea104ad3cc5d9ff89",
+      "decision": "included"
+    },
+    {
+      "source_id": "mengto-skills",
+      "upstream_path": "agent-skills/web-design/agency-grid-layout-minimal/SKILL.md",
+      "revision": "25f872a94e3bbee85ecacba4041fa52c21cb0e44",
+      "authority": "procedural-guidance",
+      "role": "mengto-web-design-reference",
+      "license": {
+        "spdx": "MIT",
+        "status": "verified",
+        "notice_path": "LICENSE",
+        "evidence": "reviewed repository notice with no conflicting per-file marker"
+      },
+      "sha256": "1787eba87fef34cf72219d0016de89910e19e383f6b01d250a11e9490a93018e",
+      "decision": "included"
+    },
+    {
+      "source_id": "mengto-skills",
+      "upstream_path": "agent-skills/web-design/animation-on-scroll/SKILL.md",
+      "revision": "25f872a94e3bbee85ecacba4041fa52c21cb0e44",
+      "authority": "procedural-guidance",
+      "role": "mengto-web-design-reference",
+      "license": {
+        "spdx": "MIT",
+        "status": "verified",
+        "notice_path": "LICENSE",
+        "evidence": "reviewed repository notice with no conflicting per-file marker"
+      },
+      "sha256": "4c9c795a9d5d8f7baf0b141394ebc0a4fd30e22234b37ff63fbf38e7cceefadf",
+      "decision": "included"
+    },
+    {
+      "source_id": "mengto-skills",
+      "upstream_path": "agent-skills/web-design/animation-systems/SKILL.md",
+      "revision": "25f872a94e3bbee85ecacba4041fa52c21cb0e44",
+      "authority": "procedural-guidance",
+      "role": "mengto-web-design-reference",
+      "license": {
+        "spdx": "MIT",
+        "status": "verified",
+        "notice_path": "LICENSE",
+        "evidence": "reviewed repository notice with no conflicting per-file marker"
+      },
+      "sha256": "ae1e51b8eede6f4d05fda5388f61bbc1d29ea88b7a5d7a488c3ecfed5f18e262",
+      "decision": "included"
+    },
+    {
+      "source_id": "mengto-skills",
+      "upstream_path": "agent-skills/web-design/atmosphere-background/SKILL.md",
+      "revision": "25f872a94e3bbee85ecacba4041fa52c21cb0e44",
+      "authority": "procedural-guidance",
+      "role": "mengto-web-design-reference",
+      "license": {
+        "spdx": "MIT",
+        "status": "verified",
+        "notice_path": "LICENSE",
+        "evidence": "reviewed repository notice with no conflicting per-file marker"
+      },
+      "sha256": "ded4a155cf5676f2aab3f1873634e08766ad31aa6ae1107e5a29c114dc1cf213",
+      "decision": "included"
+    },
+    {
+      "source_id": "mengto-skills",
+      "upstream_path": "agent-skills/web-design/background-grid-webgl/SKILL.md",
+      "revision": "25f872a94e3bbee85ecacba4041fa52c21cb0e44",
+      "authority": "procedural-guidance",
+      "role": "mengto-web-design-reference",
+      "license": {
+        "spdx": "MIT",
+        "status": "verified",
+        "notice_path": "LICENSE",
+        "evidence": "reviewed repository notice with no conflicting per-file marker"
+      },
+      "sha256": "07c155855b67a96cbb4d51d82696fe9550c2670a13a30fb6b71506d5c0685457",
+      "decision": "included"
+    },
+    {
+      "source_id": "mengto-skills",
+      "upstream_path": "agent-skills/web-design/beautiful-shadows/SKILL.md",
+      "revision": "25f872a94e3bbee85ecacba4041fa52c21cb0e44",
+      "authority": "procedural-guidance",
+      "role": "mengto-web-design-reference",
+      "license": {
+        "spdx": "MIT",
+        "status": "verified",
+        "notice_path": "LICENSE",
+        "evidence": "reviewed repository notice with no conflicting per-file marker"
+      },
+      "sha256": "10b6cc0964919118218ffe0845e4a00954f39788d89d4ec29827d100f254e135",
+      "decision": "included"
+    },
+    {
+      "source_id": "mengto-skills",
+      "upstream_path": "agent-skills/web-design/blue-cloudy-clean-modern/SKILL.md",
+      "revision": "25f872a94e3bbee85ecacba4041fa52c21cb0e44",
+      "authority": "procedural-guidance",
+      "role": "mengto-web-design-reference",
+      "license": {
+        "spdx": "MIT",
+        "status": "verified",
+        "notice_path": "LICENSE",
+        "evidence": "reviewed repository notice with no conflicting per-file marker"
+      },
+      "sha256": "212618080012349f13e1c8819048e62e9c6193b8b2d2a5e33d219ce487c5e305",
+      "decision": "included"
+    },
+    {
+      "source_id": "mengto-skills",
+      "upstream_path": "agent-skills/web-design/blue-laser-clean-glass-layout/SKILL.md",
+      "revision": "25f872a94e3bbee85ecacba4041fa52c21cb0e44",
+      "authority": "procedural-guidance",
+      "role": "mengto-web-design-reference",
+      "license": {
+        "spdx": "MIT",
+        "status": "verified",
+        "notice_path": "LICENSE",
+        "evidence": "reviewed repository notice with no conflicting per-file marker"
+      },
+      "sha256": "63cbabae394a24c1b8c4cc98dafc3bfe8c045652b20713f8a3d8edc1061530e0",
+      "decision": "included"
+    },
+    {
+      "source_id": "mengto-skills",
+      "upstream_path": "agent-skills/web-design/book-serif-index/SKILL.md",
+      "revision": "25f872a94e3bbee85ecacba4041fa52c21cb0e44",
+      "authority": "procedural-guidance",
+      "role": "mengto-web-design-reference",
+      "license": {
+        "spdx": "MIT",
+        "status": "verified",
+        "notice_path": "LICENSE",
+        "evidence": "reviewed repository notice with no conflicting per-file marker"
+      },
+      "sha256": "d53a95a47bb0fc7b047445a15e59a2b4bb126d6c8d9caac163378b19bf3948be",
+      "decision": "included"
+    },
+    {
+      "source_id": "mengto-skills",
+      "upstream_path": "agent-skills/web-design/bright-green-tech-system-webgl/SKILL.md",
+      "revision": "25f872a94e3bbee85ecacba4041fa52c21cb0e44",
+      "authority": "procedural-guidance",
+      "role": "mengto-web-design-reference",
+      "license": {
+        "spdx": "MIT",
+        "status": "verified",
+        "notice_path": "LICENSE",
+        "evidence": "reviewed repository notice with no conflicting per-file marker"
+      },
+      "sha256": "ba4cf84328189502dbd9c95f42bba68346d303f9b3f41cbc6c922f52fdec2fbf",
+      "decision": "included"
+    },
+    {
+      "source_id": "mengto-skills",
+      "upstream_path": "agent-skills/web-design/cinematic-gsap-lenis-motion-system/SKILL.md",
+      "revision": "25f872a94e3bbee85ecacba4041fa52c21cb0e44",
+      "authority": "procedural-guidance",
+      "role": "mengto-web-design-reference",
+      "license": {
+        "spdx": "MIT",
+        "status": "verified",
+        "notice_path": "LICENSE",
+        "evidence": "reviewed repository notice with no conflicting per-file marker"
+      },
+      "sha256": "7b8f5745f34ef4ba507e19fabd6acf9cd3b8d70efda81746d0f4090af0f84e06",
+      "decision": "included"
+    },
+    {
+      "source_id": "mengto-skills",
+      "upstream_path": "agent-skills/web-design/cinematic-scroll-storytelling/SKILL.md",
+      "revision": "25f872a94e3bbee85ecacba4041fa52c21cb0e44",
+      "authority": "procedural-guidance",
+      "role": "mengto-web-design-reference",
+      "license": {
+        "spdx": "MIT",
+        "status": "verified",
+        "notice_path": "LICENSE",
+        "evidence": "reviewed repository notice with no conflicting per-file marker"
+      },
+      "sha256": "3e203d1a38917004396f07b5887418e9e13dc832506754f5a4ad6303525b1572",
+      "decision": "included"
+    },
+    {
+      "source_id": "mengto-skills",
+      "upstream_path": "agent-skills/web-design/clean-minimal-beige-light-mode/SKILL.md",
+      "revision": "25f872a94e3bbee85ecacba4041fa52c21cb0e44",
+      "authority": "procedural-guidance",
+      "role": "mengto-web-design-reference",
+      "license": {
+        "spdx": "MIT",
+        "status": "verified",
+        "notice_path": "LICENSE",
+        "evidence": "reviewed repository notice with no conflicting per-file marker"
+      },
+      "sha256": "675e5d268ae36ae4aa59ff06cdaf19f67169defedc7a2cf5e7ca03a8f3eadb05",
+      "decision": "included"
+    },
+    {
+      "source_id": "mengto-skills",
+      "upstream_path": "agent-skills/web-design/cobejs/SKILL.md",
+      "revision": "25f872a94e3bbee85ecacba4041fa52c21cb0e44",
+      "authority": "procedural-guidance",
+      "role": "mengto-web-design-reference",
+      "license": {
+        "spdx": "MIT",
+        "status": "verified",
+        "notice_path": "LICENSE",
+        "evidence": "reviewed repository notice with no conflicting per-file marker"
+      },
+      "sha256": "4f050b7495a5b19d05fb89736c6c61df4feacab07f23aae20cf8a8a79a53bbef",
+      "decision": "included"
+    },
+    {
+      "source_id": "mengto-skills",
+      "upstream_path": "agent-skills/web-design/company-logos/SKILL.md",
+      "revision": "25f872a94e3bbee85ecacba4041fa52c21cb0e44",
+      "authority": "procedural-guidance",
+      "role": "mengto-web-design-reference",
+      "license": {
+        "spdx": "MIT",
+        "status": "verified",
+        "notice_path": "LICENSE",
+        "evidence": "reviewed repository notice with no conflicting per-file marker"
+      },
+      "sha256": "d089dd870e8f4012acc3bc1bf55855346a7e39fa4e975868f6ed2d495eb82729",
+      "decision": "included"
+    },
+    {
+      "source_id": "mengto-skills",
+      "upstream_path": "agent-skills/web-design/container-lines/SKILL.md",
+      "revision": "25f872a94e3bbee85ecacba4041fa52c21cb0e44",
+      "authority": "procedural-guidance",
+      "role": "mengto-web-design-reference",
+      "license": {
+        "spdx": "MIT",
+        "status": "verified",
+        "notice_path": "LICENSE",
+        "evidence": "reviewed repository notice with no conflicting per-file marker"
+      },
+      "sha256": "b2eb19356c14c034d8e077452ede319835b841b7aa046ec3cd0a4460cc7911b6",
+      "decision": "included"
+    },
+    {
+      "source_id": "mengto-skills",
+      "upstream_path": "agent-skills/web-design/corner-diagonals/SKILL.md",
+      "revision": "25f872a94e3bbee85ecacba4041fa52c21cb0e44",
+      "authority": "procedural-guidance",
+      "role": "mengto-web-design-reference",
+      "license": {
+        "spdx": "MIT",
+        "status": "verified",
+        "notice_path": "LICENSE",
+        "evidence": "reviewed repository notice with no conflicting per-file marker"
+      },
+      "sha256": "ffb61cc0a8fae762d6ff59e526aa26e7b18349ae040f125502811b63c289a310",
+      "decision": "included"
+    },
+    {
+      "source_id": "mengto-skills",
+      "upstream_path": "agent-skills/web-design/corner-lasers/SKILL.md",
+      "revision": "25f872a94e3bbee85ecacba4041fa52c21cb0e44",
+      "authority": "procedural-guidance",
+      "role": "mengto-web-design-reference",
+      "license": {
+        "spdx": "MIT",
+        "status": "verified",
+        "notice_path": "LICENSE",
+        "evidence": "reviewed repository notice with no conflicting per-file marker"
+      },
+      "sha256": "7a6766480ca8f5aa98d7f8dd92ccd378c8b32db139cb5ef0f3fd1c9930aee565",
+      "decision": "included"
+    },
+    {
+      "source_id": "mengto-skills",
+      "upstream_path": "agent-skills/web-design/css-alpha-masking/SKILL.md",
+      "revision": "25f872a94e3bbee85ecacba4041fa52c21cb0e44",
+      "authority": "procedural-guidance",
+      "role": "mengto-web-design-reference",
+      "license": {
+        "spdx": "MIT",
+        "status": "verified",
+        "notice_path": "LICENSE",
+        "evidence": "reviewed repository notice with no conflicting per-file marker"
+      },
+      "sha256": "049241d4c086b0f95af2ab68857435f604fee07e5744a856b385e3c212a638e1",
+      "decision": "included"
+    },
+    {
+      "source_id": "mengto-skills",
+      "upstream_path": "agent-skills/web-design/css-border-gradient/SKILL.md",
+      "revision": "25f872a94e3bbee85ecacba4041fa52c21cb0e44",
+      "authority": "procedural-guidance",
+      "role": "mengto-web-design-reference",
+      "license": {
+        "spdx": "MIT",
+        "status": "verified",
+        "notice_path": "LICENSE",
+        "evidence": "reviewed repository notice with no conflicting per-file marker"
+      },
+      "sha256": "6c5e1924a7ec55044aca52801cd30efb06cb922fa47e4c4b85d16b39471c922a",
+      "decision": "included"
+    },
+    {
+      "source_id": "mengto-skills",
+      "upstream_path": "agent-skills/web-design/dark-blue-contrasting-clean/SKILL.md",
+      "revision": "25f872a94e3bbee85ecacba4041fa52c21cb0e44",
+      "authority": "procedural-guidance",
+      "role": "mengto-web-design-reference",
+      "license": {
+        "spdx": "MIT",
+        "status": "verified",
+        "notice_path": "LICENSE",
+        "evidence": "reviewed repository notice with no conflicting per-file marker"
+      },
+      "sha256": "d92603c74fc0835e1ca4ed1c8b367ea453e67c5f4c990e60d3e2c3178c341aeb",
+      "decision": "included"
+    },
+    {
+      "source_id": "mengto-skills",
+      "upstream_path": "agent-skills/web-design/dark-glass-clean-layout/SKILL.md",
+      "revision": "25f872a94e3bbee85ecacba4041fa52c21cb0e44",
+      "authority": "procedural-guidance",
+      "role": "mengto-web-design-reference",
+      "license": {
+        "spdx": "MIT",
+        "status": "verified",
+        "notice_path": "LICENSE",
+        "evidence": "reviewed repository notice with no conflicting per-file marker"
+      },
+      "sha256": "e51661080ce76a5386f2490406c95d5ad8e50f0d44ef55b0d972fb87a0baa560",
+      "decision": "included"
+    },
+    {
+      "source_id": "mengto-skills",
+      "upstream_path": "agent-skills/web-design/dither-background/SKILL.md",
+      "revision": "25f872a94e3bbee85ecacba4041fa52c21cb0e44",
+      "authority": "procedural-guidance",
+      "role": "mengto-web-design-reference",
+      "license": {
+        "spdx": "MIT",
+        "status": "verified",
+        "notice_path": "LICENSE",
+        "evidence": "reviewed repository notice with no conflicting per-file marker"
+      },
+      "sha256": "aa6520dc7dcb8dc3dc9a382a4363b57cad01a6745fbc05ce609539d38663c40b",
+      "decision": "included"
+    },
+    {
+      "source_id": "mengto-skills",
+      "upstream_path": "agent-skills/web-design/dither-laser-dark-mode/SKILL.md",
+      "revision": "25f872a94e3bbee85ecacba4041fa52c21cb0e44",
+      "authority": "procedural-guidance",
+      "role": "mengto-web-design-reference",
+      "license": {
+        "spdx": "MIT",
+        "status": "verified",
+        "notice_path": "LICENSE",
+        "evidence": "reviewed repository notice with no conflicting per-file marker"
+      },
+      "sha256": "afbf1b3161ea8c5b92f69fef0abdeb299f128aaa055730998cae32d1896d7e57",
+      "decision": "included"
+    },
+    {
+      "source_id": "mengto-skills",
+      "upstream_path": "agent-skills/web-design/editorial-tech/SKILL.md",
+      "revision": "25f872a94e3bbee85ecacba4041fa52c21cb0e44",
+      "authority": "procedural-guidance",
+      "role": "mengto-web-design-reference",
+      "license": {
+        "spdx": "MIT",
+        "status": "verified",
+        "notice_path": "LICENSE",
+        "evidence": "reviewed repository notice with no conflicting per-file marker"
+      },
+      "sha256": "9f032de321c81b2e7ae7fa451d6b3c7bdb7dfbf082ff735e5af4868e3a0b9300",
+      "decision": "included"
+    },
+    {
+      "source_id": "mengto-skills",
+      "upstream_path": "agent-skills/web-design/framed-grid-layout/SKILL.md",
+      "revision": "25f872a94e3bbee85ecacba4041fa52c21cb0e44",
+      "authority": "procedural-guidance",
+      "role": "mengto-web-design-reference",
+      "license": {
+        "spdx": "MIT",
+        "status": "verified",
+        "notice_path": "LICENSE",
+        "evidence": "reviewed repository notice with no conflicting per-file marker"
+      },
+      "sha256": "0888e311ada1a4d8967a26a3650b5a521cce54bb2aad627f6c32ff12b3b03da9",
+      "decision": "included"
+    },
+    {
+      "source_id": "mengto-skills",
+      "upstream_path": "agent-skills/web-design/framed-tech-dark-border-gradient/SKILL.md",
+      "revision": "25f872a94e3bbee85ecacba4041fa52c21cb0e44",
+      "authority": "procedural-guidance",
+      "role": "mengto-web-design-reference",
+      "license": {
+        "spdx": "MIT",
+        "status": "verified",
+        "notice_path": "LICENSE",
+        "evidence": "reviewed repository notice with no conflicting per-file marker"
+      },
+      "sha256": "ab553a6dceadfc4b391d4e3927a64b9c408eb60f41468d02d0d153902295c154",
+      "decision": "included"
+    },
+    {
+      "source_id": "mengto-skills",
+      "upstream_path": "agent-skills/web-design/funky-purple-container-tech/SKILL.md",
+      "revision": "25f872a94e3bbee85ecacba4041fa52c21cb0e44",
+      "authority": "procedural-guidance",
+      "role": "mengto-web-design-reference",
+      "license": {
+        "spdx": "MIT",
+        "status": "verified",
+        "notice_path": "LICENSE",
+        "evidence": "reviewed repository notice with no conflicting per-file marker"
+      },
+      "sha256": "101e990d553e0cb13c6aeb485865e706e5fa7456a105a039f2439554b0a31dae",
+      "decision": "included"
+    },
+    {
+      "source_id": "mengto-skills",
+      "upstream_path": "agent-skills/web-design/glass-dark-mode-clock/SKILL.md",
+      "revision": "25f872a94e3bbee85ecacba4041fa52c21cb0e44",
+      "authority": "procedural-guidance",
+      "role": "mengto-web-design-reference",
+      "license": {
+        "spdx": "MIT",
+        "status": "verified",
+        "notice_path": "LICENSE",
+        "evidence": "reviewed repository notice with no conflicting per-file marker"
+      },
+      "sha256": "7be1a8d076cd1e940f33ae6a6f5b9aaaa91c1078c15b511623a38da30b3397ce",
+      "decision": "included"
+    },
+    {
+      "source_id": "mengto-skills",
+      "upstream_path": "agent-skills/web-design/glass-dark-ui/SKILL.md",
+      "revision": "25f872a94e3bbee85ecacba4041fa52c21cb0e44",
+      "authority": "procedural-guidance",
+      "role": "mengto-web-design-reference",
+      "license": {
+        "spdx": "MIT",
+        "status": "verified",
+        "notice_path": "LICENSE",
+        "evidence": "reviewed repository notice with no conflicting per-file marker"
+      },
+      "sha256": "ff607716e434e6aecb53e738122d28cd149034f51ff35c4e3bf4690d7b69c9d3",
+      "decision": "included"
+    },
+    {
+      "source_id": "mengto-skills",
+      "upstream_path": "agent-skills/web-design/globe-gl/SKILL.md",
+      "revision": "25f872a94e3bbee85ecacba4041fa52c21cb0e44",
+      "authority": "procedural-guidance",
+      "role": "mengto-web-design-reference",
+      "license": {
+        "spdx": "MIT",
+        "status": "verified",
+        "notice_path": "LICENSE",
+        "evidence": "reviewed repository notice with no conflicting per-file marker"
+      },
+      "sha256": "e2739e1f035f78aba3268ff2ce2a5b0b13fa33422781071f94c22e87a58de912",
+      "decision": "included"
+    },
+    {
+      "source_id": "mengto-skills",
+      "upstream_path": "agent-skills/web-design/globe-particles/SKILL.md",
+      "revision": "25f872a94e3bbee85ecacba4041fa52c21cb0e44",
+      "authority": "procedural-guidance",
+      "role": "mengto-web-design-reference",
+      "license": {
+        "spdx": "MIT",
+        "status": "verified",
+        "notice_path": "LICENSE",
+        "evidence": "reviewed repository notice with no conflicting per-file marker"
+      },
+      "sha256": "b29b372a1790954ea97746dc1ca62d82cc605c00ba4b88d95c3a1f0dcba4e171",
+      "decision": "included"
+    },
+    {
+      "source_id": "mengto-skills",
+      "upstream_path": "agent-skills/web-design/gooey-blob-system/SKILL.md",
+      "revision": "25f872a94e3bbee85ecacba4041fa52c21cb0e44",
+      "authority": "procedural-guidance",
+      "role": "mengto-web-design-reference",
+      "license": {
+        "spdx": "MIT",
+        "status": "verified",
+        "notice_path": "LICENSE",
+        "evidence": "reviewed repository notice with no conflicting per-file marker"
+      },
+      "sha256": "48cef691946621cb90b0891a19b9bf9076fddfe54961847f78223515475894bd",
+      "decision": "included"
+    },
+    {
+      "source_id": "mengto-skills",
+      "upstream_path": "agent-skills/web-design/gsap-scrolltrigger-storytelling/SKILL.md",
+      "revision": "25f872a94e3bbee85ecacba4041fa52c21cb0e44",
+      "authority": "procedural-guidance",
+      "role": "mengto-web-design-reference",
+      "license": {
+        "spdx": "MIT",
+        "status": "verified",
+        "notice_path": "LICENSE",
+        "evidence": "reviewed repository notice with no conflicting per-file marker"
+      },
+      "sha256": "c388738853064f4bbb4293b910efc0fb82f957298a49c94214c2522b138ae939",
+      "decision": "included"
+    },
+    {
+      "source_id": "mengto-skills",
+      "upstream_path": "agent-skills/web-design/gsap/SKILL.md",
+      "revision": "25f872a94e3bbee85ecacba4041fa52c21cb0e44",
+      "authority": "procedural-guidance",
+      "role": "mengto-web-design-reference",
+      "license": {
+        "spdx": "MIT",
+        "status": "verified",
+        "notice_path": "LICENSE",
+        "evidence": "reviewed repository notice with no conflicting per-file marker"
+      },
+      "sha256": "eb9a0a84f0747fa19ce693cf776328945aebee1205ddc42c518c133c2ab6cb42",
+      "decision": "included"
+    },
+    {
+      "source_id": "mengto-skills",
+      "upstream_path": "agent-skills/web-design/high-contrast-skeuomorphic-clean/SKILL.md",
+      "revision": "25f872a94e3bbee85ecacba4041fa52c21cb0e44",
+      "authority": "procedural-guidance",
+      "role": "mengto-web-design-reference",
+      "license": {
+        "spdx": "MIT",
+        "status": "verified",
+        "notice_path": "LICENSE",
+        "evidence": "reviewed repository notice with no conflicting per-file marker"
+      },
+      "sha256": "6381a8257a1a42df490a12ce0902fb7b70acd50c8d231e86aaaed29d33fdee81",
+      "decision": "included"
+    },
+    {
+      "source_id": "mengto-skills",
+      "upstream_path": "agent-skills/web-design/image-first-grid-layout/SKILL.md",
+      "revision": "25f872a94e3bbee85ecacba4041fa52c21cb0e44",
+      "authority": "procedural-guidance",
+      "role": "mengto-web-design-reference",
+      "license": {
+        "spdx": "MIT",
+        "status": "verified",
+        "notice_path": "LICENSE",
+        "evidence": "reviewed repository notice with no conflicting per-file marker"
+      },
+      "sha256": "76aa7e263f9c5b81920622c6c9e175a09eef10bf3d8c11a7d3edf5c95fe58abf",
+      "decision": "included"
+    },
+    {
+      "source_id": "mengto-skills",
+      "upstream_path": "agent-skills/web-design/landing-page/SKILL.md",
+      "revision": "25f872a94e3bbee85ecacba4041fa52c21cb0e44",
+      "authority": "procedural-guidance",
+      "role": "mengto-web-design-reference",
+      "license": {
+        "spdx": "MIT",
+        "status": "verified",
+        "notice_path": "LICENSE",
+        "evidence": "reviewed repository notice with no conflicting per-file marker"
+      },
+      "sha256": "6ad9965bc6b8f682340998ddd17c7700f5529ae40603d47c3b4610892c459cad",
+      "decision": "included"
+    },
+    {
+      "source_id": "mengto-skills",
+      "upstream_path": "agent-skills/web-design/light-mode-paper-technical/SKILL.md",
+      "revision": "25f872a94e3bbee85ecacba4041fa52c21cb0e44",
+      "authority": "procedural-guidance",
+      "role": "mengto-web-design-reference",
+      "license": {
+        "spdx": "MIT",
+        "status": "verified",
+        "notice_path": "LICENSE",
+        "evidence": "reviewed repository notice with no conflicting per-file marker"
+      },
+      "sha256": "f09d5b7cb8263b19d0aecc2e305a4d5f249a71187004860b8ff72272026a3f31",
+      "decision": "included"
+    },
+    {
+      "source_id": "mengto-skills",
+      "upstream_path": "agent-skills/web-design/marquee-loop/SKILL.md",
+      "revision": "25f872a94e3bbee85ecacba4041fa52c21cb0e44",
+      "authority": "procedural-guidance",
+      "role": "mengto-web-design-reference",
+      "license": {
+        "spdx": "MIT",
+        "status": "verified",
+        "notice_path": "LICENSE",
+        "evidence": "reviewed repository notice with no conflicting per-file marker"
+      },
+      "sha256": "53f705e5f245f414d4e88b88e5f997b3201d8f782d407a2f2b5794e7b2aea8ed",
+      "decision": "included"
+    },
+    {
+      "source_id": "mengto-skills",
+      "upstream_path": "agent-skills/web-design/masked-reveal/SKILL.md",
+      "revision": "25f872a94e3bbee85ecacba4041fa52c21cb0e44",
+      "authority": "procedural-guidance",
+      "role": "mengto-web-design-reference",
+      "license": {
+        "spdx": "MIT",
+        "status": "verified",
+        "notice_path": "LICENSE",
+        "evidence": "reviewed repository notice with no conflicting per-file marker"
+      },
+      "sha256": "a3e4fb96f6092ac382530db24fdd15da559e959c5b7e02d0503918c1358dcf03",
+      "decision": "included"
+    },
+    {
+      "source_id": "mengto-skills",
+      "upstream_path": "agent-skills/web-design/matterjs/SKILL.md",
+      "revision": "25f872a94e3bbee85ecacba4041fa52c21cb0e44",
+      "authority": "procedural-guidance",
+      "role": "mengto-web-design-reference",
+      "license": {
+        "spdx": "MIT",
+        "status": "verified",
+        "notice_path": "LICENSE",
+        "evidence": "reviewed repository notice with no conflicting per-file marker"
+      },
+      "sha256": "eeb1d2f6521e337dd5a5f0743ba00c00dd81f6e22b22a6f26c5d77fc44f16be4",
+      "decision": "included"
+    },
+    {
+      "source_id": "mengto-skills",
+      "upstream_path": "agent-skills/web-design/mesh-gradient-dark-blue-clean/SKILL.md",
+      "revision": "25f872a94e3bbee85ecacba4041fa52c21cb0e44",
+      "authority": "procedural-guidance",
+      "role": "mengto-web-design-reference",
+      "license": {
+        "spdx": "MIT",
+        "status": "verified",
+        "notice_path": "LICENSE",
+        "evidence": "reviewed repository notice with no conflicting per-file marker"
+      },
+      "sha256": "4c91c0ba4ccd73389f6bd0fc15b5065dc6c64866ee829249f98fb669c152ce33",
+      "decision": "included"
+    },
+    {
+      "source_id": "mengto-skills",
+      "upstream_path": "agent-skills/web-design/nested-container-clean-agency/SKILL.md",
+      "revision": "25f872a94e3bbee85ecacba4041fa52c21cb0e44",
+      "authority": "procedural-guidance",
+      "role": "mengto-web-design-reference",
+      "license": {
+        "spdx": "MIT",
+        "status": "verified",
+        "notice_path": "LICENSE",
+        "evidence": "reviewed repository notice with no conflicting per-file marker"
+      },
+      "sha256": "99a761f4c95316a649b54782bbb23666882c98ec2eddce393f86a5601c270e23",
+      "decision": "included"
+    },
+    {
+      "source_id": "mengto-skills",
+      "upstream_path": "agent-skills/web-design/nested-container-frames/SKILL.md",
+      "revision": "25f872a94e3bbee85ecacba4041fa52c21cb0e44",
+      "authority": "procedural-guidance",
+      "role": "mengto-web-design-reference",
+      "license": {
+        "spdx": "MIT",
+        "status": "verified",
+        "notice_path": "LICENSE",
+        "evidence": "reviewed repository notice with no conflicting per-file marker"
+      },
+      "sha256": "02fde1df60f9d13015a4a25a2d935831da78f665c263b5d166117e1889c151b0",
+      "decision": "included"
+    },
+    {
+      "source_id": "mengto-skills",
+      "upstream_path": "agent-skills/web-design/number-details/SKILL.md",
+      "revision": "25f872a94e3bbee85ecacba4041fa52c21cb0e44",
+      "authority": "procedural-guidance",
+      "role": "mengto-web-design-reference",
+      "license": {
+        "spdx": "MIT",
+        "status": "verified",
+        "notice_path": "LICENSE",
+        "evidence": "reviewed repository notice with no conflicting per-file marker"
+      },
+      "sha256": "bd526d953244b8f05a578892640a86e550d062094866e4d9958b538313ef271a",
+      "decision": "included"
+    },
+    {
+      "source_id": "mengto-skills",
+      "upstream_path": "agent-skills/web-design/orange-clean-paper-saas/SKILL.md",
+      "revision": "25f872a94e3bbee85ecacba4041fa52c21cb0e44",
+      "authority": "procedural-guidance",
+      "role": "mengto-web-design-reference",
+      "license": {
+        "spdx": "MIT",
+        "status": "verified",
+        "notice_path": "LICENSE",
+        "evidence": "reviewed repository notice with no conflicting per-file marker"
+      },
+      "sha256": "4f532470971c92edd7407dfba5ec6656e0377c213903bd68bd82281b7ea39788",
+      "decision": "included"
+    },
+    {
+      "source_id": "mengto-skills",
+      "upstream_path": "agent-skills/web-design/pricing-page/SKILL.md",
+      "revision": "25f872a94e3bbee85ecacba4041fa52c21cb0e44",
+      "authority": "procedural-guidance",
+      "role": "mengto-web-design-reference",
+      "license": {
+        "spdx": "MIT",
+        "status": "verified",
+        "notice_path": "LICENSE",
+        "evidence": "reviewed repository notice with no conflicting per-file marker"
+      },
+      "sha256": "9b3af6174e379042ea1579f5d62b6fb0030fe6298d35b417488ac1e5ef8159db",
+      "decision": "included"
+    },
+    {
+      "source_id": "mengto-skills",
+      "upstream_path": "agent-skills/web-design/progressive-blur/SKILL.md",
+      "revision": "25f872a94e3bbee85ecacba4041fa52c21cb0e44",
+      "authority": "procedural-guidance",
+      "role": "mengto-web-design-reference",
+      "license": {
+        "spdx": "MIT",
+        "status": "verified",
+        "notice_path": "LICENSE",
+        "evidence": "reviewed repository notice with no conflicting per-file marker"
+      },
+      "sha256": "202004db5ff37fb8add044cf00288d984c9a680c2fb07e4bb2dacc3df90ac2a1",
+      "decision": "included"
+    },
+    {
+      "source_id": "mengto-skills",
+      "upstream_path": "agent-skills/web-design/skeuomorphic-ui/SKILL.md",
+      "revision": "25f872a94e3bbee85ecacba4041fa52c21cb0e44",
+      "authority": "procedural-guidance",
+      "role": "mengto-web-design-reference",
+      "license": {
+        "spdx": "MIT",
+        "status": "verified",
+        "notice_path": "LICENSE",
+        "evidence": "reviewed repository notice with no conflicting per-file marker"
+      },
+      "sha256": "2de1673864f136b05b10a17fcf987f39864f30a716250b98e09ce669525292e4",
+      "decision": "included"
+    },
+    {
+      "source_id": "mengto-skills",
+      "upstream_path": "agent-skills/web-design/solar-duotone-bold/SKILL.md",
+      "revision": "25f872a94e3bbee85ecacba4041fa52c21cb0e44",
+      "authority": "procedural-guidance",
+      "role": "mengto-web-design-reference",
+      "license": {
+        "spdx": "MIT",
+        "status": "verified",
+        "notice_path": "LICENSE",
+        "evidence": "reviewed repository notice with no conflicting per-file marker"
+      },
+      "sha256": "fd99604acf317b21dea735558e3ac9ae98ab5751d4addbffe640bde79da41b51",
+      "decision": "included"
+    },
+    {
+      "source_id": "mengto-skills",
+      "upstream_path": "agent-skills/web-design/split-layout-technical/SKILL.md",
+      "revision": "25f872a94e3bbee85ecacba4041fa52c21cb0e44",
+      "authority": "procedural-guidance",
+      "role": "mengto-web-design-reference",
+      "license": {
+        "spdx": "MIT",
+        "status": "verified",
+        "notice_path": "LICENSE",
+        "evidence": "reviewed repository notice with no conflicting per-file marker"
+      },
+      "sha256": "ae8e02a4461773e0d4c04a3ef367cad1a7b6933565549d3296e4a0e54a8b1c0b",
+      "decision": "included"
+    },
+    {
+      "source_id": "mengto-skills",
+      "upstream_path": "agent-skills/web-design/staggered-word-reveal/SKILL.md",
+      "revision": "25f872a94e3bbee85ecacba4041fa52c21cb0e44",
+      "authority": "procedural-guidance",
+      "role": "mengto-web-design-reference",
+      "license": {
+        "spdx": "MIT",
+        "status": "verified",
+        "notice_path": "LICENSE",
+        "evidence": "reviewed repository notice with no conflicting per-file marker"
+      },
+      "sha256": "79061529376810788b1d824e0f16a18c048d1c426d6909442888c9507ead08c9",
+      "decision": "included"
+    },
+    {
+      "source_id": "mengto-skills",
+      "upstream_path": "agent-skills/web-design/tailwindcss/SKILL.md",
+      "revision": "25f872a94e3bbee85ecacba4041fa52c21cb0e44",
+      "authority": "procedural-guidance",
+      "role": "mengto-web-design-reference",
+      "license": {
+        "spdx": "MIT",
+        "status": "verified",
+        "notice_path": "LICENSE",
+        "evidence": "reviewed repository notice with no conflicting per-file marker"
+      },
+      "sha256": "90d2150c24c7453d3f75914791d5356c87606a7c1b933d3371a6120624720c4e",
+      "decision": "included"
+    },
+    {
+      "source_id": "mengto-skills",
+      "upstream_path": "agent-skills/web-design/tech-green-dark-mode-modern/SKILL.md",
+      "revision": "25f872a94e3bbee85ecacba4041fa52c21cb0e44",
+      "authority": "procedural-guidance",
+      "role": "mengto-web-design-reference",
+      "license": {
+        "spdx": "MIT",
+        "status": "verified",
+        "notice_path": "LICENSE",
+        "evidence": "reviewed repository notice with no conflicting per-file marker"
+      },
+      "sha256": "9c47f3929ebd3c3290b6d759f39a32a5ceada51f1a75404d90c391da862b9403",
+      "decision": "included"
+    },
+    {
+      "source_id": "mengto-skills",
+      "upstream_path": "agent-skills/web-design/technical-wireframe-info-layout/SKILL.md",
+      "revision": "25f872a94e3bbee85ecacba4041fa52c21cb0e44",
+      "authority": "procedural-guidance",
+      "role": "mengto-web-design-reference",
+      "license": {
+        "spdx": "MIT",
+        "status": "verified",
+        "notice_path": "LICENSE",
+        "evidence": "reviewed repository notice with no conflicting per-file marker"
+      },
+      "sha256": "1960e7805000cece8f3d5edd87d89232e31caa5d43a9000842bb29cad4de5597",
+      "decision": "included"
+    },
+    {
+      "source_id": "mengto-skills",
+      "upstream_path": "agent-skills/web-design/threejs/SKILL.md",
+      "revision": "25f872a94e3bbee85ecacba4041fa52c21cb0e44",
+      "authority": "procedural-guidance",
+      "role": "mengto-web-design-reference",
+      "license": {
+        "spdx": "MIT",
+        "status": "verified",
+        "notice_path": "LICENSE",
+        "evidence": "reviewed repository notice with no conflicting per-file marker"
+      },
+      "sha256": "e6ebd6e0354b7d05fbfb87a63403b6c2a8c62450f86ff7a9316d55283d586813",
+      "decision": "included"
+    },
+    {
+      "source_id": "mengto-skills",
+      "upstream_path": "agent-skills/web-design/unicorn-studio/SKILL.md",
+      "revision": "25f872a94e3bbee85ecacba4041fa52c21cb0e44",
+      "authority": "procedural-guidance",
+      "role": "mengto-web-design-reference",
+      "license": {
+        "spdx": "MIT",
+        "status": "verified",
+        "notice_path": "LICENSE",
+        "evidence": "reviewed repository notice with no conflicting per-file marker"
+      },
+      "sha256": "580b4ff727af5aa3d3909ee5e8cfe8e955949df597769a141b7548e8cd9f089c",
+      "decision": "included"
+    },
+    {
+      "source_id": "mengto-skills",
+      "upstream_path": "agent-skills/web-design/vantajs/SKILL.md",
+      "revision": "25f872a94e3bbee85ecacba4041fa52c21cb0e44",
+      "authority": "procedural-guidance",
+      "role": "mengto-web-design-reference",
+      "license": {
+        "spdx": "MIT",
+        "status": "verified",
+        "notice_path": "LICENSE",
+        "evidence": "reviewed repository notice with no conflicting per-file marker"
+      },
+      "sha256": "eeacf653ac518fccf3102d85cffb4002ecc2b0b8a4238757b2945a354b9afea0",
+      "decision": "included"
+    },
+    {
+      "source_id": "mengto-skills",
+      "upstream_path": "agent-skills/web-design/webgl-3d-object/SKILL.md",
+      "revision": "25f872a94e3bbee85ecacba4041fa52c21cb0e44",
+      "authority": "procedural-guidance",
+      "role": "mengto-web-design-reference",
+      "license": {
+        "spdx": "MIT",
+        "status": "verified",
+        "notice_path": "LICENSE",
+        "evidence": "reviewed repository notice with no conflicting per-file marker"
+      },
+      "sha256": "8b4c8fca568309a6156389bb21b7077a27abe24213789d7f1b2c7d5ab79f3e45",
+      "decision": "included"
+    },
+    {
+      "source_id": "mengto-skills",
+      "upstream_path": "agent-skills/web-design/webgl-landing-steering/SKILL.md",
+      "revision": "25f872a94e3bbee85ecacba4041fa52c21cb0e44",
+      "authority": "procedural-guidance",
+      "role": "mengto-web-design-reference",
+      "license": {
+        "spdx": "MIT",
+        "status": "verified",
+        "notice_path": "LICENSE",
+        "evidence": "reviewed repository notice with no conflicting per-file marker"
+      },
+      "sha256": "a5310ca2912c1c5ae8eb38f14284e5876da88bdbb9ee8034838aafba462a5127",
+      "decision": "included"
+    },
+    {
+      "source_id": "mengto-skills",
+      "upstream_path": "agent-skills/web-design/webgl-laser/SKILL.md",
+      "revision": "25f872a94e3bbee85ecacba4041fa52c21cb0e44",
+      "authority": "procedural-guidance",
+      "role": "mengto-web-design-reference",
+      "license": {
+        "spdx": "MIT",
+        "status": "verified",
+        "notice_path": "LICENSE",
+        "evidence": "reviewed repository notice with no conflicting per-file marker"
+      },
+      "sha256": "da5aef6c1b15ae0a98b545a5d51ac323c4614484e7faaa2346ec15d2b76dc21e",
+      "decision": "included"
+    }
+  ]
+}

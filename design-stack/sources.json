@@ -1,0 +1,139 @@
+{
+  "schema_version": 1,
+  "google_design_md_cli_version": "0.3.0",
+  "sources": [
+    {
+      "id": "anthropic-frontend-design",
+      "repository": "https://github.com/anthropics/skills",
+      "revision": "9d2f1ae187231d8199c64b5b762e1bdf2244733d",
+      "authority": "official-upstream-evidence",
+      "scope": [
+        "skills/frontend-design/**"
+      ],
+      "license": {
+        "spdx": "NOASSERTION",
+        "status": "unresolved",
+        "notice_path": null
+      },
+      "role": "frontend-design-provenance-evidence",
+      "update_method": "review-only-until-license-resolved",
+      "distribution": "reference-only",
+      "destination": null
+    },
+    {
+      "id": "awesome-design-md",
+      "repository": "https://github.com/VoltAgent/awesome-design-md",
+      "revision": "664b3e78fd1a298ba11973822da988483256d4b4",
+      "authority": "third-party-analysis",
+      "scope": [
+        "design-md/*/DESIGN.md"
+      ],
+      "license": {
+        "spdx": "MIT",
+        "status": "verified",
+        "notice_path": "LICENSE"
+      },
+      "role": "visual-inspiration",
+      "update_method": "reviewed-local-tar",
+      "distribution": "vendored",
+      "destination": "design-stack/vendor/awesome-design-md"
+    },
+    {
+      "id": "google-design-md",
+      "repository": "https://github.com/google-labs-code/design.md",
+      "revision": "ea4a3240d4c0d06778b9e39efeb553851be27c17",
+      "authority": "project-contract-tooling",
+      "scope": [
+        "packages/cli/**",
+        "packages/core/**",
+        "schemas/**"
+      ],
+      "license": {
+        "spdx": "Apache-2.0",
+        "status": "verified",
+        "notice_path": "LICENSE"
+      },
+      "role": "design-md-validation",
+      "update_method": "reviewed-local-tar",
+      "distribution": "vendored",
+      "destination": "design-stack/vendor/google-design-md"
+    },
+    {
+      "id": "mengto-skills",
+      "repository": "https://github.com/MengTo/Skills",
+      "revision": "25f872a94e3bbee85ecacba4041fa52c21cb0e44",
+      "authority": "procedural-guidance",
+      "scope": [
+        "agent-skills/**/SKILL.md"
+      ],
+      "license": {
+        "spdx": "MIT",
+        "status": "verified",
+        "notice_path": "LICENSE"
+      },
+      "role": "frontend-procedure-reference",
+      "update_method": "reviewed-local-tar",
+      "distribution": "vendored",
+      "destination": "design-stack/vendor/mengto-skills"
+    },
+    {
+      "id": "open-design",
+      "repository": "https://github.com/nexu-io/open-design",
+      "revision": "81b20dc6a214da2228bdd08f8850656b98f9bcea",
+      "authority": "optional-provider",
+      "scope": [
+        "design-systems/<explicit-selection>/**"
+      ],
+      "license": {
+        "spdx": "Apache-2.0",
+        "status": "verified",
+        "notice_path": "LICENSE"
+      },
+      "role": "on-demand-design-system-package",
+      "update_method": "explicit-package-selection",
+      "distribution": "on-demand",
+      "destination": null
+    },
+    {
+      "id": "vercel-agent-skills",
+      "repository": "https://github.com/vercel-labs/agent-skills",
+      "revision": "f8a72b9603728bb92a217a879b7e62e43ad76c81",
+      "authority": "official-quality-guidance",
+      "scope": [
+        "skills/composition-patterns/**",
+        "skills/react-best-practices/**",
+        "skills/react-view-transitions/**",
+        "skills/web-design-guidelines/**",
+        "skills/writing-guidelines/**"
+      ],
+      "license": {
+        "spdx": "NOASSERTION",
+        "status": "unresolved",
+        "notice_path": null
+      },
+      "role": "react-and-interface-quality",
+      "update_method": "review-and-map-official-source",
+      "distribution": "reference-only",
+      "destination": null
+    },
+    {
+      "id": "vercel-web-interface-guidelines",
+      "repository": "https://github.com/vercel-labs/web-interface-guidelines",
+      "revision": "d0a657bfe87e86dd3a4753d7ec28c7e7dd7a88fe",
+      "authority": "official-quality-guidance",
+      "scope": [
+        "README.md",
+        "src/**"
+      ],
+      "license": {
+        "spdx": "MIT",
+        "status": "verified",
+        "notice_path": "LICENSE"
+      },
+      "role": "interface-quality-gate",
+      "update_method": "reviewed-local-tar",
+      "distribution": "vendored",
+      "destination": "design-stack/vendor/vercel-web-interface-guidelines"
+    }
+  ]
+}
