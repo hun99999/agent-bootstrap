@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 import argparse
+import base64
+import binascii
 import hashlib
 import json
 import os
@@ -18,8 +20,16 @@ from typing import Any, Iterable, Mapping, Sequence
 
 
 RECEIPT_NAME = ".frontend-design-receipt.json"
+RECEIPT_SCHEMA_VERSION = 2
 HEX_40 = re.compile(r"^[0-9a-f]{40}$")
 SHA256 = re.compile(r"^[0-9a-f]{64}$")
+RAW_TREE_ENTRY_TYPES = {
+    b"40000": ("040000", "tree"),
+    b"100644": ("100644", "blob"),
+    b"100755": ("100755", "blob"),
+    b"120000": ("120000", "blob"),
+    b"160000": ("160000", "commit"),
+}
 
 
 class OpenDesignError(ValueError):
@@ -33,6 +43,43 @@ def _sha256(content: bytes) -> str:
 def _git_blob_sha1(content: bytes) -> str:
     header = f"blob {len(content)}\0".encode("ascii")
     return hashlib.sha1(header + content, usedforsecurity=False).hexdigest()
+
+
+def _git_tree_sha1(body: bytes) -> str:
+    header = f"tree {len(body)}\0".encode("ascii")
+    return hashlib.sha1(header + body, usedforsecurity=False).hexdigest()
+
+
+def _parse_raw_tree(body: bytes) -> list[dict[str, Any]]:
+    entries: list[dict[str, Any]] = []
+    seen: set[bytes] = set()
+    cursor = 0
+    while cursor < len(body):
+        space = body.find(b" ", cursor)
+        terminator = body.find(b"\0", space + 1)
+        if space <= cursor or terminator <= space + 1 or terminator + 21 > len(body):
+            raise OpenDesignError("Open Design raw Git tree is malformed")
+        raw_mode = body[cursor:space]
+        name = body[space + 1 : terminator]
+        raw_oid = body[terminator + 1 : terminator + 21]
+        if raw_mode not in RAW_TREE_ENTRY_TYPES:
+            raise OpenDesignError("Open Design raw Git tree mode is invalid")
+        if not name or name in {b".", b".."} or b"/" in name:
+            raise OpenDesignError("Open Design raw Git tree name is invalid")
+        if name in seen:
+            raise OpenDesignError("Open Design raw Git tree has a duplicate name")
+        seen.add(name)
+        mode, object_type = RAW_TREE_ENTRY_TYPES[raw_mode]
+        entries.append(
+            {
+                "name": name,
+                "mode": mode,
+                "type": object_type,
+                "oid": raw_oid.hex(),
+            }
+        )
+        cursor = terminator + 21
+    return entries
 
 
 def _safe_relative_path(value: Any, label: str) -> str:
@@ -199,6 +246,20 @@ class _FetchedRepository:
                     self.provider["revision"],
                 ]
             )
+            fetched_revision = _run_git(
+                ["-C", str(self.path), "rev-parse", "FETCH_HEAD"]
+            )
+            if fetched_revision != self.provider["revision"]:
+                raise OpenDesignError(
+                    f"fetched Open Design revision differs: {fetched_revision}"
+                )
+            object_type = _run_git(
+                ["-C", str(self.path), "cat-file", "-t", "FETCH_HEAD"]
+            )
+            if object_type != "commit":
+                raise OpenDesignError(
+                    "pinned Open Design revision must resolve to a commit"
+                )
             root_tree = _run_git(
                 ["-C", str(self.path), "rev-parse", "FETCH_HEAD^{tree}"]
             )
@@ -298,6 +359,88 @@ def _parse_tree_files(raw: bytes) -> list[dict[str, Any]]:
             }
         )
     return files
+
+
+def _build_tree_proof(
+    repository: Path,
+    package_source_root: str,
+    source_paths: Sequence[str],
+) -> list[dict[str, Any]]:
+    directory_paths = {""}
+    for source_path in source_paths:
+        parts = PurePosixPath(source_path).parts
+        for depth in range(1, len(parts)):
+            directory_paths.add("/".join(parts[:depth]))
+
+    proof_by_path: dict[str, dict[str, Any]] = {}
+
+    def load_tree(directory_path: str) -> list[dict[str, Any]]:
+        existing = proof_by_path.get(directory_path)
+        if existing is not None:
+            return existing["parsed_entries"]
+        tree_spec = (
+            "FETCH_HEAD^{tree}"
+            if not directory_path
+            else f"FETCH_HEAD:{directory_path}"
+        )
+        tree_oid = _run_git(
+            ["-C", str(repository), "rev-parse", tree_spec]
+        )
+        if not isinstance(tree_oid, str) or HEX_40.fullmatch(tree_oid) is None:
+            raise OpenDesignError(
+                f"Open Design proof path is not a Git tree: {directory_path or '.'}"
+            )
+        body = _run_git(
+            ["-C", str(repository), "cat-file", "tree", tree_oid],
+            binary=True,
+        )
+        assert isinstance(body, bytes)
+        _parse_raw_tree(body)
+        if _git_tree_sha1(body) != tree_oid:
+            raise OpenDesignError(
+                f"Open Design proof tree differs: {directory_path or '.'}"
+            )
+        parsed_entries = _parse_raw_tree(body)
+        proof_by_path[directory_path] = {
+            "path": directory_path,
+            "tree": tree_oid,
+            "body_base64": base64.b64encode(body).decode("ascii"),
+            "parsed_entries": parsed_entries,
+        }
+        return parsed_entries
+
+    for directory_path in directory_paths:
+        load_tree(directory_path)
+
+    pending = [package_source_root]
+    visited: set[str] = set()
+    while pending:
+        directory_path = pending.pop()
+        if directory_path in visited:
+            continue
+        visited.add(directory_path)
+        for entry in load_tree(directory_path):
+            if entry["mode"] != "040000":
+                continue
+            try:
+                name = entry["name"].decode("utf-8")
+            except UnicodeDecodeError as error:
+                raise OpenDesignError(
+                    "Open Design selected package tree has a non-UTF-8 path"
+                ) from error
+            child_path = f"{directory_path}/{name}"
+            _safe_relative_path(child_path, "Open Design selected package tree path")
+            pending.append(child_path)
+
+    proof: list[dict[str, Any]] = []
+    for directory_path in sorted(
+        proof_by_path,
+        key=lambda value: (len(PurePosixPath(value).parts), value.encode("utf-8")),
+    ):
+        node = dict(proof_by_path[directory_path])
+        node.pop("parsed_entries")
+        proof.append(node)
+    return proof
 
 
 def _selected_tree_files(
@@ -454,6 +597,215 @@ def _receipt_result(
     }
 
 
+def _proof_path_sort_key(value: str) -> tuple[int, bytes]:
+    return (len(PurePosixPath(value).parts), value.encode("utf-8"))
+
+
+def _load_tree_proof(
+    provider: Mapping[str, Any],
+    receipt: Mapping[str, Any],
+) -> dict[str, dict[str, Any]]:
+    raw_proof = receipt.get("tree_proof")
+    if not isinstance(raw_proof, list) or not raw_proof:
+        raise OpenDesignError("Open Design cache tree proof is missing")
+    if len(raw_proof) > provider["limits"]["max_files"] * 2 + 16:
+        raise OpenDesignError("Open Design cache tree proof has too many nodes")
+
+    nodes: dict[str, dict[str, Any]] = {}
+    total_body_bytes = 0
+    paths: list[str] = []
+    for index, raw_node in enumerate(raw_proof):
+        if not isinstance(raw_node, Mapping) or set(raw_node) != {
+            "path",
+            "tree",
+            "body_base64",
+        }:
+            raise OpenDesignError(f"Open Design cache tree proof node {index} is invalid")
+        path = raw_node["path"]
+        if path != "":
+            path = _safe_relative_path(path, "cache tree proof path")
+        if path in nodes:
+            raise OpenDesignError(f"duplicate Open Design cache tree proof path: {path}")
+        tree_oid = raw_node["tree"]
+        if HEX_40.fullmatch(str(tree_oid)) is None:
+            raise OpenDesignError(f"Open Design cache tree proof OID is invalid: {path}")
+        encoded_body = raw_node["body_base64"]
+        if not isinstance(encoded_body, str) or not encoded_body:
+            raise OpenDesignError(f"Open Design cache tree proof body is invalid: {path}")
+        try:
+            body = base64.b64decode(encoded_body, validate=True)
+        except (ValueError, binascii.Error) as error:
+            raise OpenDesignError(
+                f"Open Design cache tree proof body is invalid: {path}"
+            ) from error
+        total_body_bytes += len(body)
+        if total_body_bytes > provider["limits"]["max_total_bytes"]:
+            raise OpenDesignError("Open Design cache tree proof exceeds the size limit")
+        if _git_tree_sha1(body) != tree_oid:
+            raise OpenDesignError(f"Open Design cache tree proof hash differs: {path}")
+        entries = _parse_raw_tree(body)
+        nodes[path] = {
+            "tree": tree_oid,
+            "entries": entries,
+            "entries_by_name": {entry["name"]: entry for entry in entries},
+        }
+        paths.append(path)
+
+    if paths != sorted(paths, key=_proof_path_sort_key):
+        raise OpenDesignError("Open Design cache tree proof paths are not canonical")
+    root = nodes.get("")
+    if root is None or root["tree"] != provider["root_tree"]:
+        raise OpenDesignError("Open Design cache tree proof is not pinned to the root tree")
+    return nodes
+
+
+def _linked_tree_node(
+    nodes: Mapping[str, Mapping[str, Any]],
+    directory_path: str,
+    visited: set[str],
+) -> Mapping[str, Any]:
+    current_path = ""
+    current = nodes.get(current_path)
+    if current is None:
+        raise OpenDesignError("Open Design cache root tree proof is missing")
+    visited.add(current_path)
+    if not directory_path:
+        return current
+
+    _safe_relative_path(directory_path, "cache tree proof directory")
+    for component in PurePosixPath(directory_path).parts:
+        entry = current["entries_by_name"].get(component.encode("utf-8"))
+        if entry is None or entry["mode"] != "040000" or entry["type"] != "tree":
+            raise OpenDesignError(
+                f"Open Design cache tree proof path is not anchored: {directory_path}"
+            )
+        current_path = (
+            component if not current_path else f"{current_path}/{component}"
+        )
+        child = nodes.get(current_path)
+        if child is None:
+            raise OpenDesignError(
+                f"Open Design cache child tree proof is missing: {current_path}"
+            )
+        if child["tree"] != entry["oid"]:
+            raise OpenDesignError(
+                f"Open Design cache child tree proof differs: {current_path}"
+            )
+        visited.add(current_path)
+        current = child
+    return current
+
+
+def _anchored_blob_oid(
+    nodes: Mapping[str, Mapping[str, Any]],
+    source_path: str,
+    visited: set[str],
+) -> str:
+    source_path = _safe_relative_path(source_path, "cache proof source path")
+    parts = PurePosixPath(source_path).parts
+    parent_path = "/".join(parts[:-1])
+    parent = _linked_tree_node(nodes, parent_path, visited)
+    entry = parent["entries_by_name"].get(parts[-1].encode("utf-8"))
+    if entry is None or entry["mode"] != "100644" or entry["type"] != "blob":
+        raise OpenDesignError(
+            f"Open Design cache file is not an anchored regular blob: {source_path}"
+        )
+    return entry["oid"]
+
+
+def _walk_anchored_package(
+    nodes: Mapping[str, Mapping[str, Any]],
+    package_source_root: str,
+    visited: set[str],
+) -> tuple[str, dict[str, str]]:
+    package_node = _linked_tree_node(nodes, package_source_root, visited)
+    package_files: dict[str, str] = {}
+
+    def walk(directory_path: str, node: Mapping[str, Any]) -> None:
+        for entry in node["entries"]:
+            try:
+                name = entry["name"].decode("utf-8")
+            except UnicodeDecodeError as error:
+                raise OpenDesignError(
+                    "Open Design selected package proof has a non-UTF-8 path"
+                ) from error
+            source_path = f"{directory_path}/{name}"
+            _safe_relative_path(source_path, "selected package proof path")
+            if entry["mode"] == "040000" and entry["type"] == "tree":
+                child = nodes.get(source_path)
+                if child is None:
+                    raise OpenDesignError(
+                        f"Open Design selected package child proof is missing: {source_path}"
+                    )
+                if child["tree"] != entry["oid"]:
+                    raise OpenDesignError(
+                        f"Open Design selected package child proof differs: {source_path}"
+                    )
+                visited.add(source_path)
+                walk(source_path, child)
+            elif entry["mode"] == "100644" and entry["type"] == "blob":
+                package_files[source_path] = entry["oid"]
+            else:
+                raise OpenDesignError(
+                    "Open Design selected package proof contains a non-regular entry: "
+                    f"{source_path}"
+                )
+
+    walk(package_source_root, package_node)
+    return package_node["tree"], package_files
+
+
+def _anchored_expected_files(
+    provider: Mapping[str, Any],
+    slug: str,
+    receipt: Mapping[str, Any],
+) -> dict[str, dict[str, str]]:
+    nodes = _load_tree_proof(provider, receipt)
+    visited: set[str] = set()
+    package_source_root = f"{provider['package_root']}/{slug}"
+    package_tree, package_files = _walk_anchored_package(
+        nodes,
+        package_source_root,
+        visited,
+    )
+    if receipt.get("package_tree") != package_tree:
+        raise OpenDesignError("Open Design cache package tree differs from its proof")
+
+    source_oids = {
+        provider["license"]["path"]: _anchored_blob_oid(
+            nodes,
+            provider["license"]["path"],
+            visited,
+        ),
+        provider["package_index_path"]: _anchored_blob_oid(
+            nodes,
+            provider["package_index_path"],
+            visited,
+        ),
+    }
+    for source_path, oid in package_files.items():
+        if source_path in source_oids:
+            raise OpenDesignError(
+                f"duplicate Open Design anchored source path: {source_path}"
+            )
+        source_oids[source_path] = oid
+    if set(nodes) != visited:
+        raise OpenDesignError("Open Design cache tree proof contains unused nodes")
+
+    expected: dict[str, dict[str, str]] = {}
+    for source_path, oid in source_oids.items():
+        destination = _destination_path(provider, slug, source_path)
+        if destination in expected:
+            raise OpenDesignError(
+                f"duplicate Open Design anchored destination: {destination}"
+            )
+        expected[destination] = {
+            "source_path": source_path,
+            "git_blob_sha1": oid,
+        }
+    return expected
+
+
 def _verify_cache_path(
     provider: Mapping[str, Any],
     slug: str,
@@ -469,7 +821,7 @@ def _verify_cache_path(
     except (OSError, UnicodeDecodeError, json.JSONDecodeError) as error:
         raise OpenDesignError("Open Design cache receipt is invalid") from error
     expected_receipt_values = {
-        "schema_version": 1,
+        "schema_version": RECEIPT_SCHEMA_VERSION,
         "provider_id": provider["provider_id"],
         "repository": provider["repository"],
         "revision": provider["revision"],
@@ -482,6 +834,15 @@ def _verify_cache_path(
     }
     if not isinstance(receipt, dict):
         raise OpenDesignError("Open Design cache receipt must be an object")
+    expected_receipt_fields = set(expected_receipt_values) | {
+        "package_tree",
+        "retrieved_at",
+        "license",
+        "files",
+        "tree_proof",
+    }
+    if set(receipt) != expected_receipt_fields:
+        raise OpenDesignError("Open Design cache receipt fields are not recognized")
     for field, expected in expected_receipt_values.items():
         if receipt.get(field) != expected:
             raise OpenDesignError(f"Open Design cache receipt {field} differs")
@@ -491,6 +852,7 @@ def _verify_cache_path(
         raise OpenDesignError("Open Design cache receipt retrieval time is missing")
     if receipt.get("license") != provider["license"]:
         raise OpenDesignError("Open Design cache receipt license differs")
+    anchored_files = _anchored_expected_files(provider, slug, receipt)
     file_records = receipt.get("files")
     if not isinstance(file_records, list) or not file_records:
         raise OpenDesignError("Open Design cache receipt file list is missing")
@@ -506,18 +868,39 @@ def _verify_cache_path(
         }:
             raise OpenDesignError(f"Open Design cache file record {index} is invalid")
         relative_path = _safe_relative_path(record["path"], "cache receipt path")
-        _safe_relative_path(record["source_path"], "cache receipt source path")
+        source_path = _safe_relative_path(
+            record["source_path"],
+            "cache receipt source path",
+        )
         if relative_path in expected_files:
             raise OpenDesignError(f"duplicate Open Design cache receipt path: {relative_path}")
+        anchored = anchored_files.get(relative_path)
+        if anchored is None:
+            raise OpenDesignError(
+                f"Open Design cache receipt path is outside the anchored file set: {relative_path}"
+            )
+        if source_path != anchored["source_path"]:
+            raise OpenDesignError(
+                f"Open Design cache receipt source path differs: {relative_path}"
+            )
         if record["mode"] != "100644":
             raise OpenDesignError(f"Open Design cache mode differs: {relative_path}")
         if not isinstance(record["size"], int) or record["size"] < 0:
             raise OpenDesignError(f"Open Design cache size is invalid: {relative_path}")
         if HEX_40.fullmatch(str(record["git_blob_sha1"])) is None:
             raise OpenDesignError(f"Open Design cache blob hash is invalid: {relative_path}")
+        if record["git_blob_sha1"] != anchored["git_blob_sha1"]:
+            raise OpenDesignError(
+                f"Open Design cache blob hash differs from its tree proof: {relative_path}"
+            )
         if SHA256.fullmatch(str(record["sha256"])) is None:
             raise OpenDesignError(f"Open Design cache SHA-256 is invalid: {relative_path}")
         expected_files[relative_path] = record
+    missing_records = sorted(set(anchored_files) - set(expected_files))
+    if missing_records:
+        raise OpenDesignError(
+            f"Open Design cache receipt is missing anchored files: {missing_records}"
+        )
 
     actual_files: dict[str, Path] = {}
     for path in cache_path.rglob("*"):
@@ -537,18 +920,31 @@ def _verify_cache_path(
         raise OpenDesignError(
             f"Open Design cache file set differs; missing={missing}, unexpected={unexpected}"
         )
+    total_size = 0
     for relative_path, record in expected_files.items():
         path = actual_files[relative_path]
         mode = path.stat().st_mode
         if not stat.S_ISREG(mode) or mode & 0o111:
             raise OpenDesignError(f"Open Design cache mode differs: {relative_path}")
         content = path.read_bytes()
+        total_size += len(content)
         if len(content) != record["size"]:
             raise OpenDesignError(f"Open Design cache size differs: {relative_path}")
         if _sha256(content) != record["sha256"]:
             raise OpenDesignError(f"Open Design cache hash differs: {relative_path}")
         if _git_blob_sha1(content) != record["git_blob_sha1"]:
             raise OpenDesignError(f"Open Design cache blob hash differs: {relative_path}")
+        if relative_path == "_provider/LICENSE" and (
+            len(content) != provider["license"]["size"]
+            or _sha256(content) != provider["license"]["sha256"]
+        ):
+            raise OpenDesignError(
+                "Open Design cached license differs from the pinned provider hash"
+            )
+    if len(expected_files) > provider["limits"]["max_files"]:
+        raise OpenDesignError("Open Design cache exceeds the file-count limit")
+    if total_size > provider["limits"]["max_total_bytes"]:
+        raise OpenDesignError("Open Design cache exceeds the total-size limit")
     _validate_manifest(provider, slug, cache_path / "package")
     return receipt
 
@@ -589,6 +985,12 @@ def fetch_package(
         if slug not in packages:
             raise OpenDesignError(f"Open Design package slug does not exist: {slug}")
         package_tree, files = _selected_tree_files(repository, provider, slug)
+        package_source_root = f"{provider['package_root']}/{slug}"
+        tree_proof = _build_tree_proof(
+            repository,
+            package_source_root,
+            [record["source_path"] for record in files],
+        )
         staging = Path(
             tempfile.mkdtemp(prefix=f".{slug}.staging-", dir=revision_root)
         )
@@ -645,7 +1047,7 @@ def fetch_package(
                 raise OpenDesignError("Open Design root license hash or size differs")
             _validate_manifest(provider, slug, staging / "package")
             receipt = {
-                "schema_version": 1,
+                "schema_version": RECEIPT_SCHEMA_VERSION,
                 "provider_id": provider["provider_id"],
                 "repository": provider["repository"],
                 "revision": provider["revision"],
@@ -659,6 +1061,7 @@ def fetch_package(
                 "retrieved_at": datetime.now(timezone.utc).isoformat(),
                 "package_root": "package",
                 "files": sorted(records, key=lambda record: record["path"]),
+                "tree_proof": tree_proof,
             }
             receipt_path = staging / RECEIPT_NAME
             receipt_path.write_text(

@@ -56,11 +56,26 @@ class FrontendDesignDocumentationTests(unittest.TestCase):
             "open_design_cache.py fetch --explicit-demand",
             "open_design_cache.py verify --explicit-demand",
             "fail without deleting or overwriting",
+            "receipt is not an authority",
+            "pinned root-tree Merkle proof",
+            "receipt schema v1",
             "package-level provenance",
             "Preview HTML",
         )
         for phrase in expected_phrases:
             self.assertIn(phrase, guide)
+
+    def test_open_design_reference_documents_the_offline_trust_anchor(self) -> None:
+        reference = (
+            REPO_ROOT / "design-stack/router/references/open-design.md"
+        ).read_text(encoding="utf-8")
+        for phrase in (
+            "receipt is an untrusted witness",
+            "pinned root tree",
+            "receipt schema v1",
+            "fail without mutation",
+        ):
+            self.assertIn(phrase, reference)
 
     def test_setup_prompts_keep_identity_models_plugins_and_figma_approval_gated(self) -> None:
         for relative_path in (

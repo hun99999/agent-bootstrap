@@ -27,6 +27,12 @@ python3 scripts/open_design_cache.py verify --explicit-demand --slug "<slug>" --
 repository, revision, latest, force, purge, or authentication override. Do not execute the upstream
 CLI, install dependencies, run package scripts, or open preview HTML automatically.
 
+The receipt is an untrusted witness, not an authority. Offline verification recomputes every raw
+Git tree object in its proof, anchors the path walk at the provider's pinned root tree, covers the
+complete selected package subtree, and compares cached bytes with the anchored blob IDs.
+A receipt schema v1 cache is not upgraded automatically: fail without mutation and require fresh
+explicit demand before fetching a schema v2 cache.
+
 Every use begins with `verify`. Load `USAGE.md`, `DESIGN.md`, and `tokens.css` from the returned
 package root as needed; inspect components, previews, assets, or source evidence only when the task
 requires them. Cache presence never authorizes loading a package in a later task.

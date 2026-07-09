@@ -1808,7 +1808,7 @@
     "corrupt_cache_policy": "fail-without-mutation",
     "distribution": "on-demand",
     "helper_path": "scripts/open_design_cache.py",
-    "helper_sha256": "00142bb670aa9552ed0af29c70394128894081ce227ff582e5e1262386de0ad2",
+    "helper_sha256": "aa6b34a9065403d63fd4396f5bf9eee8c04726a391d821b6440593c664cc4297",
     "network_policy": "explicit-demand-only",
     "provider_id": "open-design",
     "provider_sha256": "95b75993f1379864d37a18875d6bf9ec1e43eabfa12b66e0132a0ab7ed66060f",

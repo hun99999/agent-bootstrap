@@ -1,5 +1,7 @@
+import base64
 import importlib.util
 import gc
+import hashlib
 import json
 import subprocess
 import sys
@@ -22,6 +24,11 @@ from tests.frontend_design_test_support import (
 REPO_ROOT = Path(__file__).resolve().parents[1]
 SCRIPT_PATH = REPO_ROOT / "design-stack/router/scripts/open_design_cache.py"
 LICENSE = b"fixture provider license\n"
+
+
+def git_blob_sha1(content: bytes) -> str:
+    header = f"blob {len(content)}\0".encode("ascii")
+    return hashlib.sha1(header + content, usedforsecurity=False).hexdigest()
 
 
 def load_open_design_module():
@@ -149,11 +156,13 @@ class OpenDesignCacheTests(unittest.TestCase):
             self.assertFalse(sentinel.exists())
 
             receipt = json.loads(receipt_path.read_text(encoding="utf-8"))
+            self.assertEqual(receipt["schema_version"], 2)
             self.assertEqual(receipt["package_slug"], "alpha")
             self.assertEqual(receipt["revision"], provider["revision"])
             self.assertEqual(receipt["root_tree"], provider["root_tree"])
             self.assertTrue(receipt["package_tree"])
             self.assertTrue(receipt["files"])
+            self.assertTrue(receipt["tree_proof"])
             self.assertTrue(all(record["mode"] == "100644" for record in receipt["files"]))
 
             verified = self.open_design.verify_package(provider, "alpha", cache_root)
@@ -202,6 +211,150 @@ class OpenDesignCacheTests(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, "unexpected|file set"):
                 self.open_design.verify_package(provider, "alpha", cache_root)
 
+    def test_offline_verify_rejects_rehashed_receipt_tampering(self) -> None:
+        tampered_paths = (
+            "package/DESIGN.md",
+            "_provider/README.md",
+            "_provider/LICENSE",
+        )
+        for relative_path in tampered_paths:
+            with self.subTest(path=relative_path), tempfile.TemporaryDirectory() as temp_dir:
+                root = Path(temp_dir)
+                _, provider = create_provider_repo(root)
+                cache_root = root / "cache"
+                result = self.open_design.fetch_package(provider, "alpha", cache_root)
+                cache_path = Path(result["cache_path"])
+                receipt_path = Path(result["receipt_path"])
+                tampered = f"tampered {relative_path}\n".encode("utf-8")
+
+                (cache_path / relative_path).write_bytes(tampered)
+                receipt = json.loads(receipt_path.read_text(encoding="utf-8"))
+                record = next(
+                    item for item in receipt["files"] if item["path"] == relative_path
+                )
+                record["size"] = len(tampered)
+                record["sha256"] = sha256_bytes(tampered)
+                record["git_blob_sha1"] = git_blob_sha1(tampered)
+                receipt_path.write_text(
+                    json.dumps(receipt, indent=2, ensure_ascii=False, sort_keys=True) + "\n",
+                    encoding="utf-8",
+                )
+
+                with self.assertRaisesRegex(ValueError, "pinned|proof|tree|hash"):
+                    self.open_design.verify_package(provider, "alpha", cache_root)
+
+    def test_offline_verify_rejects_unanchored_or_incomplete_tree_proof(self) -> None:
+        mutation_kinds = ("missing-root", "missing-package", "changed-body")
+        for mutation_kind in mutation_kinds:
+            with self.subTest(kind=mutation_kind), tempfile.TemporaryDirectory() as temp_dir:
+                root = Path(temp_dir)
+                _, provider = create_provider_repo(root)
+                cache_root = root / "cache"
+                result = self.open_design.fetch_package(provider, "alpha", cache_root)
+                receipt_path = Path(result["receipt_path"])
+                receipt = json.loads(receipt_path.read_text(encoding="utf-8"))
+                proof = receipt.get("tree_proof")
+                self.assertIsInstance(proof, list)
+
+                if mutation_kind == "missing-root":
+                    receipt["tree_proof"] = [
+                        node for node in proof if node["path"] != ""
+                    ]
+                elif mutation_kind == "missing-package":
+                    receipt["tree_proof"] = [
+                        node
+                        for node in proof
+                        if node["path"] != "design-systems/alpha"
+                    ]
+                else:
+                    root_node = next(node for node in proof if node["path"] == "")
+                    body = bytearray(base64.b64decode(root_node["body_base64"]))
+                    body[-1] ^= 1
+                    root_node["body_base64"] = base64.b64encode(body).decode("ascii")
+                receipt_path.write_text(
+                    json.dumps(receipt, indent=2, ensure_ascii=False, sort_keys=True) + "\n",
+                    encoding="utf-8",
+                )
+
+                with self.assertRaisesRegex(ValueError, "proof|tree|pinned"):
+                    self.open_design.verify_package(provider, "alpha", cache_root)
+
+    def test_offline_verify_binds_records_to_exact_selected_source_paths(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            _, provider = create_provider_repo(root)
+            cache_root = root / "cache"
+            result = self.open_design.fetch_package(provider, "alpha", cache_root)
+            receipt_path = Path(result["receipt_path"])
+            receipt = json.loads(receipt_path.read_text(encoding="utf-8"))
+            record = next(
+                item for item in receipt["files"] if item["path"] == "package/DESIGN.md"
+            )
+            record["source_path"] = "design-systems/beta/DESIGN.md"
+            receipt_path.write_text(
+                json.dumps(receipt, indent=2, ensure_ascii=False, sort_keys=True) + "\n",
+                encoding="utf-8",
+            )
+
+            with self.assertRaisesRegex(ValueError, "path|proof|selected|source"):
+                self.open_design.verify_package(provider, "alpha", cache_root)
+
+    def test_offline_verify_rejects_deleted_optional_file_and_receipt_record(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            _, provider = create_provider_repo(root)
+            cache_root = root / "cache"
+            result = self.open_design.fetch_package(provider, "alpha", cache_root)
+            cache_path = Path(result["cache_path"])
+            receipt_path = Path(result["receipt_path"])
+            optional_path = cache_path / "package/USAGE.md"
+            optional_path.unlink()
+            receipt = json.loads(receipt_path.read_text(encoding="utf-8"))
+            receipt["files"] = [
+                record
+                for record in receipt["files"]
+                if record["path"] != "package/USAGE.md"
+            ]
+            receipt_path.write_text(
+                json.dumps(receipt, indent=2, ensure_ascii=False, sort_keys=True) + "\n",
+                encoding="utf-8",
+            )
+
+            with self.assertRaisesRegex(ValueError, "missing|proof|tree|file set"):
+                self.open_design.verify_package(provider, "alpha", cache_root)
+
+    def test_schema_v1_cache_fails_without_mutation(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            _, provider = create_provider_repo(root)
+            cache_root = root / "cache"
+            result = self.open_design.fetch_package(provider, "alpha", cache_root)
+            cache_path = Path(result["cache_path"])
+            receipt_path = Path(result["receipt_path"])
+            receipt = json.loads(receipt_path.read_text(encoding="utf-8"))
+            receipt["schema_version"] = 1
+            receipt_path.write_text(
+                json.dumps(receipt, indent=2, ensure_ascii=False, sort_keys=True) + "\n",
+                encoding="utf-8",
+            )
+            before = snapshot_tree(cache_path)
+
+            with self.assertRaisesRegex(ValueError, "schema_version|receipt"):
+                self.open_design.verify_package(provider, "alpha", cache_root)
+            self.assertEqual(snapshot_tree(cache_path), before)
+
+    def test_offline_verify_does_not_reopen_the_provider_repository(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            repo, provider = create_provider_repo(root)
+            cache_root = root / "cache"
+            self.open_design.fetch_package(provider, "alpha", cache_root)
+            repo.rename(root / "provider-unavailable")
+
+            result = self.open_design.verify_package(provider, "alpha", cache_root)
+
+            self.assertEqual(result["status"], "verified")
+
     def test_rejects_invalid_slug_and_wrong_pinned_root_tree(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             root = Path(temp_dir)
@@ -220,6 +373,20 @@ class OpenDesignCacheTests(unittest.TestCase):
                 [warning for warning in caught if warning.category is ResourceWarning],
                 [],
             )
+
+    def test_rejects_tree_object_as_pinned_revision(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            repo, provider = create_provider_repo(root)
+            run_git(repo, "tag", "-a", "fixture-tag", "-m", "fixture tag")
+            tag_oid = run_git(repo, "rev-parse", "fixture-tag^{tag}")
+
+            for object_id in (provider["root_tree"], tag_oid):
+                with self.subTest(object_id=object_id):
+                    invalid_revision = dict(provider)
+                    invalid_revision["revision"] = object_id
+                    with self.assertRaisesRegex(ValueError, "commit|revision"):
+                        self.open_design.list_packages(invalid_revision)
 
     def test_rejects_executable_and_symlink_entries_without_cache_mutation(self) -> None:
         for unsafe_kind in ("executable", "symlink"):

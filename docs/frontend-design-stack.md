@@ -72,6 +72,13 @@ writes a content-addressed receipt. Every later use starts with offline `verify`
 reused; a corrupt cache must fail without deleting or overwriting user bytes. Preview HTML, package
 scripts, dependencies, and upstream CLIs are never run automatically.
 
+The receipt is not an authority. It is an untrusted witness whose raw Git tree bodies are checked
+as a pinned root-tree Merkle proof before any cached file is accepted. Verification walks the exact
+license, package index, and selected-package paths, covers every file in the selected package tree,
+and binds the cached bytes to their anchored Git blob IDs. Existing receipt schema v1 caches fail
+without mutation; a new fetch requires the same explicit demand and cache-write disclosure as the
+first fetch.
+
 Open Design packages are labeled third-party-derived inspiration. The provider root license is not
 proof that every package's code, tokens, assets, or fonts may be redistributed. Copying package
 bytes into a project, committing them, or publishing them requires package-level provenance and

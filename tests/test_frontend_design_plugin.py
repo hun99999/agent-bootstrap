@@ -519,6 +519,13 @@ class FrontendDesignPluginTests(unittest.TestCase):
         self.assertTrue(helper_path.is_file())
         self.assertTrue(guide_path.is_file())
         self.assertEqual(helper_path.stat().st_mode & 0o111, 0)
+        self.assertEqual(
+            helper_path.read_bytes(),
+            (
+                REPO_ROOT
+                / "design-stack/router/scripts/open_design_cache.py"
+            ).read_bytes(),
+        )
 
         provider = json.loads(provider_path.read_text(encoding="utf-8"))
         self.assertEqual(provider["provider_id"], "open-design")
