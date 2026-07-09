@@ -1,0 +1,39 @@
+{
+  "authority": "optional-provider",
+  "cache_namespace": "open-design",
+  "cache_write_policy": "selected-package-only",
+  "corrupt_cache_policy": "fail-without-mutation",
+  "distribution": "on-demand",
+  "license": {
+    "path": "LICENSE",
+    "sha256": "9d95806a26532623360eb84bb17d298f394b55ef73fb4c0796d99b4319b2b0da",
+    "size": 11296,
+    "spdx": "Apache-2.0",
+    "status": "verified"
+  },
+  "limits": {
+    "max_file_bytes": 8388608,
+    "max_files": 1000,
+    "max_total_bytes": 67108864
+  },
+  "manifest_contract": {
+    "design": "DESIGN.md",
+    "schema_version": "od-design-system-project/v1",
+    "tokens": "tokens.css"
+  },
+  "network_policy": "explicit-demand-only",
+  "package_index_path": "design-systems/README.md",
+  "package_root": "design-systems",
+  "provider_id": "open-design",
+  "repository": "https://github.com/nexu-io/open-design",
+  "required_files": [
+    "manifest.json",
+    "DESIGN.md",
+    "tokens.css"
+  ],
+  "revision": "81b20dc6a214da2228bdd08f8850656b98f9bcea",
+  "root_tree": "f3b4e7ab9e965c26e07be1104b4e0977f780807a",
+  "schema_version": 1,
+  "scope": "design-systems/<explicit-selection>/**",
+  "slug_pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+}

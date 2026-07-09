@@ -45,6 +45,19 @@ class FrontendDesignDocumentationTests(unittest.TestCase):
             "semantic version",
             "Rollback",
             "git -c tar.umask=0022 archive",
+            "npx -y skills@latest add vercel-labs/agent-skills",
+            "vercel-react-best-practices",
+            "vercel-composition-patterns",
+            "vercel-react-view-transitions",
+            "npx -y skills@latest update",
+            "Do not guess their runtime paths",
+            "new Codex task",
+            "open_design_cache.py list --explicit-demand",
+            "open_design_cache.py fetch --explicit-demand",
+            "open_design_cache.py verify --explicit-demand",
+            "fail without deleting or overwriting",
+            "package-level provenance",
+            "Preview HTML",
         )
         for phrase in expected_phrases:
             self.assertIn(phrase, guide)

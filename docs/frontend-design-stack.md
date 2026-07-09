@@ -45,8 +45,38 @@ An agent setting up this repository should perform these steps in order:
 
 Open Design is on-demand and explicit-demand-only. It is not vendored, installed, or loaded by
 default. The Vercel agent-skills source remains reference-only because the reviewed root did not
-provide a redistributable license; the MIT-licensed Web Interface Guidelines source supplies the
-vendored official interface guidance instead.
+provide a redistributable license. The MIT-licensed Web Interface Guidelines supply vendored
+official interface guidance, while three exact Vercel React companion skills are mapped as
+content-addressed external runtime capabilities rather than copied into this plugin.
+
+### Open Design On-Demand Cache
+
+The installed skill includes a provider contract and a standard-library helper, but it performs no
+startup or background fetch. Continue only when the user names Open Design and supplies an exact
+package slug or explicitly delegates package selection. A generic request for good references and
+the existence of an old cache are not consent. Before list or fetch, report that the helper will
+contact the pinned public repository and write only one selected package to a user cache.
+
+From the discovered installed skill root, the supported flow is:
+
+```bash
+python3 scripts/open_design_cache.py list --explicit-demand --json
+python3 scripts/open_design_cache.py fetch --explicit-demand --slug "<slug>" --json
+python3 scripts/open_design_cache.py verify --explicit-demand --slug "<slug>" --json
+```
+
+The helper accepts no repository, revision, latest, force, purge, or authentication override. It
+fetches the immutable revision into a temporary bare Git repository, verifies the root tree, reads
+only root attribution plus the selected package subtree, rejects links/submodules/executables, and
+writes a content-addressed receipt. Every later use starts with offline `verify`. A valid cache is
+reused; a corrupt cache must fail without deleting or overwriting user bytes. Preview HTML, package
+scripts, dependencies, and upstream CLIs are never run automatically.
+
+Open Design packages are labeled third-party-derived inspiration. The provider root license is not
+proof that every package's code, tokens, assets, or fonts may be redistributed. Copying package
+bytes into a project, committing them, or publishing them requires package-level provenance and
+license review plus separate user approval. Applying any package over an established project design
+system remains an explicit material-design decision.
 
 Imported scripts are inert data and are physically stored as non-executable files. The sync,
 renderer, installer, and validators do not execute them.
@@ -109,6 +139,38 @@ Start a fresh Codex task after installation. Skills are discovered at task start
 performed installation is not valid discovery evidence. In the fresh task, use a read-only request
 such as “Review this interface and report findings only.” Confirm that the agent reports one mode,
 the target surface, and the smallest loaded reference set without editing files.
+
+### Official Vercel Companion Skills
+
+`frontend-design-pack` itself still exports only the `frontend-design` native entry point. The
+official Vercel React guidance remains independently installed runtime capability because its
+reviewed repository has no redistributable root license for copying those bytes into this plugin.
+After the user approves installing the three exact companion skills, use the official skills CLI:
+
+```bash
+npx -y skills@latest add vercel-labs/agent-skills \
+  --skill vercel-react-best-practices \
+  --skill vercel-composition-patterns \
+  --skill vercel-react-view-transitions \
+  --global --agent codex --yes
+```
+
+Before an update, inspect the currently discovered skills and ask again. Update only these three,
+not every global skill:
+
+```bash
+npx -y skills@latest update \
+  vercel-react-best-practices \
+  vercel-composition-patterns \
+  vercel-react-view-transitions \
+  --global --yes
+```
+
+The installer command may resolve the current official installer, but the design catalog pins each
+Vercel skill name, upstream revision, entrypoint SHA-256, and skill subtree. Discover the installed
+roots from the runtime or skills inventory and verify those identities.
+Do not guess their runtime paths. Start a new Codex task after installation or update. Load only an
+applicable gate, and report an unavailable capability as not applied.
 
 ## Install In Claude Code
 

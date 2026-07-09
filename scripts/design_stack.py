@@ -835,6 +835,143 @@ def validate_mengto_dependencies(
                 )
 
 
+def validate_vercel_runtime_skills(
+    registry: Mapping[str, Any],
+    lock: Mapping[str, Any],
+    contract: Mapping[str, Any],
+) -> None:
+    sources = _source_map(registry)
+    source = sources.get("vercel-agent-skills")
+    if source is None:
+        raise ValidationError("Vercel runtime source is missing from the registry")
+    if source["distribution"] != "reference-only" or source["license"][
+        "status"
+    ] != "unresolved":
+        raise ValidationError(
+            "Vercel runtime source must remain reference-only with unresolved licensing"
+        )
+    locked_source = next(
+        (
+            item
+            for item in lock["sources"]
+            if item["id"] == "vercel-agent-skills"
+        ),
+        None,
+    )
+    if locked_source is None:
+        raise ValidationError("Vercel runtime source is missing from the source lock")
+
+    contracts = _require_mapping(lock.get("contracts"), "lock.contracts")
+    lock_contract = _require_mapping(
+        contracts.get("vercel_runtime_skills"),
+        "lock.contracts.vercel_runtime_skills",
+    )
+    expected_lock_contract = {
+        "source_id": "vercel-agent-skills",
+        "path": "design-stack/vercel-runtime-skills.json",
+        "sha256": lock_contract.get("sha256"),
+        "revision": source["revision"],
+        "source_tree": locked_source["tree"],
+    }
+    if lock_contract != expected_lock_contract:
+        raise ValidationError("Vercel runtime lock contract does not match its source")
+    digest = _require_sha256(
+        lock_contract["sha256"],
+        "lock.contracts.vercel_runtime_skills.sha256",
+    )
+    contract_bytes = (
+        json.dumps(contract, indent=2, ensure_ascii=False) + "\n"
+    ).encode("utf-8")
+    if sha256_bytes(contract_bytes) != digest:
+        raise ValidationError("Vercel runtime contract differs from its content lock")
+
+    contract = _require_mapping(contract, "vercel_runtime")
+    _require_schema(contract, "vercel_runtime")
+    allowed_fields = {
+        "schema_version",
+        "source_id",
+        "install_source",
+        "installation_policy",
+        "runtime_path_policy",
+        "fresh_task_required",
+        "missing_policy",
+        "skills",
+    }
+    if set(contract) != allowed_fields:
+        raise ValidationError("Vercel runtime contract fields are not recognized")
+    expected_top_level = {
+        "source_id": "vercel-agent-skills",
+        "install_source": "vercel-labs/agent-skills",
+        "installation_policy": "ask-before-install-or-update",
+        "runtime_path_policy": "discover-never-guess",
+        "fresh_task_required": True,
+        "missing_policy": "report-unavailable-not-applied",
+    }
+    for field, expected in expected_top_level.items():
+        if contract.get(field) != expected:
+            raise ValidationError(f"Vercel runtime {field} must be {expected!r}")
+
+    skills = _require_list(contract.get("skills"), "vercel_runtime.skills")
+    expected_skills = [
+        (
+            "react-performance",
+            "vercel-react-best-practices",
+            "skills/react-best-practices/SKILL.md",
+        ),
+        (
+            "component-composition",
+            "vercel-composition-patterns",
+            "skills/composition-patterns/SKILL.md",
+        ),
+        (
+            "react-view-transitions",
+            "vercel-react-view-transitions",
+            "skills/react-view-transitions/SKILL.md",
+        ),
+    ]
+    if len(skills) != len(expected_skills):
+        raise ValidationError("Vercel runtime must map exactly three official skills")
+    for index, (raw_skill, expected) in enumerate(zip(skills, expected_skills)):
+        context = f"Vercel runtime skills[{index}]"
+        skill = _require_mapping(raw_skill, context)
+        allowed_skill_fields = {
+            "gate",
+            "name",
+            "source_path",
+            "skill_tree",
+            "sha256",
+            "authority",
+            "use_condition",
+            "external_runtime_requirement",
+        }
+        if set(skill) != allowed_skill_fields:
+            raise ValidationError(f"{context} fields are not recognized")
+        gate, name, source_path = expected
+        if (
+            skill.get("gate") != gate
+            or skill.get("name") != name
+            or skill.get("source_path") != source_path
+        ):
+            raise ValidationError(f"{context} does not match the approved skill mapping")
+        _require_safe_relative_path(skill["source_path"], f"{context}.source_path")
+        if HEX_40_PATTERN.fullmatch(str(skill.get("skill_tree", ""))) is None:
+            raise ValidationError(f"{context}.skill_tree must be a full Git tree")
+        _require_sha256(skill.get("sha256"), f"{context}.sha256")
+        if skill.get("authority") != "official-external-runtime":
+            raise ValidationError(f"{context}.authority is not approved")
+        _require_nonempty_string(skill.get("use_condition"), f"{context}.use_condition")
+        requirement = _require_mapping(
+            skill.get("external_runtime_requirement"),
+            f"{context}.external_runtime_requirement",
+        )
+        if requirement != {
+            "capability": f"skill:{name}",
+            "required_file": "SKILL.md",
+            "resolution": "discover-installed-skill",
+        }:
+            raise ValidationError(f"{context} runtime requirement is not approved")
+
+
 def _strip_yaml_scalar(value: str) -> str:
     value = value.strip()
     if len(value) >= 2 and value[0] == value[-1] == '"':
@@ -898,3 +1035,9 @@ def validate_repository(repo_root: Path, metadata_only: bool = False) -> None:
     )
     validate_provenance(registry, lock, provenance)
     validate_mengto_dependencies(registry, lock, provenance, dependencies)
+    if "vercel-agent-skills" in _source_map(registry):
+        validate_vercel_runtime_skills(
+            registry,
+            lock,
+            load_json(design_root / "vercel-runtime-skills.json"),
+        )

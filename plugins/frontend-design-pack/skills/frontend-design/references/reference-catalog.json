@@ -1802,6 +1802,21 @@
       "source_path": "agent-skills/web-design/webgl-laser/SKILL.md"
     }
   ],
+  "open_design_provider": {
+    "authority": "optional-provider",
+    "cache_write_policy": "selected-package-only",
+    "corrupt_cache_policy": "fail-without-mutation",
+    "distribution": "on-demand",
+    "helper_path": "scripts/open_design_cache.py",
+    "helper_sha256": "00142bb670aa9552ed0af29c70394128894081ce227ff582e5e1262386de0ad2",
+    "network_policy": "explicit-demand-only",
+    "provider_id": "open-design",
+    "provider_sha256": "95b75993f1379864d37a18875d6bf9ec1e43eabfa12b66e0132a0ab7ed66060f",
+    "reference_path": "references/open-design-provider.json",
+    "repository": "https://github.com/nexu-io/open-design",
+    "revision": "81b20dc6a214da2228bdd08f8850656b98f9bcea",
+    "root_tree": "f3b4e7ab9e965c26e07be1104b4e0977f780807a"
+  },
   "schema_version": 1,
   "vercel_interface": {
     "authority": "official",
@@ -1809,5 +1824,63 @@
     "sha256": "eea73cb6dd46fee9faec9973e8e7fe198b5f07ec326f14d276a56e50287e1cab",
     "source_id": "vercel-web-interface-guidelines",
     "source_path": "command.md"
+  },
+  "vercel_runtime_skills": {
+    "contract_sha256": "21499d8ad770e9c5f1c7b8e481b12c2052c80dbaf5d17a2614ea641ec10683a5",
+    "distribution": "reference-only",
+    "fresh_task_required": true,
+    "install_source": "vercel-labs/agent-skills",
+    "installation_policy": "ask-before-install-or-update",
+    "license_status": "unresolved",
+    "missing_policy": "report-unavailable-not-applied",
+    "repository": "https://github.com/vercel-labs/agent-skills",
+    "revision": "f8a72b9603728bb92a217a879b7e62e43ad76c81",
+    "runtime_path_policy": "discover-never-guess",
+    "skills": [
+      {
+        "authority": "official-external-runtime",
+        "external_runtime_requirement": {
+          "capability": "skill:vercel-react-best-practices",
+          "required_file": "SKILL.md",
+          "resolution": "discover-installed-skill"
+        },
+        "gate": "react-performance",
+        "name": "vercel-react-best-practices",
+        "sha256": "71ed7794962fa6e803ee83030517b5b93a9f70fbfeb431ec4535c5480a8d8355",
+        "skill_tree": "343db72180d05814949fef7d46be96b5c6ee86b3",
+        "source_path": "skills/react-best-practices/SKILL.md",
+        "use_condition": "Use only for an observed React or Next.js performance risk in the selected surface."
+      },
+      {
+        "authority": "official-external-runtime",
+        "external_runtime_requirement": {
+          "capability": "skill:vercel-composition-patterns",
+          "required_file": "SKILL.md",
+          "resolution": "discover-installed-skill"
+        },
+        "gate": "component-composition",
+        "name": "vercel-composition-patterns",
+        "sha256": "e38e0eaa609316b10423a9a138ed95e35099accd3f735585295c8a8f165c28a3",
+        "skill_tree": "bf90d0a4b83ea054653350f9c67f6de235d3a368",
+        "source_path": "skills/composition-patterns/SKILL.md",
+        "use_condition": "Use only for an observed reusable React component API or composition decision."
+      },
+      {
+        "authority": "official-external-runtime",
+        "external_runtime_requirement": {
+          "capability": "skill:vercel-react-view-transitions",
+          "required_file": "SKILL.md",
+          "resolution": "discover-installed-skill"
+        },
+        "gate": "react-view-transitions",
+        "name": "vercel-react-view-transitions",
+        "sha256": "8c4c0f8b5581ef473fbf388b2df7d13e02d418ab2150a912b9b7eafdf4b76a01",
+        "skill_tree": "4d46c637057aae90b9ec5280190c25dc0d90ec28",
+        "source_path": "skills/react-view-transitions/SKILL.md",
+        "use_condition": "Use only when View Transitions are requested or already present; verify support and reduced-motion behavior."
+      }
+    ],
+    "source_id": "vercel-agent-skills",
+    "source_tree": "5bd714a247baf205f05eb0371e82602e181a505d"
   }
 }

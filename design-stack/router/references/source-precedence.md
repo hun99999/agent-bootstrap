@@ -14,3 +14,6 @@ Resolve conflicts in this order:
 Project-owned design decisions outrank external aesthetics. Do not replace an established design
 system, component contract, or product behavior unless the user approves that material decision.
 When sources disagree, name the conflict, the chosen authority, and the reason.
+
+For tooling, a user-approved or project-committed pinned contract outranks the pack's pinned
+fallback. Treat versionless commands in imported DESIGN.md analysis as non-authoritative examples.

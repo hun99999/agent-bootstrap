@@ -1,4 +1,27 @@
 {
+  "design_md_validation": {
+    "arguments": [
+      "lint",
+      "DESIGN.md"
+    ],
+    "authority_order": [
+      "user-approved-project-pinned-contract",
+      "project-committed-pinned-contract",
+      "frontend-design-pack-pinned-fallback",
+      "versionless-imported-examples-non-authoritative"
+    ],
+    "binary": "designmd",
+    "external_execution": "ask-before-download-or-execution",
+    "fallback_command": [
+      "npx",
+      "--package=@google/design.md@0.3.0",
+      "designmd",
+      "lint",
+      "DESIGN.md"
+    ],
+    "package_spec": "@google/design.md@0.3.0",
+    "unavailable_policy": "report-unverified-never-substitute-unpinned"
+  },
   "mengto_resolution_rules": [
     {
       "authority": "official",
@@ -188,6 +211,7 @@
     "frontend-design"
   ],
   "references": {
+    "open-design": "references/open-design.md",
     "quality-gates": "references/quality-gates.md",
     "source-precedence": "references/source-precedence.md"
   },

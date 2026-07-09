@@ -341,6 +341,7 @@ class FrontendDesignPluginTests(unittest.TestCase):
             {
                 "source-precedence": "references/source-precedence.md",
                 "quality-gates": "references/quality-gates.md",
+                "open-design": "references/open-design.md",
             },
         )
         for key, relative_path in routing["references"].items():
@@ -371,6 +372,43 @@ class FrontendDesignPluginTests(unittest.TestCase):
                 ValueError,
                 "routing reference.*source-precedence.*missing",
             ):
+                renderer.validate_plugin_tree(plugin_root)
+
+    def test_plugin_validation_rejects_unpinned_design_md_fallback(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            plugin_root = Path(temp_dir) / "frontend-design-pack"
+            shutil.copytree(PLUGIN_ROOT, plugin_root)
+            routing_path = (
+                plugin_root / "skills/frontend-design/references/routing.json"
+            )
+            routing = json.loads(routing_path.read_text(encoding="utf-8"))
+            routing["design_md_validation"]["package_spec"] = "@google/design.md"
+            routing_path.write_text(
+                json.dumps(routing, indent=2, ensure_ascii=False) + "\n",
+                encoding="utf-8",
+            )
+
+            with self.assertRaisesRegex(ValueError, "DESIGN.md validation"):
+                renderer.validate_plugin_tree(plugin_root)
+
+    def test_plugin_validation_rejects_imported_design_md_tooling_authority(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            plugin_root = Path(temp_dir) / "frontend-design-pack"
+            shutil.copytree(PLUGIN_ROOT, plugin_root)
+            routing_path = (
+                plugin_root / "skills/frontend-design/references/routing.json"
+            )
+            routing = json.loads(routing_path.read_text(encoding="utf-8"))
+            authority = routing["design_md_validation"]["authority_order"]
+            routing["design_md_validation"]["authority_order"] = list(
+                reversed(authority)
+            )
+            routing_path.write_text(
+                json.dumps(routing, indent=2, ensure_ascii=False) + "\n",
+                encoding="utf-8",
+            )
+
+            with self.assertRaisesRegex(ValueError, "DESIGN.md validation"):
                 renderer.validate_plugin_tree(plugin_root)
 
     def test_reference_catalog_resolves_every_approved_source_decision(self) -> None:
@@ -421,6 +459,179 @@ class FrontendDesignPluginTests(unittest.TestCase):
                 sha256_bytes(reference_path.read_bytes()),
                 reference["sha256"],
             )
+
+    def test_catalog_maps_vercel_quality_guidance_to_external_runtime_skills(self) -> None:
+        skill_root = PLUGIN_ROOT / "skills/frontend-design"
+        catalog = json.loads(
+            (skill_root / "references/reference-catalog.json").read_text(
+                encoding="utf-8"
+            )
+        )
+        source_contract = json.loads(
+            (REPO_ROOT / "design-stack/vercel-runtime-skills.json").read_text(
+                encoding="utf-8"
+            )
+        )
+        runtime = catalog["vercel_runtime_skills"]
+
+        self.assertEqual(runtime["source_id"], "vercel-agent-skills")
+        self.assertEqual(
+            runtime["repository"],
+            "https://github.com/vercel-labs/agent-skills",
+        )
+        self.assertEqual(
+            runtime["revision"],
+            "f8a72b9603728bb92a217a879b7e62e43ad76c81",
+        )
+        self.assertEqual(
+            runtime["source_tree"],
+            "5bd714a247baf205f05eb0371e82602e181a505d",
+        )
+        self.assertEqual(runtime["license_status"], "unresolved")
+        self.assertEqual(runtime["distribution"], "reference-only")
+        self.assertEqual(
+            runtime["contract_sha256"],
+            "21499d8ad770e9c5f1c7b8e481b12c2052c80dbaf5d17a2614ea641ec10683a5",
+        )
+        self.assertEqual(runtime["skills"], source_contract["skills"])
+        for skill in runtime["skills"]:
+            self.assertNotIn("reference_path", skill)
+            self.assertEqual(
+                skill["external_runtime_requirement"]["resolution"],
+                "discover-installed-skill",
+            )
+
+        copied_vercel_skill_paths = [
+            path
+            for path in skill_root.rglob("*")
+            if path.is_file()
+            and "vercel-agent-skills" in path.relative_to(skill_root).parts
+        ]
+        self.assertEqual(copied_vercel_skill_paths, [])
+
+    def test_open_design_provider_and_inert_cache_helper_are_packaged(self) -> None:
+        skill_root = PLUGIN_ROOT / "skills/frontend-design"
+        provider_path = skill_root / "references/open-design-provider.json"
+        helper_path = skill_root / "scripts/open_design_cache.py"
+        guide_path = skill_root / "references/open-design.md"
+
+        self.assertTrue(provider_path.is_file())
+        self.assertTrue(helper_path.is_file())
+        self.assertTrue(guide_path.is_file())
+        self.assertEqual(helper_path.stat().st_mode & 0o111, 0)
+
+        provider = json.loads(provider_path.read_text(encoding="utf-8"))
+        self.assertEqual(provider["provider_id"], "open-design")
+        self.assertEqual(
+            provider["repository"],
+            "https://github.com/nexu-io/open-design",
+        )
+        self.assertEqual(
+            provider["revision"],
+            "81b20dc6a214da2228bdd08f8850656b98f9bcea",
+        )
+        self.assertEqual(
+            provider["root_tree"],
+            "f3b4e7ab9e965c26e07be1104b4e0977f780807a",
+        )
+        self.assertEqual(provider["authority"], "optional-provider")
+        self.assertEqual(provider["distribution"], "on-demand")
+        self.assertEqual(
+            provider["required_files"],
+            ["manifest.json", "DESIGN.md", "tokens.css"],
+        )
+        self.assertEqual(
+            provider["license"]["sha256"],
+            "9d95806a26532623360eb84bb17d298f394b55ef73fb4c0796d99b4319b2b0da",
+        )
+        self.assertEqual(provider["network_policy"], "explicit-demand-only")
+        self.assertEqual(provider["cache_write_policy"], "selected-package-only")
+        self.assertEqual(provider["corrupt_cache_policy"], "fail-without-mutation")
+        catalog = json.loads(
+            (skill_root / "references/reference-catalog.json").read_text(
+                encoding="utf-8"
+            )
+        )
+        catalog_provider = catalog["open_design_provider"]
+        self.assertEqual(
+            catalog_provider["reference_path"],
+            "references/open-design-provider.json",
+        )
+        self.assertEqual(
+            catalog_provider["helper_path"],
+            "scripts/open_design_cache.py",
+        )
+        self.assertEqual(
+            catalog_provider["provider_sha256"],
+            sha256_bytes(provider_path.read_bytes()),
+        )
+        self.assertEqual(
+            catalog_provider["helper_sha256"],
+            sha256_bytes(helper_path.read_bytes()),
+        )
+        self.assertEqual(catalog_provider["revision"], provider["revision"])
+        self.assertEqual(catalog_provider["root_tree"], provider["root_tree"])
+
+    def test_plugin_validation_rejects_mutated_open_design_provider(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            plugin_root = Path(temp_dir) / "frontend-design-pack"
+            shutil.copytree(PLUGIN_ROOT, plugin_root)
+            provider_path = (
+                plugin_root
+                / "skills/frontend-design/references/open-design-provider.json"
+            )
+            provider = json.loads(provider_path.read_text(encoding="utf-8"))
+            provider["network_policy"] = "automatic"
+            provider_path.write_text(
+                json.dumps(provider, indent=2, ensure_ascii=False) + "\n",
+                encoding="utf-8",
+            )
+
+            with self.assertRaisesRegex(ValueError, "Open Design provider"):
+                renderer.validate_plugin_tree(plugin_root)
+
+    def test_plugin_validation_rejects_rehashed_open_design_helper_mutation(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            plugin_root = Path(temp_dir) / "frontend-design-pack"
+            shutil.copytree(PLUGIN_ROOT, plugin_root)
+            skill_root = plugin_root / "skills/frontend-design"
+            helper_path = skill_root / "scripts/open_design_cache.py"
+            helper_path.write_text(
+                helper_path.read_text(encoding="utf-8") + "\n# mutation\n",
+                encoding="utf-8",
+            )
+            catalog_path = skill_root / "references/reference-catalog.json"
+            catalog = json.loads(catalog_path.read_text(encoding="utf-8"))
+            catalog["open_design_provider"]["helper_sha256"] = sha256_bytes(
+                helper_path.read_bytes()
+            )
+            catalog_path.write_text(
+                json.dumps(catalog, indent=2, ensure_ascii=False) + "\n",
+                encoding="utf-8",
+            )
+
+            with self.assertRaisesRegex(ValueError, "Open Design provider helper"):
+                renderer.validate_plugin_tree(plugin_root)
+
+    def test_plugin_validation_rejects_invalid_vercel_runtime_mapping(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            plugin_root = Path(temp_dir) / "frontend-design-pack"
+            shutil.copytree(PLUGIN_ROOT, plugin_root)
+            catalog_path = (
+                plugin_root
+                / "skills/frontend-design/references/reference-catalog.json"
+            )
+            catalog = json.loads(catalog_path.read_text(encoding="utf-8"))
+            catalog["vercel_runtime_skills"]["skills"][0][
+                "external_runtime_requirement"
+            ]["resolution"] = "guess-a-local-path"
+            catalog_path.write_text(
+                json.dumps(catalog, indent=2, ensure_ascii=False) + "\n",
+                encoding="utf-8",
+            )
+
+            with self.assertRaisesRegex(ValueError, "Vercel runtime"):
+                renderer.validate_plugin_tree(plugin_root)
 
     def test_all_mengto_procedures_are_included_or_mapped_to_official(self) -> None:
         skill_root = PLUGIN_ROOT / "skills/frontend-design"

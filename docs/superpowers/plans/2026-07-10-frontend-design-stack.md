@@ -68,7 +68,7 @@
 | `mengto-skills` | `MengTo/Skills@25f872a94e3bbee85ecacba4041fa52c21cb0e44` | Derive all 95 skill decisions from the tree; include vetted material and map known official duplicates. |
 | `google-design-md` | `google-labs-code/design.md`, CLI `0.3.0`, reviewed commit `ea4a3240d4c0d06778b9e39efeb553851be27c17` | Pin validator contract and project-owned DESIGN.md workflow. |
 | `awesome-design-md` | `VoltAgent/awesome-design-md@664b3e78fd1a298ba11973822da988483256d4b4` | Index all 74 references as third-party analysis. |
-| `vercel-agent-skills` | `vercel-labs/agent-skills@f8a72b9603728bb92a217a879b7e62e43ad76c81` | Include selected official interface, React, composition, transition, and writing guidance. |
+| `vercel-agent-skills` | `vercel-labs/agent-skills@f8a72b9603728bb92a217a879b7e62e43ad76c81` | Keep unresolved-license bodies external; map the three official React/composition/transition skills by exact name, entrypoint hash, and subtree. |
 | `vercel-web-interface-guidelines` | `vercel-labs/web-interface-guidelines@d0a657bfe87e86dd3a4753d7ec28c7e7dd7a88fe` | Official UI review quality gate. |
 | `anthropic-frontend-design` | `anthropics/skills@9d2f1ae187231d8199c64b5b762e1bdf2244733d` | Preserve official frontend-design provenance and notice for the mapped MengTo duplicate. |
 | `open-design` | `nexu-io/open-design@81b20dc6a214da2228bdd08f8850656b98f9bcea` | Registry-only on-demand provider; do not vendor the complete checkout. |
@@ -227,7 +227,7 @@ git commit -m "feat: add reviewed design source updates"
 
 - [ ] **Step 1: Write failing router tests**
 
-Cover `shape`, `explore`, `implement`, `review`, `copy`, and `harden`. Keep positive/negative trigger fixtures separate from guidance-application fixtures. Require mode, target surface, and loaded references in each route; smallest-sufficient reference sets; at most three labeled inspiration sources; the approved source precedence; no edits in Shape/Review without explicit request; TDD in Implement; copy-only scope in Copy; external-side-effect material explicit-use-only; Open Design explicit-demand-only; and resolution of every included/mapped MengTo entry without creating 95 native skills.
+Cover `shape`, `explore`, `implement`, `review`, `copy`, and `harden`. Keep positive/negative trigger fixtures separate from guidance-application fixtures. Require mode, target surface, and loaded references in each route; smallest-sufficient reference sets; at most three labeled inspiration sources; the approved source precedence; no edits in Shape/Review without explicit request; TDD in Implement; copy-only scope in Copy; external-side-effect material explicit-use-only; Open Design explicit-demand plus exact-slug/delegated-selection cases; applicable-only Vercel runtime gates; and resolution of every included/mapped MengTo entry without creating 95 native skills.
 
 - [ ] **Step 2: Run RED**
 
@@ -271,7 +271,7 @@ python3 -m unittest tests.test_frontend_design_plugin tests.test_claude_plugin -
 
 - [ ] **Step 3: Create reviewed local tar archives**
 
-Use `git archive` against the already reviewed immutable checkouts. Create one archive per source, import with `sync_design_sources.py`, and retain only the scoped files declared by `sources.json`. Import all vetted MengTo skill procedure files needed by the 95-decision catalog, all 74 VoltAgent DESIGN.md references, Google DESIGN.md contract material, selected official Vercel guidance, the official Anthropic frontend-design notice/mapping, and required license/notice files. Do not import the full Open Design checkout.
+Use `git archive` against the already reviewed immutable checkouts. Create one archive per source, import with `sync_design_sources.py`, and retain only the scoped files declared by `sources.json`. Import all vetted MengTo skill procedure files needed by the 95-decision catalog, all 74 VoltAgent DESIGN.md references, the Google DESIGN.md contract material, MIT-licensed Vercel Web Interface Guidelines, the official Anthropic frontend-design notice/mapping, and required license/notice files. Keep unresolved-license Vercel Agent Skills as content-addressed external runtime mappings. Do not import the full Open Design checkout; package its fixed-revision selective-fetch and receipt-verification helper instead.
 
 - [ ] **Step 4: Implement deterministic rendering**
 

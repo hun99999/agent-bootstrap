@@ -5,7 +5,8 @@
   ],
   "references": {
     "source-precedence": "router/references/source-precedence.md",
-    "quality-gates": "router/references/quality-gates.md"
+    "quality-gates": "router/references/quality-gates.md",
+    "open-design": "router/references/open-design.md"
   },
   "source_precedence": [
     "current-user-instruction-and-approved-scope",
@@ -26,6 +27,29 @@
     "external_side_effect_material": "explicit-use-only",
     "open_design": "explicit-demand-only",
     "project_design_system_override": "explicit-material-decision-only"
+  },
+  "design_md_validation": {
+    "package_spec": "@google/design.md@0.3.0",
+    "binary": "designmd",
+    "arguments": [
+      "lint",
+      "DESIGN.md"
+    ],
+    "fallback_command": [
+      "npx",
+      "--package=@google/design.md@0.3.0",
+      "designmd",
+      "lint",
+      "DESIGN.md"
+    ],
+    "authority_order": [
+      "user-approved-project-pinned-contract",
+      "project-committed-pinned-contract",
+      "frontend-design-pack-pinned-fallback",
+      "versionless-imported-examples-non-authoritative"
+    ],
+    "external_execution": "ask-before-download-or-execution",
+    "unavailable_policy": "report-unverified-never-substitute-unpinned"
   },
   "modes": {
     "shape": {

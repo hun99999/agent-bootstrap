@@ -117,6 +117,141 @@ class FrontendDesignRouterContractTests(unittest.TestCase):
         self.assertEqual(policy["max_inspiration_sources"], 3)
         self.assertTrue(policy["require_authority_labels"])
 
+    def test_design_md_validation_contract_is_pinned_in_repo_and_plugin(self) -> None:
+        package = load_json(
+            DESIGN_STACK / "vendor/google-design-md/packages/cli/package.json"
+        )
+        packaged_routing = load_json(
+            REPO_ROOT
+            / "plugins/frontend-design-pack/skills/frontend-design/references/routing.json"
+        )
+        for label, routing in (
+            ("repository", self.routing),
+            ("packaged plugin", packaged_routing),
+        ):
+            with self.subTest(location=label):
+                contract = routing["design_md_validation"]
+                self.assertEqual(contract["package_spec"], "@google/design.md@0.3.0")
+                self.assertEqual(contract["binary"], "designmd")
+                self.assertEqual(contract["arguments"], ["lint", "DESIGN.md"])
+                self.assertEqual(
+                    contract["fallback_command"],
+                    [
+                        "npx",
+                        "--package=@google/design.md@0.3.0",
+                        "designmd",
+                        "lint",
+                        "DESIGN.md",
+                    ],
+                )
+                self.assertEqual(
+                    contract["authority_order"],
+                    [
+                        "user-approved-project-pinned-contract",
+                        "project-committed-pinned-contract",
+                        "frontend-design-pack-pinned-fallback",
+                        "versionless-imported-examples-non-authoritative",
+                    ],
+                )
+                self.assertEqual(
+                    contract["unavailable_policy"],
+                    "report-unverified-never-substitute-unpinned",
+                )
+
+        self.assertEqual(package["name"], "@google/design.md")
+        self.assertEqual(package["version"], "0.3.0")
+        self.assertEqual(package["bin"]["designmd"], "./dist/index.js")
+
+    def test_authored_guidance_overrides_unpinned_imported_design_md_commands(self) -> None:
+        quality = (
+            DESIGN_STACK / self.routing["references"]["quality-gates"]
+        ).read_text(encoding="utf-8")
+        precedence = (
+            DESIGN_STACK / self.routing["references"]["source-precedence"]
+        ).read_text(encoding="utf-8")
+        self.assertIn(
+            'npx --package="@google/design.md@0.3.0" designmd lint DESIGN.md',
+            quality,
+        )
+        self.assertIn("Ask before downloading or executing", quality)
+        self.assertIn("versionless commands in imported DESIGN.md", precedence)
+        self.assertIn("non-authoritative", precedence)
+
+    def test_vercel_runtime_skills_are_selected_only_for_applicable_gates(self) -> None:
+        contract = load_json(DESIGN_STACK / "vercel-runtime-skills.json")
+        quality = (
+            DESIGN_STACK / self.routing["references"]["quality-gates"]
+        ).read_text(encoding="utf-8")
+        router_skill = (DESIGN_STACK / "router/SKILL.md").read_text(encoding="utf-8")
+
+        self.assertEqual(
+            [skill["gate"] for skill in contract["skills"]],
+            [
+                "react-performance",
+                "component-composition",
+                "react-view-transitions",
+            ],
+        )
+        for skill in contract["skills"]:
+            requirement = skill["external_runtime_requirement"]
+            self.assertEqual(requirement["capability"], f"skill:{skill['name']}")
+            self.assertEqual(requirement["resolution"], "discover-installed-skill")
+            self.assertTrue(skill["use_condition"].startswith("Use only"))
+        for marker in (
+            "applicable gate only",
+            "Status: unavailable",
+            "Result: not applied",
+            "never claim that unavailable guidance was applied",
+        ):
+            self.assertIn(marker, quality)
+        self.assertIn("vercel_runtime_skills", router_skill)
+        self.assertIn("exact installed skill name", router_skill)
+
+    def test_open_design_requires_explicit_demand_and_package_selection(self) -> None:
+        cases = load_json(DESIGN_STACK / "evals/open-design-cases.json")["cases"]
+        by_id = {case["id"]: case for case in cases}
+
+        self.assertEqual(
+            by_id["generic-best-references"]["expected_action"],
+            "ignore-open-design",
+        )
+        self.assertEqual(
+            by_id["cached-without-explicit-demand"]["expected_action"],
+            "ignore-open-design",
+        )
+        self.assertEqual(
+            by_id["named-without-selection"]["expected_action"],
+            "list-up-to-three-and-confirm-slug",
+        )
+        self.assertEqual(
+            by_id["explicit-slug"]["expected_action"],
+            "fetch-selected-package",
+        )
+        self.assertEqual(
+            by_id["delegated-selection"]["expected_action"],
+            "select-report-and-fetch-one",
+        )
+        self.assertTrue(
+            all(
+                case["explicit_demand"]
+                for case in cases
+                if case["expected_action"] != "ignore-open-design"
+            )
+        )
+
+        self.assertEqual(
+            self.routing["references"]["open-design"],
+            "router/references/open-design.md",
+        )
+        router_skill = (DESIGN_STACK / "router/SKILL.md").read_text(encoding="utf-8")
+        for marker in (
+            "references/open-design.md",
+            "exact slug",
+            "selection authority",
+            "cache presence never counts as demand",
+        ):
+            self.assertIn(marker, router_skill)
+
     def test_every_approved_mengto_entry_resolves_without_native_skill_sprawl(self) -> None:
         decisions = {
             (record["source_id"], record["upstream_path"]): record["decision"]

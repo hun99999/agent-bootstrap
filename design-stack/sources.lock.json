@@ -2743,6 +2743,13 @@
       "path": "packages/cli/package.json",
       "sha256": "c0abab090ee1f3522810631a0a46f47d3903027826d286b46fe2fbfb1122cbc1",
       "version": "0.3.0"
+    },
+    "vercel_runtime_skills": {
+      "source_id": "vercel-agent-skills",
+      "path": "design-stack/vercel-runtime-skills.json",
+      "sha256": "21499d8ad770e9c5f1c7b8e481b12c2052c80dbaf5d17a2614ea641ec10683a5",
+      "revision": "f8a72b9603728bb92a217a879b7e62e43ad76c81",
+      "source_tree": "5bd714a247baf205f05eb0371e82602e181a505d"
     }
   }
 }

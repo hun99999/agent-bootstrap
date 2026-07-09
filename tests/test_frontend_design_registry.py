@@ -215,6 +215,90 @@ class FrontendDesignRegistryUnitTests(unittest.TestCase):
                 with self.assertRaisesRegex(design_stack.ValidationError, "id"):
                     design_stack.validate_registry(registry)
 
+    def test_vercel_runtime_contract_maps_content_addressed_external_skills(self) -> None:
+        registry = json.loads(
+            (REPO_ROOT / "design-stack/sources.json").read_text(encoding="utf-8")
+        )
+        lock = json.loads(
+            (REPO_ROOT / "design-stack/sources.lock.json").read_text(
+                encoding="utf-8"
+            )
+        )
+        contract = json.loads(
+            (REPO_ROOT / "design-stack/vercel-runtime-skills.json").read_text(
+                encoding="utf-8"
+            )
+        )
+
+        design_stack.validate_vercel_runtime_skills(registry, lock, contract)
+
+        source = next(
+            source
+            for source in registry["sources"]
+            if source["id"] == "vercel-agent-skills"
+        )
+        self.assertEqual(source["distribution"], "reference-only")
+        self.assertEqual(source["license"]["status"], "unresolved")
+        self.assertEqual(
+            [skill["name"] for skill in contract["skills"]],
+            [
+                "vercel-react-best-practices",
+                "vercel-composition-patterns",
+                "vercel-react-view-transitions",
+            ],
+        )
+        for skill in contract["skills"]:
+            self.assertNotIn("reference_path", skill)
+            self.assertRegex(skill["skill_tree"], r"^[0-9a-f]{40}$")
+            self.assertRegex(skill["sha256"], r"^[0-9a-f]{64}$")
+            self.assertEqual(skill["authority"], "official-external-runtime")
+            self.assertEqual(
+                skill["external_runtime_requirement"]["resolution"],
+                "discover-installed-skill",
+            )
+
+    def test_vercel_runtime_contract_rejects_unsafe_or_unverified_mappings(self) -> None:
+        registry = json.loads(
+            (REPO_ROOT / "design-stack/sources.json").read_text(encoding="utf-8")
+        )
+        lock = json.loads(
+            (REPO_ROOT / "design-stack/sources.lock.json").read_text(
+                encoding="utf-8"
+            )
+        )
+        contract = json.loads(
+            (REPO_ROOT / "design-stack/vercel-runtime-skills.json").read_text(
+                encoding="utf-8"
+            )
+        )
+        mutations = {
+            "source path": lambda payload: payload["skills"][0].__setitem__(
+                "source_path", "../SKILL.md"
+            ),
+            "skill hash": lambda payload: payload["skills"][0].__setitem__(
+                "sha256", "0" * 64
+            ),
+            "resolution": lambda payload: payload["skills"][0][
+                "external_runtime_requirement"
+            ].__setitem__("resolution", "guess-a-local-path"),
+            "capability": lambda payload: payload["skills"][0][
+                "external_runtime_requirement"
+            ].__setitem__("capability", "skill:unrelated"),
+        }
+        for label, mutate in mutations.items():
+            with self.subTest(mutation=label):
+                changed = copy.deepcopy(contract)
+                mutate(changed)
+                with self.assertRaisesRegex(
+                    design_stack.ValidationError,
+                    "Vercel runtime",
+                ):
+                    design_stack.validate_vercel_runtime_skills(
+                        registry,
+                        lock,
+                        changed,
+                    )
+
     def test_lock_rejects_revision_that_does_not_match_registry(self) -> None:
         lock = lock_payload()
         lock["sources"][0]["revision"] = "c" * 40

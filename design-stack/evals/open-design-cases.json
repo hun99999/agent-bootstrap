@@ -1,0 +1,46 @@
+{
+  "schema_version": 1,
+  "purpose": "Open Design opt-in, selection, and cache-use boundaries.",
+  "cases": [
+    {
+      "id": "generic-best-references",
+      "request": "Use the best design references for this landing page.",
+      "explicit_demand": false,
+      "selected_slug": null,
+      "selection_delegated": false,
+      "expected_action": "ignore-open-design"
+    },
+    {
+      "id": "cached-without-explicit-demand",
+      "request": "Review this dashboard; a previous task cached an Open Design package.",
+      "explicit_demand": false,
+      "selected_slug": null,
+      "selection_delegated": false,
+      "expected_action": "ignore-open-design"
+    },
+    {
+      "id": "named-without-selection",
+      "request": "Use Open Design for this interface.",
+      "explicit_demand": true,
+      "selected_slug": null,
+      "selection_delegated": false,
+      "expected_action": "list-up-to-three-and-confirm-slug"
+    },
+    {
+      "id": "explicit-slug",
+      "request": "Use the Open Design default package for this exploration.",
+      "explicit_demand": true,
+      "selected_slug": "default",
+      "selection_delegated": false,
+      "expected_action": "fetch-selected-package"
+    },
+    {
+      "id": "delegated-selection",
+      "request": "Use Open Design and choose the best matching package for me.",
+      "explicit_demand": true,
+      "selected_slug": null,
+      "selection_delegated": true,
+      "expected_action": "select-report-and-fetch-one"
+    }
+  ]
+}

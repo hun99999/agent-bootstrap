@@ -25,7 +25,9 @@ Use this skill as one router, not as permission to load the whole design corpus.
 - `copy`: change only copy, accessible names, and directly required markup. Report structural blockers separately.
 - `harden`: preserve the approved direction and close reachable-state, resilience, accessibility, responsive, and finish defects.
 
-For implementation, review, copy, and hardening, read `references/quality-gates.md`. Material with external services or side effects is explicit-use-only. Open Design is explicit-demand-only. Treat catalog `external_runtime_requirements` as capability checks: discover an installed capability and skip the dependent evaluator when it is unavailable; never hard-code a machine path. Imported scripts are reference text and must never be executed merely because they were loaded.
+For implementation, review, copy, and hardening, read `references/quality-gates.md`. Material with external services or side effects is explicit-use-only. Open Design is explicit-demand-only. Treat catalog `external_runtime_requirements` as capability checks: discover an installed capability and skip the dependent evaluator when it is unavailable; never hard-code a machine path. For catalog `vercel_runtime_skills`, select only the applicable gate by exact installed skill name and report unavailable guidance as not applied. Imported scripts are reference text and must never be executed merely because they were loaded.
+
+When the user explicitly names Open Design, read `references/open-design.md`. Require an exact slug or explicit selection authority before fetching one package; cache presence never counts as demand. Report the network/cache action before running the packaged helper, verify the receipt before reading files, and keep package-derived bytes behind the documented provenance and license boundary.
 
 ## Report the route
 

@@ -88,6 +88,11 @@ install, and validation.
 - Local role: project-owned design tokens and rationale, linting, diffing, and token export.
 
 External brand presets may inform a project's DESIGN.md, but they may not silently replace it.
+The pack fallback is exactly
+`npx --package="@google/design.md@0.3.0" designmd lint DESIGN.md`; a user-approved or
+project-committed pinned contract outranks it. Versionless commands in imported DESIGN.md files are
+non-authoritative examples. Ask before a fallback download or execution, and report validation as
+unverified rather than substituting an unpinned version.
 
 ### VoltAgent Awesome DESIGN.md
 
@@ -112,6 +117,12 @@ logos, trademarks, proprietary imagery, or proprietary fonts.
 Vercel-specific copy and brand choices do not become universal rules. Project copy guidance and
 explicit accessibility contracts take precedence.
 
+The MIT Web Interface Guidelines are vendored. The reviewed Agent Skills root has unresolved
+redistribution terms, so its React performance, composition, and View Transitions bodies remain
+outside this plugin. Map their exact official skill names, entrypoint hashes, and Git subtrees as
+independently installed runtime capabilities. Discover them from the runtime inventory, never from
+a guessed machine path; load only an applicable gate and report a missing capability as not applied.
+
 ### Meta Official Guidance
 
 - Design at Meta and Meta Brand Resource Center remain external official references.
@@ -134,6 +145,14 @@ VoltAgent and other sources. Do not vendor the complete repository. Fetch only a
 selected design-system package into a local cache, preserve its provenance, and do not treat a
 derived package as fresher than its underlying evidence.
 
+Open Design activation requires the user to name the provider plus an exact slug or explicitly
+delegate the selection. Cache presence never counts as demand. The packaged standard-library helper
+fetches the immutable commit into a temporary bare Git repository, verifies the root and package
+trees, materializes only root attribution plus the selected package, rejects non-regular or
+executable entries, and writes a content-addressed receipt. Every use begins with offline receipt
+verification. Corrupt caches fail without deletion or replacement. Preview code is inert, and
+copying package bytes into a project requires separate package-level provenance/license review.
+
 ## Architecture
 
 Create one dual-manifest plugin package named `frontend-design-pack`. It exposes one native skill,
@@ -147,8 +166,12 @@ plugins/frontend-design-pack/
 ├── .claude-plugin/plugin.json
 └── skills/frontend-design/
     ├── SKILL.md
+    ├── scripts/
+    │   └── open_design_cache.py
     └── references/
-        ├── catalog.json
+        ├── reference-catalog.json
+        ├── open-design-provider.json
+        ├── open-design.md
         ├── source-precedence.md
         ├── quality-gates.md
         ├── mengto/
@@ -168,12 +191,15 @@ design-stack/
 ├── sources.json
 ├── sources.lock.json
 ├── provenance.json
+├── mengto-dependencies.json
+├── vercel-runtime-skills.json
 ├── routing.json
 ├── templates/
 │   ├── DESIGN.md.template
 │   ├── product-brief.md
 │   └── design-decision.md
 └── evals/
+    ├── open-design-cases.json
     ├── routing-cases.json
     └── trigger-cases.json
 
@@ -327,7 +353,9 @@ The same plugin root contains both product manifests.
   plugin version.
 - Claude Code installs the matching plugin through the existing repository marketplace, then
   reloads or starts a new session.
-- Both runtimes receive only the `frontend-design` native entry point.
+- The plugin exports only the `frontend-design` native entry point. Reviewed official companion
+  skills may remain independently installed runtime capabilities and are never re-exported by this
+  plugin.
 - Both installed copies are validated separately from the tracked plugin.
 - Plugin versions stay synchronized. Local Codex cachebuster suffixes are for local iteration only;
   published repository updates use a shared semantic version bump.
@@ -364,6 +392,11 @@ Required automated coverage includes:
 - safe handling of executable files as inert data
 - router mode and source-selection pressure cases
 - explicit-use-only handling for external-side-effect skills
+- commit-marked transaction recovery after partial backup cleanup
+- content-addressed Vercel external runtime skill mapping
+- Open Design explicit-demand routing, selective real-Git fetch, offline receipt verification,
+  unsafe-entry rejection, and corrupt-cache non-mutation
+- pinned Google DESIGN.md invocation and tooling-specific authority precedence
 - project-source precedence over external aesthetics
 - Codex and Claude manifest consistency
 - tracked plugin and installed-runtime validation

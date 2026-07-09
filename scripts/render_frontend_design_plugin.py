@@ -15,6 +15,7 @@ from design_stack import (
     ValidationError,
     load_json,
     parse_skill_frontmatter,
+    sha256_bytes,
     sha256_file,
     validate_repository,
 )
@@ -40,6 +41,15 @@ PLUGIN_KEYWORDS = [
     "responsive-design",
     "design-system",
 ]
+VERCEL_RUNTIME_CONTRACT_SHA256 = (
+    "21499d8ad770e9c5f1c7b8e481b12c2052c80dbaf5d17a2614ea641ec10683a5"
+)
+VERCEL_RUNTIME_CANONICAL_SHA256 = (
+    "1d5a3cb8109c5f923088d67a15de6de874bcaaa9102d910e323b92ac35522647"
+)
+OPEN_DESIGN_HELPER_SHA256 = (
+    "00142bb670aa9552ed0af29c70394128894081ce227ff582e5e1262386de0ad2"
+)
 CODEX_INTERFACE = {
     "displayName": "Frontend Design Pack",
     "shortDescription": "Evidence-first frontend design workflows",
@@ -593,7 +603,7 @@ def _copy_authored_router(repo_root: Path, skill_root: Path) -> None:
         skill_root / "SKILL.md",
         (design_stack / "router/SKILL.md").read_bytes(),
     )
-    for filename in ("source-precedence.md", "quality-gates.md"):
+    for filename in ("source-precedence.md", "quality-gates.md", "open-design.md"):
         _write_bytes(
             skill_root / "references" / filename,
             (design_stack / "router/references" / filename).read_bytes(),
@@ -631,12 +641,91 @@ def _copy_authored_router(repo_root: Path, skill_root: Path) -> None:
             )
 
 
+def _copy_open_design_provider(
+    repo_root: Path,
+    skill_root: Path,
+    registry: Mapping[str, Any],
+    lock: Mapping[str, Any],
+) -> Dict[str, Any]:
+    source = _source_map(registry)["open-design"]
+    locked_source = next(
+        item for item in lock["sources"] if item["id"] == "open-design"
+    )
+    locked_license = next(
+        item
+        for item in locked_source["files"]
+        if item["path"] == source["license"]["notice_path"]
+    )
+    provider = {
+        "schema_version": 1,
+        "provider_id": source["id"],
+        "repository": source["repository"],
+        "revision": source["revision"],
+        "root_tree": locked_source["tree"],
+        "package_root": "design-systems",
+        "package_index_path": "design-systems/README.md",
+        "scope": source["scope"][0],
+        "authority": source["authority"],
+        "distribution": source["distribution"],
+        "license": {
+            "spdx": source["license"]["spdx"],
+            "status": source["license"]["status"],
+            "path": source["license"]["notice_path"],
+            "sha256": source["license"]["notice_sha256"],
+            "size": locked_license["size"],
+        },
+        "slug_pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$",
+        "required_files": ["manifest.json", "DESIGN.md", "tokens.css"],
+        "manifest_contract": {
+            "schema_version": "od-design-system-project/v1",
+            "design": "DESIGN.md",
+            "tokens": "tokens.css",
+        },
+        "network_policy": "explicit-demand-only",
+        "cache_write_policy": "selected-package-only",
+        "corrupt_cache_policy": "fail-without-mutation",
+        "cache_namespace": "open-design",
+        "limits": {
+            "max_files": 1000,
+            "max_file_bytes": 8 * 1024 * 1024,
+            "max_total_bytes": 64 * 1024 * 1024,
+        },
+    }
+    provider_reference = "references/open-design-provider.json"
+    helper_reference = "scripts/open_design_cache.py"
+    _write_json(skill_root / provider_reference, provider)
+    _write_bytes(
+        skill_root / helper_reference,
+        (
+            repo_root
+            / "design-stack/router/scripts/open_design_cache.py"
+        ).read_bytes(),
+    )
+    return {
+        "provider_id": provider["provider_id"],
+        "repository": provider["repository"],
+        "revision": provider["revision"],
+        "root_tree": provider["root_tree"],
+        "authority": provider["authority"],
+        "distribution": provider["distribution"],
+        "reference_path": provider_reference,
+        "helper_path": helper_reference,
+        "provider_sha256": sha256_file(skill_root / provider_reference),
+        "helper_sha256": sha256_file(skill_root / helper_reference),
+        "network_policy": provider["network_policy"],
+        "cache_write_policy": provider["cache_write_policy"],
+        "corrupt_cache_policy": provider["corrupt_cache_policy"],
+    }
+
+
 def _copy_contracts_and_official_guidance(
     repo_root: Path,
     skill_root: Path,
+    registry: Mapping[str, Any],
     lock: Mapping[str, Any],
 ) -> Dict[str, Any]:
     locked_files = _locked_file_map(lock)
+    sources = _source_map(registry)
     google_contract = lock["contracts"]["google_design_md_cli"]
     google_reference = "references/contracts/google-design-md-cli-package.json"
     _write_bytes(
@@ -655,6 +744,15 @@ def _copy_contracts_and_official_guidance(
             / "design-stack/vendor/vercel-web-interface-guidelines/command.md"
         ).read_bytes(),
     )
+    vercel_runtime_contract = load_json(
+        repo_root / "design-stack/vercel-runtime-skills.json"
+    )
+    vercel_runtime_source = sources[vercel_runtime_contract["source_id"]]
+    vercel_runtime_lock = next(
+        source
+        for source in lock["sources"]
+        if source["id"] == vercel_runtime_contract["source_id"]
+    )
     return {
         "google_design_md": {
             "source_id": google_contract["source_id"],
@@ -672,6 +770,29 @@ def _copy_contracts_and_official_guidance(
                 ("vercel-web-interface-guidelines", "command.md")
             ]["sha256"],
             "authority": "official",
+        },
+        "vercel_runtime_skills": {
+            "source_id": vercel_runtime_source["id"],
+            "repository": vercel_runtime_source["repository"],
+            "revision": vercel_runtime_source["revision"],
+            "source_tree": vercel_runtime_lock["tree"],
+            "license_status": vercel_runtime_source["license"]["status"],
+            "distribution": vercel_runtime_source["distribution"],
+            "contract_sha256": lock["contracts"]["vercel_runtime_skills"][
+                "sha256"
+            ],
+            "install_source": vercel_runtime_contract["install_source"],
+            "installation_policy": vercel_runtime_contract[
+                "installation_policy"
+            ],
+            "runtime_path_policy": vercel_runtime_contract[
+                "runtime_path_policy"
+            ],
+            "fresh_task_required": vercel_runtime_contract[
+                "fresh_task_required"
+            ],
+            "missing_policy": vercel_runtime_contract["missing_policy"],
+            "skills": vercel_runtime_contract["skills"],
         },
     }
 
@@ -740,9 +861,20 @@ def _render_plugin_tree(repo_root: Path, plugin_root: Path) -> None:
             dependencies,
         ),
         "design_md": _copy_design_md_references(repo_root, skill_root, lock),
+        "open_design_provider": _copy_open_design_provider(
+            repo_root,
+            skill_root,
+            registry,
+            lock,
+        ),
     }
     catalog.update(
-        _copy_contracts_and_official_guidance(repo_root, skill_root, lock)
+        _copy_contracts_and_official_guidance(
+            repo_root,
+            skill_root,
+            registry,
+            lock,
+        )
     )
     _write_json(skill_root / "references/reference-catalog.json", catalog)
     _copy_notices(repo_root, plugin_root, registry)
@@ -784,6 +916,224 @@ def _plugin_files(root: Path) -> Dict[str, Path]:
             raise ValidationError(f"plugin contains a special file: {relative}")
         files[relative] = path
     return files
+
+
+def _validate_design_md_validation_contract(
+    routing: Mapping[str, Any],
+    catalog: Mapping[str, Any],
+    skill_root: Path,
+) -> None:
+    reference = catalog.get("google_design_md")
+    if not isinstance(reference, dict):
+        raise ValidationError("DESIGN.md validation catalog reference is missing")
+    raw_path = reference.get("reference_path")
+    if not isinstance(raw_path, str):
+        raise ValidationError("DESIGN.md validation catalog path is missing")
+    path = _safe_dependency_path(raw_path, "DESIGN.md validation catalog path")
+    manifest = load_json(skill_root.joinpath(*path.parts))
+    if manifest.get("name") != "@google/design.md" or manifest.get("version") != "0.3.0":
+        raise ValidationError("DESIGN.md validation package must be @google/design.md@0.3.0")
+    binaries = manifest.get("bin")
+    if not isinstance(binaries, dict) or binaries.get("designmd") != binaries.get(
+        "design.md"
+    ):
+        raise ValidationError("DESIGN.md validation package must expose the designmd alias")
+    if reference.get("version") != manifest["version"]:
+        raise ValidationError("DESIGN.md validation catalog version differs from its package")
+
+    expected = {
+        "package_spec": "@google/design.md@0.3.0",
+        "binary": "designmd",
+        "arguments": ["lint", "DESIGN.md"],
+        "fallback_command": [
+            "npx",
+            "--package=@google/design.md@0.3.0",
+            "designmd",
+            "lint",
+            "DESIGN.md",
+        ],
+        "authority_order": [
+            "user-approved-project-pinned-contract",
+            "project-committed-pinned-contract",
+            "frontend-design-pack-pinned-fallback",
+            "versionless-imported-examples-non-authoritative",
+        ],
+        "external_execution": "ask-before-download-or-execution",
+        "unavailable_policy": "report-unverified-never-substitute-unpinned",
+    }
+    if routing.get("design_md_validation") != expected:
+        raise ValidationError("DESIGN.md validation contract is not the approved pinned contract")
+
+
+def _validate_vercel_runtime_catalog(catalog: Mapping[str, Any]) -> None:
+    runtime = catalog.get("vercel_runtime_skills")
+    if not isinstance(runtime, dict):
+        raise ValidationError("Vercel runtime catalog contract is missing")
+    expected_fields = {
+        "source_id",
+        "repository",
+        "revision",
+        "source_tree",
+        "license_status",
+        "distribution",
+        "contract_sha256",
+        "install_source",
+        "installation_policy",
+        "runtime_path_policy",
+        "fresh_task_required",
+        "missing_policy",
+        "skills",
+    }
+    if set(runtime) != expected_fields:
+        raise ValidationError("Vercel runtime catalog fields are not recognized")
+    expected_metadata = {
+        "source_id": "vercel-agent-skills",
+        "repository": "https://github.com/vercel-labs/agent-skills",
+        "revision": "f8a72b9603728bb92a217a879b7e62e43ad76c81",
+        "source_tree": "5bd714a247baf205f05eb0371e82602e181a505d",
+        "license_status": "unresolved",
+        "distribution": "reference-only",
+        "contract_sha256": VERCEL_RUNTIME_CONTRACT_SHA256,
+    }
+    for field, expected in expected_metadata.items():
+        if runtime.get(field) != expected:
+            raise ValidationError(f"Vercel runtime {field} is not the approved value")
+    contract = {
+        "schema_version": 1,
+        "source_id": runtime["source_id"],
+        "install_source": runtime["install_source"],
+        "installation_policy": runtime["installation_policy"],
+        "runtime_path_policy": runtime["runtime_path_policy"],
+        "fresh_task_required": runtime["fresh_task_required"],
+        "missing_policy": runtime["missing_policy"],
+        "skills": runtime["skills"],
+    }
+    contract_bytes = json.dumps(
+        contract,
+        ensure_ascii=False,
+        separators=(",", ":"),
+        sort_keys=True,
+    ).encode("utf-8")
+    if sha256_bytes(contract_bytes) != VERCEL_RUNTIME_CANONICAL_SHA256:
+        raise ValidationError("Vercel runtime skill mapping differs from its content lock")
+    for skill in runtime["skills"]:
+        if not isinstance(skill, dict) or "reference_path" in skill:
+            raise ValidationError("Vercel runtime skills must remain external mappings")
+        _safe_dependency_path(
+            skill.get("source_path", ""),
+            "Vercel runtime source path",
+        )
+        requirement = skill.get("external_runtime_requirement")
+        if not isinstance(requirement, dict) or requirement != {
+            "capability": f"skill:{skill.get('name', '')}",
+            "required_file": "SKILL.md",
+            "resolution": "discover-installed-skill",
+        }:
+            raise ValidationError("Vercel runtime requirement is not discoverable")
+
+
+def _validate_open_design_provider(
+    catalog: Mapping[str, Any],
+    skill_root: Path,
+) -> None:
+    entry = catalog.get("open_design_provider")
+    if not isinstance(entry, dict):
+        raise ValidationError("Open Design provider catalog entry is missing")
+    expected_fields = {
+        "provider_id",
+        "repository",
+        "revision",
+        "root_tree",
+        "authority",
+        "distribution",
+        "reference_path",
+        "helper_path",
+        "provider_sha256",
+        "helper_sha256",
+        "network_policy",
+        "cache_write_policy",
+        "corrupt_cache_policy",
+    }
+    if set(entry) != expected_fields:
+        raise ValidationError("Open Design provider catalog fields are not recognized")
+    expected_metadata = {
+        "provider_id": "open-design",
+        "repository": "https://github.com/nexu-io/open-design",
+        "revision": "81b20dc6a214da2228bdd08f8850656b98f9bcea",
+        "root_tree": "f3b4e7ab9e965c26e07be1104b4e0977f780807a",
+        "authority": "optional-provider",
+        "distribution": "on-demand",
+        "network_policy": "explicit-demand-only",
+        "cache_write_policy": "selected-package-only",
+        "corrupt_cache_policy": "fail-without-mutation",
+    }
+    for field, expected in expected_metadata.items():
+        if entry.get(field) != expected:
+            raise ValidationError(f"Open Design provider {field} is not approved")
+    if entry.get("helper_sha256") != OPEN_DESIGN_HELPER_SHA256:
+        raise ValidationError("Open Design provider helper is not the approved implementation")
+    provider_path = _safe_dependency_path(
+        entry["reference_path"],
+        "Open Design provider reference",
+    )
+    helper_path = _safe_dependency_path(
+        entry["helper_path"],
+        "Open Design provider helper",
+    )
+    provider_file = skill_root.joinpath(*provider_path.parts)
+    helper_file = skill_root.joinpath(*helper_path.parts)
+    for label, path, digest in (
+        ("provider", provider_file, entry["provider_sha256"]),
+        ("helper", helper_file, entry["helper_sha256"]),
+    ):
+        if not path.is_file() or path.is_symlink():
+            raise ValidationError(f"Open Design provider {label} file is missing")
+        if not isinstance(digest, str) or sha256_file(path) != digest:
+            raise ValidationError(f"Open Design provider {label} hash differs")
+    if helper_file.stat().st_mode & 0o111:
+        raise ValidationError("Open Design provider helper must remain non-executable")
+    provider = load_json(provider_file)
+    expected_provider_values = {
+        "schema_version": 1,
+        "provider_id": entry["provider_id"],
+        "repository": entry["repository"],
+        "revision": entry["revision"],
+        "root_tree": entry["root_tree"],
+        "package_root": "design-systems",
+        "package_index_path": "design-systems/README.md",
+        "scope": "design-systems/<explicit-selection>/**",
+        "authority": entry["authority"],
+        "distribution": entry["distribution"],
+        "slug_pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$",
+        "required_files": ["manifest.json", "DESIGN.md", "tokens.css"],
+        "manifest_contract": {
+            "schema_version": "od-design-system-project/v1",
+            "design": "DESIGN.md",
+            "tokens": "tokens.css",
+        },
+        "network_policy": entry["network_policy"],
+        "cache_write_policy": entry["cache_write_policy"],
+        "corrupt_cache_policy": entry["corrupt_cache_policy"],
+        "cache_namespace": "open-design",
+        "limits": {
+            "max_files": 1000,
+            "max_file_bytes": 8 * 1024 * 1024,
+            "max_total_bytes": 64 * 1024 * 1024,
+        },
+    }
+    for field, expected in expected_provider_values.items():
+        if provider.get(field) != expected:
+            raise ValidationError(f"Open Design provider {field} differs")
+    if set(provider) != set(expected_provider_values) | {"license"}:
+        raise ValidationError("Open Design provider fields are not recognized")
+    if provider.get("license") != {
+        "spdx": "Apache-2.0",
+        "status": "verified",
+        "path": "LICENSE",
+        "sha256": "9d95806a26532623360eb84bb17d298f394b55ef73fb4c0796d99b4319b2b0da",
+        "size": 11296,
+    }:
+        raise ValidationError("Open Design provider license evidence differs")
 
 
 def validate_plugin_tree(plugin_root: Path) -> None:
@@ -995,6 +1345,9 @@ def validate_plugin_tree(plugin_root: Path) -> None:
             raise ValidationError(f"catalog {catalog_key} reference is missing: {raw_path}")
         if sha256_file(local_path) != digest:
             raise ValidationError(f"catalog {catalog_key} hash differs: {raw_path}")
+    _validate_design_md_validation_contract(routing, catalog, skill_root)
+    _validate_vercel_runtime_catalog(catalog)
+    _validate_open_design_provider(catalog, skill_root)
 
 
 def validate_runtime_copy(
