@@ -4,9 +4,10 @@ This repository packages a reviewed frontend-design environment for Codex and Cl
 exposes one native skill, `frontend-design`, through `frontend-design-pack`; the larger corpus stays
 behind a router so an agent loads only the references required by the current surface and mode.
 
-The tracked repository is the review source. An installed plugin is a separate runtime copy. A
-successful repository validation does not prove that an older installed copy was refreshed, and an
-installed copy does not prove that the tracked plugin is current.
+The tracked repository is the review source. Resolve and validate the live runtime root separately.
+For a local Codex marketplace, that root may be the tracked plugin root; a cached install can be a
+distinct runtime copy. Repository validation alone does not prove which root the active runtime is
+loading.
 
 ## First-Run Decisions
 
@@ -94,6 +95,38 @@ The browser evaluator records `browser:control-in-app-browser` as a discoverable
 requirement. It never stores a private installation path. If that capability is unavailable, the
 agent skips only that evaluator instead of pretending the whole design procedure is available.
 
+## Use The Frontend Design Router
+
+Users do not need to memorize the six modes. State the product goal and explicitly name the
+`frontend-design` skill when deterministic routing matters; the router chooses the smallest
+applicable mode and reference set. A useful default request is:
+
+```text
+Use the frontend-design skill to review this interface, implement the highest-impact fixes, and
+verify the rendered result at the relevant mobile and desktop viewports.
+```
+
+Use a mode explicitly when the boundary matters:
+
+- Review only: `Use review mode, inspect the rendered interface, and report prioritized findings
+  without editing files.`
+- Implementation and finish: `Use the frontend-design skill to implement and then harden this
+  surface. Verify accessibility, responsive behavior, and loading, empty, error, disabled, and
+  success states in a real browser.`
+- New direction: `Use shape mode to define the user flow, then explore mode to compare two or three
+  materially different directions. Implement only the direction I approve.`
+- Figma handoff: `Use the frontend-design skill with this Figma URL. Reuse project components and
+  tokens, implement the selected surface, and compare the rendered result with the supplied Figma
+  evidence.`
+- Open Design: `Use the frontend-design skill with the exact Open Design slug <slug>. Report the
+  pinned revision and cache destination before any network or cache write, verify the receipt, and
+  treat the package as labeled inspiration rather than automatic copy permission.`
+
+Say `review only` when edits are not authorized. Say `implement` or `implement and then harden` when
+the agent should change code, run the relevant tests, and perform visual verification. External
+references remain subordinate to project-owned components, tokens, DESIGN.md, screenshots, and
+Figma evidence; naming a broad aesthetic is not permission to replace an established design system.
+
 ## Validate The Tracked Source
 
 Run these commands from a clean clone:
@@ -110,7 +143,7 @@ git diff --check
 procedure dependencies, deterministic rendering, and the tracked plugin. The renderer builds and
 validates a same-filesystem staging tree before a journaled swap, so a late failure or interrupted
 replacement restores the previous complete output. Repository ancestors and unapproved in-repo
-destinations are rejected. This validation does not silently validate an installed runtime copy.
+destinations are rejected. This validation does not infer or silently select the live runtime root.
 
 ## Install In Codex
 
@@ -118,7 +151,7 @@ First inspect current state:
 
 ```bash
 codex plugin marketplace list
-codex plugin list
+codex plugin list --json
 ```
 
 After the user approves adding this repository marketplace and installing the plugin:
@@ -126,11 +159,12 @@ After the user approves adding this repository marketplace and installing the pl
 ```bash
 codex plugin marketplace add "$PWD"
 codex plugin add frontend-design-pack@agent-bootstrap
-codex plugin list
+codex plugin list --json
 ```
 
-Use `codex plugin list` plus read-only filesystem inspection to locate the actual installed plugin
-root. Validate it separately:
+Use `codex plugin list --json` plus read-only filesystem inspection to resolve the live runtime
+root. A local marketplace may resolve directly to the tracked plugin root; a cached install may
+resolve elsewhere. Validate the resolved root separately:
 
 ```bash
 python3 scripts/validate_frontend_design_stack.py \
@@ -139,7 +173,7 @@ python3 scripts/validate_frontend_design_stack.py \
 ```
 
 Do not guess the cache path. Do not remove an existing marketplace or plugin to make installation
-easier. If replacement is required, explain the current state and Ask before installing, updating,
+easier. If replacement is required, explain the current state and ask before installing, updating,
 or replacing it.
 
 Start a fresh Codex task after installation. Skills are discovered at task start; the task that
@@ -187,7 +221,7 @@ Validate both manifests before changing runtime state:
 claude plugin validate .claude-plugin/marketplace.json
 claude plugin validate plugins/frontend-design-pack
 claude plugin marketplace list
-claude plugin list
+claude plugin list --json
 ```
 
 After the user approves marketplace and plugin installation:
@@ -195,10 +229,11 @@ After the user approves marketplace and plugin installation:
 ```bash
 claude plugin marketplace add "$PWD"
 claude plugin install frontend-design-pack@agent-bootstrap --scope user
-claude plugin list
+claude plugin list --json
 ```
 
-Locate the installed root from current Claude Code state and validate that runtime copy separately:
+Read `installPath` from `claude plugin list --json` to resolve the live runtime root, then validate
+that runtime copy separately:
 
 ```bash
 python3 scripts/validate_frontend_design_stack.py \
@@ -208,6 +243,22 @@ python3 scripts/validate_frontend_design_stack.py \
 
 Start a fresh Claude Code session after install or update. A restart or fresh session is required
 before claiming discovery.
+
+After separate approval, install the same three official Vercel companion skills for Claude Code
+without installing the rest of the upstream catalog:
+
+```bash
+npx -y skills@latest add vercel-labs/agent-skills \
+  --skill vercel-react-best-practices \
+  --skill vercel-composition-patterns \
+  --skill vercel-react-view-transitions \
+  --global --agent claude-code --yes
+```
+
+Inspect the installed skill identities against `design-stack/vercel-runtime-skills.json`, load only
+the gate applicable to the current React or Next.js task, and start a fresh Claude Code session
+after installation or an approved update. Do not treat Codex installation as proof that Claude Code
+can discover the same external skills.
 
 ## Figma Boundary
 
@@ -307,12 +358,14 @@ After pulling a reviewed repository update:
 
 1. inspect `git status --short --branch`;
 2. validate the tracked source and generated output;
-3. inspect current marketplace/plugin state;
-4. ask approval before runtime replacement;
-5. install the newly versioned plugin using the current runtime's documented command;
-6. validate the installed root separately;
+3. inspect current marketplace/plugin state and resolve the live runtime root;
+4. If the live Codex root is the tracked plugin root, validate it directly; do not reinstall it
+   merely because the repository was pulled;
+5. if a distinct cached runtime is stale, install or update only a distinct cached runtime after approval;
+6. validate the resolved live root separately;
 7. start a fresh task or session and run a read-only discovery pressure case.
 
 Rollback is a new reviewed release: restore the prior source content in a task branch, assign a new
-semantic version, render and validate it, inspect the diff, then install that new rollback version.
-Do not point a reused version at different bytes, and do not delete unrelated runtime state.
+semantic version, render and validate it, inspect the diff, then expose the new rollback version
+through the resolved live-root path. Update a distinct cache only with approval. Do not point a
+reused version at different bytes, and do not delete unrelated runtime state.

@@ -13,7 +13,7 @@ First read AGENTS.md, README.md, docs/agent-setup-playbook.md, docs/global-guard
 
 Before changing anything, run git status --short --branch. If there is uncommitted or untracked user work, stop and ask how to handle it. Identify whether the current harness is Codex or Claude Code. Identify my requested scope.
 
-Before rendering local configuration, ask what name the active agent should use to address me. Inspect the models and reasoning levels the active Codex and Claude runtimes actually support, then inherit those available selections instead of hard-coding a latest model or paid-plan assumption. Keep the chosen name out of tracked files.
+Before rendering local configuration, ask what name the active agent should use to address me. Inspect the models and reasoning levels the active Codex and Claude runtimes actually support, then inherit those available selections instead of hard-coding a latest model or paid-plan assumption. Keep the chosen name local. Do not commit the chosen name or rendered files that contain it.
 
 Read docs/frontend-design-stack.md. Validate the tracked frontend-design-pack, report whether Figma is available without authenticating it, and ask before installing or replacing any runtime plugin copy. If installation is approved, validate the installed root separately and use a fresh task or session to prove discovery.
 
@@ -234,17 +234,21 @@ Do not install optional tools just because they are mentioned. Inventory the cur
 
 ## Architecture
 
-The repository is split into three practical layers:
+The repository is split into four practical layers:
 
 - shared core
   - `AGENTS.md`
   - `agents/*.md`
   - `shared/agent-metadata.json`
   - common process-first constitution and role prompt bodies
+- reviewed frontend design source
+  - `design-stack/`
+  - source registry, immutable lock, provenance, router contracts, and reviewed vendored material
 - first-class harness adapters
   - `.codex/`
   - `.claude-plugin/`
   - `plugins/process-first-agents/`
+  - `plugins/frontend-design-pack/`
 - reusable public-safe skills
   - `skills/karpathy-guidelines/`
   - `skills/chatgpt-collaboration-harness/`
@@ -271,8 +275,12 @@ Use [docs/agent-bootstrap-structure.md](docs/agent-bootstrap-structure.md) as th
 - Change role metadata in `shared/agent-metadata.json`.
 - Change Codex installation behavior in `.codex/install.py`.
 - Change Claude plugin rendering in `scripts/render_claude_plugin.py`.
+- Change reviewed frontend design source and routing in `design-stack/`.
+- Render the frontend design plugin with `scripts/render_frontend_design_plugin.py`; do not edit
+  `plugins/frontend-design-pack/` by hand.
 - Regenerate Claude plugin output with `python3 scripts/render_claude_plugin.py --partner-name "<Name>"` after shared prompt or metadata changes.
-- Verify with `python3 -m unittest discover -s tests -p 'test_*.py'` and `python3 scripts/audit_agent_stack.py`.
+- Verify design changes with `python3 scripts/validate_frontend_design_stack.py --repo-root .` in
+  addition to the full tests, agent-stack audit, and private-path check.
 - Keep generated Claude plugin output in sync. Do not edit generated Claude plugin agents by hand.
 
 ## Pull And Update Workflow
@@ -286,6 +294,13 @@ python3 scripts/render_claude_plugin.py --partner-name "<Name>"
 python3 -m unittest discover -s tests -p 'test_*.py'
 python3 scripts/audit_agent_stack.py
 ```
+
+If the update touches `design-stack/` or `plugins/frontend-design-pack/`, follow
+[docs/frontend-design-stack.md](docs/frontend-design-stack.md) and the conditional workflow in
+[prompts/update-agent-bootstrap.md](prompts/update-agent-bootstrap.md). After pulling, resolve and
+validate the live runtime root. With a local Codex marketplace it may be the tracked plugin root; a
+cached install can be distinct. Replace a cached install only after separate user approval, then
+validate the resolved root and use a fresh task or session to prove discovery.
 
 If `git status --short --branch` is not clean, stop and decide whether the local work should be committed, moved to a WIP branch, or left untouched before pulling. Do not stash or overwrite user work automatically.
 
@@ -301,7 +316,7 @@ The default audit is offline and read-only. Add `--online` only when you explici
 
 ## Compatibility Notes
 
-Some legacy files remain for history and migration review, including older OpenCode and OpenClaw docs or prompts. They are not the current public setup path. Do not expand them unless Hun explicitly asks to restore support.
+Some legacy files remain for history and migration review, including older OpenCode and OpenClaw docs or prompts. They are not the current public setup path. Do not expand them unless the user explicitly asks to restore support.
 
 ## Testing
 

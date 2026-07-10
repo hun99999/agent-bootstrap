@@ -13,7 +13,7 @@
 
 ファイルを変更する前に git status --short --branch を実行してください。未コミット変更や untracked file があれば停止し、どう扱うか確認してください。現在のハーネスが Codex か Claude Code かを確認し、私が要求した範囲を確認してください。
 
-ローカル設定を render する前に、エージェントが私を何と呼ぶか質問してください。現在の Codex と Claude runtime が実際に利用できる model と reasoning level を確認し、最新 model 名や paid plan を固定せず、利用可能な選択を継承してください。選んだ名前を tracked file に入れないでください。
+ローカル設定を render する前に、エージェントが私を何と呼ぶか質問してください。現在の Codex と Claude runtime が実際に利用できる model と reasoning level を確認し、最新 model 名や paid plan を固定せず、利用可能な選択を継承してください。選択した名前は local に保持してください。選択した名前や、その名前を含む render 結果を commit しないでください。
 
 docs/frontend-design-stack.md を読んでください。tracked frontend-design-pack を検証し、Figma は認証せず利用可否だけを報告し、runtime plugin copy の install または replacement 前に承認を求めてください。承認後は installed root を別に検証し、fresh task/session で discovery を確認してください。
 
@@ -183,10 +183,11 @@ Optional tools は workflow を支えるためのものです。Obsidian, Lumin 
 
 ## アーキテクチャ
 
-The repository has three layers:
+The repository has four layers:
 
 - shared core: `AGENTS.md`, `agents/*.md`, `shared/agent-metadata.json`
-- first-class harness adapters: `.codex/`, `.claude-plugin/`, `plugins/process-first-agents/`
+- reviewed frontend design source: `design-stack/`
+- first-class harness adapters: `.codex/`, `.claude-plugin/`, `plugins/process-first-agents/`, `plugins/frontend-design-pack/`
 - reusable public-safe skills: `skills/karpathy-guidelines/`, `skills/chatgpt-collaboration-harness/`, `skills/hun-engineering-loop/`, `skills/_template/`
 
 詳細は [docs/agent-bootstrap-structure.md](docs/agent-bootstrap-structure.md) を読んでください。
@@ -201,7 +202,9 @@ Codex App curated Superpowers plugin を使えます。Codex installer は manua
 - Metadata: `shared/agent-metadata.json`
 - Codex installer: `.codex/install.py`
 - Claude renderer: `scripts/render_claude_plugin.py`
-- Verification: `python3 -m unittest discover -s tests -p 'test_*.py'`, `python3 scripts/audit_agent_stack.py`
+- Frontend design source and router: `design-stack/`
+- Frontend design renderer: `scripts/render_frontend_design_plugin.py`; do not edit `plugins/frontend-design-pack/` by hand
+- Verification: `python3 -m unittest discover -s tests -p 'test_*.py'`, `python3 scripts/audit_agent_stack.py`, `python3 scripts/validate_frontend_design_stack.py --repo-root .`
 
 Existing clone update:
 
@@ -212,6 +215,14 @@ python3 scripts/render_claude_plugin.py --partner-name "<Name>"
 python3 -m unittest discover -s tests -p 'test_*.py'
 python3 scripts/audit_agent_stack.py
 ```
+
+更新が `design-stack/` または `plugins/frontend-design-pack/` に触れる場合は、
+[docs/frontend-design-stack.md](docs/frontend-design-stack.md) と
+[prompts/update-agent-bootstrap.md](prompts/update-agent-bootstrap.md) の条件付き手順に従います。
+pull 後に live runtime root を解決して検証します。local Codex marketplace では tracked
+plugin root の場合がありますが、cached install は別の場所にある場合があります。
+cached install の置換前に個別の承認を得て、解決した root を検証し、fresh task または
+session で discovery を確認します。
 
 ## Agent Stack Audit
 

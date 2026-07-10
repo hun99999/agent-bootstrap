@@ -18,6 +18,11 @@ The session layer may already be loaded before a new global install happens. New
 
 In short: install globally for new sessions, then use project-local knowledge for the facts that only one repository knows.
 
+Before running an installer or renderer, stop. Ask the user what name the active agent should use.
+Keep the chosen name local. Substitute it for `<chosen-name>`, and do not commit the chosen name or
+any rendered identity file that contains it. Inspect the active runtime's models and reasoning
+levels. Do not hard-code a latest model or paid-plan ceiling.
+
 ## Codex Global Setup
 
 Codex uses `~/.codex` for user-level defaults and `~/.agents/skills/superpowers` for shared Superpowers skill discovery.
@@ -25,7 +30,7 @@ Codex uses `~/.codex` for user-level defaults and `~/.agents/skills/superpowers`
 Run this from the repository root:
 
 ```bash
-bash .codex/install.sh --partner-name "Hun"
+bash .codex/install.sh --partner-name "<chosen-name>"
 python3 scripts/audit_agent_stack.py
 ```
 
@@ -62,7 +67,7 @@ Recommended setup:
 Commands from the repository root:
 
 ```bash
-python3 scripts/render_claude_plugin.py --partner-name "Hun"
+python3 scripts/render_claude_plugin.py --partner-name "<chosen-name>"
 ```
 
 Then inside Claude Code:
@@ -78,7 +83,7 @@ The Claude Code plugin carries the same shared constitution and role prompt bodi
 
 OpenCode and OpenClaw are legacy/reference material in this repository, not
 current first-class setup targets. Do not run legacy installers or route new
-setup work through those files unless Hun explicitly asks to restore that
+setup work through those files unless the user explicitly asks to restore that
 support.
 
 ## Project-Local Knowledge
@@ -214,7 +219,7 @@ Otherwise, document the recommended rule and leave installation for a separate a
 The Codex installer is a shell script:
 
 ```bash
-bash .codex/install.sh --partner-name "Hun"
+bash .codex/install.sh --partner-name "<chosen-name>"
 ```
 
 Claude Code plugin installation happens inside Claude Code after rendering the plugin bundle with Python.
@@ -240,8 +245,8 @@ The Codex installer is a shell script. On Windows, run it in an environment that
 After pulling changes in this repository:
 
 ```bash
-bash .codex/install.sh --partner-name "Hun"
-python3 scripts/render_claude_plugin.py --partner-name "Hun"
+bash .codex/install.sh --partner-name "<chosen-name>"
+python3 scripts/render_claude_plugin.py --partner-name "<chosen-name>"
 python3 scripts/audit_agent_stack.py
 ```
 

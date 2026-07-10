@@ -93,6 +93,11 @@ After implementation, review the change before calling it complete:
 
 ## macOS Setup
 
+Ask the user what name the active agent should use before rendering local defaults. Keep the chosen name local.
+Substitute it for `<chosen-name>`, and do not commit the chosen name or any rendered identity file
+that contains it. Inspect the active runtime's models and reasoning levels. Do not hard-code a latest
+model or paid-plan ceiling.
+
 For this repository:
 
 ```bash
@@ -104,14 +109,14 @@ python3 -m unittest discover -s tests -p 'test_*.py'
 For Codex current-harness setup from this repository:
 
 ```bash
-bash .codex/install.sh --partner-name "Hun"
+bash .codex/install.sh --partner-name "<chosen-name>"
 python3 scripts/audit_agent_stack.py
 ```
 
 For Claude Code plugin rendering from this repository:
 
 ```bash
-python3 scripts/render_claude_plugin.py --partner-name "Hun"
+python3 scripts/render_claude_plugin.py --partner-name "<chosen-name>"
 python3 -m unittest tests.test_claude_plugin -v
 ```
 
@@ -192,7 +197,7 @@ Use `:full` for a first checkup, a branch-level review, or a major refactor. Use
 ## Legacy Surface Notes
 
 OpenCode and OpenClaw are legacy/reference material in this repository, not
-current first-class service targets. If Hun explicitly asks for migration or
+current first-class service targets. If the user explicitly asks for migration or
 restoration work on those surfaces, apply the same shared-core guardrails: read
 the root `AGENTS.md`, use the local project knowledge template, run pre-write,
 write, and post-write checks, and keep local evidence artifacts untracked.
@@ -266,7 +271,7 @@ Use canon or living audit docs when the repo has enough structure to justify dur
 - Use living audit or project docs for boundary policy, public API policy, dependency direction, and re-export policy.
 - Keep a living audit for unresolved structure risks, stale evidence, recurring hotspots, and accepted deviations.
 - Prefer `docs/current/audit/lumin-structural-audit.md` for shareable project facts.
-- Keep private local details in `local.md`, an untracked note, or an Obsidian page. The repository should link to the kind of knowledge needed, not to Hun's personal vault path.
+- Keep private local details in `local.md`, an untracked note, or an Obsidian page. The repository should link to the kind of knowledge needed, not to the user's personal vault path.
 
 ## Local Wiki Or Obsidian Index
 
@@ -276,7 +281,7 @@ Good places to keep that index:
 
 - the target repository's `local.md` if it is intended to be local or machine-specific
 - an untracked note under a private notes directory
-- an Obsidian page in Hun's personal vault
+- an Obsidian page in the user's personal vault
 - a team-visible architecture note if the content is safe to share
 
 Do not commit personal vault paths, private project paths, credentials, MCP endpoints, auth state, or machine-specific trust settings.

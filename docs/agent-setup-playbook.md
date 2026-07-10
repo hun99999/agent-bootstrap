@@ -175,6 +175,11 @@ Before installing any desktop app, CLI, plugin, browser extension, package manag
 
 Proceed only after approval. If approval is not given, continue with the best no-install path and report the limitation.
 
+Ask the user what name the active agent should use before any local render. Keep the chosen name local.
+Substitute it for `<chosen-name>`, and do not commit the chosen name or any rendered identity file
+that contains it. Inspect the active runtime's models and reasoning levels. Do not hard-code a latest
+model or paid-plan ceiling.
+
 ## Setup Paths
 
 Use the documented path for the selected scope.
@@ -190,7 +195,7 @@ Read:
 Documented command from the repository root:
 
 ```bash
-bash .codex/install.sh --partner-name "Hun"
+bash .codex/install.sh --partner-name "<chosen-name>"
 python3 scripts/audit_agent_stack.py
 ```
 
@@ -217,7 +222,7 @@ Read:
 Documented render command from the repository root:
 
 ```bash
-python3 scripts/render_claude_plugin.py --partner-name "Hun"
+python3 scripts/render_claude_plugin.py --partner-name "<chosen-name>"
 python3 -m unittest tests.test_claude_plugin -v
 ```
 
@@ -227,7 +232,7 @@ Claude Code plugin installation itself happens inside Claude Code using the docu
 
 OpenCode and OpenClaw are legacy/reference material, not active service targets.
 Do not run legacy installers or route a fresh setup through those docs unless
-Hun explicitly asks for migration or restoration work.
+the user explicitly asks for migration or restoration work.
 
 ### Project Guardrails
 
@@ -312,7 +317,7 @@ Tracked files must not contain:
 - browser profile paths
 - machine-specific trust settings
 
-Public docs may describe what to record. They should not record where Hun personally stores private notes.
+Public docs may describe what to record. They should not record where the user personally stores private notes.
 
 ## Final Report Template
 

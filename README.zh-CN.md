@@ -13,7 +13,7 @@
 
 修改文件之前，运行 git status --short --branch。如果有未提交修改或 untracked file，停止并询问如何处理。确认当前 harness 是 Codex 还是 Claude Code，并确认我要求的范围。
 
-渲染本地配置之前，先询问代理应如何称呼我。检查当前 Codex 和 Claude runtime 实际支持的 model 与 reasoning level，不要硬编码最新 model 名或 paid plan，而应继承可用选择。不要把选定名称写入 tracked file。
+渲染本地配置之前，先询问代理应如何称呼我。检查当前 Codex 和 Claude runtime 实际支持的 model 与 reasoning level，不要硬编码最新 model 名或 paid plan，而应继承可用选择。将所选名称保留在本地。不要提交所选名称或包含该名称的 render 结果。
 
 阅读 docs/frontend-design-stack.md。验证 tracked frontend-design-pack；只报告 Figma 是否可用，不要进行认证；安装或替换 runtime plugin copy 前先询问。获得批准后，单独验证 installed root，并在 fresh task/session 中确认 discovery。
 
@@ -183,10 +183,11 @@ Optional tools 应支持 workflow，而不是替代 workflow。Obsidian、Lumin 
 
 ## 架构
 
-The repository has three layers:
+The repository has four layers:
 
 - shared core: `AGENTS.md`, `agents/*.md`, `shared/agent-metadata.json`
-- first-class harness adapters: `.codex/`, `.claude-plugin/`, `plugins/process-first-agents/`
+- reviewed frontend design source: `design-stack/`
+- first-class harness adapters: `.codex/`, `.claude-plugin/`, `plugins/process-first-agents/`, `plugins/frontend-design-pack/`
 - reusable public-safe skills: `skills/karpathy-guidelines/`, `skills/chatgpt-collaboration-harness/`, `skills/hun-engineering-loop/`, `skills/_template/`
 
 详细结构请阅读 [docs/agent-bootstrap-structure.md](docs/agent-bootstrap-structure.md)。
@@ -201,7 +202,9 @@ Codex 可以使用 Codex App curated Superpowers plugin。Codex installer 也支
 - Metadata: `shared/agent-metadata.json`
 - Codex installer: `.codex/install.py`
 - Claude renderer: `scripts/render_claude_plugin.py`
-- Verification: `python3 -m unittest discover -s tests -p 'test_*.py'`, `python3 scripts/audit_agent_stack.py`
+- Frontend design source and router: `design-stack/`
+- Frontend design renderer: `scripts/render_frontend_design_plugin.py`; do not edit `plugins/frontend-design-pack/` by hand
+- Verification: `python3 -m unittest discover -s tests -p 'test_*.py'`, `python3 scripts/audit_agent_stack.py`, `python3 scripts/validate_frontend_design_stack.py --repo-root .`
 
 Existing clone update:
 
@@ -212,6 +215,13 @@ python3 scripts/render_claude_plugin.py --partner-name "<Name>"
 python3 -m unittest discover -s tests -p 'test_*.py'
 python3 scripts/audit_agent_stack.py
 ```
+
+如果更新涉及 `design-stack/` 或 `plugins/frontend-design-pack/`，请遵循
+[docs/frontend-design-stack.md](docs/frontend-design-stack.md) 与
+[prompts/update-agent-bootstrap.md](prompts/update-agent-bootstrap.md) 中的条件更新流程。
+pull 后解析并验证 live runtime root。使用 local Codex marketplace 时，它可能就是 tracked
+plugin root；cached install 也可能位于其他位置。替换 cached install 前需单独批准，随后
+验证解析出的 root，并在 fresh task 或 session 中确认 discovery。
 
 ## Agent Stack Audit
 
