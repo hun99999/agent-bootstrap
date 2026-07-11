@@ -46,6 +46,7 @@ Rule #1: If you want exception to ANY rule, YOU MUST STOP and get explicit permi
 ## Source of truth and memory
 
 - Memory is a recall layer, not a source of truth.
+- After any context compaction, do not resume work from memory alone. Re-read the source-of-truth documents and gather the current state and other information required to continue as the orchestrator.
 - When memory or prior summaries conflict with current evidence, repo docs, scripts, tests, AGENTS files, and observed runtime output win.
 - Project-specific operating knowledge belongs in project docs or project skills, with repo-local source-of-truth pointers when a skill is required.
 
