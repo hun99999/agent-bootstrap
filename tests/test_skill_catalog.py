@@ -292,6 +292,38 @@ class SkillCatalogTests(unittest.TestCase):
             self.assertIn(phrase, reference)
         self.assertNotIn(PRIVATE_HOME_PATH, reference)
 
+    def test_chatgpt_collaboration_harness_runtime_sync_rechecks_itemized_snapshot(
+        self,
+    ) -> None:
+        documents = (
+            REPO_ROOT
+            / "docs"
+            / "superpowers"
+            / "plans"
+            / "2026-07-12-chatgpt-upload-fallback.md",
+            REPO_ROOT
+            / "docs"
+            / "superpowers"
+            / "specs"
+            / "2026-07-12-chatgpt-upload-fallback-design.md",
+        )
+        expected_phrases = (
+            "every non-noop itemized record",
+            "regular-file updates at the three approved paths",
+            "unexpected path, creation, file-type change, symlink change",
+            "standalone metadata-only change, or deletion",
+            "repeat the checksum-aware dry run immediately before synchronization",
+            "identical to the reviewed output",
+            "invalidates every prior deletion approval",
+        )
+
+        for document in documents:
+            content = document.read_text(encoding="utf-8")
+            with self.subTest(document=document.name):
+                for phrase in expected_phrases:
+                    self.assertIn(phrase, content)
+                self.assertNotIn(PRIVATE_HOME_PATH, content)
+
     def test_skill_setup_guide_documents_selective_install_flow(self) -> None:
         guide = (REPO_ROOT / "docs" / "codex-skills.md").read_text(encoding="utf-8")
 
