@@ -260,6 +260,29 @@ Expected: `Skill is valid!`
 - [ ] **Step 4: Synchronize only the approved skill**
 
 ```bash
+diff -rq \
+  skills/chatgpt-collaboration-harness \
+  ~/.codex/skills/chatgpt-collaboration-harness
+rsync -acni --delete \
+  skills/chatgpt-collaboration-harness/ \
+  ~/.codex/skills/chatgpt-collaboration-harness/
+```
+
+Inspect every content-change and deletion entry. The only approved content
+changes are:
+
+- `SKILL.md`
+- `references/chrome-chatgpt-pro.md`
+- `references/file-artifact-exchange.md`
+
+If the dry run contains `*deleting` or any content change outside those files,
+stop. Any proposed deletion requires Hun's explicit approval for the exact
+runtime-only path; approval to update the skill is not blanket approval to
+delete unknown runtime-only files. Only when there is no unexpected content
+change and either no deletion is proposed or every exact deletion was
+separately approved by Hun, run:
+
+```bash
 rsync -a --delete \
   skills/chatgpt-collaboration-harness/ \
   ~/.codex/skills/chatgpt-collaboration-harness/

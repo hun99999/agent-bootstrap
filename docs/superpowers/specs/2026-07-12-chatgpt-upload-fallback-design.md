@@ -114,6 +114,11 @@ or separate fallback skill is required.
 Implement and test the repository source first. After it passes, mechanically
 synchronize the complete skill directory to the runtime destination, validate
 both directories independently, and require a recursive diff with no output.
+Synchronization must begin with an itemized, checksum-aware dry run. If that
+dry run proposes deleting any runtime-only file, stop and obtain Hun's explicit
+approval for the exact deletion before running a deletion-capable sync.
+Approval to update the skill is not blanket approval to delete unknown
+runtime-only files.
 
 ## Test And Review Contract
 
