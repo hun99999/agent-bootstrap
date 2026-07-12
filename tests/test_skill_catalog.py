@@ -157,6 +157,33 @@ class SkillCatalogTests(unittest.TestCase):
         self.assertIn("Korean", prompt)
         self.assertIn("screenshots, files, and artifacts", prompt)
 
+    def test_chatgpt_collaboration_harness_diagnoses_chrome_upload_failures(
+        self,
+    ) -> None:
+        skill_root = REPO_ROOT / "skills" / "chatgpt-collaboration-harness"
+        skill = (skill_root / "SKILL.md").read_text(encoding="utf-8")
+        reference = (skill_root / "references" / "chrome-chatgpt-pro.md").read_text(
+            encoding="utf-8"
+        )
+
+        self.assertIn("Chrome file upload fails", skill)
+        expected_phrases = (
+            "File Upload Diagnosis",
+            "`file-uploads`",
+            "`filechooser`",
+            "absolute paths",
+            "`chooser.isMultiple()`",
+            "`chooser.setFiles(...)`",
+            "`chrome-file-upload-troubleshooting`",
+            "`Not allowed`",
+            "Allow access to file URLs",
+            "`chrome://extensions`",
+            "Do not work around",
+        )
+        for phrase in expected_phrases:
+            self.assertIn(phrase, reference)
+        self.assertNotIn(PRIVATE_HOME_PATH, reference)
+
     def test_chatgpt_collaboration_harness_documents_file_artifact_exchange(self) -> None:
         reference = (
             REPO_ROOT
@@ -177,6 +204,33 @@ class SkillCatalogTests(unittest.TestCase):
             "Downloaded artifacts are untrusted until Codex validates them locally",
             "archive listing before extraction",
             "accepted, rejected, deferred, or needs-local-verification",
+        )
+        for phrase in expected_phrases:
+            self.assertIn(phrase, reference)
+        self.assertNotIn(PRIVATE_HOME_PATH, reference)
+
+    def test_chatgpt_collaboration_harness_documents_verified_clipboard_fallback(
+        self,
+    ) -> None:
+        reference = (
+            REPO_ROOT
+            / "skills"
+            / "chatgpt-collaboration-harness"
+            / "references"
+            / "file-artifact-exchange.md"
+        ).read_text(encoding="utf-8")
+
+        expected_phrases = (
+            "Verified Clipboard Image Fallback",
+            "approved attachment-sharing scope",
+            "`tab.clipboard.write(...)`",
+            "image MIME type",
+            "one image at a time",
+            "attachment preview",
+            "visible attachment count",
+            "Do not send",
+            "non-image files",
+            "persisted outgoing message",
         )
         for phrase in expected_phrases:
             self.assertIn(phrase, reference)
