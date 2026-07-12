@@ -68,8 +68,10 @@ The artifact-exchange reference will define an image-only fallback:
    or destination because the transport changed.
 2. Confirm that every input is an approved image and record the intended image
    count and order.
-3. Write decoded image bytes to the selected ChatGPT tab with
-   `tab.clipboard.write(...)` and the correct image MIME type.
+3. Read image bytes locally and Base64-encode them for the selected browser's
+   documented clipboard-item payload. Then call `tab.clipboard.write(...)` with
+   an entry whose `base64` value is the encoded bytes and whose `mimeType` is
+   the correct image MIME type.
 4. Focus the verified ChatGPT composer and use the selected browser's supported
    paste key sequence.
 5. Paste one image at a time. After each paste, verify that a new attachment

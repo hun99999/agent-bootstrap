@@ -80,6 +80,9 @@ def test_chatgpt_collaboration_harness_documents_verified_clipboard_fallback(
         "Verified Clipboard Image Fallback",
         "approved attachment-sharing scope",
         "`tab.clipboard.write(...)`",
+        "Base64-encode",
+        "`base64`",
+        "`mimeType`",
         "image MIME type",
         "one image at a time",
         "attachment preview",
@@ -87,6 +90,7 @@ def test_chatgpt_collaboration_harness_documents_verified_clipboard_fallback(
         "Do not send",
         "non-image files",
         "persisted outgoing message",
+        "Composer previews prove staging, not delivery",
     )
     for phrase in expected_phrases:
         self.assertIn(phrase, reference)
@@ -173,8 +177,10 @@ does not authorize more files or a different ChatGPT destination.
 
 1. Confirm every input is an approved image and record the intended order and
    count. Do not use this route for non-image files.
-2. Write decoded bytes with `tab.clipboard.write(...)` and the correct image
-   MIME type.
+2. Read image bytes locally and Base64-encode them for the selected browser's
+   documented clipboard-item payload. Then call `tab.clipboard.write(...)` with
+   an entry whose `base64` value is the encoded bytes and whose `mimeType` is
+   the correct image MIME type.
 3. Focus the verified ChatGPT composer and use the paste key supported by the
    selected browser.
 4. Paste one image at a time. After each paste, require one new attachment

@@ -167,6 +167,10 @@ class SkillCatalogTests(unittest.TestCase):
         )
 
         self.assertIn("Chrome file upload fails", skill)
+        self.assertIn("`references/chrome-chatgpt-pro.md` and", skill)
+        self.assertIn(
+            "`references/file-artifact-exchange.md` before retrying", skill
+        )
         expected_phrases = (
             "File Upload Diagnosis",
             "`file-uploads`",
@@ -224,6 +228,9 @@ class SkillCatalogTests(unittest.TestCase):
             "Verified Clipboard Image Fallback",
             "approved attachment-sharing scope",
             "`tab.clipboard.write(...)`",
+            "Base64-encode",
+            "`base64`",
+            "`mimeType`",
             "image MIME type",
             "one image at a time",
             "attachment preview",
@@ -231,6 +238,7 @@ class SkillCatalogTests(unittest.TestCase):
             "Do not send",
             "non-image files",
             "persisted outgoing message",
+            "Composer previews prove staging, not delivery",
         )
         for phrase in expected_phrases:
             self.assertIn(phrase, reference)
