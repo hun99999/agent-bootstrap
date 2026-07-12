@@ -6,7 +6,7 @@
 
 **Architecture:** Keep `SKILL.md` as the compact router, keep Chrome chooser diagnosis and permission remediation in `references/chrome-chatgpt-pro.md`, and move transport selection, the bounded format/MIME matrix, clipboard qualification, and manual handoff into `references/file-artifact-exchange.md`. Drive the repository change with contract tests, gather browser evidence using valid synthetic files without sending, and promote only transport/format pairs that produce unambiguous composer previews.
 
-**Tech Stack:** Markdown skills and references, Python 3 `unittest`, bundled Python artifact libraries (`Pillow`, `reportlab`, `python-docx`, `openpyxl`, `python-pptx`, `pypdf`), Chrome browser-client runtime, Codex skill validator with PyYAML, `rsync`, Git.
+**Tech Stack:** Markdown skills and references, Python 3 `unittest`, bundled Python artifact libraries (`Pillow`, `reportlab`, `python-docx`, `pypdf`) for ordinary/image/PDF/DOCX fixtures, bundled Node.js plus `@oai/artifact-tool` for XLSX/PPTX authoring and rendering, Poppler and the installed document/presentation render helpers for visual QA, Chrome browser-client runtime, Codex skill validator with PyYAML, `rsync`, Git.
 
 ---
 
@@ -18,7 +18,10 @@
 - Modify: `skills/chatgpt-collaboration-harness/references/file-artifact-exchange.md`
 - Read as source of truth: `docs/superpowers/specs/2026-07-13-chatgpt-multi-format-attachments-design.md`
 - Create temporarily outside Git: `/tmp/chatgpt-multi-format-generate-20260713.py`
+- Create temporarily outside Git: `/tmp/chatgpt-multi-format-artifact-workspace-20260713/xlsx/build-xlsx.mjs`
+- Create temporarily outside Git: `/tmp/chatgpt-multi-format-artifact-workspace-20260713/pptx/build-pptx.mjs`
 - Create temporarily outside Git: `/tmp/chatgpt-multi-format-smoke-20260713/`
+- Create temporarily outside Git: `/tmp/chatgpt-multi-format-qa-20260713/`
 - Synchronize after repository validation: `~/.codex/skills/chatgpt-collaboration-harness/`
 
 Do not add a repository script, dependency, binary fixture, global Codex config
@@ -232,27 +235,81 @@ Expected: one test-only commit; pre-commit hooks run normally.
 
 **Files:**
 - Create temporarily: `/tmp/chatgpt-multi-format-generate-20260713.py`
+- Create temporarily: `/tmp/chatgpt-multi-format-artifact-workspace-20260713/xlsx/build-xlsx.mjs`
+- Create temporarily: `/tmp/chatgpt-multi-format-artifact-workspace-20260713/pptx/build-pptx.mjs`
 - Create temporarily: `/tmp/chatgpt-multi-format-smoke-20260713/`
+- Create temporarily: `/tmp/chatgpt-multi-format-qa-20260713/`
 - Do not modify repository files.
 
-- [ ] **Step 1: Resolve the bundled artifact runtime**
+- [ ] **Step 1: Resolve and isolate the bundled artifact runtimes**
 
-Call the workspace dependency resolver and use the returned bundled Python
-executable and package root. Confirm these imports without installing anything:
+Call the workspace dependency resolver and use only its returned bundled
+Python executable, bundled Node executable, and bundled `node_modules`
+directory. Also set `DOCUMENTS_SKILL_DIR` and `PRESENTATIONS_SKILL_DIR` from the
+absolute directories of the currently loaded installed skills; do not guess or
+hardcode a versioned cache path. Confirm the required files and imports without
+installing anything:
 
 ```bash
-"$BUNDLED_PYTHON" -c "import PIL, reportlab, docx, openpyxl, pptx, pypdf; print('artifact imports: ok')"
+test -x "$BUNDLED_PYTHON"
+test -x "$BUNDLED_NODE"
+test -d "$BUNDLED_NODE_MODULES"
+test -f "$DOCUMENTS_SKILL_DIR/render_docx.py"
+test -f "$PRESENTATIONS_SKILL_DIR/container_tools/setup_artifact_tool_workspace.mjs"
+test -f "$PRESENTATIONS_SKILL_DIR/container_tools/slides_test.py"
+"$BUNDLED_PYTHON" -c "import PIL, reportlab, docx, pypdf; print('python artifact imports: ok')"
 ```
 
-Expected: `artifact imports: ok`. Stop and report the missing import if the
-current bundle differs; do not install into system Python or invent a package
-path.
+Before creating anything, require every disposable top-level path to be absent:
 
-- [ ] **Step 2: Create the temporary fixture generator with `apply_patch`**
+```bash
+GENERATOR="/tmp/chatgpt-multi-format-generate-20260713.py"
+BUILD_ROOT="/tmp/chatgpt-multi-format-artifact-workspace-20260713"
+FIXTURE_ROOT="/tmp/chatgpt-multi-format-smoke-20260713"
+QA_ROOT="/tmp/chatgpt-multi-format-qa-20260713"
+test ! -e "$GENERATOR"
+test ! -e "$BUILD_ROOT"
+test ! -e "$FIXTURE_ROOT"
+test ! -e "$QA_ROOT"
+mkdir "$BUILD_ROOT"
+mkdir "$BUILD_ROOT/xlsx" "$BUILD_ROOT/pptx"
+ln -s "$BUNDLED_NODE_MODULES" "$BUILD_ROOT/xlsx/node_modules"
+test "$(realpath "$BUILD_ROOT/xlsx/node_modules")" = "$(realpath "$BUNDLED_NODE_MODULES")"
+"$BUNDLED_NODE" \
+  "$PRESENTATIONS_SKILL_DIR/container_tools/setup_artifact_tool_workspace.mjs" \
+  --workspace "$BUILD_ROOT/pptx"
+test "$(realpath "$BUILD_ROOT/pptx/node_modules/@oai/artifact-tool")" = \
+  "$(realpath "$BUNDLED_NODE_MODULES/@oai/artifact-tool")"
+(cd "$BUILD_ROOT/xlsx" && "$BUNDLED_NODE" -e \
+  "import('@oai/artifact-tool').then(({ Workbook, SpreadsheetFile }) => { if (!Workbook || !SpreadsheetFile) process.exit(2); console.log('xlsx artifact imports: ok'); })"
+)
+(cd "$BUILD_ROOT/pptx" && "$BUNDLED_NODE" -e \
+  "import('@oai/artifact-tool').then(({ Presentation, PresentationFile }) => { if (!Presentation || !PresentationFile) process.exit(2); console.log('pptx artifact imports: ok'); })")
+```
 
-First confirm `/tmp/chatgpt-multi-format-generate-20260713.py` does not already
-exist. If it exists, stop and report the collision; do not overwrite or delete
-an unknown file. Create the script with this complete content:
+Expected: the Python import check, XLSX import check, and PPTX import check each
+print `ok`; the XLSX workspace resolves the loader-provided `node_modules`, and
+the PPTX workspace is initialized by the installed presentation skill's
+official setup helper. Stop on any collision, missing import, path mismatch, or
+setup error. Do not overwrite or delete an unknown path, install packages,
+modify the managed dependency directory, use system runtimes, or invent a
+package path.
+
+- [ ] **Step 2: Create the temporary fixture builders with `apply_patch`**
+
+The collision checks in Step 1 must have passed. Create the Python generator
+and both ES-module builders with `apply_patch`; do not use heredocs or copy
+these files into the repository. The Python generator owns only PNG, JPEG,
+WebP, GIF, PDF, DOCX, TXT, CSV, and ZIP. It may inventory the final eleven
+files, but it must not import, create, parse, or validate XLSX/PPTX with
+`openpyxl`, `python-pptx`, or any alternate Office authoring library.
+
+For DOCX, select the installed `compact_reference_guide` preset and apply its
+page, Normal, and Heading 1-3 tokens explicitly. This one-page fixture has no
+title block, list, table, callout, running header, or running footer content, so
+no header-template, numbering, or table-geometry role is introduced.
+
+Create `$GENERATOR` with this complete content:
 
 ```python
 from __future__ import annotations
@@ -266,9 +323,10 @@ from pathlib import Path
 
 from PIL import Image, ImageDraw
 from docx import Document
-from openpyxl import Workbook, load_workbook
-from pptx import Presentation
+from docx.oxml.ns import qn
+from docx.shared import Inches, Pt, RGBColor, Twips
 from pypdf import PdfReader
+from reportlab.lib.pagesizes import letter
 from reportlab.pdfgen.canvas import Canvas
 
 
@@ -290,9 +348,86 @@ MIME_TYPES = {
 
 
 def create_image(name: str, image_format: str) -> None:
-    image = Image.new("RGB", (320, 120), "white")
-    ImageDraw.Draw(image).text((12, 50), f"{name}: {MARKER}", fill="black")
+    image = Image.new("RGB", (960, 180), "white")
+    drawing = ImageDraw.Draw(image)
+    drawing.text((24, 48), f"Attachment smoke: {name}", fill="black")
+    drawing.text((24, 96), MARKER, fill="black")
     image.save(ROOT / name, format=image_format)
+
+
+def configure_docx_style(
+    document: Document,
+    style_name: str,
+    *,
+    size: int,
+    color: str,
+    before: int,
+    after: int,
+    line_spacing: float | None,
+) -> None:
+    style = document.styles[style_name]
+    style.font.name = "Calibri"
+    style._element.get_or_add_rPr().rFonts.set(qn("w:ascii"), "Calibri")
+    style._element.get_or_add_rPr().rFonts.set(qn("w:hAnsi"), "Calibri")
+    style.font.size = Pt(size)
+    style.font.color.rgb = RGBColor.from_string(color)
+    style.paragraph_format.space_before = Pt(before)
+    style.paragraph_format.space_after = Pt(after)
+    if line_spacing is not None:
+        style.paragraph_format.line_spacing = line_spacing
+
+
+def create_docx() -> None:
+    document = Document()
+    section = document.sections[0]
+    section.page_width = Inches(8.5)
+    section.page_height = Inches(11)
+    section.top_margin = Inches(1)
+    section.right_margin = Inches(1)
+    section.bottom_margin = Inches(1)
+    section.left_margin = Inches(1)
+    section.header_distance = Twips(708)
+    section.footer_distance = Twips(708)
+
+    configure_docx_style(
+        document,
+        "Normal",
+        size=11,
+        color="000000",
+        before=0,
+        after=6,
+        line_spacing=1.25,
+    )
+    configure_docx_style(
+        document,
+        "Heading 1",
+        size=16,
+        color="2E74B5",
+        before=18,
+        after=10,
+        line_spacing=None,
+    )
+    configure_docx_style(
+        document,
+        "Heading 2",
+        size=13,
+        color="2E74B5",
+        before=14,
+        after=7,
+        line_spacing=None,
+    )
+    configure_docx_style(
+        document,
+        "Heading 3",
+        size=12,
+        color="1F4D78",
+        before=10,
+        after=5,
+        line_spacing=None,
+    )
+    document.add_heading("Attachment transport smoke", level=1)
+    document.add_paragraph(MARKER)
+    document.save(ROOT / "sample.docx")
 
 
 def create_fixtures() -> None:
@@ -303,27 +438,16 @@ def create_fixtures() -> None:
     create_image("sample.gif", "GIF")
 
     pdf_path = ROOT / "sample.pdf"
-    canvas = Canvas(str(pdf_path))
-    canvas.drawString(72, 760, MARKER)
+    canvas = Canvas(str(pdf_path), pagesize=letter)
+    canvas.setTitle("Attachment transport smoke")
+    canvas.setFont("Helvetica-Bold", 18)
+    canvas.drawString(72, 720, "Attachment transport smoke")
+    canvas.setFont("Helvetica", 12)
+    canvas.drawString(72, 684, MARKER)
     canvas.showPage()
     canvas.save()
 
-    document = Document()
-    document.add_heading("Attachment smoke", level=1)
-    document.add_paragraph(MARKER)
-    document.save(ROOT / "sample.docx")
-
-    workbook = Workbook()
-    worksheet = workbook.active
-    worksheet.title = "Smoke"
-    worksheet["A1"] = MARKER
-    workbook.save(ROOT / "sample.xlsx")
-
-    presentation = Presentation()
-    slide = presentation.slides.add_slide(presentation.slide_layouts[1])
-    slide.shapes.title.text = "Attachment smoke"
-    slide.placeholders[1].text = MARKER
-    presentation.save(ROOT / "sample.pptx")
+    create_docx()
 
     (ROOT / "sample.txt").write_text(f"{MARKER}\n", encoding="utf-8")
     with (ROOT / "sample.csv").open("w", encoding="utf-8", newline="") as handle:
@@ -335,7 +459,7 @@ def create_fixtures() -> None:
         archive.writestr("README.txt", f"{MARKER}\n")
 
 
-def validate_fixtures() -> list[dict[str, str | int]]:
+def validate_ordinary_fixtures() -> list[str]:
     expected_image_formats = {
         "sample.png": "PNG",
         "sample.jpg": "JPEG",
@@ -348,18 +472,36 @@ def validate_fixtures() -> list[dict[str, str | int]]:
             assert image.format == expected_format
 
     assert MARKER in (PdfReader(ROOT / "sample.pdf").pages[0].extract_text() or "")
-    assert MARKER in "\n".join(
-        paragraph.text for paragraph in Document(ROOT / "sample.docx").paragraphs
-    )
-    assert load_workbook(ROOT / "sample.xlsx").active["A1"].value == MARKER
-    presentation = Presentation(ROOT / "sample.pptx")
-    presentation_text = "\n".join(
-        shape.text
-        for slide in presentation.slides
-        for shape in slide.shapes
-        if hasattr(shape, "text")
-    )
-    assert MARKER in presentation_text
+    document = Document(ROOT / "sample.docx")
+    assert MARKER in "\n".join(paragraph.text for paragraph in document.paragraphs)
+    section = document.sections[0]
+    assert section.page_width == Inches(8.5)
+    assert section.page_height == Inches(11)
+    assert section.top_margin == Inches(1)
+    assert section.right_margin == Inches(1)
+    assert section.bottom_margin == Inches(1)
+    assert section.left_margin == Inches(1)
+    assert section.header_distance == Twips(708)
+    assert section.footer_distance == Twips(708)
+    normal = document.styles["Normal"]
+    assert normal.font.name == "Calibri"
+    assert normal.font.size == Pt(11)
+    assert str(normal.font.color.rgb) == "000000"
+    assert normal.paragraph_format.space_before == Pt(0)
+    assert normal.paragraph_format.space_after == Pt(6)
+    assert normal.paragraph_format.line_spacing == 1.25
+    expected_headings = {
+        "Heading 1": (16, "2E74B5", 18, 10),
+        "Heading 2": (13, "2E74B5", 14, 7),
+        "Heading 3": (12, "1F4D78", 10, 5),
+    }
+    for name, (size, color, before, after) in expected_headings.items():
+        style = document.styles[name]
+        assert style.font.name == "Calibri"
+        assert style.font.size == Pt(size)
+        assert str(style.font.color.rgb) == color
+        assert style.paragraph_format.space_before == Pt(before)
+        assert style.paragraph_format.space_after == Pt(after)
     assert (ROOT / "sample.txt").read_text(encoding="utf-8").strip() == MARKER
     with (ROOT / "sample.csv").open(encoding="utf-8", newline="") as handle:
         rows = list(csv.reader(handle))
@@ -374,13 +516,24 @@ def validate_fixtures() -> list[dict[str, str | int]]:
         assert ((entry.external_attr >> 16) & 0o111) == 0
         assert archive.read("README.txt").decode("utf-8").strip() == MARKER
 
+    ordinary_names = [
+        name for name in MIME_TYPES if name not in {"sample.xlsx", "sample.pptx"}
+    ]
+    assert {path.name for path in ROOT.iterdir()} == set(ordinary_names)
+    return ordinary_names
+
+
+def build_manifest() -> list[dict[str, str | int]]:
+    assert {path.name for path in ROOT.iterdir()} == set(MIME_TYPES)
     manifest: list[dict[str, str | int]] = []
-    for path in sorted(ROOT.iterdir()):
+    for name, mime_type in MIME_TYPES.items():
+        path = ROOT / name
         payload = path.read_bytes()
+        assert payload
         manifest.append(
             {
                 "name": path.name,
-                "mime_type": MIME_TYPES[path.name],
+                "mime_type": mime_type,
                 "size": len(payload),
                 "sha256": hashlib.sha256(payload).hexdigest(),
             }
@@ -388,8 +541,247 @@ def validate_fixtures() -> list[dict[str, str | int]]:
     return manifest
 
 
-create_fixtures()
-print(json.dumps(validate_fixtures(), indent=2, sort_keys=True))
+if len(sys.argv) == 2:
+    create_fixtures()
+    print(json.dumps(validate_ordinary_fixtures(), indent=2))
+elif len(sys.argv) == 3 and sys.argv[2] == "--manifest":
+    print(json.dumps(build_manifest(), indent=2, sort_keys=True))
+else:
+    raise SystemExit(f"usage: {Path(sys.argv[0]).name} FIXTURE_ROOT [--manifest]")
+```
+
+Create `$BUILD_ROOT/xlsx/build-xlsx.mjs` with this complete content. This is a
+small, styled fixture workbook rather than a business model, but it still uses
+the spreadsheet skill's authoring, inspection, rendering, and export path:
+
+```js
+import fs from "node:fs/promises";
+import path from "node:path";
+import { SpreadsheetFile, Workbook } from "@oai/artifact-tool";
+
+const [fixtureRoot, qaRoot] = process.argv.slice(2).map((value) =>
+  path.resolve(value),
+);
+if (!fixtureRoot || !qaRoot) {
+  throw new Error("usage: build-xlsx.mjs FIXTURE_ROOT XLSX_QA_ROOT");
+}
+
+const marker = "Synthetic ChatGPT attachment transport smoke fixture";
+const outputPath = path.join(fixtureRoot, "sample.xlsx");
+
+async function assertMissing(targetPath) {
+  try {
+    await fs.access(targetPath);
+  } catch (error) {
+    if (error.code === "ENOENT") return;
+    throw error;
+  }
+  throw new Error(`refusing to overwrite existing path: ${targetPath}`);
+}
+
+async function writeBlob(targetPath, blob) {
+  await fs.writeFile(targetPath, new Uint8Array(await blob.arrayBuffer()));
+}
+
+await assertMissing(outputPath);
+await assertMissing(qaRoot);
+await fs.mkdir(qaRoot, { recursive: false });
+
+const workbook = Workbook.create();
+const sheet = workbook.worksheets.add("Smoke");
+sheet.showGridLines = false;
+sheet.getRange("A1:B2").values = [
+  ["Fixture", "Marker"],
+  ["XLSX", marker],
+];
+sheet.getRange("A1:B1").format = {
+  fill: "#0F766E",
+  font: { bold: true, color: "#FFFFFF" },
+};
+sheet.getRange("A1:B2").format.borders = {
+  preset: "outside",
+  style: "thin",
+  color: "#D9D9D9",
+};
+sheet.getRange("A1").format.columnWidth = 16;
+sheet.getRange("B1").format.columnWidth = 56;
+
+const structure = await workbook.inspect({
+  kind: "sheet",
+  include: "id,name",
+  maxChars: 2000,
+});
+const content = await workbook.inspect({
+  kind: "table",
+  range: "Smoke!A1:B2",
+  include: "values,formulas",
+  tableMaxRows: 4,
+  tableMaxCols: 4,
+  maxChars: 4000,
+});
+if (!structure.ndjson.includes("Smoke")) {
+  throw new Error("XLSX structure inspection did not find Smoke");
+}
+if (!content.ndjson.includes(marker)) {
+  throw new Error("XLSX content inspection did not find the marker");
+}
+await fs.writeFile(
+  path.join(qaRoot, "xlsx-inspect.ndjson"),
+  `${structure.ndjson}\n${content.ndjson}\n`,
+  "utf8",
+);
+
+const preview = await workbook.render({
+  sheetName: "Smoke",
+  range: "A1:B2",
+  autoCrop: "all",
+  scale: 2,
+  format: "png",
+});
+await writeBlob(path.join(qaRoot, "sample-xlsx.png"), preview);
+
+const output = await SpreadsheetFile.exportXlsx(workbook);
+await output.save(outputPath);
+console.log(JSON.stringify({ outputPath, qaRoot, marker }, null, 2));
+```
+
+Create `$BUILD_ROOT/pptx/build-pptx.mjs` with this complete content. The
+communication job is intentionally narrow: by the end, a smoke-test reviewer
+should recognize this as a synthetic transport fixture because the marker is
+prominent and unambiguous. With no user visual reference, adapt the installed
+Codex Grid `slide-01.mjs` sparse stacked-text layout: preserve its 1280x720
+canvas, `layers(...)`/`text(...)` Compose structure, three aligned text slots,
+80px title, and 32px supporting text.
+
+```js
+import fs from "node:fs/promises";
+import path from "node:path";
+import {
+  layers,
+  Presentation,
+  PresentationFile,
+  text,
+} from "@oai/artifact-tool";
+
+const [fixtureRoot, qaRoot] = process.argv.slice(2).map((value) =>
+  path.resolve(value),
+);
+if (!fixtureRoot || !qaRoot) {
+  throw new Error("usage: build-pptx.mjs FIXTURE_ROOT PPTX_QA_ROOT");
+}
+
+const marker = "Synthetic ChatGPT attachment transport smoke fixture";
+const outputPath = path.join(fixtureRoot, "sample.pptx");
+
+async function assertMissing(targetPath) {
+  try {
+    await fs.access(targetPath);
+  } catch (error) {
+    if (error.code === "ENOENT") return;
+    throw error;
+  }
+  throw new Error(`refusing to overwrite existing path: ${targetPath}`);
+}
+
+async function writeBlob(targetPath, blob) {
+  await fs.writeFile(targetPath, new Uint8Array(await blob.arrayBuffer()));
+}
+
+await assertMissing(outputPath);
+await assertMissing(qaRoot);
+await fs.mkdir(qaRoot, { recursive: false });
+
+const presentation = Presentation.create({
+  slideSize: { width: 1280, height: 720 },
+});
+const slide = presentation.slides.add();
+slide.compose(
+  layers(
+    {
+      name: "codex-grid-layout-library#slide-01-smoke-fixture",
+      width: "fill",
+      height: "fill",
+    },
+    [
+      text(["Attachment transport smoke"], {
+        name: "Fixture title",
+        position: { left: 41.33, top: 182.55 },
+        width: 992,
+        height: 261.57,
+        style: {
+          fontSize: "80px",
+          typeface: "Helvetica Neue",
+          color: "#000000",
+          alignment: "left",
+          verticalAlignment: "bottom",
+          autoFit: "none",
+          insets: { top: 0, right: 0, bottom: 0, left: 0 },
+        },
+      }),
+      text([marker], {
+        name: "Fixture marker",
+        position: { left: 41.33, top: 497.87 },
+        width: 598.67,
+        height: 113.41,
+        style: {
+          fontSize: "32px",
+          typeface: "Helvetica Neue",
+          color: "#000000",
+          alignment: "left",
+          autoFit: "none",
+          insets: { top: 0, right: 0, bottom: 0, left: 0 },
+        },
+      }),
+      text(["Synthetic attachment fixture"], {
+        name: "Fixture supertitle",
+        position: { left: 41.33, top: 41.18 },
+        width: 598.67,
+        height: 68.15,
+        style: {
+          fontSize: "32px",
+          typeface: "Helvetica Neue",
+          color: "#000000",
+          alignment: "left",
+          autoFit: "none",
+          insets: { top: 0, right: 0, bottom: 0, left: 0 },
+        },
+      }),
+    ],
+  ),
+  {
+    frame: { left: 0, top: 0, width: 1280, height: 720 },
+    baseUnit: 1,
+  },
+);
+
+const inspection = await presentation.inspect({
+  kind: "slide,textbox,shape,layout",
+  maxChars: 6000,
+});
+if (!inspection.ndjson.includes(marker)) {
+  throw new Error("PPTX content inspection did not find the marker");
+}
+await fs.writeFile(
+  path.join(qaRoot, "pptx-inspect.ndjson"),
+  `${inspection.ndjson}\n`,
+  "utf8",
+);
+const layout = await slide.export({ format: "layout" });
+await fs.writeFile(
+  path.join(qaRoot, "pptx-layout.json"),
+  await layout.text(),
+  "utf8",
+);
+const preview = await presentation.export({
+  slide,
+  format: "png",
+  scale: 2,
+});
+await writeBlob(path.join(qaRoot, "sample-pptx.png"), preview);
+
+const output = await PresentationFile.exportPptx(presentation);
+await output.save(outputPath);
+console.log(JSON.stringify({ outputPath, qaRoot, marker }, null, 2));
 ```
 
 - [ ] **Step 3: Generate and locally validate all eleven fixtures**
@@ -397,17 +789,69 @@ print(json.dumps(validate_fixtures(), indent=2, sort_keys=True))
 Run:
 
 ```bash
-FIXTURE_ROOT="/tmp/chatgpt-multi-format-smoke-20260713"
-test ! -e "$FIXTURE_ROOT"
-"$BUNDLED_PYTHON" /tmp/chatgpt-multi-format-generate-20260713.py "$FIXTURE_ROOT"
+"$BUNDLED_NODE" --check "$BUILD_ROOT/xlsx/build-xlsx.mjs"
+"$BUNDLED_NODE" --check "$BUILD_ROOT/pptx/build-pptx.mjs"
+"$BUNDLED_PYTHON" "$GENERATOR" "$FIXTURE_ROOT"
+mkdir "$QA_ROOT"
+(cd "$BUILD_ROOT/xlsx" && "$BUNDLED_NODE" build-xlsx.mjs \
+  "$FIXTURE_ROOT" "$QA_ROOT/xlsx")
+(cd "$BUILD_ROOT/pptx" && "$BUNDLED_NODE" build-pptx.mjs \
+  "$FIXTURE_ROOT" "$QA_ROOT/pptx")
+"$BUNDLED_PYTHON" "$GENERATOR" "$FIXTURE_ROOT" --manifest
 file "$FIXTURE_ROOT"/*
 unzip -l "$FIXTURE_ROOT/sample.zip"
+unzip -t "$FIXTURE_ROOT/sample.zip"
 ```
 
-Expected: the generator prints eleven manifest entries with non-zero sizes and
-SHA-256 values; `file` recognizes each real format; the ZIP contains only
-`README.txt`. Keep the temporary directory until final reporting. Do not delete
-it automatically or copy it into Git.
+Expected: the Python generator validates its nine owned formats; both
+artifact-tool builders pass Node syntax checks, inspect their marker content,
+render non-empty previews, and export real Office files; the final generator
+invocation prints exactly eleven manifest entries in the approved order with
+MIME, non-zero size, and SHA-256; `file` recognizes every real format; and the
+ZIP contains only safe `README.txt` and passes its integrity test.
+
+Run the format-specific render gates:
+
+```bash
+mkdir "$QA_ROOT/docx" "$QA_ROOT/pdf"
+"$BUNDLED_PYTHON" "$DOCUMENTS_SKILL_DIR/render_docx.py" \
+  "$FIXTURE_ROOT/sample.docx" --output_dir "$QA_ROOT/docx"
+PDFTOPPM="$(command -v pdftoppm)"
+test -x "$PDFTOPPM"
+"$PDFTOPPM" -png "$FIXTURE_ROOT/sample.pdf" "$QA_ROOT/pdf/sample"
+"$BUNDLED_PYTHON" "$PRESENTATIONS_SKILL_DIR/container_tools/slides_test.py" \
+  "$FIXTURE_ROOT/sample.pptx"
+test -s "$QA_ROOT/docx/page-1.png"
+test -s "$QA_ROOT/pdf/sample-1.png"
+test -s "$QA_ROOT/xlsx/sample-xlsx.png"
+test -s "$QA_ROOT/pptx/sample-pptx.png"
+test -s "$QA_ROOT/xlsx/xlsx-inspect.ndjson"
+test -s "$QA_ROOT/pptx/pptx-inspect.ndjson"
+test -s "$QA_ROOT/pptx/pptx-layout.json"
+```
+
+Use the host image-viewing capability at 100% zoom on all four render outputs:
+
+- `$QA_ROOT/docx/page-1.png`
+- `$QA_ROOT/pdf/sample-1.png`
+- `$QA_ROOT/xlsx/sample-xlsx.png`
+- `$QA_ROOT/pptx/sample-pptx.png`
+
+Also read the compact XLSX inspection, PPTX inspection, and PPTX layout JSON.
+The DOCX page must show its heading and full marker without clipping; the PDF
+must show its title and marker with clean margins; the spreadsheet must show
+both cells, full marker text, and legible styling; the slide must preserve the
+selected Codex Grid hierarchy, show the full 80px title and 32px marker, and
+contain no overlap, overflow, out-of-bounds content, or ignored layout warning.
+Any visual or layout defect is a failure. Preserve the failed evidence,
+allocate a new absent suffix for build, fixture, and QA roots, create the
+corrected builder under that new build root with `apply_patch`, and re-run the
+full generation/render/inspection gate. Do not overwrite or delete the first
+attempt, and do not use a different authoring library as a fallback.
+
+Keep the fixture, build, and QA directories until final reporting. They are
+disposable and synthetic, but do not delete them automatically, copy them into
+Git, or commit any binary output.
 
 - [ ] **Step 4: Establish a fresh Chrome staging surface**
 
