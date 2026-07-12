@@ -4,7 +4,7 @@
 
 Make `chatgpt-collaboration-harness` recover predictably when Chrome blocks local
 file reads: diagnose the real file-chooser failure, give the official narrow
-permission remedy, and use a verified clipboard-image fallback when direct
+permission check, and use a verified clipboard-PNG fallback when direct
 attachment remains unavailable. Keep the repository catalog source and the
 installed Codex runtime copy identical, then validate and integrate the change
 into `main`.
@@ -14,9 +14,10 @@ into `main`.
 - The ChatGPT Pro composer exposes a multiple-file chooser.
 - The chooser opens successfully, but setting an absolute local PNG path fails
   at the Chrome extension boundary with `Not allowed`.
-- The selected Chrome plugin's upload troubleshooting identifies the required
-  remedy as enabling **Allow access to file URLs** for the ChatGPT Chrome
-  Extension from `chrome://extensions`.
+- The selected Chrome plugin's upload troubleshooting instructs the user to
+  enable **Allow access to file URLs** for the ChatGPT Chrome Extension from
+  `chrome://extensions`. The chooser denial alone does not prove that this
+  setting is the sole cause.
 - Browser automation is prohibited from opening or modifying the privileged
   `chrome://extensions` page. The skill must not attempt another browser
   surface, profile-file edit, raw browser command, or other workaround.
@@ -39,8 +40,8 @@ Use an adaptive hybrid path.
 3. If Chrome rejects file setting, read the selected browser's
    `chrome-file-upload-troubleshooting` guidance and reproduce its exact manual
    permission instruction. Do not claim that Codex changed the permission.
-4. For approved image attachments, continue with the verified clipboard-image
-   fallback when direct file attachment remains unavailable.
+4. For approved PNG attachments, continue with the verified clipboard fallback
+   when direct file attachment remains unavailable.
 5. For PDFs, archives, documents, or other non-image files, do not pretend that
    clipboard image paste is equivalent. Require the manual Chrome permission
    change, a supported upload route, or Hun's manual attachment.
@@ -55,38 +56,47 @@ The Chrome collaboration reference will require the operator to:
 4. Check `chooser.isMultiple()` before passing more than one path.
 5. Inspect the actual `setFiles(...)` result and visible composer state.
 6. On Chrome rejection, read `chrome-file-upload-troubleshooting` and report
-   the exact **Allow access to file URLs** remedy.
+   the exact **Allow access to file URLs** check without presenting it as a
+   confirmed cause.
+7. If the user changes the setting, start the Chrome task again and verify with
+   a fresh file-chooser attempt before attributing the failure to that setting.
 
 The reference will explicitly prohibit bypassing a blocked `chrome://` page or
 editing Chrome profiles and extension state indirectly.
 
 ## Verified Clipboard Image Fallback
 
-The artifact-exchange reference will define an image-only fallback:
+The artifact-exchange reference will define a fallback whose verified scope is
+limited to `image/png`:
 
 1. Reuse the already approved attachment-sharing scope. Do not widen the files
    or destination because the transport changed.
-2. Confirm that every input is an approved image and record the intended image
-   count and order.
-3. Read image bytes locally and Base64-encode them for the selected browser's
+2. Confirm that every input is an approved PNG and record its manifest index,
+   intended count and order, MIME type, and non-sensitive alias.
+3. Establish a clean composer baseline with no attachment preview, pending or
+   error state, or text beyond the exact approved prompt.
+4. Read image bytes locally and Base64-encode them for the selected browser's
    documented clipboard-item payload. Then call `tab.clipboard.write(...)` with
    an entry whose `base64` value is the encoded bytes and whose `mimeType` is
-   the correct image MIME type.
-4. Focus the verified ChatGPT composer and use the selected browser's supported
+   `image/png`. Await the write and stop before paste if it rejects or throws.
+5. Focus the verified ChatGPT composer and use the selected browser's supported
    paste key sequence.
-5. Paste one image at a time. After each paste, verify that a new attachment
-   preview appears and that no error or pending state remains.
-6. Do not send until the visible attachment count equals the intended count.
-7. If a paste fails or creates an ambiguous duplicate, do not send a partial
+6. Paste one image at a time. After each paste, verify that the preview count
+   equals the manifest index and that no error or pending state remains. Count
+   proves staging, not byte identity.
+7. Before sending, require the exact approved prompt, expected preview count,
+   recorded order, and absence of unexpected content, errors, or pending state.
+8. If a paste fails or creates an ambiguous duplicate, do not send a partial
    packet. Remove only draft attachments created by the failed attempt when
    that can be done unambiguously; otherwise leave a handoff and report the
    exact draft state.
-8. When delivery is part of the stage, verify the persisted outgoing message
+9. When delivery is part of the stage, verify the persisted outgoing message
    after sending. Composer previews alone prove staging, not delivery.
 
 Clipboard paste may replace original filenames with a generated name such as
-`clipboard.png`. The attachment manifest must retain the original ordered
-labels so ChatGPT Pro can relate each pasted image to its intended purpose.
+`clipboard.png`. The attachment manifest must use non-sensitive aliases by
+default, never include absolute paths, and include an original basename only
+when that name is separately approved for the destination.
 
 ## Skill Structure
 

@@ -2,9 +2,9 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Make the ChatGPT collaboration harness diagnose Chrome local-file denial accurately, stage approved images through a verified clipboard fallback, synchronize the installed runtime copy, and integrate the validated change into `main`.
+**Goal:** Make the ChatGPT collaboration harness diagnose Chrome local-file denial without overclaiming its cause, stage approved PNGs through a verified clipboard fallback, synchronize the installed runtime copy, and integrate the validated change into `main`.
 
-**Architecture:** Keep `SKILL.md` as the compact router, place Chrome file-chooser diagnosis in `references/chrome-chatgpt-pro.md`, and place image-only clipboard staging and evidence rules in `references/file-artifact-exchange.md`. Enforce the process with repository contract tests, then mechanically synchronize and independently validate the installed runtime copy.
+**Architecture:** Keep `SKILL.md` as the compact router, place Chrome file-chooser diagnosis in `references/chrome-chatgpt-pro.md`, and place PNG-only verified clipboard staging and exact-packet evidence rules in `references/file-artifact-exchange.md`. Enforce the process with repository contract tests, then mechanically synchronize and independently validate the installed runtime copy.
 
 **Tech Stack:** Markdown skills and references, Python 3 `unittest`, Codex skill validator with PyYAML, Chrome browser-client runtime, Git.
 
@@ -344,6 +344,14 @@ For every suggestion, compare it with repository source, selected Chrome plugin
 documentation, and observed browser evidence. Apply only accepted corrections,
 then rerun the focused tests, both validators, the full suite, private-path scan,
 agent-stack audit, recursive runtime diff, and `git diff --check`.
+
+Accepted corrections must keep `Not allowed` conditional, include the official
+restart-the-Chrome-task step after a permission change, limit verified clipboard
+evidence to PNG, require a clean composer baseline and exact packet before send,
+await every clipboard write, and use non-sensitive manifest aliases. Reject any
+review claim contradicted by the source, including an assertion that
+`chooser.isMultiple()` is checked after multiple paths when the reference
+already requires the check before passing more than one path.
 
 - [ ] **Step 4: Commit any final-review correction**
 

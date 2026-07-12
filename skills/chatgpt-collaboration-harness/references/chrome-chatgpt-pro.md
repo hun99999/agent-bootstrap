@@ -34,6 +34,14 @@ denial, read `chrome-file-upload-troubleshooting` and reproduce its exact user
 instruction: open `chrome://extensions`, select Details for the ChatGPT Chrome
 Extension, and enable **Allow access to file URLs**. Do not claim Codex changed
 the permission.
+A chooser denial does not prove that file-URL access is the sole cause.
+Present the setting as the official next check, not a confirmed root cause.
+
+After the user changes the setting, start the Chrome task again and verify the
+upload with a fresh file-chooser attempt. Record file-URL access as the confirmed
+cause only if that attempt succeeds. If the setting was already enabled or the
+fresh attempt still fails, keep the cause unconfirmed and report the observed
+boundary.
 
 Do not work around a blocked `chrome://` page through another browser surface,
 raw browser commands, profile-file edits, or indirect extension-state changes.

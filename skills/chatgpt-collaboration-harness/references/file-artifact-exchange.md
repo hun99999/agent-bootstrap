@@ -25,29 +25,45 @@ Large bundles, full source files, private repository material, Git URLs, reposit
 
 ## Verified Clipboard Image Fallback
 
-Use this only for approved image attachments after direct file upload is
-unavailable. Reuse the approved attachment-sharing scope; changing transport
-does not authorize more files or a different ChatGPT destination.
+Use this only for approved PNG attachments after direct file upload is
+unavailable. The currently verified path is limited to `image/png`; do not
+generalize its evidence to other image MIME types.
+Reuse the approved attachment-sharing scope; changing transport does not
+authorize more files or a different ChatGPT destination.
 
-1. Confirm every input is an approved image and record the intended order and
-   count. Do not use this route for non-image files.
-2. Read image bytes locally and Base64-encode them for the selected browser's
-   documented clipboard-item payload. Then call `tab.clipboard.write(...)` with
-   an entry whose `base64` value is the encoded bytes and whose `mimeType` is
-   the correct image MIME type.
-3. Focus the verified ChatGPT composer and use the paste key supported by the
+1. Confirm every input is an approved PNG and record its manifest index,
+   intended order, count, correct image MIME type, and a non-sensitive alias.
+   Do not use this route for non-image files or unverified image MIME types.
+2. Establish a clean packet baseline at the verified ChatGPT destination: no
+   attachment previews, no error or pending state, and no unapproved text. Any
+   existing text must be the exact approved prompt for this packet; otherwise
+   stop or use a fresh composer.
+3. In manifest order, read one image's bytes locally and Base64-encode them for
+   the selected browser's documented clipboard-item payload.
+   Await each `tab.clipboard.write(...)` call before pasting, with an entry whose
+   `base64` value is the encoded bytes and whose `mimeType` is `image/png`.
+   If the call rejects or throws, stop before pasting.
+4. Focus the verified ChatGPT composer and use the paste key supported by the
    selected browser.
-4. Paste one image at a time. After each paste, require one new
-   attachment preview and verify that no error or pending state remains.
-5. Do not send until the visible attachment count equals the intended count.
-6. If a paste fails or creates an ambiguous duplicate, do not send a partial
+5. Paste one image at a time. After each paste, require the attachment preview
+   count to equal that manifest index and verify that no error or pending state
+   remains. The preview count does not prove byte identity; it proves the staged
+   count, while order is limited to the recorded write-and-paste sequence.
+6. Before sending, verify the exact packet: only the approved prompt text, no
+   unapproved text, the intended visible attachment count, no unexpected
+   previews, the ordered manifest matching the recorded sequence, and no error
+   or pending state. Do not send until every check passes.
+7. If a paste fails or creates an ambiguous duplicate, do not send a partial
    packet. Remove only draft attachments created by the failed attempt when
    they are unambiguous; otherwise leave a handoff and report the exact state.
-7. If the stage requires delivery, verify the persisted outgoing message after
-   sending. Composer previews prove staging, not delivery.
+8. If the stage requires delivery, verify that the persisted outgoing message
+   contains the same exact packet after sending.
+   Composer previews prove staging, not delivery.
 
-Clipboard paste may expose generated names such as `clipboard.png`; keep the
-original ordered labels in the attachment manifest.
+Clipboard paste may expose generated names such as `clipboard.png`.
+Never place an absolute path in the attachment manifest. Use non-sensitive
+aliases by default, and use an original basename only after confirming that the
+name itself is approved for the same destination.
 
 ## Attachment Packet
 
