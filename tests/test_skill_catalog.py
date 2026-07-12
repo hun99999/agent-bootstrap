@@ -208,6 +208,26 @@ class SkillCatalogTests(unittest.TestCase):
             self.assertIn(phrase, reference)
         self.assertNotIn(PRIVATE_HOME_PATH, reference)
 
+    def test_chatgpt_collaboration_harness_does_not_conflate_remediation_with_cause(
+        self,
+    ) -> None:
+        reference = (
+            REPO_ROOT
+            / "skills"
+            / "chatgpt-collaboration-harness"
+            / "references"
+            / "chrome-chatgpt-pro.md"
+        ).read_text(encoding="utf-8")
+
+        expected_phrases = (
+            "record the documented remediation and the fresh attempt result",
+            "does not isolate file-URL access as the sole cause",
+            "unless independently isolated",
+        )
+        for phrase in expected_phrases:
+            self.assertIn(phrase, reference)
+        self.assertNotIn(PRIVATE_HOME_PATH, reference)
+
     def test_chatgpt_collaboration_harness_documents_file_artifact_exchange(self) -> None:
         reference = (
             REPO_ROOT
@@ -292,6 +312,27 @@ class SkillCatalogTests(unittest.TestCase):
             self.assertIn(phrase, reference)
         self.assertNotIn(PRIVATE_HOME_PATH, reference)
 
+    def test_chatgpt_collaboration_harness_documents_clipboard_item_entries_shape(
+        self,
+    ) -> None:
+        reference = (
+            REPO_ROOT
+            / "skills"
+            / "chatgpt-collaboration-harness"
+            / "references"
+            / "file-artifact-exchange.md"
+        ).read_text(encoding="utf-8")
+
+        expected_phrases = (
+            "`tab.clipboard.write(...)` receives an array",
+            "outer clipboard item",
+            "`entries` array",
+            "`base64` and `mimeType` entry",
+        )
+        for phrase in expected_phrases:
+            self.assertIn(phrase, reference)
+        self.assertNotIn(PRIVATE_HOME_PATH, reference)
+
     def test_chatgpt_collaboration_harness_runtime_sync_rechecks_itemized_snapshot(
         self,
     ) -> None:
@@ -323,6 +364,47 @@ class SkillCatalogTests(unittest.TestCase):
                 for phrase in expected_phrases:
                     self.assertIn(phrase, content)
                 self.assertNotIn(PRIVATE_HOME_PATH, content)
+
+    def test_chatgpt_collaboration_harness_runtime_sync_uses_reviewed_checksums(
+        self,
+    ) -> None:
+        plan = (
+            REPO_ROOT
+            / "docs"
+            / "superpowers"
+            / "plans"
+            / "2026-07-12-chatgpt-upload-fallback.md"
+        ).read_text(encoding="utf-8")
+        design = (
+            REPO_ROOT
+            / "docs"
+            / "superpowers"
+            / "specs"
+            / "2026-07-12-chatgpt-upload-fallback-design.md"
+        ).read_text(encoding="utf-8")
+
+        expected_phrase = (
+            "actual synchronization uses the same checksum comparison as the dry run"
+        )
+        self.assertIn(expected_phrase, plan)
+        self.assertIn(expected_phrase, design)
+        self.assertIn("rsync -ac \\", plan)
+        self.assertNotIn("rsync -a --delete", plan)
+
+    def test_chatgpt_upload_plan_integrates_from_the_primary_worktree(self) -> None:
+        plan = (
+            REPO_ROOT
+            / "docs"
+            / "superpowers"
+            / "plans"
+            / "2026-07-12-chatgpt-upload-fallback.md"
+        ).read_text(encoding="utf-8")
+
+        self.assertIn(
+            "Run these commands in the primary worktree where `main` is already checked out",
+            plan,
+        )
+        self.assertNotIn("git switch main", plan)
 
     def test_skill_setup_guide_documents_selective_install_flow(self) -> None:
         guide = (REPO_ROOT / "docs" / "codex-skills.md").read_text(encoding="utf-8")
