@@ -18,6 +18,29 @@
 - If a new tab is needed, open the ChatGPT web session and check whether Pro extended mode or Pro conversation mode is available.
 - Do not assume a specific Chrome profile name, account name, local username, or fixed path.
 
+## File Upload Diagnosis
+
+Before uploading, read the selected browser's `file-uploads` documentation.
+Start the `filechooser` wait before activating the visible attachment control,
+use absolute paths with `chooser.setFiles(...)`, and call
+`chooser.isMultiple()` before passing more than one path.
+
+Do not diagnose a permission failure from a hidden input click or an unopened
+picker. Diagnose the boundary only from the actual `chooser.setFiles(...)`
+result and the visible composer state.
+
+If Chrome rejects file setting with `Not allowed` or another chooser-level
+denial, read `chrome-file-upload-troubleshooting` and reproduce its exact user
+instruction: open `chrome://extensions`, select Details for the ChatGPT Chrome
+Extension, and enable **Allow access to file URLs**. Do not claim Codex changed
+the permission.
+
+Do not work around a blocked `chrome://` page through another browser surface,
+raw browser commands, profile-file edits, or indirect extension-state changes.
+For approved images, use the Verified Clipboard Image Fallback in
+`file-artifact-exchange.md`; for non-image files, require a supported upload
+route or manual attachment.
+
 ## Capability Selection
 
 - If a pinned or "고정됨" ChatGPT area visibly offers Search Mode, use it for search stages after confirming the selected mode in the composer or tool state.

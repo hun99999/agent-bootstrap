@@ -23,6 +23,30 @@ Do not upload credentials, private keys, API tokens, database passwords, cookies
 
 Large bundles, full source files, private repository material, Git URLs, repository URLs, browser state, and scope expansion require Hun's approval before sharing.
 
+## Verified Clipboard Image Fallback
+
+Use this only for approved image attachments after direct file upload is
+unavailable. Reuse the approved attachment-sharing scope; changing transport
+does not authorize more files or a different ChatGPT destination.
+
+1. Confirm every input is an approved image and record the intended order and
+   count. Do not use this route for non-image files.
+2. Write decoded bytes with `tab.clipboard.write(...)` and the correct
+   image MIME type.
+3. Focus the verified ChatGPT composer and use the paste key supported by the
+   selected browser.
+4. Paste one image at a time. After each paste, require one new
+   attachment preview and verify that no error or pending state remains.
+5. Do not send until the visible attachment count equals the intended count.
+6. If a paste fails or creates an ambiguous duplicate, do not send a partial
+   packet. Remove only draft attachments created by the failed attempt when
+   they are unambiguous; otherwise leave a handoff and report the exact state.
+7. If the stage requires delivery, verify the persisted outgoing message after
+   sending. Composer previews prove staging, not delivery.
+
+Clipboard paste may expose generated names such as `clipboard.png`; keep the
+original ordered labels in the attachment manifest.
+
 ## Attachment Packet
 
 When sending screenshots or files, include a compact manifest:

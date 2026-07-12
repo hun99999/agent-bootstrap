@@ -18,6 +18,10 @@ Harness mode is not a single ChatGPT question. It is a controlled staged loop: c
 - Treat `@chrome` as a plugin/skill route, not as proof that a literal tool named `Chrome` must appear. If direct Chrome tools are not visible, read `references/chrome-chatgpt-pro.md` and follow the Chrome skill's browser-client route before reporting a blocker.
 - Prefer web ChatGPT Pro extended mode, Pro conversation mode, Search Mode, deep research, or agent mode when the stage calls for that capability and the UI makes it available.
 - When a stage needs screenshots, files, or generated artifacts, read `references/file-artifact-exchange.md` before uploading, downloading, or relying on them.
+- When Chrome file upload fails or approved images need a clipboard fallback,
+  read both `references/chrome-chatgpt-pro.md` and
+  `references/file-artifact-exchange.md` before retrying, changing permissions,
+  pasting, or reporting a blocker.
 - Codex owns local files, execution, validation, final judgment, and user-facing reporting.
 - ChatGPT Pro can provide critique, risks, alternatives, debugging ideas, design feedback, source-backed research, delegated draft work, web task execution, and final review.
 
