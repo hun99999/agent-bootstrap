@@ -500,29 +500,26 @@ class SkillCatalogTests(unittest.TestCase):
             next_heading,
         )
 
-        verified_mime = 'const verifiedMimeType = "image/png";'
-        write_call = "await tab.clipboard.write(["
-        nested_entry = (
-            "entries: [{ base64: encodedBytes, mimeType: verifiedMimeType }]"
-        )
+        nested_write = """const verifiedMimeType = "image/png";
+   await tab.clipboard.write([
+     {
+       entries: [{ base64: encodedBytes, mimeType: verifiedMimeType }],
+     },
+   ]);"""
         paste_call = (
             'await tab.cua.keypress({ keys: ["ControlOrMeta", "v"] });'
         )
         focus_step = "Focus the verified ChatGPT composer"
         one_file_step = "Paste one file at a time"
-        expected_fragments = (
-            verified_mime,
-            write_call,
-            nested_entry,
+        expected_anchors = (
+            nested_write,
             focus_step,
             paste_call,
             one_file_step,
         )
-        for fragment in expected_fragments:
-            self.assertIn(fragment, section)
-        self.assertLess(section.index(verified_mime), section.index(write_call))
-        self.assertLess(section.index(write_call), section.index(nested_entry))
-        self.assertLess(section.index(nested_entry), section.index(focus_step))
+        for anchor in expected_anchors:
+            self.assertIn(anchor, section)
+        self.assertLess(section.index(nested_write), section.index(focus_step))
         self.assertLess(section.index(focus_step), section.index(paste_call))
         self.assertLess(section.index(paste_call), section.index(one_file_step))
         self.assertNotIn("write([{ base64", section)
