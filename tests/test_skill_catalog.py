@@ -188,6 +188,26 @@ class SkillCatalogTests(unittest.TestCase):
             self.assertIn(phrase, reference)
         self.assertNotIn(PRIVATE_HOME_PATH, reference)
 
+    def test_chatgpt_collaboration_harness_keeps_file_permission_diagnosis_conditional(
+        self,
+    ) -> None:
+        reference = (
+            REPO_ROOT
+            / "skills"
+            / "chatgpt-collaboration-harness"
+            / "references"
+            / "chrome-chatgpt-pro.md"
+        ).read_text(encoding="utf-8")
+
+        expected_phrases = (
+            "does not prove that file-URL access is the sole cause",
+            "start the Chrome task again",
+            "fresh file-chooser attempt",
+        )
+        for phrase in expected_phrases:
+            self.assertIn(phrase, reference)
+        self.assertNotIn(PRIVATE_HOME_PATH, reference)
+
     def test_chatgpt_collaboration_harness_documents_file_artifact_exchange(self) -> None:
         reference = (
             REPO_ROOT
@@ -239,6 +259,34 @@ class SkillCatalogTests(unittest.TestCase):
             "non-image files",
             "persisted outgoing message",
             "Composer previews prove staging, not delivery",
+        )
+        for phrase in expected_phrases:
+            self.assertIn(phrase, reference)
+        self.assertNotIn(PRIVATE_HOME_PATH, reference)
+
+    def test_chatgpt_collaboration_harness_gates_the_exact_png_clipboard_packet(
+        self,
+    ) -> None:
+        reference = (
+            REPO_ROOT
+            / "skills"
+            / "chatgpt-collaboration-harness"
+            / "references"
+            / "file-artifact-exchange.md"
+        ).read_text(encoding="utf-8")
+
+        expected_phrases = (
+            "limited to `image/png`",
+            "clean packet baseline",
+            "no unapproved text",
+            "Await each `tab.clipboard.write(...)` call",
+            "manifest index",
+            "non-sensitive alias",
+            "rejects or throws",
+            "exact packet",
+            "preview count does not prove byte identity",
+            "Never place an absolute path",
+            "original basename only after",
         )
         for phrase in expected_phrases:
             self.assertIn(phrase, reference)
