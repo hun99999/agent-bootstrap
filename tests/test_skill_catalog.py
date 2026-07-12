@@ -318,7 +318,19 @@ class SkillCatalogTests(unittest.TestCase):
             self.assertIn(phrase, reference)
         self.assertNotIn(PRIVATE_HOME_PATH, reference)
 
-    def test_chatgpt_collaboration_harness_documents_verified_clipboard_fallback(
+    def test_chatgpt_collaboration_harness_routes_approved_file_fallbacks(
+        self,
+    ) -> None:
+        skill_root = REPO_ROOT / "skills" / "chatgpt-collaboration-harness"
+        skill = (skill_root / "SKILL.md").read_text(encoding="utf-8")
+
+        self.assertIn("approved files need a clipboard fallback", skill)
+        self.assertIn("references/chrome-chatgpt-pro.md", skill)
+        self.assertIn("references/file-artifact-exchange.md", skill)
+        self.assertNotIn("approved images need a clipboard fallback", skill)
+        self.assertNotIn(PRIVATE_HOME_PATH, skill)
+
+    def test_chatgpt_collaboration_harness_documents_direct_first_transport(
         self,
     ) -> None:
         reference = (
@@ -330,75 +342,108 @@ class SkillCatalogTests(unittest.TestCase):
         ).read_text(encoding="utf-8")
 
         expected_phrases = (
-            "Verified Clipboard Image Fallback",
-            "approved attachment-sharing scope",
+            "Attachment Transport Capability Matrix",
+            "Direct-First Attachment Transport",
+            "file chooser first",
+            "exact format/MIME pair",
+            "manual attachment",
+            "PNG",
+            "JPEG/JPG",
+            "WebP",
+            "GIF",
+            "PDF",
+            "DOCX",
+            "XLSX",
+            "PPTX",
+            "TXT",
+            "CSV",
+            "ZIP",
+        )
+        for phrase in expected_phrases:
+            self.assertIn(phrase, reference)
+        self.assertNotIn(PRIVATE_HOME_PATH, reference)
+
+    def test_chatgpt_collaboration_harness_uses_evidence_labeled_matrix(
+        self,
+    ) -> None:
+        reference = (
+            REPO_ROOT
+            / "skills"
+            / "chatgpt-collaboration-harness"
+            / "references"
+            / "file-artifact-exchange.md"
+        ).read_text(encoding="utf-8")
+        matrix = markdown_section(
+            reference,
+            "## Attachment Transport Capability Matrix",
+            "## Direct-First Attachment Transport",
+        )
+        rows = [line for line in matrix.splitlines() if line.startswith("|")][2:]
+        expected_formats = (
+            "PNG",
+            "JPEG/JPG",
+            "WebP",
+            "GIF",
+            "PDF",
+            "DOCX",
+            "XLSX",
+            "PPTX",
+            "TXT",
+            "CSV",
+            "ZIP",
+        )
+        allowed_direct_statuses = {
+            "`verified-staging`",
+            "`unsupported-in-current-smoke`",
+            "`not-tested`",
+            "`user-verified`",
+        }
+        allowed_clipboard_statuses = {
+            "`verified-staging`",
+            "`unsupported-in-current-smoke`",
+            "`not-tested`",
+        }
+
+        self.assertEqual(len(rows), len(expected_formats))
+        for row, expected_format in zip(rows, expected_formats, strict=True):
+            columns = [column.strip() for column in row.strip("|").split("|")]
+            self.assertEqual(columns[0], expected_format)
+            self.assertIn(columns[2], allowed_direct_statuses)
+            self.assertIn(columns[3], allowed_clipboard_statuses)
+            if columns[2] == "`user-verified`":
+                self.assertEqual(expected_format, "ZIP")
+        self.assertIn("Hun-confirmed", matrix)
+        self.assertIn("Six previews staged", matrix)
+        self.assertNotIn(PRIVATE_HOME_PATH, matrix)
+
+    def test_chatgpt_collaboration_harness_gates_clipboard_by_exact_mime_evidence(
+        self,
+    ) -> None:
+        reference = (
+            REPO_ROOT
+            / "skills"
+            / "chatgpt-collaboration-harness"
+            / "references"
+            / "file-artifact-exchange.md"
+        ).read_text(encoding="utf-8")
+
+        expected_phrases = (
+            "Verified Clipboard Attachment Fallback",
             "`tab.clipboard.write(...)`",
-            "Base64-encode",
-            "`base64`",
-            "`mimeType`",
-            "image MIME type",
-            "one image at a time",
-            "attachment preview",
-            "visible attachment count",
-            "Do not send",
-            "non-image files",
-            "persisted outgoing message",
+            "exact format/MIME pair",
+            "`verified-staging`",
+            "API success alone",
+            "visible attachment preview",
+            "Do not promote",
+            "one file at a time",
+            "Never place an absolute path",
             "Composer previews prove staging, not delivery",
         )
         for phrase in expected_phrases:
             self.assertIn(phrase, reference)
         self.assertNotIn(PRIVATE_HOME_PATH, reference)
 
-    def test_chatgpt_collaboration_harness_gates_the_exact_png_clipboard_packet(
-        self,
-    ) -> None:
-        reference = (
-            REPO_ROOT
-            / "skills"
-            / "chatgpt-collaboration-harness"
-            / "references"
-            / "file-artifact-exchange.md"
-        ).read_text(encoding="utf-8")
-
-        expected_phrases = (
-            "limited to `image/png`",
-            "clean packet baseline",
-            "no unapproved text",
-            "Await each `tab.clipboard.write(...)` call",
-            "manifest index",
-            "non-sensitive alias",
-            "rejects or throws",
-            "exact packet",
-            "preview count does not prove byte identity",
-            "Never place an absolute path",
-            "original basename only after",
-        )
-        for phrase in expected_phrases:
-            self.assertIn(phrase, reference)
-        self.assertNotIn(PRIVATE_HOME_PATH, reference)
-
-    def test_chatgpt_collaboration_harness_documents_clipboard_item_entries_shape(
-        self,
-    ) -> None:
-        reference = (
-            REPO_ROOT
-            / "skills"
-            / "chatgpt-collaboration-harness"
-            / "references"
-            / "file-artifact-exchange.md"
-        ).read_text(encoding="utf-8")
-
-        expected_phrases = (
-            "`tab.clipboard.write(...)` receives an array",
-            "outer clipboard item",
-            "`entries` array",
-            "`base64` and `mimeType` entry",
-        )
-        for phrase in expected_phrases:
-            self.assertIn(phrase, reference)
-        self.assertNotIn(PRIVATE_HOME_PATH, reference)
-
-    def test_chatgpt_collaboration_harness_uses_the_virtual_clipboard_paste_call(
+    def test_chatgpt_collaboration_harness_preserves_clipboard_api_order(
         self,
     ) -> None:
         reference = (
@@ -410,13 +455,14 @@ class SkillCatalogTests(unittest.TestCase):
         ).read_text(encoding="utf-8")
         section = markdown_section(
             reference,
-            "## Verified Clipboard Image Fallback",
+            "### Verified Clipboard Attachment Fallback",
             "## Attachment Packet",
         )
 
-        nested_write = """await tab.clipboard.write([
+        nested_write = """const verifiedMimeType = "image/png";
+   await tab.clipboard.write([
      {
-       entries: [{ base64: encodedBytes, mimeType: "image/png" }],
+       entries: [{ base64: encodedBytes, mimeType: verifiedMimeType }],
      },
    ]);"""
         paste_call = (
@@ -429,9 +475,8 @@ class SkillCatalogTests(unittest.TestCase):
         self.assertLess(section.index(focus_step), section.index(paste_call))
         self.assertLess(
             section.index(paste_call),
-            section.index("Paste one image at a time"),
+            section.index("Paste one file at a time"),
         )
-        self.assertNotIn("image/jpeg", section)
         self.assertNotIn("write([{ base64", section)
 
     def test_chatgpt_collaboration_harness_runtime_sync_rechecks_itemized_snapshot(
