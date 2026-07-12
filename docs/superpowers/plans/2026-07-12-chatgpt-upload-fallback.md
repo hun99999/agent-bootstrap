@@ -129,7 +129,7 @@ git commit -m "test: define ChatGPT upload fallback contract"
 Add one Required Components bullet after the existing file-artifact bullet:
 
 ```markdown
-- When Chrome file upload fails or approved images need a clipboard fallback,
+- When Chrome file upload fails or approved PNGs need a clipboard fallback,
   read both `references/chrome-chatgpt-pro.md` and
   `references/file-artifact-exchange.md` before retrying, changing permissions,
   pasting, or reporting a blocker.
@@ -148,18 +148,21 @@ use absolute paths with `chooser.setFiles(...)`, and call
 `chooser.isMultiple()` before passing more than one path.
 
 Do not diagnose a permission failure from a hidden input click or an unopened
-picker. Diagnose the boundary only from the actual `chooser.setFiles(...)`
-result and the visible composer state.
+picker. Diagnose the boundary from the awaited `chooser.setFiles(...)`
+fulfillment or rejection and the visible composer state. The API resolves with
+no result value.
 
-If Chrome rejects file setting with `Not allowed` or another chooser-level
-denial, read `chrome-file-upload-troubleshooting` and reproduce its exact user
-instruction: open `chrome://extensions`, select Details for the ChatGPT Chrome
-Extension, and enable **Allow access to file URLs**. Do not claim Codex changed
-the permission.
+If the underlying chooser rejection is `Not allowed`, Chrome may instead
+surface the packaged permission instruction. Read
+`chrome-file-upload-troubleshooting` and reproduce its current instruction
+verbatim, including its details link. The current user-directed check is to
+open `chrome://extensions`, select Details for the ChatGPT Chrome Extension,
+and enable **Allow access to file URLs**. Opening the Extension Manager may be
+approval-gated, and the permission change remains user-directed.
 
 Do not work around a blocked `chrome://` page through another browser surface,
 raw browser commands, profile-file edits, or indirect extension-state changes.
-For approved images, use the Verified Clipboard Image Fallback in
+For approved PNGs, use the Verified Clipboard Image Fallback in
 `file-artifact-exchange.md`; for non-image files, require a supported upload
 route or manual attachment.
 ```
@@ -171,29 +174,44 @@ Document the verified image-only sequence:
 ```markdown
 ## Verified Clipboard Image Fallback
 
-Use this only for approved image attachments after direct file upload is
-unavailable. Reuse the approved attachment-sharing scope; changing transport
-does not authorize more files or a different ChatGPT destination.
+Use this only for approved PNG attachments after direct file upload is
+unavailable. The verified scope is limited to `image/png`; changing transport
+does not widen the approved files or ChatGPT destination.
 
-1. Confirm every input is an approved image and record the intended order and
-   count. Do not use this route for non-image files.
-2. Read image bytes locally and Base64-encode them for the selected browser's
-   documented clipboard-item payload. Then call `tab.clipboard.write(...)` with
-   an entry whose `base64` value is the encoded bytes and whose `mimeType` is
-   the correct image MIME type.
-3. Focus the verified ChatGPT composer and use the paste key supported by the
-   selected browser.
-4. Paste one image at a time. After each paste, require one new attachment
-   preview and verify that no error or pending state remains.
-5. Do not send until the visible attachment count equals the intended count.
-6. If a paste fails or creates an ambiguous duplicate, do not send a partial
-   packet. Remove only draft attachments created by the failed attempt when
-   they are unambiguous; otherwise leave a handoff and report the exact state.
-7. If the stage requires delivery, verify the persisted outgoing message after
+1. Record the approved PNG manifest index, intended order and count, MIME type,
+   and non-sensitive aliases. Do not use this route for other MIME types.
+2. Establish a clean packet baseline with no preview, error, pending state, or
+   text beyond the exact approved prompt.
+3. In manifest order, write one PNG through the nested clipboard-item shape and
+   await the call before pasting:
+
+   ```js
+   await tab.clipboard.write([
+     {
+       entries: [{ base64: encodedBytes, mimeType: "image/png" }],
+     },
+   ]);
+   ```
+
+4. Focus the verified composer and use the virtual clipboard paste call:
+
+   ```js
+   await tab.cua.keypress({ keys: ["ControlOrMeta", "v"] });
+   ```
+
+5. After each paste, require the preview count to equal the manifest index and
+   require no error or pending state. Count proves staging, not byte identity.
+6. Before sending, verify the exact packet: approved prompt, intended preview
+   count and order, no unexpected content, and no error or pending state.
+7. On a failed or ambiguous paste, do not send a partial packet. Remove only
+   unambiguous draft attachments from the failed attempt; otherwise report the
+   exact draft state.
+8. When delivery is required, verify the persisted outgoing message after
    sending. Composer previews prove staging, not delivery.
 
-Clipboard paste may expose generated names such as `clipboard.png`; keep the
-original ordered labels in the attachment manifest.
+Clipboard paste may expose generated names. Never include absolute paths; use
+non-sensitive aliases and include an original basename only when separately
+approved for the destination.
 ```
 
 - [ ] **Step 4: Run GREEN**
@@ -309,12 +327,16 @@ any other catalog skill.
 "$VALIDATOR_ROOT/venv/bin/python" \
   ~/.codex/skills/.system/skill-creator/scripts/quick_validate.py \
   ~/.codex/skills/chatgpt-collaboration-harness
+rsync -acni --delete \
+  skills/chatgpt-collaboration-harness/ \
+  ~/.codex/skills/chatgpt-collaboration-harness/
 diff -ru \
   skills/chatgpt-collaboration-harness \
   ~/.codex/skills/chatgpt-collaboration-harness
 ```
 
-Expected: `Skill is valid!` and no recursive diff output.
+Expected: `Skill is valid!`, no checksum dry-run output, and no recursive diff
+output.
 
 - [ ] **Step 6: Forward-test the installed skill**
 
@@ -357,11 +379,19 @@ documentation, and observed browser evidence. Apply only accepted corrections,
 then rerun the focused tests, both validators, the full suite, private-path scan,
 agent-stack audit, recursive runtime diff, and `git diff --check`.
 
-Accepted corrections must keep `Not allowed` conditional, include the official
-restart-the-Chrome-task step after a permission change, limit verified clipboard
-evidence to PNG, require a clean composer baseline and exact packet before send,
-await every clipboard write, preserve the documented clipboard-item `entries`
-shape, avoid sole-cause attribution after a multi-step remediation, and use
+If any file under `skills/chatgpt-collaboration-harness/` changes, first
+repeat the complete guarded synchronization and installed-copy validation
+from Task 3 using a fresh dry-run snapshot.
+Prior dry-run output and deletion approvals are invalid after a skill change.
+If only tests, plan, or design files change, no runtime synchronization is
+needed.
+
+Accepted corrections must keep `Not allowed` conditional, include the
+fresh-task verification step from the current official OpenAI guide after a
+permission change, limit verified clipboard evidence to PNG, require a clean
+composer baseline and exact packet before send, await every clipboard write,
+preserve the documented clipboard-item `entries` shape and virtual paste call,
+avoid sole-cause attribution after a multi-step remediation, and use
 non-sensitive manifest aliases. Reject any review claim contradicted by the
 source, including an assertion that
 `chooser.isMultiple()` is checked after multiple paths when the reference
@@ -390,6 +420,7 @@ Run these commands in the primary worktree where `main` is already checked out,
 not in the feature worktree:
 
 ```bash
+git worktree list --porcelain
 git pull --ff-only origin main
 git merge --ff-only codex/chatgpt-upload-fallback
 python3 -m unittest discover -s tests -p 'test_*.py'

@@ -18,9 +18,12 @@ into `main`.
   enable **Allow access to file URLs** for the ChatGPT Chrome Extension from
   `chrome://extensions`. The chooser denial alone does not prove that this
   setting is the sole cause.
-- Browser automation is prohibited from opening or modifying the privileged
-  `chrome://extensions` page. The skill must not attempt another browser
-  surface, profile-file edit, raw browser command, or other workaround.
+- Opening the Extension Manager is approval-gated.
+  The permission change remains user-directed.
+  The reproduced browser safety blocked automated access to
+  `chrome://extensions`; the skill must report that boundary instead of trying
+  another browser surface, profile-file edit, raw browser command, or other
+  workaround.
 - Writing PNG bytes to the selected ChatGPT tab's clipboard and pasting into
   the composer created attachment previews. A bounded smoke test observed the
   preview count increase from one through six without sending a message.
@@ -54,10 +57,11 @@ The Chrome collaboration reference will require the operator to:
 2. Start the `filechooser` wait before clicking the visible attachment control.
 3. Use absolute paths with `chooser.setFiles(...)`.
 4. Check `chooser.isMultiple()` before passing more than one path.
-5. Inspect the actual `setFiles(...)` result and visible composer state.
+5. Inspect whether awaited `setFiles(...)` fulfills or rejects and check the
+   visible composer state; the API has no result value.
 6. On Chrome rejection, read `chrome-file-upload-troubleshooting` and report
-   the exact **Allow access to file URLs** check without presenting it as a
-   confirmed cause.
+   its current instruction verbatim, including the details link, without
+   presenting **Allow access to file URLs** as a confirmed cause.
 7. If the user changes the setting, start the Chrome task again and verify with
    a fresh file-chooser attempt. Record the remediation and result, but do not
    identify file-URL access as the sole cause unless independently isolated.
@@ -81,8 +85,8 @@ limited to `image/png`:
    an array containing one outer clipboard item whose `entries` array contains
    the `base64` and `mimeType` entry for `image/png`. Await the write and stop
    before paste if it rejects or throws.
-5. Focus the verified ChatGPT composer and use the selected browser's supported
-   paste key sequence.
+5. Focus the verified ChatGPT composer and run
+   `await tab.cua.keypress({ keys: ["ControlOrMeta", "v"] });`.
 6. Paste one image at a time. After each paste, verify that the preview count
    equals the manifest index and that no error or pending state remains. Count
    proves staging, not byte identity.
@@ -128,7 +132,7 @@ synchronize the complete skill directory to the runtime destination, validate
 both directories independently, and require a recursive diff with no output.
 Synchronization must begin with an itemized, checksum-aware dry run. If that
 dry run proposes deleting any runtime-only file, stop and obtain Hun's explicit
-approval for the exact deletion before running a deletion-capable sync.
+approval for the exact deletion before removing that exact path.
 Approval to update the skill is not blanket approval to delete unknown
 runtime-only files.
 
@@ -159,7 +163,8 @@ Before declaring the skill ready:
 - run the complete repository test suite;
 - run both skill validators in a disposable PyYAML virtual environment;
 - run the private-path scan, agent-stack audit, and `git diff --check`;
-- compare repository and runtime skill directories recursively;
+- require a no-op checksum-aware runtime dry run and compare repository and
+  runtime skill directories recursively;
 - forward-test the updated skill with a fresh agent given only the raw failure
   scenario;
 - ask ChatGPT Pro for a final review using only public-safe changed excerpts and
@@ -178,7 +183,8 @@ and verify local `HEAD`, `origin/main`, and the remote `main` ref all match.
 
 ## Non-Goals
 
-- Automating or bypassing Chrome's privileged extension settings page.
+- Automating the permission change or bypassing Chrome's extension settings
+  safety boundary.
 - Persistently broadening Chrome extension permissions.
 - Treating clipboard paste as a generic transport for non-image files.
 - Uploading Hun's real screenshots as part of repository validation.

@@ -54,8 +54,13 @@ authorize more files or a different ChatGPT destination.
 
    Await each `tab.clipboard.write(...)` call before pasting. If the call
    rejects or throws, stop before pasting.
-4. Focus the verified ChatGPT composer and use the paste key supported by the
-   selected browser.
+4. Focus the verified ChatGPT composer, then use the Chrome virtual-clipboard
+   paste call:
+
+   ```js
+   await tab.cua.keypress({ keys: ["ControlOrMeta", "v"] });
+   ```
+
 5. Paste one image at a time. After each paste, require the attachment preview
    count to equal that manifest index and verify that no error or pending state
    remains. The preview count does not prove byte identity; it proves the staged

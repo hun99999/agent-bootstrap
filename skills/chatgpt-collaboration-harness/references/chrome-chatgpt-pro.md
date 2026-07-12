@@ -26,14 +26,20 @@ use absolute paths with `chooser.setFiles(...)`, and call
 `chooser.isMultiple()` before passing more than one path.
 
 Do not diagnose a permission failure from a hidden input click or an unopened
-picker. Diagnose the boundary only from the actual `chooser.setFiles(...)`
-result and the visible composer state.
+picker. Diagnose the boundary from the awaited `chooser.setFiles(...)`
+fulfillment or rejection and the visible composer state. The API resolves with
+no result value.
 
-If Chrome rejects file setting with `Not allowed` or another chooser-level
-denial, read `chrome-file-upload-troubleshooting` and reproduce its exact user
-instruction: open `chrome://extensions`, select Details for the ChatGPT Chrome
-Extension, and enable **Allow access to file URLs**. Do not claim Codex changed
-the permission.
+If the underlying chooser rejection is `Not allowed`,
+Chrome may instead surface the packaged permission instruction. Read
+`chrome-file-upload-troubleshooting` and reproduce its
+current instruction verbatim, including its details link. The current
+user-directed check is to
+open `chrome://extensions`, select Details for the ChatGPT Chrome Extension,
+and enable **Allow access to file URLs**; see the
+[OpenAI file-upload guide](https://learn.chatgpt.com/docs/chrome-extension#upload-files).
+Opening the Extension Manager may be approval-gated.
+The permission change remains user-directed. Do not claim Codex changed it.
 A chooser denial does not prove that file-URL access is the sole cause.
 Present the setting as the official next check, not a confirmed root cause.
 
@@ -48,6 +54,8 @@ observed boundary.
 
 Do not work around a blocked `chrome://` page through another browser surface,
 raw browser commands, profile-file edits, or indirect extension-state changes.
+If browser safety blocks automated access, report that boundary and have the
+user open the Extension Manager manually.
 For approved images, use the Verified Clipboard Image Fallback in
 `file-artifact-exchange.md`; for non-image files, require a supported upload
 route or manual attachment.
