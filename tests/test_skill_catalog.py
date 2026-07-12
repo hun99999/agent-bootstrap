@@ -212,12 +212,18 @@ class SkillCatalogTests(unittest.TestCase):
             "fulfillment or rejection",
             "may instead surface the packaged permission instruction",
             "current instruction verbatim, including its details link",
-            "https://learn.chatgpt.com/docs/chrome-extension#upload-files",
+            "https://developers.openai.com/codex/app/chrome-extension#upload-files",
+            "Opening the Extension Manager is approval-gated",
+            "permission change requires action-time confirmation",
             "permission change remains user-directed",
         )
         for phrase in expected_phrases:
             self.assertIn(phrase, section)
         self.assertNotIn("actual `chooser.setFiles(...)` result", section)
+        self.assertNotIn(
+            "https://learn.chatgpt.com/docs/chrome-extension#upload-files",
+            section,
+        )
         self.assertLess(
             section.index("Start the `filechooser` wait"),
             section.index("`chooser.isMultiple()`"),
@@ -241,6 +247,7 @@ class SkillCatalogTests(unittest.TestCase):
         expected_phrases = (
             "Opening the Extension Manager is approval-gated",
             "reproduced browser safety blocked automated access",
+            "permission change requires action-time confirmation",
             "permission change remains user-directed",
         )
         for phrase in expected_phrases:
@@ -407,15 +414,19 @@ class SkillCatalogTests(unittest.TestCase):
             "## Attachment Packet",
         )
 
-        nested_entry = (
-            'entries: [{ base64: encodedBytes, mimeType: "image/png" }]'
-        )
+        nested_write = """await tab.clipboard.write([
+     {
+       entries: [{ base64: encodedBytes, mimeType: "image/png" }],
+     },
+   ]);"""
         paste_call = (
             'await tab.cua.keypress({ keys: ["ControlOrMeta", "v"] });'
         )
-        self.assertIn(nested_entry, section)
+        focus_step = "Focus the verified ChatGPT composer"
+        self.assertIn(nested_write, section)
         self.assertIn(paste_call, section)
-        self.assertLess(section.index(nested_entry), section.index(paste_call))
+        self.assertLess(section.index(nested_write), section.index(focus_step))
+        self.assertLess(section.index(focus_step), section.index(paste_call))
         self.assertLess(
             section.index(paste_call),
             section.index("Paste one image at a time"),
@@ -532,6 +543,8 @@ class SkillCatalogTests(unittest.TestCase):
             "clean packet baseline",
             "entries: [{ base64: encodedBytes, mimeType: \"image/png\" }]",
             "await tab.cua.keypress({ keys: [\"ControlOrMeta\", \"v\"] });",
+            "permission change requires action-time confirmation",
+            "https://developers.openai.com/codex/app/chrome-extension#upload-files",
             "exact packet",
             "non-sensitive aliases",
         )
