@@ -6,6 +6,10 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 PRIVATE_HOME_PATH = "/" + "Users/hooooonje"
 
 
+def markdown_section(document: str, heading: str, next_heading: str) -> str:
+    return document.split(heading, 1)[1].split(next_heading, 1)[0]
+
+
 class SkillCatalogTests(unittest.TestCase):
     def test_catalog_lists_karpathy_guidelines_as_public_base_first(self) -> None:
         catalog = (REPO_ROOT / "skills" / "README.md").read_text(encoding="utf-8")
@@ -188,6 +192,60 @@ class SkillCatalogTests(unittest.TestCase):
             self.assertIn(phrase, reference)
         self.assertNotIn(PRIVATE_HOME_PATH, reference)
 
+    def test_chatgpt_collaboration_harness_uses_the_chrome_upload_api_contract(
+        self,
+    ) -> None:
+        reference = (
+            REPO_ROOT
+            / "skills"
+            / "chatgpt-collaboration-harness"
+            / "references"
+            / "chrome-chatgpt-pro.md"
+        ).read_text(encoding="utf-8")
+        section = markdown_section(
+            reference,
+            "## File Upload Diagnosis",
+            "## Capability Selection",
+        )
+
+        expected_phrases = (
+            "fulfillment or rejection",
+            "may instead surface the packaged permission instruction",
+            "current instruction verbatim, including its details link",
+            "https://learn.chatgpt.com/docs/chrome-extension#upload-files",
+            "permission change remains user-directed",
+        )
+        for phrase in expected_phrases:
+            self.assertIn(phrase, section)
+        self.assertNotIn("actual `chooser.setFiles(...)` result", section)
+        self.assertLess(
+            section.index("Start the `filechooser` wait"),
+            section.index("`chooser.isMultiple()`"),
+        )
+        self.assertLess(
+            section.index("`chooser.isMultiple()`"),
+            section.index("passing more than one path"),
+        )
+
+    def test_chatgpt_upload_design_keeps_extension_manager_user_directed(
+        self,
+    ) -> None:
+        design = (
+            REPO_ROOT
+            / "docs"
+            / "superpowers"
+            / "specs"
+            / "2026-07-12-chatgpt-upload-fallback-design.md"
+        ).read_text(encoding="utf-8")
+
+        expected_phrases = (
+            "Opening the Extension Manager is approval-gated",
+            "reproduced browser safety blocked automated access",
+            "permission change remains user-directed",
+        )
+        for phrase in expected_phrases:
+            self.assertIn(phrase, design)
+
     def test_chatgpt_collaboration_harness_keeps_file_permission_diagnosis_conditional(
         self,
     ) -> None:
@@ -333,6 +391,38 @@ class SkillCatalogTests(unittest.TestCase):
             self.assertIn(phrase, reference)
         self.assertNotIn(PRIVATE_HOME_PATH, reference)
 
+    def test_chatgpt_collaboration_harness_uses_the_virtual_clipboard_paste_call(
+        self,
+    ) -> None:
+        reference = (
+            REPO_ROOT
+            / "skills"
+            / "chatgpt-collaboration-harness"
+            / "references"
+            / "file-artifact-exchange.md"
+        ).read_text(encoding="utf-8")
+        section = markdown_section(
+            reference,
+            "## Verified Clipboard Image Fallback",
+            "## Attachment Packet",
+        )
+
+        nested_entry = (
+            'entries: [{ base64: encodedBytes, mimeType: "image/png" }]'
+        )
+        paste_call = (
+            'await tab.cua.keypress({ keys: ["ControlOrMeta", "v"] });'
+        )
+        self.assertIn(nested_entry, section)
+        self.assertIn(paste_call, section)
+        self.assertLess(section.index(nested_entry), section.index(paste_call))
+        self.assertLess(
+            section.index(paste_call),
+            section.index("Paste one image at a time"),
+        )
+        self.assertNotIn("image/jpeg", section)
+        self.assertNotIn("write([{ base64", section)
+
     def test_chatgpt_collaboration_harness_runtime_sync_rechecks_itemized_snapshot(
         self,
     ) -> None:
@@ -390,6 +480,63 @@ class SkillCatalogTests(unittest.TestCase):
         self.assertIn(expected_phrase, design)
         self.assertIn("rsync -ac \\", plan)
         self.assertNotIn("rsync -a --delete", plan)
+
+        sync_section = markdown_section(
+            plan,
+            "- [ ] **Step 4: Synchronize only the approved skill**",
+            "- [ ] **Step 5: Validate and compare the installed copy**",
+        )
+        dry_run = "rsync -acni --delete"
+        actual_sync = "rsync -ac \\"
+        self.assertEqual(sync_section.count(dry_run), 1)
+        self.assertEqual(sync_section.count(actual_sync), 1)
+        self.assertLess(sync_section.index(dry_run), sync_section.index(actual_sync))
+        self.assertNotIn("rsync -a --delete", sync_section)
+
+    def test_chatgpt_upload_plan_repeats_guarded_sync_after_skill_corrections(
+        self,
+    ) -> None:
+        plan = (
+            REPO_ROOT
+            / "docs"
+            / "superpowers"
+            / "plans"
+            / "2026-07-12-chatgpt-upload-fallback.md"
+        ).read_text(encoding="utf-8")
+        final_review = plan.split(
+            "- [ ] **Step 3: Classify feedback and apply only verified corrections**",
+            1,
+        )[1]
+
+        expected_phrases = (
+            "repeat the complete guarded synchronization and installed-copy validation",
+            "fresh dry-run snapshot",
+            "Prior dry-run output and deletion approvals are invalid",
+        )
+        for phrase in expected_phrases:
+            self.assertIn(phrase, final_review)
+
+    def test_chatgpt_upload_plan_task_two_matches_the_final_png_contract(self) -> None:
+        plan = (
+            REPO_ROOT
+            / "docs"
+            / "superpowers"
+            / "plans"
+            / "2026-07-12-chatgpt-upload-fallback.md"
+        ).read_text(encoding="utf-8")
+        task = markdown_section(plan, "### Task 2:", "### Task 3:")
+
+        expected_phrases = (
+            "approved PNG attachments",
+            "limited to `image/png`",
+            "clean packet baseline",
+            "entries: [{ base64: encodedBytes, mimeType: \"image/png\" }]",
+            "await tab.cua.keypress({ keys: [\"ControlOrMeta\", \"v\"] });",
+            "exact packet",
+            "non-sensitive aliases",
+        )
+        for phrase in expected_phrases:
+            self.assertIn(phrase, task)
 
     def test_chatgpt_upload_plan_integrates_from_the_primary_worktree(self) -> None:
         plan = (
