@@ -268,19 +268,25 @@ rsync -acni --delete \
   ~/.codex/skills/chatgpt-collaboration-harness/
 ```
 
-Inspect every content-change and deletion entry. The only approved content
-changes are:
+Inspect every non-noop itemized record. The only expected records are
+regular-file updates at the three approved paths:
 
 - `SKILL.md`
 - `references/chrome-chatgpt-pro.md`
 - `references/file-artifact-exchange.md`
 
-If the dry run contains `*deleting` or any content change outside those files,
-stop. Any proposed deletion requires Hun's explicit approval for the exact
-runtime-only path; approval to update the skill is not blanket approval to
-delete unknown runtime-only files. Only when there is no unexpected content
-change and either no deletion is proposed or every exact deletion was
-separately approved by Hun, run:
+Stop on any unexpected path, creation, file-type change, symlink change,
+standalone metadata-only change, or deletion. A proposed deletion may proceed
+only after Hun explicitly approves the exact runtime-only path; approval to
+update the skill is not blanket approval to delete unknown runtime-only files.
+
+After reviewing the output and obtaining any required deletion approval,
+repeat the checksum-aware dry run immediately before synchronization. The new
+output must be identical to the reviewed output.
+Any difference invalidates every prior deletion approval and requires a new
+review before continuing. Only proceed when the repeated output is identical
+and either no deletion is proposed or every exact deletion is separately
+approved by Hun. Then run:
 
 ```bash
 rsync -a --delete \

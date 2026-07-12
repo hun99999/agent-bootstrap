@@ -130,6 +130,16 @@ approval for the exact deletion before running a deletion-capable sync.
 Approval to update the skill is not blanket approval to delete unknown
 runtime-only files.
 
+Review every non-noop itemized record. The only expected records are
+regular-file updates at the three approved paths.
+Stop on any unexpected path, creation, file-type change, symlink change,
+standalone metadata-only change, or deletion. After reviewing the output and
+obtaining any required exact-path deletion approval,
+repeat the checksum-aware dry run immediately before synchronization.
+The repeated output must be identical to the reviewed output. Any difference
+invalidates every prior deletion approval and requires a fresh review before a
+deletion-capable synchronization may run.
+
 ## Test And Review Contract
 
 Before editing skill instructions:
