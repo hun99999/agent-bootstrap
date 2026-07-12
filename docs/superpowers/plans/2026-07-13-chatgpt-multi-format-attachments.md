@@ -556,8 +556,9 @@ the spreadsheet skill's authoring, inspection, rendering, and export path:
 
 ```js
 import fs from "node:fs/promises";
+import { constants as fsConstants } from "node:fs";
 import path from "node:path";
-import { SpreadsheetFile, Workbook } from "@oai/artifact-tool";
+import { FileBlob, SpreadsheetFile, Workbook } from "@oai/artifact-tool";
 
 const [fixtureRoot, qaRoot] = process.argv.slice(2).map((value) =>
   path.resolve(value),
@@ -586,6 +587,7 @@ async function writeBlob(targetPath, blob) {
 await assertMissing(outputPath);
 await assertMissing(qaRoot);
 await fs.mkdir(qaRoot, { recursive: false });
+const validatedExportPath = path.join(qaRoot, "sample.xlsx");
 
 const workbook = Workbook.create();
 const sheet = workbook.worksheets.add("Smoke");
@@ -625,13 +627,46 @@ if (!structure.ndjson.includes("Smoke")) {
 if (!content.ndjson.includes(marker)) {
   throw new Error("XLSX content inspection did not find the marker");
 }
+const output = await SpreadsheetFile.exportXlsx(workbook);
+await output.save(validatedExportPath);
+
+const importedWorkbook = await SpreadsheetFile.importXlsx(
+  await FileBlob.load(validatedExportPath),
+);
+const importedStructure = await importedWorkbook.inspect({
+  kind: "sheet",
+  include: "id,name",
+  maxChars: 2000,
+});
+const importedContent = await importedWorkbook.inspect({
+  kind: "table",
+  range: "Smoke!A1:B2",
+  include: "values,formulas",
+  tableMaxRows: 4,
+  tableMaxCols: 4,
+  maxChars: 4000,
+});
+if (!importedStructure.ndjson.includes("Smoke")) {
+  throw new Error("Exported XLSX structure inspection did not find Smoke");
+}
+if (!importedContent.ndjson.includes(marker)) {
+  throw new Error("Exported XLSX content inspection did not find the marker");
+}
 await fs.writeFile(
   path.join(qaRoot, "xlsx-inspect.ndjson"),
-  `${structure.ndjson}\n${content.ndjson}\n`,
+  [
+    "source workbook",
+    structure.ndjson,
+    content.ndjson,
+    "re-imported exported workbook",
+    importedStructure.ndjson,
+    importedContent.ndjson,
+    "",
+  ].join("\n"),
   "utf8",
 );
 
-const preview = await workbook.render({
+const preview = await importedWorkbook.render({
   sheetName: "Smoke",
   range: "A1:B2",
   autoCrop: "all",
@@ -639,10 +674,11 @@ const preview = await workbook.render({
   format: "png",
 });
 await writeBlob(path.join(qaRoot, "sample-xlsx.png"), preview);
+await fs.copyFile(validatedExportPath, outputPath, fsConstants.COPYFILE_EXCL);
 
-const output = await SpreadsheetFile.exportXlsx(workbook);
-await output.save(outputPath);
-console.log(JSON.stringify({ outputPath, qaRoot, marker }, null, 2));
+console.log(
+  JSON.stringify({ outputPath, qaRoot, validatedExportPath, marker }, null, 2),
+);
 ```
 
 Create `$BUILD_ROOT/pptx/build-pptx.mjs` with this complete content. The
@@ -655,8 +691,10 @@ canvas, `layers(...)`/`text(...)` Compose structure, three aligned text slots,
 
 ```js
 import fs from "node:fs/promises";
+import { constants as fsConstants } from "node:fs";
 import path from "node:path";
 import {
+  FileBlob,
   layers,
   Presentation,
   PresentationFile,
@@ -690,6 +728,7 @@ async function writeBlob(targetPath, blob) {
 await assertMissing(outputPath);
 await assertMissing(qaRoot);
 await fs.mkdir(qaRoot, { recursive: false });
+const validatedExportPath = path.join(qaRoot, "sample.pptx");
 
 const presentation = Presentation.create({
   slideSize: { width: 1280, height: 720 },
@@ -761,28 +800,60 @@ const inspection = await presentation.inspect({
 if (!inspection.ndjson.includes(marker)) {
   throw new Error("PPTX content inspection did not find the marker");
 }
+const output = await PresentationFile.exportPptx(presentation);
+await output.save(validatedExportPath);
+
+const importedPresentation = await PresentationFile.importPptx(
+  await FileBlob.load(validatedExportPath),
+);
+const importedInspection = await importedPresentation.inspect({
+  kind: "slide,textbox,shape,layout",
+  maxChars: 6000,
+});
+if (!importedInspection.ndjson.includes(marker)) {
+  throw new Error("Exported PPTX inspection did not find the marker");
+}
+const importedSlide = importedPresentation.slides.items[0];
+if (!importedSlide) {
+  throw new Error("Exported PPTX did not contain a slide");
+}
 await fs.writeFile(
   path.join(qaRoot, "pptx-inspect.ndjson"),
-  `${inspection.ndjson}\n`,
+  [
+    "source presentation",
+    inspection.ndjson,
+    "re-imported exported presentation",
+    importedInspection.ndjson,
+    "",
+  ].join("\n"),
   "utf8",
 );
-const layout = await slide.export({ format: "layout" });
+const layout = await importedSlide.export({ format: "layout" });
 await fs.writeFile(
   path.join(qaRoot, "pptx-layout.json"),
   await layout.text(),
   "utf8",
 );
-const preview = await presentation.export({
-  slide,
+const preview = await importedPresentation.export({
+  slide: importedSlide,
   format: "png",
   scale: 2,
 });
 await writeBlob(path.join(qaRoot, "sample-pptx.png"), preview);
+await fs.copyFile(validatedExportPath, outputPath, fsConstants.COPYFILE_EXCL);
 
-const output = await PresentationFile.exportPptx(presentation);
-await output.save(outputPath);
-console.log(JSON.stringify({ outputPath, qaRoot, marker }, null, 2));
+console.log(
+  JSON.stringify({ outputPath, qaRoot, validatedExportPath, marker }, null, 2),
+);
 ```
+
+Both builders deliberately save and re-import the Office file inside their QA
+directory before copying it into the fixture root. Artifact-tool may create an
+inspection sidecar next to an imported file; keeping that source under QA
+preserves the exact eleven-file fixture inventory. Only after imported marker
+inspection and final rendering pass may `COPYFILE_EXCL` copy the validated
+Office bytes to `sample.xlsx` or `sample.pptx`; it must never overwrite an
+existing fixture.
 
 - [ ] **Step 3: Generate and locally validate all eleven fixtures**
 
@@ -804,11 +875,14 @@ unzip -t "$FIXTURE_ROOT/sample.zip"
 ```
 
 Expected: the Python generator validates its nine owned formats; both
-artifact-tool builders pass Node syntax checks, inspect their marker content,
-render non-empty previews, and export real Office files; the final generator
-invocation prints exactly eleven manifest entries in the approved order with
-MIME, non-zero size, and SHA-256; `file` recognizes every real format; and the
-ZIP contains only safe `README.txt` and passes its integrity test.
+artifact-tool builders pass Node syntax checks, inspect their source marker
+content, export real Office files under QA, re-import those saved files, find
+the marker again, render the final non-empty previews from the re-imported
+artifacts, and exclusively copy the validated bytes into the fixture root; the
+final generator invocation prints exactly eleven manifest entries in the
+approved order with MIME, non-zero size, and SHA-256; `file` recognizes every
+real format; and the ZIP contains only safe `README.txt` and passes its
+integrity test.
 
 Run the format-specific render gates:
 
@@ -823,11 +897,15 @@ test -x "$PDFTOPPM"
   "$FIXTURE_ROOT/sample.pptx"
 test -s "$QA_ROOT/docx/page-1.png"
 test -s "$QA_ROOT/pdf/sample-1.png"
+test -s "$QA_ROOT/xlsx/sample.xlsx"
 test -s "$QA_ROOT/xlsx/sample-xlsx.png"
+test -s "$QA_ROOT/pptx/sample.pptx"
 test -s "$QA_ROOT/pptx/sample-pptx.png"
 test -s "$QA_ROOT/xlsx/xlsx-inspect.ndjson"
 test -s "$QA_ROOT/pptx/pptx-inspect.ndjson"
 test -s "$QA_ROOT/pptx/pptx-layout.json"
+cmp "$QA_ROOT/xlsx/sample.xlsx" "$FIXTURE_ROOT/sample.xlsx"
+cmp "$QA_ROOT/pptx/sample.pptx" "$FIXTURE_ROOT/sample.pptx"
 ```
 
 Use the host image-viewing capability at 100% zoom on all four render outputs:
@@ -838,6 +916,8 @@ Use the host image-viewing capability at 100% zoom on all four render outputs:
 - `$QA_ROOT/pptx/sample-pptx.png`
 
 Also read the compact XLSX inspection, PPTX inspection, and PPTX layout JSON.
+The final XLSX preview, PPTX preview, and PPTX layout must come from the
+re-imported saved artifacts, not only their source in-memory objects.
 The DOCX page must show its heading and full marker without clipping; the PDF
 must show its title and marker with clean margins; the spreadsheet must show
 both cells, full marker text, and legible styling; the slide must preserve the
