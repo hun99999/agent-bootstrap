@@ -59,7 +59,8 @@ The Chrome collaboration reference will require the operator to:
    the exact **Allow access to file URLs** check without presenting it as a
    confirmed cause.
 7. If the user changes the setting, start the Chrome task again and verify with
-   a fresh file-chooser attempt before attributing the failure to that setting.
+   a fresh file-chooser attempt. Record the remediation and result, but do not
+   identify file-URL access as the sole cause unless independently isolated.
 
 The reference will explicitly prohibit bypassing a blocked `chrome://` page or
 editing Chrome profiles and extension state indirectly.
@@ -77,8 +78,9 @@ limited to `image/png`:
    error state, or text beyond the exact approved prompt.
 4. Read image bytes locally and Base64-encode them for the selected browser's
    documented clipboard-item payload. Then call `tab.clipboard.write(...)` with
-   an entry whose `base64` value is the encoded bytes and whose `mimeType` is
-   `image/png`. Await the write and stop before paste if it rejects or throws.
+   an array containing one outer clipboard item whose `entries` array contains
+   the `base64` and `mimeType` entry for `image/png`. Await the write and stop
+   before paste if it rejects or throws.
 5. Focus the verified ChatGPT composer and use the selected browser's supported
    paste key sequence.
 6. Paste one image at a time. After each paste, verify that the preview count
@@ -138,7 +140,10 @@ obtaining any required exact-path deletion approval,
 repeat the checksum-aware dry run immediately before synchronization.
 The repeated output must be identical to the reviewed output. Any difference
 invalidates every prior deletion approval and requires a fresh review before a
-deletion-capable synchronization may run.
+deletion may run.
+The actual synchronization uses the same checksum comparison as the dry run
+and does not use a blanket deletion option. If a deletion was approved,
+revalidate and remove only that exact runtime-only path.
 
 ## Test And Review Contract
 

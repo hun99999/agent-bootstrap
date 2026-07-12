@@ -286,13 +286,19 @@ output must be identical to the reviewed output.
 Any difference invalidates every prior deletion approval and requires a new
 review before continuing. Only proceed when the repeated output is identical
 and either no deletion is proposed or every exact deletion is separately
-approved by Hun. Then run:
+approved by Hun.
+The actual synchronization uses the same checksum comparison as the dry run
+and never applies a blanket deletion. Then run:
 
 ```bash
-rsync -a --delete \
+rsync -ac \
   skills/chatgpt-collaboration-harness/ \
   ~/.codex/skills/chatgpt-collaboration-harness/
 ```
+
+If the dry run listed an exact deletion that Hun separately approved, recheck
+that the same path is still unchanged and runtime-only immediately before
+deleting only that path. Do not use a blanket deletion command.
 
 Do not copy credentials, browser profiles, auth state, Chrome permissions, or
 any other catalog skill.
@@ -354,8 +360,10 @@ agent-stack audit, recursive runtime diff, and `git diff --check`.
 Accepted corrections must keep `Not allowed` conditional, include the official
 restart-the-Chrome-task step after a permission change, limit verified clipboard
 evidence to PNG, require a clean composer baseline and exact packet before send,
-await every clipboard write, and use non-sensitive manifest aliases. Reject any
-review claim contradicted by the source, including an assertion that
+await every clipboard write, preserve the documented clipboard-item `entries`
+shape, avoid sole-cause attribution after a multi-step remediation, and use
+non-sensitive manifest aliases. Reject any review claim contradicted by the
+source, including an assertion that
 `chooser.isMultiple()` is checked after multiple paths when the reference
 already requires the check before passing more than one path.
 
@@ -365,6 +373,8 @@ If files changed:
 
 ```bash
 git add tests/test_skill_catalog.py \
+  docs/superpowers/plans/2026-07-12-chatgpt-upload-fallback.md \
+  docs/superpowers/specs/2026-07-12-chatgpt-upload-fallback-design.md \
   skills/chatgpt-collaboration-harness/SKILL.md \
   skills/chatgpt-collaboration-harness/references/chrome-chatgpt-pro.md \
   skills/chatgpt-collaboration-harness/references/file-artifact-exchange.md
@@ -375,16 +385,17 @@ If no files changed, record that no corrective commit was needed.
 
 - [ ] **Step 5: Fast-forward `main` and push**
 
-Verify the feature worktree is clean, then:
+Verify both the feature worktree and the primary `main` worktree are clean.
+Run these commands in the primary worktree where `main` is already checked out,
+not in the feature worktree:
 
 ```bash
-git switch main
 git pull --ff-only origin main
 git merge --ff-only codex/chatgpt-upload-fallback
 python3 -m unittest discover -s tests -p 'test_*.py'
 python3 scripts/check_private_paths.py
 python3 scripts/audit_agent_stack.py
-git diff --check
+git diff --check origin/main..HEAD
 git push origin main
 ```
 

@@ -40,9 +40,20 @@ authorize more files or a different ChatGPT destination.
    stop or use a fresh composer.
 3. In manifest order, read one image's bytes locally and Base64-encode them for
    the selected browser's documented clipboard-item payload.
-   Await each `tab.clipboard.write(...)` call before pasting, with an entry whose
-   `base64` value is the encoded bytes and whose `mimeType` is `image/png`.
-   If the call rejects or throws, stop before pasting.
+   `tab.clipboard.write(...)` receives an array containing one
+   outer clipboard item. Its `entries` array contains the
+   `base64` and `mimeType` entry:
+
+   ```js
+   await tab.clipboard.write([
+     {
+       entries: [{ base64: encodedBytes, mimeType: "image/png" }],
+     },
+   ]);
+   ```
+
+   Await each `tab.clipboard.write(...)` call before pasting. If the call
+   rejects or throws, stop before pasting.
 4. Focus the verified ChatGPT composer and use the paste key supported by the
    selected browser.
 5. Paste one image at a time. After each paste, require the attachment preview
