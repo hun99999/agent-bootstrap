@@ -157,8 +157,11 @@ surface the packaged permission instruction. Read
 `chrome-file-upload-troubleshooting` and reproduce its current instruction
 verbatim, including its details link. The current user-directed check is to
 open `chrome://extensions`, select Details for the ChatGPT Chrome Extension,
-and enable **Allow access to file URLs**. Opening the Extension Manager may be
-approval-gated, and the permission change remains user-directed.
+and enable **Allow access to file URLs**; see the
+[OpenAI file-upload guide](https://developers.openai.com/codex/app/chrome-extension#upload-files).
+Opening the Extension Manager is approval-gated.
+The permission change requires action-time confirmation.
+The permission change remains user-directed.
 
 Do not work around a blocked `chrome://` page through another browser surface,
 raw browser commands, profile-file edits, or indirect extension-state changes.
@@ -388,10 +391,11 @@ needed.
 
 Accepted corrections must keep `Not allowed` conditional, include the
 fresh-task verification step from the current official OpenAI guide after a
-permission change, limit verified clipboard evidence to PNG, require a clean
-composer baseline and exact packet before send, await every clipboard write,
-preserve the documented clipboard-item `entries` shape and virtual paste call,
-avoid sole-cause attribution after a multi-step remediation, and use
+permission change, require action-time confirmation for that change, limit
+verified clipboard evidence to PNG, require a clean composer baseline and exact
+packet before send, await every clipboard write, preserve the documented
+clipboard-item `entries` shape and virtual paste call, avoid sole-cause
+attribution after a multi-step remediation, and use
 non-sensitive manifest aliases. Reject any review claim contradicted by the
 source, including an assertion that
 `chooser.isMultiple()` is checked after multiple paths when the reference

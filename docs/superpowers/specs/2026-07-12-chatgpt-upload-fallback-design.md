@@ -19,6 +19,7 @@ into `main`.
   `chrome://extensions`. The chooser denial alone does not prove that this
   setting is the sole cause.
 - Opening the Extension Manager is approval-gated.
+  The permission change requires action-time confirmation.
   The permission change remains user-directed.
   The reproduced browser safety blocked automated access to
   `chrome://extensions`; the skill must report that boundary instead of trying
@@ -42,7 +43,8 @@ Use an adaptive hybrid path.
    click.
 3. If Chrome rejects file setting, read the selected browser's
    `chrome-file-upload-troubleshooting` guidance and reproduce its exact manual
-   permission instruction. Do not claim that Codex changed the permission.
+   permission instruction. Require action-time confirmation and keep the
+   permission change user-directed; do not claim Codex changed it.
 4. For approved PNG attachments, continue with the verified clipboard fallback
    when direct file attachment remains unavailable.
 5. For PDFs, archives, documents, or other non-image files, do not pretend that

@@ -37,8 +37,9 @@ current instruction verbatim, including its details link. The current
 user-directed check is to
 open `chrome://extensions`, select Details for the ChatGPT Chrome Extension,
 and enable **Allow access to file URLs**; see the
-[OpenAI file-upload guide](https://learn.chatgpt.com/docs/chrome-extension#upload-files).
-Opening the Extension Manager may be approval-gated.
+[OpenAI file-upload guide](https://developers.openai.com/codex/app/chrome-extension#upload-files).
+Opening the Extension Manager is approval-gated.
+The permission change requires action-time confirmation.
 The permission change remains user-directed. Do not claim Codex changed it.
 A chooser denial does not prove that file-URL access is the sole cause.
 Present the setting as the official next check, not a confirmed root cause.
