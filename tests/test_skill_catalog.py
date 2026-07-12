@@ -373,24 +373,41 @@ class SkillCatalogTests(unittest.TestCase):
             / "references"
             / "file-artifact-exchange.md"
         ).read_text(encoding="utf-8")
+        matrix_heading = "## Attachment Transport Capability Matrix"
+        transport_heading = "## Direct-First Attachment Transport"
+        self.assertIn(matrix_heading, reference)
+        self.assertIn(transport_heading, reference)
+        self.assertLess(
+            reference.index(matrix_heading),
+            reference.index(transport_heading),
+        )
         matrix = markdown_section(
             reference,
-            "## Attachment Transport Capability Matrix",
-            "## Direct-First Attachment Transport",
+            matrix_heading,
+            transport_heading,
         )
         rows = [line for line in matrix.splitlines() if line.startswith("|")][2:]
-        expected_formats = (
-            "PNG",
-            "JPEG/JPG",
-            "WebP",
-            "GIF",
-            "PDF",
-            "DOCX",
-            "XLSX",
-            "PPTX",
-            "TXT",
-            "CSV",
-            "ZIP",
+        expected_format_mimes = (
+            ("PNG", "image/png"),
+            ("JPEG/JPG", "image/jpeg"),
+            ("WebP", "image/webp"),
+            ("GIF", "image/gif"),
+            ("PDF", "application/pdf"),
+            (
+                "DOCX",
+                "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+            ),
+            (
+                "XLSX",
+                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            ),
+            (
+                "PPTX",
+                "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+            ),
+            ("TXT", "text/plain"),
+            ("CSV", "text/csv"),
+            ("ZIP", "application/zip"),
         )
         allowed_direct_statuses = {
             "`verified-staging`",
@@ -404,16 +421,32 @@ class SkillCatalogTests(unittest.TestCase):
             "`not-tested`",
         }
 
-        self.assertEqual(len(rows), len(expected_formats))
-        for row, expected_format in zip(rows, expected_formats, strict=True):
-            columns = [column.strip() for column in row.strip("|").split("|")]
-            self.assertEqual(columns[0], expected_format)
-            self.assertIn(columns[2], allowed_direct_statuses)
-            self.assertIn(columns[3], allowed_clipboard_statuses)
-            if columns[2] == "`user-verified`":
-                self.assertEqual(expected_format, "ZIP")
-        self.assertIn("Hun-confirmed", matrix)
-        self.assertIn("Six previews staged", matrix)
+        self.assertIn(
+            "| Format | MIME type | Direct chooser | Clipboard | Evidence |",
+            matrix,
+        )
+        self.assertEqual(len(rows), len(expected_format_mimes))
+        for row, expected in zip(rows, expected_format_mimes, strict=True):
+            expected_format, expected_mime = expected
+            with self.subTest(format=expected_format):
+                columns = [
+                    column.strip() for column in row.strip("|").split("|")
+                ]
+                self.assertEqual(len(columns), 5)
+                self.assertEqual(columns[0], expected_format)
+                self.assertEqual(columns[1], expected_mime)
+                self.assertIn(columns[2], allowed_direct_statuses)
+                self.assertIn(columns[3], allowed_clipboard_statuses)
+                if columns[2] == "`user-verified`":
+                    self.assertEqual(expected_format, "ZIP")
+                if expected_format == "PNG":
+                    self.assertIn("Six previews staged previously", columns[4])
+                else:
+                    self.assertNotIn("Six previews staged previously", columns[4])
+                if expected_format == "ZIP":
+                    self.assertIn("Hun-confirmed", columns[4])
+                else:
+                    self.assertNotIn("Hun-confirmed", columns[4])
         self.assertNotIn(PRIVATE_HOME_PATH, matrix)
 
     def test_chatgpt_collaboration_harness_gates_clipboard_by_exact_mime_evidence(
@@ -453,30 +486,45 @@ class SkillCatalogTests(unittest.TestCase):
             / "references"
             / "file-artifact-exchange.md"
         ).read_text(encoding="utf-8")
+        section_heading = "### Verified Clipboard Attachment Fallback"
+        next_heading = "## Attachment Packet"
+        self.assertIn(section_heading, reference)
+        self.assertIn(next_heading, reference)
+        self.assertLess(
+            reference.index(section_heading),
+            reference.index(next_heading),
+        )
         section = markdown_section(
             reference,
-            "### Verified Clipboard Attachment Fallback",
-            "## Attachment Packet",
+            section_heading,
+            next_heading,
         )
 
-        nested_write = """const verifiedMimeType = "image/png";
-   await tab.clipboard.write([
-     {
-       entries: [{ base64: encodedBytes, mimeType: verifiedMimeType }],
-     },
-   ]);"""
+        verified_mime = 'const verifiedMimeType = "image/png";'
+        write_call = "await tab.clipboard.write(["
+        nested_entry = (
+            "entries: [{ base64: encodedBytes, mimeType: verifiedMimeType }]"
+        )
         paste_call = (
             'await tab.cua.keypress({ keys: ["ControlOrMeta", "v"] });'
         )
         focus_step = "Focus the verified ChatGPT composer"
-        self.assertIn(nested_write, section)
-        self.assertIn(paste_call, section)
-        self.assertLess(section.index(nested_write), section.index(focus_step))
-        self.assertLess(section.index(focus_step), section.index(paste_call))
-        self.assertLess(
-            section.index(paste_call),
-            section.index("Paste one file at a time"),
+        one_file_step = "Paste one file at a time"
+        expected_fragments = (
+            verified_mime,
+            write_call,
+            nested_entry,
+            focus_step,
+            paste_call,
+            one_file_step,
         )
+        for fragment in expected_fragments:
+            self.assertIn(fragment, section)
+        self.assertLess(section.index(verified_mime), section.index(write_call))
+        self.assertLess(section.index(write_call), section.index(nested_entry))
+        self.assertLess(section.index(nested_entry), section.index(focus_step))
+        self.assertLess(section.index(focus_step), section.index(paste_call))
+        self.assertLess(section.index(paste_call), section.index(one_file_step))
         self.assertNotIn("write([{ base64", section)
 
     def test_chatgpt_collaboration_harness_runtime_sync_rechecks_itemized_snapshot(
