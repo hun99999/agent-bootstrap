@@ -23,63 +23,107 @@ Do not upload credentials, private keys, API tokens, database passwords, cookies
 
 Large bundles, full source files, private repository material, Git URLs, repository URLs, browser state, and scope expansion require Hun's approval before sharing.
 
-## Verified Clipboard Image Fallback
+## Attachment Transport Capability Matrix
 
-Use this only for approved PNG attachments after direct file upload is
-unavailable. The currently verified path is limited to `image/png`; do not
-generalize its evidence to other image MIME types.
+| Format | MIME type | Direct chooser | Clipboard | Evidence |
+| --- | --- | --- | --- | --- |
+| PNG | image/png | `unsupported-in-current-smoke` | `verified-staging` | Direct: fresh chooser event failed with `Timed out after 3000ms waiting for file chooser.` before chooser/isMultiple/setFiles; no preview. Clipboard: one fresh exact-MIME write and paste fulfilled; the one preview initially named `clipboard.png` stabilized to `clipboard(1).png`, with no error or pending state. Six previews staged previously. |
+| JPEG/JPG | image/jpeg | `unsupported-in-current-smoke` | `verified-staging` | Direct: fresh chooser event failed with `Timed out after 3000ms waiting for file chooser.` before chooser/isMultiple/setFiles; no preview. Clipboard: fresh exact-MIME write and paste fulfilled; exactly one visible `clipboard.jpeg` preview, with no error or pending state. |
+| WebP | image/webp | `unsupported-in-current-smoke` | `verified-staging` | Direct: fresh chooser event failed with `Timed out after 3000ms waiting for file chooser.` before chooser/isMultiple/setFiles; no preview. Clipboard: fresh exact-MIME write and paste fulfilled; exactly one visible `clipboard.webp` preview, with no error or pending state. |
+| GIF | image/gif | `unsupported-in-current-smoke` | `verified-staging` | Direct: fresh chooser event failed with `Timed out after 3000ms waiting for file chooser.` before chooser/isMultiple/setFiles; no preview. Clipboard: fresh exact-MIME write and paste fulfilled; exactly one visible `clipboard.gif` preview, with no error or pending state. |
+| PDF | application/pdf | `unsupported-in-current-smoke` | `verified-staging` | Direct: fresh chooser event failed with `Timed out after 3000ms waiting for file chooser.` before chooser/isMultiple/setFiles; no preview. Clipboard: fresh exact-MIME write and paste fulfilled; exactly one visible `clipboard.pdf` preview, with no error or pending state. |
+| DOCX | application/vnd.openxmlformats-officedocument.wordprocessingml.document | `unsupported-in-current-smoke` | `verified-staging` | Direct: fresh chooser event failed with `Timed out after 3000ms waiting for file chooser.` before chooser/isMultiple/setFiles; no preview. Clipboard: fresh exact-MIME write and paste fulfilled; exactly one visible `clipboard.vnd.openxmlformats-officedocument.wordprocessingml.document` preview, with no error or pending state. |
+| XLSX | application/vnd.openxmlformats-officedocument.spreadsheetml.sheet | `unsupported-in-current-smoke` | `verified-staging` | Direct: fresh chooser event failed with `Timed out after 3000ms waiting for file chooser.` before chooser/isMultiple/setFiles; no preview. Clipboard: fresh exact-MIME write and paste fulfilled; exactly one visible `clipboard.vnd.openxmlformats-officedocument.spreadsheetml.sheet` preview, with no error or pending state. |
+| PPTX | application/vnd.openxmlformats-officedocument.presentationml.presentation | `unsupported-in-current-smoke` | `verified-staging` | Direct: fresh chooser event failed with `Timed out after 3000ms waiting for file chooser.` before chooser/isMultiple/setFiles; no preview. Clipboard: fresh exact-MIME write and paste fulfilled; exactly one visible `clipboard.vnd.openxmlformats-officedocument.presentationml.presentation` preview, with no error or pending state. |
+| TXT | text/plain | `unsupported-in-current-smoke` | `verified-staging` | Direct: fresh chooser event failed with `Timed out after 3000ms waiting for file chooser.` before chooser/isMultiple/setFiles; no preview. Clipboard: fresh exact-MIME write and paste fulfilled; exactly one visible `clipboard.plain` attachment preview and no prompt text, error, or pending state. |
+| CSV | text/csv | `unsupported-in-current-smoke` | `verified-staging` | Direct: fresh chooser event failed with `Timed out after 3000ms waiting for file chooser.` before chooser/isMultiple/setFiles; no preview. Clipboard: fresh exact-MIME write and paste fulfilled; exactly one visible `clipboard.csv` preview, with no error or pending state. |
+| ZIP | application/zip | `user-verified` | `verified-staging` | Direct: Hun-confirmed attachment capability; the fresh chooser event failed with `Timed out after 3000ms waiting for file chooser.` before chooser/isMultiple/setFiles and produced no preview. Clipboard: fresh exact-MIME write and paste fulfilled; exactly one visible `clipboard.zip` preview, with no error or pending state. |
+
+- `verified-staging`: that transport passed its complete composer-staging rule
+  for the exact format/MIME pair in this smoke.
+- `unsupported-in-current-smoke`: the attempted transport did not pass that
+  rule in the current smoke. It is not a categorical product-support claim.
+- `not-tested`: an external blocker prevented the transport attempt from
+  starting, so there is no current transport result.
+- `user-verified`: Hun reported successful product use, but the report does not
+  prove that the current browser API path passes its staging rule.
+
+Product support, browser API acceptance, clipboard write fulfillment, visible
+composer staging, and a user report are distinct evidence levels. The
+clipboard results above prove composer staging only. Generated preview names
+may derive from MIME because clipboard bytes carry no original filename; those
+names do not prove original filename preservation.
+
+Visible composer previews from this smoke were removed and no Send occurred.
+ChatGPT Library persistence or deletion was not inspected, so this does not
+establish account-side cleanup.
+
+## Direct-First Attachment Transport
+
 Reuse the approved attachment-sharing scope; changing transport does not
-authorize more files or a different ChatGPT destination.
+authorize more files or a different ChatGPT destination. Try the documented
+file chooser first for every approved file.
 
-1. Confirm every input is an approved PNG and record its manifest index,
-   intended order, count, correct image MIME type, and a non-sensitive alias.
-   Do not use this route for non-image files or unverified image MIME types.
-2. Establish a clean packet baseline at the verified ChatGPT destination: no
-   attachment previews, no error or pending state, and no unapproved text. Any
-   existing text must be the exact approved prompt for this packet; otherwise
-   stop or use a fresh composer.
-3. In manifest order, read one image's bytes locally and Base64-encode them for
-   the selected browser's documented clipboard-item payload.
-   `tab.clipboard.write(...)` receives an array containing one
-   outer clipboard item. Its `entries` array contains the
-   `base64` and `mimeType` entry:
+1. Confirm the destination, file count, order, intended use, MIME type, and
+   non-sensitive alias. Never place an absolute path in the attachment manifest.
+2. Establish a clean packet baseline: no attachment previews, error or pending
+   state, or unapproved text. Existing text must be the exact approved prompt.
+3. Follow `File Upload Diagnosis` and await `chooser.setFiles(...)`.
+4. Treat direct staging as verified only when the call fulfills, the expected
+   preview count and visible names are unambiguous, and no error or pending
+   state remains.
+5. If direct staging fails, consult the capability matrix. Use clipboard only
+   when that exact format/MIME pair is `verified-staging` for clipboard.
+6. Otherwise stop and require manual attachment. Do not convert, unpack, rename,
+   partially send, or claim that another format's result applies.
+
+Composer previews prove staging, not byte identity, persistence, model
+readability, or delivery.
+
+### Verified Clipboard Attachment Fallback
+
+Use this only after direct staging is unavailable and the capability matrix
+marks the exact format/MIME pair as `verified-staging`. API success alone is
+not attachment evidence. Do not promote a format unless both the
+`tab.clipboard.write(...)` call and a visible attachment preview passed the
+smoke contract.
+
+1. Record the manifest index, intended order and count, exact MIME type, and
+   non-sensitive alias.
+2. Read one file's bytes and Base64-encode them. For the already verified PNG
+   example, the documented payload is:
 
    ```js
+   const verifiedMimeType = "image/png";
    await tab.clipboard.write([
      {
-       entries: [{ base64: encodedBytes, mimeType: "image/png" }],
+       entries: [{ base64: encodedBytes, mimeType: verifiedMimeType }],
      },
    ]);
    ```
 
-   Await each `tab.clipboard.write(...)` call before pasting. If the call
-   rejects or throws, stop before pasting.
-4. Focus the verified ChatGPT composer, then use the Chrome virtual-clipboard
-   paste call:
+   For another format, substitute only the exact MIME value from a clipboard
+   row marked `verified-staging`. Await the write and stop before paste if it
+   rejects or throws.
+3. Focus the verified ChatGPT composer and paste:
 
    ```js
    await tab.cua.keypress({ keys: ["ControlOrMeta", "v"] });
    ```
 
-5. Paste one image at a time. After each paste, require the attachment preview
-   count to equal that manifest index and verify that no error or pending state
-   remains. The preview count does not prove byte identity; it proves the staged
-   count, while order is limited to the recorded write-and-paste sequence.
-6. Before sending, verify the exact packet: only the approved prompt text, no
-   unapproved text, the intended visible attachment count, no unexpected
-   previews, the ordered manifest matching the recorded sequence, and no error
-   or pending state. Do not send until every check passes.
-7. If a paste fails or creates an ambiguous duplicate, do not send a partial
-   packet. Remove only draft attachments created by the failed attempt when
-   they are unambiguous; otherwise leave a handoff and report the exact state.
-8. If the stage requires delivery, verify that the persisted outgoing message
-   contains the same exact packet after sending.
-   Composer previews prove staging, not delivery.
+4. Paste one file at a time. Require the preview count to increase by exactly
+   one and require no error, pending state, or ambiguous duplicate.
+5. Before sending in an authorized delivery stage, verify the exact packet:
+   approved prompt, expected preview count and order, no unexpected content,
+   and no error or pending state. This browser smoke is not authorized to send.
+6. On failure, do not send a partial packet. Remove only unambiguous draft
+   attachments from the current attempt; otherwise leave a handoff and report
+   the exact state.
+7. When delivery is separately authorized, verify the persisted outgoing
+   message. Composer previews prove staging, not delivery.
 
-Clipboard paste may expose generated names such as `clipboard.png`.
-Never place an absolute path in the attachment manifest. Use non-sensitive
-aliases by default, and use an original basename only after confirming that the
-name itself is approved for the same destination.
+Clipboard paste may expose generated names. Use non-sensitive aliases by
+default and an original basename only when separately approved.
 
 ## Attachment Packet
 

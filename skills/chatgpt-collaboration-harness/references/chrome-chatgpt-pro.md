@@ -57,9 +57,10 @@ Do not work around a blocked `chrome://` page through another browser surface,
 raw browser commands, profile-file edits, or indirect extension-state changes.
 If browser safety blocks automated access, report that boundary and have the
 user open the Extension Manager manually.
-For approved images, use the Verified Clipboard Image Fallback in
-`file-artifact-exchange.md`; for non-image files, require a supported upload
-route or manual attachment.
+For approved files, use the Direct-First Attachment Transport in
+`file-artifact-exchange.md`. Use clipboard only when the capability matrix
+marks that exact format/MIME pair as `verified-staging`; otherwise require
+manual attachment.
 
 ## Capability Selection
 
