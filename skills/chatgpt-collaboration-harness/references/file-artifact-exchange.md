@@ -63,6 +63,14 @@ Visible composer previews from this smoke were removed and no Send occurred.
 ChatGPT Library persistence or deletion was not inspected, so this does not
 establish account-side cleanup.
 
+OpenAI documents that uploaded files can be saved to ChatGPT Library and that
+Library files are managed separately from chats:
+<https://help.openai.com/en/articles/20001052-library>. Attachment staging may
+create an account-side Library item even without Send. Clearing or abandoning
+the composer is not account-side cleanup. Do not stage files that must not
+persist in the account. Library deletion requires Hun's action-time approval or
+direct user action.
+
 ## Direct-First Attachment Transport
 
 Reuse the approved attachment-sharing scope; changing transport does not
