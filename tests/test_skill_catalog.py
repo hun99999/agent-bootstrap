@@ -848,6 +848,44 @@ class SkillCatalogTests(unittest.TestCase):
         self.assertNotIn("--delete", actual_sync)
         self.assertNotIn(PRIVATE_HOME_PATH, task)
 
+    def test_chatgpt_multi_format_plan_supports_partial_correction_sync(
+        self,
+    ) -> None:
+        plan = (
+            REPO_ROOT
+            / "docs"
+            / "superpowers"
+            / "plans"
+            / "2026-07-13-chatgpt-multi-format-attachments.md"
+        ).read_text(encoding="utf-8")
+        task = markdown_section(plan, "### Task 4:", "### Task 5:")
+        final_review = markdown_section(plan, "### Task 5:", "### Task 6:")
+
+        expected_phrases = (
+            "content_differences.issubset(ALLOWED_CONTENT_DIFFERENCES)",
+            "if not content_differences",
+            "expected_updates = approved_regular_updates(source, runtime)",
+            "expected_count = len(expected_updates)",
+            "paths != expected_updates",
+            "one-file correction raw/review: PASS",
+            "one to three approved regular-file content differences",
+        )
+        for phrase in expected_phrases:
+            self.assertIn(phrase, task)
+
+        self.assertIn(
+            "one to three currently changed allowlisted files",
+            final_review,
+        )
+        self.assertNotIn(
+            'expected_count = 3 if arguments.phase == "pre" else 0',
+            task,
+        )
+        self.assertNotIn(
+            "if len(actions) != 3 or paths != ALLOWED_UPDATES",
+            task,
+        )
+
     def test_chatgpt_upload_plan_repeats_guarded_sync_after_skill_corrections(
         self,
     ) -> None:
