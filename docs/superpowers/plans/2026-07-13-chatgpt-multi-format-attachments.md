@@ -1512,116 +1512,870 @@ Expected: the full test count is at least the 288-test design baseline plus the
 net new contract test, both scripts pass with pristine output, and the diff
 check emits nothing. Any failure is in scope and must be resolved before sync.
 
-- [ ] **Step 2: Create a disposable validator environment**
+- [ ] **Step 2: Preserve the stopped RED evidence and create a fresh validator**
 
-Run:
+The previous checksum dry run is intentionally stopped evidence. Explicitly
+preserve the stopped validator and its snapshots as RED evidence: do not delete, overwrite,
+rename, or reuse `/tmp/chatgpt-multi-format-validator-20260713`. Create a new,
+collision-checked content-only validator root and record the old snapshot hash:
 
 ```bash
 set -euo pipefail
-VALIDATOR_ROOT="/tmp/chatgpt-multi-format-validator-20260713"
+set -C
+OLD_VALIDATOR_ROOT="/tmp/chatgpt-multi-format-validator-20260713"
+VALIDATOR_ROOT="/tmp/chatgpt-multi-format-validator-20260713-content-only"
+test -d "$OLD_VALIDATOR_ROOT"
+test -s "$OLD_VALIDATOR_ROOT/runtime-dry-run-1.txt"
 test ! -e "$VALIDATOR_ROOT"
+mkdir -m 700 "$VALIDATOR_ROOT"
+test ! -e "$VALIDATOR_ROOT/old-red-snapshot.sha256"
+shasum -a 256 "$OLD_VALIDATOR_ROOT/runtime-dry-run-1.txt" \
+  > "$VALIDATOR_ROOT/old-red-snapshot.sha256"
 python3 -m venv "$VALIDATOR_ROOT/venv"
 "$VALIDATOR_ROOT/venv/bin/python" -m pip install PyYAML
 ```
 
-Expected: PyYAML installs only inside the disposable environment. Do not modify
-system Python.
+Expected: the new environment is isolated, PyYAML is installed only in its
+venv, and the old stopped validator remains untouched.
 
-- [ ] **Step 3: Validate the repository skill**
+- [ ] **Step 3: Create the independent manifest and rsync-review tools**
 
-Run:
+Use `apply_patch` to create
+`/tmp/chatgpt-multi-format-validator-20260713-content-only/compare_skill_trees.py`
+with this complete content:
+
+```python
+from __future__ import annotations
+
+import argparse
+import hashlib
+import json
+import os
+import stat
+import sys
+from typing import Any
+
+
+ALLOWED_CONTENT_DIFFERENCES = {
+    "SKILL.md",
+    "references/chrome-chatgpt-pro.md",
+    "references/file-artifact-exchange.md",
+}
+
+
+def fail(message: str) -> None:
+    raise SystemExit(message)
+
+
+def regular_digest(path: str, expected: os.stat_result) -> tuple[int, str]:
+    if not hasattr(os, "O_NOFOLLOW"):
+        fail("O_NOFOLLOW is required to hash regular files safely")
+    descriptor = os.open(path, os.O_RDONLY | os.O_NOFOLLOW)
+    try:
+        opened = os.fstat(descriptor)
+        if not stat.S_ISREG(opened.st_mode):
+            fail(f"regular file changed type while opening: {path}")
+        if (opened.st_dev, opened.st_ino) != (expected.st_dev, expected.st_ino):
+            fail(f"regular file changed identity while opening: {path}")
+        digest = hashlib.sha256()
+        size = 0
+        while True:
+            chunk = os.read(descriptor, 1024 * 1024)
+            if not chunk:
+                break
+            size += len(chunk)
+            digest.update(chunk)
+        finished = os.fstat(descriptor)
+        if (
+            finished.st_size != opened.st_size
+            or finished.st_mtime_ns != opened.st_mtime_ns
+            or stat.S_IMODE(finished.st_mode) != stat.S_IMODE(opened.st_mode)
+        ):
+            fail(f"regular file changed while hashing: {path}")
+        return size, digest.hexdigest()
+    finally:
+        os.close(descriptor)
+
+
+def describe(path: str, relative_path: str) -> dict[str, Any]:
+    metadata = os.lstat(path)
+    record: dict[str, Any] = {
+        "path": relative_path,
+        "mode": f"{stat.S_IMODE(metadata.st_mode):04o}",
+    }
+    if stat.S_ISDIR(metadata.st_mode):
+        record["type"] = "directory"
+    elif stat.S_ISREG(metadata.st_mode):
+        size, digest = regular_digest(path, metadata)
+        record.update(type="regular", size=size, sha256=digest)
+    elif stat.S_ISLNK(metadata.st_mode):
+        record.update(type="symlink", target=os.readlink(path))
+    else:
+        fail(f"special files are forbidden: {relative_path}")
+    return record
+
+
+def inventory(root: str) -> dict[str, dict[str, Any]]:
+    root = os.path.abspath(root)
+    root_metadata = os.lstat(root)
+    if not stat.S_ISDIR(root_metadata.st_mode):
+        fail(f"tree root must be a real directory: {root}")
+
+    entries = {".": describe(root, ".")}
+
+    def walk_error(error: OSError) -> None:
+        raise error
+
+    for current, dirnames, filenames in os.walk(
+        root,
+        topdown=True,
+        onerror=walk_error,
+        followlinks=False,
+    ):
+        dirnames.sort()
+        filenames.sort()
+        for name in [*dirnames, *filenames]:
+            full_path = os.path.join(current, name)
+            relative_path = os.path.relpath(full_path, root).replace(os.sep, "/")
+            if relative_path in entries:
+                fail(f"duplicate relative path: {relative_path}")
+            entries[relative_path] = describe(full_path, relative_path)
+        dirnames[:] = [
+            name
+            for name in dirnames
+            if not stat.S_ISLNK(os.lstat(os.path.join(current, name)).st_mode)
+        ]
+    return dict(sorted(entries.items()))
+
+
+def write_manifest(path: str, entries: dict[str, dict[str, Any]]) -> None:
+    with open(path, "x", encoding="utf-8") as output:
+        json.dump(entries, output, indent=2, sort_keys=True)
+        output.write("\n")
+
+
+def compare(
+    source: dict[str, dict[str, Any]],
+    runtime: dict[str, dict[str, Any]],
+    phase: str,
+) -> None:
+    source_paths = set(source)
+    runtime_paths = set(runtime)
+    if source_paths != runtime_paths:
+        fail(
+            "exact relative path set differs: "
+            f"source_only={sorted(source_paths - runtime_paths)!r}, "
+            f"runtime_only={sorted(runtime_paths - source_paths)!r}"
+        )
+
+    content_differences: set[str] = set()
+    for relative_path in sorted(source):
+        source_entry = source[relative_path]
+        runtime_entry = runtime[relative_path]
+        if source_entry["type"] != runtime_entry["type"]:
+            fail(f"type differs at {relative_path}")
+        if source_entry["mode"] != runtime_entry["mode"]:
+            fail(f"mode differs at {relative_path}")
+        if source_entry["type"] == "symlink":
+            if source_entry["target"] != runtime_entry["target"]:
+                fail(f"symlink target differs at {relative_path}")
+        elif source_entry["type"] == "regular":
+            source_content = (source_entry["size"], source_entry["sha256"])
+            runtime_content = (runtime_entry["size"], runtime_entry["sha256"])
+            if source_content != runtime_content:
+                content_differences.add(relative_path)
+
+    expected = ALLOWED_CONTENT_DIFFERENCES if phase == "pre" else set()
+    if content_differences != expected:
+        fail(
+            f"{phase} content differences are not exact: "
+            f"expected={sorted(expected)!r}, actual={sorted(content_differences)!r}"
+        )
+
+
+def main() -> None:
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--source", required=True)
+    parser.add_argument("--runtime", required=True)
+    parser.add_argument("--source-manifest", required=True)
+    parser.add_argument("--runtime-manifest", required=True)
+    parser.add_argument("--phase", choices=("pre", "post"), required=True)
+    arguments = parser.parse_args()
+
+    source = inventory(arguments.source)
+    runtime = inventory(arguments.runtime)
+    write_manifest(arguments.source_manifest, source)
+    write_manifest(arguments.runtime_manifest, runtime)
+    compare(source, runtime, arguments.phase)
+    print(
+        f"{arguments.phase} manifests verified: "
+        f"{len(source)} exact relative paths"
+    )
+
+
+if __name__ == "__main__":
+    main()
+```
+
+This comparator uses `os.lstat` for every entry, `stat.S_IMODE` for modes,
+`hashlib.sha256` plus byte size for regular files, and `os.readlink` for
+symlink targets. Its `os.walk(..., followlinks=False)` inventory has an exact
+relative path set, rejects special files, writes stable sorted JSON, and never
+resolves or follows a path inside either tree. mtime is intentionally excluded
+from the manifest and equality decision. Pre-sync accepts exactly the three
+approved regular-file content differences; post-sync requires exact equality.
+
+Then use `apply_patch` to create
+`/tmp/chatgpt-multi-format-validator-20260713-content-only/review_rsync.py`
+with this complete content:
+
+```python
+from __future__ import annotations
+
+import argparse
+import json
+import re
+
+
+ALLOWED_UPDATES = {
+    "SKILL.md",
+    "references/chrome-chatgpt-pro.md",
+    "references/file-artifact-exchange.md",
+}
+ITEMIZED = re.compile(r"^[<>ch.][fdLDS][cstTpoguaxA.+?]{7}$")
+PSEUDO_RECORD = ".f..T...."
+
+
+def fail(message: str) -> None:
+    raise SystemExit(message)
+
+
+def read_manifest(path: str) -> dict[str, dict[str, object]]:
+    with open(path, encoding="utf-8") as input_file:
+        value = json.load(input_file)
+    if not isinstance(value, dict):
+        fail(f"manifest is not an object: {path}")
+    return value
+
+
+def prove_equal_regular(
+    relative_path: str,
+    source: dict[str, dict[str, object]],
+    runtime: dict[str, dict[str, object]],
+) -> None:
+    if relative_path not in source or relative_path not in runtime:
+        fail(f"pseudo-record path is absent from a manifest: {relative_path}")
+    source_entry = source[relative_path]
+    runtime_entry = runtime[relative_path]
+    if source_entry.get("type") != "regular":
+        fail(f"pseudo-record is not a regular file: {relative_path}")
+    evidence_keys = ("type", "mode", "size", "sha256")
+    if any(source_entry.get(key) != runtime_entry.get(key) for key in evidence_keys):
+        fail(
+            "pseudo-record lacks equal regular-file size, SHA-256, and mode: "
+            f"{relative_path}"
+        )
+
+
+def write_exclusive(path: str, content: str) -> None:
+    with open(path, "x", encoding="utf-8") as output:
+        output.write(content)
+
+
+def main() -> None:
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--raw", required=True)
+    parser.add_argument("--count", required=True)
+    parser.add_argument("--source-manifest", required=True)
+    parser.add_argument("--runtime-manifest", required=True)
+    parser.add_argument("--reviewed", required=True)
+    parser.add_argument("--phase", choices=("pre", "post"), required=True)
+    arguments = parser.parse_args()
+
+    source = read_manifest(arguments.source_manifest)
+    runtime = read_manifest(arguments.runtime_manifest)
+    actions: list[tuple[str, str, str]] = []
+    with open(arguments.raw, encoding="utf-8") as input_file:
+        for raw_line in input_file:
+            line = raw_line.rstrip("\n")
+            if not line:
+                continue
+            fields = line.split(maxsplit=1)
+            item = fields[0]
+            if item == PSEUDO_RECORD:
+                if len(fields) != 2:
+                    fail(f"pseudo-record has no path: {line!r}")
+                prove_equal_regular(fields[1], source, runtime)
+                continue
+            if item == "*deleting":
+                relative_path = fields[1] if len(fields) == 2 else ""
+                actions.append((item, relative_path, line))
+            elif ITEMIZED.fullmatch(item):
+                if len(fields) != 2:
+                    fail(f"itemized record has no path: {line!r}")
+                actions.append((item, fields[1], line))
+            else:
+                fail(f"unrecognized raw rsync output: {line!r}")
+
+    with open(arguments.count, encoding="utf-8") as input_file:
+        count_lines = [line.rstrip("\n") for line in input_file]
+    expected_count = 3 if arguments.phase == "pre" else 0
+    expected_count_line = f"Number of files transferred: {expected_count}"
+    if count_lines != [expected_count_line]:
+        fail(
+            f"unstable transfer-count evidence: "
+            f"expected={[expected_count_line]!r}, actual={count_lines!r}"
+        )
+
+    if arguments.phase == "pre":
+        paths = {path for _, path, _ in actions}
+        if len(actions) != 3 or paths != ALLOWED_UPDATES:
+            fail(f"reviewed pre-sync actions are not exact: {actions!r}")
+        for item, relative_path, _ in actions:
+            if not item.startswith(">f") or "+" in item:
+                fail(f"pre-sync action is not a regular-file update: {item} {relative_path}")
+    elif actions:
+        fail(f"post-sync reviewed dry run is not empty: {actions!r}")
+
+    reviewed = "".join(f"{line}\n" for _, _, line in actions)
+    write_exclusive(arguments.reviewed, reviewed)
+    print(
+        f"{arguments.phase} rsync evidence verified: "
+        f"{len(actions)} reviewed actions"
+    )
+
+
+if __name__ == "__main__":
+    main()
+```
+
+The reviewer filters only a record whose first field is exactly `.f..T....`,
+and only after the independent manifests prove equal regular-file size,
+SHA-256, and mode at that path. It does not hide any other `T` record. Every
+deletion, creation, type, mode, symlink, special-file, or unplanned-path
+difference remains fail-closed through the independent comparator, raw
+snapshot, or reviewed action set.
+
+Finally, use `apply_patch` to create
+`/tmp/chatgpt-multi-format-validator-20260713-content-only/pressure_sync.py`
+with this complete content:
+
+```python
+from __future__ import annotations
+
+import argparse
+import os
+import shutil
+import subprocess
+import sys
+from pathlib import Path
+
+
+ALLOWED = (
+    "SKILL.md",
+    "references/chrome-chatgpt-pro.md",
+    "references/file-artifact-exchange.md",
+)
+
+
+def write(path: Path, content: str) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(content, encoding="utf-8")
+
+
+def make_tree(root: Path) -> None:
+    write(root / "SKILL.md", "same skill\n")
+    write(root / "agents/openai.yaml", "same agent\n")
+    write(root / "references/chrome-chatgpt-pro.md", "same chrome\n")
+    write(root / "references/file-artifact-exchange.md", "same exchange\n")
+    write(root / "references/unchanged.md", "same unchanged\n")
+    os.symlink("unchanged.md", root / "references/sample-link")
+
+
+def invoke_comparator(
+    comparator: Path,
+    scenario: Path,
+    source: Path,
+    runtime: Path,
+    *,
+    phase: str = "post",
+) -> subprocess.CompletedProcess[str]:
+    return subprocess.run(
+        [
+            sys.executable,
+            str(comparator),
+            "--source",
+            str(source),
+            "--runtime",
+            str(runtime),
+            "--source-manifest",
+            str(scenario / "source.json"),
+            "--runtime-manifest",
+            str(scenario / "runtime.json"),
+            "--phase",
+            phase,
+        ],
+        text=True,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        check=False,
+    )
+
+
+def structural_case(
+    root: Path,
+    comparator: Path,
+    name: str,
+    mutate,
+    *,
+    should_pass: bool,
+    expected_error: str | None = None,
+) -> None:
+    scenario = root / name
+    source = scenario / "source"
+    runtime = scenario / "runtime"
+    make_tree(source)
+    shutil.copytree(source, runtime, symlinks=True)
+    mutate(source, runtime)
+    result = invoke_comparator(comparator, scenario, source, runtime)
+    if (result.returncode == 0) != should_pass:
+        raise SystemExit(
+            f"{name}: unexpected comparator result "
+            f"rc={result.returncode}, stdout={result.stdout!r}, stderr={result.stderr!r}"
+        )
+    if not should_pass and expected_error not in result.stderr:
+        raise SystemExit(
+            f"{name}: expected error {expected_error!r}, got {result.stderr!r}"
+        )
+    print(f"{name}: {'PASS' if should_pass else 'REJECTED'}")
+
+
+def run_openrsync_case(root: Path, comparator: Path, reviewer: Path) -> None:
+    scenario = root / "openrsync"
+    source = scenario / "source"
+    runtime = scenario / "runtime"
+    make_tree(source)
+    shutil.copytree(source, runtime, symlinks=True)
+    for relative_path in ALLOWED:
+        write(source / relative_path, f"source content for {relative_path}\n")
+    unchanged = runtime / "agents/openai.yaml"
+    original = unchanged.stat()
+    os.utime(unchanged, (original.st_atime + 120, original.st_mtime + 120))
+
+    result = invoke_comparator(
+        comparator,
+        scenario,
+        source,
+        runtime,
+        phase="pre",
+    )
+    if result.returncode != 0:
+        raise SystemExit(f"openrsync comparator failed: {result.stderr!r}")
+
+    raw_path = scenario / "raw.txt"
+    raw = subprocess.run(
+        [
+            "rsync",
+            "-rlpcni",
+            "--delete",
+            "--out-format=%i %n%L",
+            f"{source}/",
+            f"{runtime}/",
+        ],
+        text=True,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        check=True,
+        env={**os.environ, "LC_ALL": "C"},
+    )
+    raw_path.write_text(raw.stdout, encoding="utf-8")
+    if ".f..T.... agents/openai.yaml\n" not in raw.stdout:
+        raise SystemExit(f"openrsync pseudo-record not reproduced: {raw.stdout!r}")
+
+    stats = subprocess.run(
+        [
+            "rsync",
+            "-rlpcni",
+            "--delete",
+            "--stats",
+            "--out-format=",
+            f"{source}/",
+            f"{runtime}/",
+        ],
+        text=True,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        check=True,
+        env={**os.environ, "LC_ALL": "C"},
+    )
+    count_lines = [
+        line
+        for line in stats.stdout.splitlines()
+        if line.startswith("Number of files transferred:")
+    ]
+    count_path = scenario / "count.txt"
+    count_path.write_text("\n".join(count_lines) + "\n", encoding="utf-8")
+
+    review_result = subprocess.run(
+        [
+            sys.executable,
+            str(reviewer),
+            "--raw",
+            str(raw_path),
+            "--count",
+            str(count_path),
+            "--source-manifest",
+            str(scenario / "source.json"),
+            "--runtime-manifest",
+            str(scenario / "runtime.json"),
+            "--reviewed",
+            str(scenario / "reviewed.txt"),
+            "--phase",
+            "pre",
+        ],
+        text=True,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        check=True,
+    )
+    if review_result.stdout != "pre rsync evidence verified: 3 reviewed actions\n":
+        raise SystemExit(f"unexpected reviewer output: {review_result.stdout!r}")
+    reviewed = (scenario / "reviewed.txt").read_text(encoding="utf-8").splitlines()
+    if len(reviewed) != 3:
+        raise SystemExit(f"openrsync reviewed actions are not exact: {reviewed!r}")
+    print("openrsync raw/review: PASS")
+
+
+def main() -> None:
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--root", required=True)
+    parser.add_argument("--comparator", required=True)
+    parser.add_argument("--reviewer", required=True)
+    arguments = parser.parse_args()
+    root = Path(arguments.root)
+    comparator = Path(arguments.comparator)
+    reviewer = Path(arguments.reviewer)
+    root.mkdir(mode=0o700)
+
+    structural_case(
+        root,
+        comparator,
+        "deletion",
+        lambda _source, runtime: (runtime / "agents/openai.yaml").unlink(),
+        should_pass=False,
+        expected_error="exact relative path set differs",
+    )
+    structural_case(
+        root,
+        comparator,
+        "source-only creation",
+        lambda source, _runtime: write(source / "source-only.md", "new\n"),
+        should_pass=False,
+        expected_error="exact relative path set differs",
+    )
+    structural_case(
+        root,
+        comparator,
+        "regular-file mode change",
+        lambda _source, runtime: os.chmod(runtime / "SKILL.md", 0o600),
+        should_pass=False,
+        expected_error="mode differs at SKILL.md",
+    )
+    structural_case(
+        root,
+        comparator,
+        "directory mode change",
+        lambda _source, runtime: os.chmod(runtime / "references", 0o700),
+        should_pass=False,
+        expected_error="mode differs at references",
+    )
+
+    def replace_type(_source: Path, runtime: Path) -> None:
+        path = runtime / "agents/openai.yaml"
+        path.unlink()
+        path.mkdir()
+
+    structural_case(
+        root,
+        comparator,
+        "file-type replacement",
+        replace_type,
+        should_pass=False,
+        expected_error="type differs at agents/openai.yaml",
+    )
+
+    def change_link(_source: Path, runtime: Path) -> None:
+        link = runtime / "references/sample-link"
+        link.unlink()
+        os.symlink("chrome-chatgpt-pro.md", link)
+
+    structural_case(
+        root,
+        comparator,
+        "changed symlink target",
+        change_link,
+        should_pass=False,
+        expected_error="symlink target differs at references/sample-link",
+    )
+    structural_case(
+        root,
+        comparator,
+        "special-file insertion",
+        lambda _source, runtime: os.mkfifo(runtime / "references/special.fifo"),
+        should_pass=False,
+        expected_error="special files are forbidden: references/special.fifo",
+    )
+
+    def change_timestamp(_source: Path, runtime: Path) -> None:
+        path = runtime / "agents/openai.yaml"
+        current = path.stat()
+        os.utime(path, (current.st_atime + 120, current.st_mtime + 120))
+
+    structural_case(
+        root,
+        comparator,
+        "timestamp-only mismatch",
+        change_timestamp,
+        should_pass=True,
+    )
+    run_openrsync_case(root, comparator, reviewer)
+
+
+if __name__ == "__main__":
+    main()
+```
+
+Mark all three scripts executable only after `apply_patch` succeeds:
 
 ```bash
 set -euo pipefail
-VALIDATOR_ROOT="/tmp/chatgpt-multi-format-validator-20260713"
-test -d "$VALIDATOR_ROOT/venv"
+VALIDATOR_ROOT="/tmp/chatgpt-multi-format-validator-20260713-content-only"
+test -f "$VALIDATOR_ROOT/compare_skill_trees.py"
+test -f "$VALIDATOR_ROOT/review_rsync.py"
+test -f "$VALIDATOR_ROOT/pressure_sync.py"
+chmod 700 \
+  "$VALIDATOR_ROOT/compare_skill_trees.py" \
+  "$VALIDATOR_ROOT/review_rsync.py" \
+  "$VALIDATOR_ROOT/pressure_sync.py"
+```
+
+- [ ] **Step 4: Pressure-test the comparator and validate the repository skill**
+
+Use a separate collision-checked diagnostic root. Preserve it after the run;
+never use it as the validator, repository source, or installed runtime:
+
+```bash
+set -euo pipefail
+VALIDATOR_ROOT="/tmp/chatgpt-multi-format-validator-20260713-content-only"
+PRESSURE_ROOT="/tmp/chatgpt-multi-format-sync-pressure-20260713-content-only"
+test ! -e "$PRESSURE_ROOT"
+"$VALIDATOR_ROOT/venv/bin/python" "$VALIDATOR_ROOT/pressure_sync.py" \
+  --root "$PRESSURE_ROOT" \
+  --comparator "$VALIDATOR_ROOT/compare_skill_trees.py" \
+  --reviewer "$VALIDATOR_ROOT/review_rsync.py"
 "$VALIDATOR_ROOT/venv/bin/python" \
   ~/.codex/skills/.system/skill-creator/scripts/quick_validate.py \
   skills/chatgpt-collaboration-harness
 ```
 
-Expected: `Skill is valid!`.
+Expected pressure evidence:
 
-- [ ] **Step 4: Review two identical checksum-aware dry runs**
-
-Run the first snapshot:
-
-```bash
-set -euo pipefail
-VALIDATOR_ROOT="/tmp/chatgpt-multi-format-validator-20260713"
-test -d "$VALIDATOR_ROOT"
-test ! -e "$VALIDATOR_ROOT/runtime-dry-run-1.txt"
-rsync -acni --delete \
-  skills/chatgpt-collaboration-harness/ \
-  ~/.codex/skills/chatgpt-collaboration-harness/ \
-  > "$VALIDATOR_ROOT/runtime-dry-run-1.txt"
-cat "$VALIDATOR_ROOT/runtime-dry-run-1.txt"
+```text
+deletion: REJECTED
+source-only creation: REJECTED
+regular-file mode change: REJECTED
+directory mode change: REJECTED
+file-type replacement: REJECTED
+changed symlink target: REJECTED
+special-file insertion: REJECTED
+timestamp-only mismatch: PASS
+openrsync raw/review: PASS
+Skill is valid!
 ```
 
-The only expected non-noop records are regular-file updates for:
+The manifest must catch all structural cases, including the changed symlink
+target that this host's openrsync did not itemize. Only timestamp-only mismatch
+is ignored. The openrsync case must reproduce and safely filter the exact
+pseudo-record while retaining exactly three reviewed content updates.
 
-- `SKILL.md`
-- `references/chrome-chatgpt-pro.md`
-- `references/file-artifact-exchange.md`
+- [ ] **Step 5: Capture and compare two complete pre-sync evidence sets**
 
-Stop on an unexpected path, creation, deletion, file-type change, symlink
-change, or standalone metadata-only change. A runtime-only deletion requires
-Hun's exact-path approval and must never be converted into blanket delete
-authorization.
-
-Immediately before sync, run:
+Capture dry-run 1. Every output path uses exclusive creation, so a collision
+stops the run:
 
 ```bash
 set -euo pipefail
-VALIDATOR_ROOT="/tmp/chatgpt-multi-format-validator-20260713"
-test -s "$VALIDATOR_ROOT/runtime-dry-run-1.txt"
-test ! -e "$VALIDATOR_ROOT/runtime-dry-run-2.txt"
-rsync -acni --delete \
-  skills/chatgpt-collaboration-harness/ \
-  ~/.codex/skills/chatgpt-collaboration-harness/ \
-  > "$VALIDATOR_ROOT/runtime-dry-run-2.txt"
-cmp "$VALIDATOR_ROOT/runtime-dry-run-1.txt" \
-  "$VALIDATOR_ROOT/runtime-dry-run-2.txt"
+set -C
+VALIDATOR_ROOT="/tmp/chatgpt-multi-format-validator-20260713-content-only"
+SOURCE="skills/chatgpt-collaboration-harness"
+RUNTIME="$HOME/.codex/skills/chatgpt-collaboration-harness"
+for path in \
+  "$VALIDATOR_ROOT/source-pre-1.json" \
+  "$VALIDATOR_ROOT/runtime-pre-1.json" \
+  "$VALIDATOR_ROOT/runtime-raw-dry-run-1.txt" \
+  "$VALIDATOR_ROOT/runtime-reviewed-dry-run-1.txt" \
+  "$VALIDATOR_ROOT/runtime-transfer-count-1.txt"
+do
+  test ! -e "$path"
+done
+"$VALIDATOR_ROOT/venv/bin/python" "$VALIDATOR_ROOT/compare_skill_trees.py" \
+  --source "$SOURCE" \
+  --runtime "$RUNTIME" \
+  --source-manifest "$VALIDATOR_ROOT/source-pre-1.json" \
+  --runtime-manifest "$VALIDATOR_ROOT/runtime-pre-1.json" \
+  --phase pre
+LC_ALL=C rsync -rlpcni --delete --out-format='%i %n%L' \
+  "$SOURCE/" "$RUNTIME/" \
+  > "$VALIDATOR_ROOT/runtime-raw-dry-run-1.txt"
+LC_ALL=C rsync -rlpcni --delete --stats --out-format='' \
+  "$SOURCE/" "$RUNTIME/" \
+  | awk '/^Number of files transferred:/{print}' \
+  > "$VALIDATOR_ROOT/runtime-transfer-count-1.txt"
+"$VALIDATOR_ROOT/venv/bin/python" "$VALIDATOR_ROOT/review_rsync.py" \
+  --raw "$VALIDATOR_ROOT/runtime-raw-dry-run-1.txt" \
+  --count "$VALIDATOR_ROOT/runtime-transfer-count-1.txt" \
+  --source-manifest "$VALIDATOR_ROOT/source-pre-1.json" \
+  --runtime-manifest "$VALIDATOR_ROOT/runtime-pre-1.json" \
+  --reviewed "$VALIDATOR_ROOT/runtime-reviewed-dry-run-1.txt" \
+  --phase pre
+cat "$VALIDATOR_ROOT/runtime-reviewed-dry-run-1.txt"
+cat "$VALIDATOR_ROOT/runtime-transfer-count-1.txt"
 ```
 
-Expected: `cmp` exits zero. Any difference invalidates the review and every
-prior deletion approval.
+Expected: the independent manifests allow
+exactly the three approved regular-file content differences; the reviewed snapshot has exactly those three update
+paths, and the stable count is `Number of files transferred: 3`. Any deletion,
+creation, type, mode, symlink, special-file, or unplanned-path difference stops.
+A runtime-only deletion requires Hun's exact-path approval; it never authorizes
+blanket deletion.
 
-- [ ] **Step 5: Synchronize without blanket deletion**
-
-Only after the reviewed dry runs are identical, run:
+Immediately before synchronization, capture dry-run 2 and byte-compare all raw,
+reviewed, stable-count, and independent-manifest evidence:
 
 ```bash
 set -euo pipefail
-rsync -ac \
+set -C
+VALIDATOR_ROOT="/tmp/chatgpt-multi-format-validator-20260713-content-only"
+SOURCE="skills/chatgpt-collaboration-harness"
+RUNTIME="$HOME/.codex/skills/chatgpt-collaboration-harness"
+for path in \
+  "$VALIDATOR_ROOT/source-pre-2.json" \
+  "$VALIDATOR_ROOT/runtime-pre-2.json" \
+  "$VALIDATOR_ROOT/runtime-raw-dry-run-2.txt" \
+  "$VALIDATOR_ROOT/runtime-reviewed-dry-run-2.txt" \
+  "$VALIDATOR_ROOT/runtime-transfer-count-2.txt"
+do
+  test ! -e "$path"
+done
+"$VALIDATOR_ROOT/venv/bin/python" "$VALIDATOR_ROOT/compare_skill_trees.py" \
+  --source "$SOURCE" \
+  --runtime "$RUNTIME" \
+  --source-manifest "$VALIDATOR_ROOT/source-pre-2.json" \
+  --runtime-manifest "$VALIDATOR_ROOT/runtime-pre-2.json" \
+  --phase pre
+LC_ALL=C rsync -rlpcni --delete --out-format='%i %n%L' \
+  "$SOURCE/" "$RUNTIME/" \
+  > "$VALIDATOR_ROOT/runtime-raw-dry-run-2.txt"
+LC_ALL=C rsync -rlpcni --delete --stats --out-format='' \
+  "$SOURCE/" "$RUNTIME/" \
+  | awk '/^Number of files transferred:/{print}' \
+  > "$VALIDATOR_ROOT/runtime-transfer-count-2.txt"
+"$VALIDATOR_ROOT/venv/bin/python" "$VALIDATOR_ROOT/review_rsync.py" \
+  --raw "$VALIDATOR_ROOT/runtime-raw-dry-run-2.txt" \
+  --count "$VALIDATOR_ROOT/runtime-transfer-count-2.txt" \
+  --source-manifest "$VALIDATOR_ROOT/source-pre-2.json" \
+  --runtime-manifest "$VALIDATOR_ROOT/runtime-pre-2.json" \
+  --reviewed "$VALIDATOR_ROOT/runtime-reviewed-dry-run-2.txt" \
+  --phase pre
+cmp -- "$VALIDATOR_ROOT/source-pre-1.json" \
+  "$VALIDATOR_ROOT/source-pre-2.json"
+cmp -- "$VALIDATOR_ROOT/runtime-pre-1.json" \
+  "$VALIDATOR_ROOT/runtime-pre-2.json"
+cmp -- "$VALIDATOR_ROOT/runtime-raw-dry-run-1.txt" \
+  "$VALIDATOR_ROOT/runtime-raw-dry-run-2.txt"
+cmp -- "$VALIDATOR_ROOT/runtime-reviewed-dry-run-1.txt" \
+  "$VALIDATOR_ROOT/runtime-reviewed-dry-run-2.txt"
+cmp -- "$VALIDATOR_ROOT/runtime-transfer-count-1.txt" \
+  "$VALIDATOR_ROOT/runtime-transfer-count-2.txt"
+```
+
+Expected: every `cmp --` exits zero. Any difference invalidates the review and
+every prior deletion approval.
+
+- [ ] **Step 6: Synchronize without blanket deletion**
+
+Only after dry-run 2 and every comparison succeed, synchronize content and
+permissions without timestamps and without deletion:
+
+```bash
+set -euo pipefail
+rsync -rlpc \
   skills/chatgpt-collaboration-harness/ \
   ~/.codex/skills/chatgpt-collaboration-harness/
 ```
 
-Do not use `--delete`. If an exact runtime-only path was separately approved
-for deletion, revalidate only that path immediately before removing it; do not
-remove any other path.
+Do not add `-t`, `-a`, or the deletion flag. If an exact runtime-only path was
+separately approved for deletion, revalidate only that path immediately before
+removing it; do not remove any other path.
 
-- [ ] **Step 6: Validate and compare the installed copy**
+- [ ] **Step 7: Validate the installed copy and exact equality**
 
-Run:
+Capture collision-checked post-sync manifests, raw output, reviewed output, and
+stable count:
 
 ```bash
 set -euo pipefail
-VALIDATOR_ROOT="/tmp/chatgpt-multi-format-validator-20260713"
-test -d "$VALIDATOR_ROOT/venv"
+set -C
+OLD_VALIDATOR_ROOT="/tmp/chatgpt-multi-format-validator-20260713"
+VALIDATOR_ROOT="/tmp/chatgpt-multi-format-validator-20260713-content-only"
+SOURCE="skills/chatgpt-collaboration-harness"
+RUNTIME="$HOME/.codex/skills/chatgpt-collaboration-harness"
+for path in \
+  "$VALIDATOR_ROOT/source-post.json" \
+  "$VALIDATOR_ROOT/runtime-post.json" \
+  "$VALIDATOR_ROOT/runtime-raw-post.txt" \
+  "$VALIDATOR_ROOT/runtime-reviewed-post.txt" \
+  "$VALIDATOR_ROOT/runtime-transfer-count-post.txt"
+do
+  test ! -e "$path"
+done
+"$VALIDATOR_ROOT/venv/bin/python" "$VALIDATOR_ROOT/compare_skill_trees.py" \
+  --source "$SOURCE" \
+  --runtime "$RUNTIME" \
+  --source-manifest "$VALIDATOR_ROOT/source-post.json" \
+  --runtime-manifest "$VALIDATOR_ROOT/runtime-post.json" \
+  --phase post
+LC_ALL=C rsync -rlpcni --delete --out-format='%i %n%L' \
+  "$SOURCE/" "$RUNTIME/" \
+  > "$VALIDATOR_ROOT/runtime-raw-post.txt"
+LC_ALL=C rsync -rlpcni --delete --stats --out-format='' \
+  "$SOURCE/" "$RUNTIME/" \
+  | awk '/^Number of files transferred:/{print}' \
+  > "$VALIDATOR_ROOT/runtime-transfer-count-post.txt"
+"$VALIDATOR_ROOT/venv/bin/python" "$VALIDATOR_ROOT/review_rsync.py" \
+  --raw "$VALIDATOR_ROOT/runtime-raw-post.txt" \
+  --count "$VALIDATOR_ROOT/runtime-transfer-count-post.txt" \
+  --source-manifest "$VALIDATOR_ROOT/source-post.json" \
+  --runtime-manifest "$VALIDATOR_ROOT/runtime-post.json" \
+  --reviewed "$VALIDATOR_ROOT/runtime-reviewed-post.txt" \
+  --phase post
+test ! -s "$VALIDATOR_ROOT/runtime-reviewed-post.txt"
+grep -Fx "Number of files transferred: 0" \
+  "$VALIDATOR_ROOT/runtime-transfer-count-post.txt"
+cmp -- "$VALIDATOR_ROOT/source-post.json" \
+  "$VALIDATOR_ROOT/runtime-post.json"
 "$VALIDATOR_ROOT/venv/bin/python" \
   ~/.codex/skills/.system/skill-creator/scripts/quick_validate.py \
-  ~/.codex/skills/chatgpt-collaboration-harness
-rsync -acni --delete \
-  skills/chatgpt-collaboration-harness/ \
-  ~/.codex/skills/chatgpt-collaboration-harness/
-diff -ru \
-  skills/chatgpt-collaboration-harness \
-  ~/.codex/skills/chatgpt-collaboration-harness
+  "$RUNTIME"
+diff -ru "$SOURCE" "$RUNTIME"
+shasum -a 256 -c "$VALIDATOR_ROOT/old-red-snapshot.sha256"
+test -s "$OLD_VALIDATOR_ROOT/runtime-dry-run-1.txt"
 ```
 
-Expected: `Skill is valid!`, then no `rsync` output and no recursive diff.
+Expected: the post-sync reviewed dry run is empty, the stable count is
+`Number of files transferred: 0`, post-sync manifests are exactly equal,
+`quick_validate.py` reports `Skill is valid!`, `diff -ru` has no output, and
+the old stopped RED snapshot still matches its recorded hash.
 
 ### Task 5: Pressure-Test, Review, And Correct The Final Branch
 
@@ -1698,9 +2452,12 @@ git add tests/test_skill_catalog.py \
 git commit -m "fix: address multi-format attachment review"
 ```
 
-If any installed skill source changes, repeat all guarded dry-run,
-synchronization, installed validator, and recursive diff steps from Task 4 with
-a fresh snapshot. Prior snapshots and deletion approvals are invalid.
+If any installed skill source changes, preserve every prior validator and
+snapshot, choose a fresh collision-checked content-only validator suffix, and
+repeat Task 4's independent manifests, pressure cases, two raw/reviewed/count
+pre-sync evidence sets, `rsync -rlpc` synchronization, post-sync validator,
+exact manifest equality, and recursive diff. Prior snapshots and deletion
+approvals are invalid.
 
 - [ ] **Step 5: Run final branch verification**
 
