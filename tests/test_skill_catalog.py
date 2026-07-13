@@ -388,66 +388,146 @@ class SkillCatalogTests(unittest.TestCase):
             transport_heading,
         )
         rows = [line for line in matrix.splitlines() if line.startswith("|")][2:]
-        expected_format_mimes = (
-            ("PNG", "image/png"),
-            ("JPEG/JPG", "image/jpeg"),
-            ("WebP", "image/webp"),
-            ("GIF", "image/gif"),
-            ("PDF", "application/pdf"),
+        timeout_evidence = "Timed out after 3000ms waiting for file chooser."
+        expected_rows = (
+            (
+                "PNG",
+                "image/png",
+                "`unsupported-in-current-smoke`",
+                "`verified-staging`",
+                (
+                    "`clipboard.png`",
+                    "`clipboard(1).png`",
+                    "Six previews staged previously",
+                ),
+            ),
+            (
+                "JPEG/JPG",
+                "image/jpeg",
+                "`unsupported-in-current-smoke`",
+                "`verified-staging`",
+                ("`clipboard.jpeg`",),
+            ),
+            (
+                "WebP",
+                "image/webp",
+                "`unsupported-in-current-smoke`",
+                "`verified-staging`",
+                ("`clipboard.webp`",),
+            ),
+            (
+                "GIF",
+                "image/gif",
+                "`unsupported-in-current-smoke`",
+                "`verified-staging`",
+                ("`clipboard.gif`",),
+            ),
+            (
+                "PDF",
+                "application/pdf",
+                "`unsupported-in-current-smoke`",
+                "`verified-staging`",
+                ("`clipboard.pdf`",),
+            ),
             (
                 "DOCX",
                 "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                "`unsupported-in-current-smoke`",
+                "`verified-staging`",
+                (
+                    "`clipboard.vnd.openxmlformats-officedocument.wordprocessingml.document`",
+                ),
             ),
             (
                 "XLSX",
                 "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                "`unsupported-in-current-smoke`",
+                "`verified-staging`",
+                (
+                    "`clipboard.vnd.openxmlformats-officedocument.spreadsheetml.sheet`",
+                ),
             ),
             (
                 "PPTX",
                 "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+                "`unsupported-in-current-smoke`",
+                "`verified-staging`",
+                (
+                    "`clipboard.vnd.openxmlformats-officedocument.presentationml.presentation`",
+                ),
             ),
-            ("TXT", "text/plain"),
-            ("CSV", "text/csv"),
-            ("ZIP", "application/zip"),
+            (
+                "TXT",
+                "text/plain",
+                "`unsupported-in-current-smoke`",
+                "`verified-staging`",
+                ("`clipboard.plain`", "no prompt text"),
+            ),
+            (
+                "CSV",
+                "text/csv",
+                "`unsupported-in-current-smoke`",
+                "`verified-staging`",
+                ("`clipboard.csv`",),
+            ),
+            (
+                "ZIP",
+                "application/zip",
+                "`user-verified`",
+                "`verified-staging`",
+                ("`clipboard.zip`", "Hun-confirmed"),
+            ),
         )
-        allowed_direct_statuses = {
-            "`verified-staging`",
-            "`unsupported-in-current-smoke`",
-            "`not-tested`",
-            "`user-verified`",
-        }
-        allowed_clipboard_statuses = {
-            "`verified-staging`",
-            "`unsupported-in-current-smoke`",
-            "`not-tested`",
-        }
 
         self.assertIn(
             "| Format | MIME type | Direct chooser | Clipboard | Evidence |",
             matrix,
         )
-        self.assertEqual(len(rows), len(expected_format_mimes))
-        for row, expected in zip(rows, expected_format_mimes, strict=True):
-            expected_format, expected_mime = expected
+        self.assertEqual(len(rows), len(expected_rows))
+        forbidden_row_claims = (
+            "delivery",
+            "persistence",
+            "byte identity",
+            "model readability",
+            "account-side cleanup",
+            "cross-session",
+        )
+        for row, expected in zip(rows, expected_rows, strict=True):
+            (
+                expected_format,
+                expected_mime,
+                expected_direct,
+                expected_clipboard,
+                evidence_markers,
+            ) = expected
             with self.subTest(format=expected_format):
                 columns = [
                     column.strip() for column in row.strip("|").split("|")
                 ]
                 self.assertEqual(len(columns), 5)
-                self.assertEqual(columns[0], expected_format)
-                self.assertEqual(columns[1], expected_mime)
-                self.assertIn(columns[2], allowed_direct_statuses)
-                self.assertIn(columns[3], allowed_clipboard_statuses)
-                if columns[2] == "`user-verified`":
-                    self.assertEqual(expected_format, "ZIP")
-                if expected_format == "PNG":
-                    self.assertIn("Six previews staged previously", columns[4])
-                else:
-                    self.assertNotIn("Six previews staged previously", columns[4])
-                if expected_format == "ZIP":
-                    self.assertIn("Hun-confirmed", columns[4])
-                else:
-                    self.assertNotIn("Hun-confirmed", columns[4])
+                self.assertEqual(
+                    tuple(columns[:4]),
+                    (
+                        expected_format,
+                        expected_mime,
+                        expected_direct,
+                        expected_clipboard,
+                    ),
+                )
+                evidence = columns[4]
+                self.assertIn(timeout_evidence, evidence)
+                for marker in evidence_markers:
+                    self.assertIn(marker, evidence)
+                for forbidden_claim in forbidden_row_claims:
+                    self.assertNotIn(forbidden_claim, evidence.lower())
+        self.assertIn("prove composer staging only", matrix)
+        self.assertIn("no Send occurred", matrix)
+        self.assertIn(
+            "ChatGPT Library persistence or deletion was not inspected",
+            matrix,
+        )
+        self.assertIn("does not establish account-side cleanup", matrix)
+        self.assertIn("not a categorical product-support claim", matrix)
         self.assertNotIn(PRIVATE_HOME_PATH, matrix)
 
     def test_chatgpt_collaboration_harness_gates_clipboard_by_exact_mime_evidence(
@@ -523,7 +603,39 @@ class SkillCatalogTests(unittest.TestCase):
         self.assertLess(section.index(nested_write), section.index(focus_step))
         self.assertLess(section.index(focus_step), section.index(paste_call))
         self.assertLess(section.index(paste_call), section.index(one_file_step))
+        cleanup_anchors = (
+            "abandon that dirty composer",
+            "establish a fresh clean composer before any continuation",
+            "leave an exact handoff",
+        )
+        for anchor in cleanup_anchors:
+            self.assertIn(anchor, section)
         self.assertNotIn("write([{ base64", section)
+
+    def test_chatgpt_multi_format_plan_reconciles_completed_smoke_evidence(
+        self,
+    ) -> None:
+        plan = (
+            REPO_ROOT
+            / "docs"
+            / "superpowers"
+            / "plans"
+            / "2026-07-13-chatgpt-multi-format-attachments.md"
+        ).read_text(encoding="utf-8")
+
+        expected_phrases = (
+            "timeoutMs: 10000",
+            "clamps the effective chooser wait to 3000ms",
+            "current-runtime smoke only",
+            "revalidate if the browser-client runtime changes",
+            "`/tmp/chatgpt-multi-format-qa-20260713/pdf/pdftoppm.log` was absent",
+            "`/tmp/chatgpt-multi-format-qa-20260713/pdf-fontconfig-clean/pdftoppm-output.txt`",
+            "empty",
+            "byte-identical",
+            "Future primary QA runs must still require",
+        )
+        for phrase in expected_phrases:
+            self.assertIn(phrase, plan)
 
     def test_chatgpt_collaboration_harness_runtime_sync_rechecks_itemized_snapshot(
         self,
@@ -672,7 +784,9 @@ class SkillCatalogTests(unittest.TestCase):
             "runtime root identity is unchanged",
             "cooperative drift detection",
             "not an adversarial race-proof no-follow guarantee",
-            "immutable reviewed staging snapshot and exact allowlist are the mutation safety boundary",
+            "owner-controlled, repeatedly verified staging snapshot and exact allowlist are the mutation safety boundary",
+            "owner-writable",
+            "check-to-use window",
             "unequal-manifest pseudo-record",
             "non-pseudo T record",
             "unknown raw line",
@@ -704,6 +818,7 @@ class SkillCatalogTests(unittest.TestCase):
         self.assertNotIn("rsync -ac \\", task)
         self.assertNotIn("rsync -a ", task)
         self.assertNotIn("for path in", task)
+        self.assertNotIn("immutable reviewed staging snapshot", task)
         bash_fences = re.findall(r"```bash\n(.*?)\n```", task, re.DOTALL)
         for fence in bash_fences:
             normalized = fence.replace("\\\n", " ")
