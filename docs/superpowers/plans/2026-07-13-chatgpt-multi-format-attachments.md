@@ -2010,6 +2010,13 @@ def approved_subset(full_manifest: dict[str, Any]) -> dict[str, dict[str, Any]]:
     return subset
 
 
+def reviewed_directory_mode(full_manifest: dict[str, Any], path: str) -> int:
+    entry = full_manifest.get(path)
+    if not isinstance(entry, dict) or entry.get("type") != "directory":
+        fail(f"reviewed parent is not a directory: {path}")
+    return int(entry["mode"], 8)
+
+
 def validate_allowlist(path: str) -> None:
     content, record = read_regular(path)
     if content != ALLOWLIST_BYTES:
@@ -2041,8 +2048,13 @@ def create_snapshot(
 ) -> None:
     full_manifest = load_object(source_manifest_path)
     expected = approved_subset(full_manifest)
-    os.mkdir(staging, 0o700)
-    os.mkdir(os.path.join(staging, "references"), 0o700)
+    root_mode = reviewed_directory_mode(full_manifest, ".")
+    references_mode = reviewed_directory_mode(full_manifest, "references")
+    os.mkdir(staging, root_mode)
+    os.chmod(staging, root_mode, follow_symlinks=False)
+    references = os.path.join(staging, "references")
+    os.mkdir(references, references_mode)
+    os.chmod(references, references_mode, follow_symlinks=False)
     actual: dict[str, dict[str, Any]] = {}
     for relative_path in APPROVED_PATHS:
         source_path = os.path.join(source, *relative_path.split("/"))
@@ -2058,11 +2070,20 @@ def create_snapshot(
     verify_snapshot(staging, allowlist, source_manifest_path, staging_manifest_path)
 
 
-def scan_staging(staging: str) -> dict[str, dict[str, Any]]:
+def scan_staging(
+    staging: str,
+    full_manifest: dict[str, Any],
+) -> dict[str, dict[str, Any]]:
     root = os.lstat(staging)
     references = os.lstat(os.path.join(staging, "references"))
     if not stat.S_ISDIR(root.st_mode) or not stat.S_ISDIR(references.st_mode):
         fail("staging root and references parent must be real directories")
+    if stat.S_IMODE(root.st_mode) != reviewed_directory_mode(full_manifest, "."):
+        fail("staging root mode differs from reviewed source")
+    if stat.S_IMODE(references.st_mode) != reviewed_directory_mode(
+        full_manifest, "references"
+    ):
+        fail("staging references mode differs from reviewed source")
     observed_paths: set[str] = set()
     for current, dirnames, filenames in os.walk(staging, followlinks=False):
         dirnames.sort()
@@ -2097,9 +2118,10 @@ def verify_snapshot(
     staging_manifest_path: str,
 ) -> None:
     validate_allowlist(allowlist)
-    expected = approved_subset(load_object(source_manifest_path))
+    full_manifest = load_object(source_manifest_path)
+    expected = approved_subset(full_manifest)
     recorded = load_object(staging_manifest_path)
-    actual = scan_staging(staging)
+    actual = scan_staging(staging, full_manifest)
     if recorded != expected or actual != expected:
         fail("staging manifest does not match the reviewed source subset")
     print("staging manifest matches the reviewed allowlisted subset")
@@ -2187,6 +2209,8 @@ creates parents and files exclusively, uses
 and never copies a symlink or special file. The exclusive allowlist is exactly
 three ASCII relative paths with no blank, absolute, `..`, or glob entry; its
 bytes, SHA-256, and `0600` mode are validated on every gate.
+The staging root and required parent directory are created exclusively with
+the reviewed full-manifest modes, and reviewed parent directory modes match source-pre-2.
 
 Finally, use `apply_patch` to create
 `/tmp/chatgpt-multi-format-validator-20260713-content-only/pressure_sync.py`
@@ -2608,6 +2632,38 @@ def snapshot_binding_pressure(
     if result.returncode != 0:
         raise SystemExit(f"snapshot creation failed: {result.stderr!r}")
 
+    initial_transport = subprocess.run(
+        [
+            "/usr/bin/rsync",
+            "-rlpcni",
+            f"--files-from={allowlist}",
+            "--out-format=%i %n%L",
+            f"{staging}/",
+            f"{runtime}/",
+        ],
+        text=True,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        check=True,
+        env={**os.environ, "LC_ALL": "C"},
+    )
+    transport_lines = initial_transport.stdout.splitlines()
+    transport_paths = {
+        line.split(maxsplit=1)[1] for line in transport_lines if " " in line
+    }
+    if (
+        len(transport_lines) != 3
+        or transport_paths != set(ALLOWED)
+        or any(not line.startswith(">f") for line in transport_lines)
+    ):
+        raise SystemExit(
+            f"transport contains directory or unapproved action: {transport_lines!r}"
+        )
+    print(
+        "transport contains exactly three regular-file actions "
+        "and no directory metadata action"
+    )
+
     reviewed_skill = (staging / "SKILL.md").read_bytes()
     write(source / "SKILL.md", "mutated live source\n")
     result = run_snapshot(
@@ -2855,6 +2911,7 @@ live-source mutation after pre-2: PASS
 source-only addition after pre-2: PASS
 runtime-root identity mismatch: REJECTED
 staging mutation: REJECTED
+transport contains exactly three regular-file actions and no directory metadata action
 Skill is valid!
 ```
 
