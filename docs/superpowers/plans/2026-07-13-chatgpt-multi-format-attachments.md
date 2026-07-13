@@ -1523,25 +1523,31 @@ collision-checked content-only validator root and record the old snapshot hash:
 set -euo pipefail
 set -C
 OLD_VALIDATOR_ROOT="/tmp/chatgpt-multi-format-validator-20260713"
-VALIDATOR_ROOT="/tmp/chatgpt-multi-format-validator-20260713-content-only"
+FAILED_VALIDATOR_ROOT="/tmp/chatgpt-multi-format-validator-20260713-content-only"
+VALIDATOR_ROOT="/tmp/chatgpt-multi-format-validator-20260713-content-only-pathsafe"
 test -d "$OLD_VALIDATOR_ROOT"
 test -s "$OLD_VALIDATOR_ROOT/runtime-dry-run-1.txt"
+test -d "$FAILED_VALIDATOR_ROOT"
+test -f "$FAILED_VALIDATOR_ROOT/runtime-raw-dry-run-1.txt"
+test ! -s "$FAILED_VALIDATOR_ROOT/runtime-raw-dry-run-1.txt"
 test ! -e "$VALIDATOR_ROOT"
 mkdir -m 700 "$VALIDATOR_ROOT"
 test ! -e "$VALIDATOR_ROOT/old-red-snapshot.sha256"
 shasum -a 256 "$OLD_VALIDATOR_ROOT/runtime-dry-run-1.txt" \
   > "$VALIDATOR_ROOT/old-red-snapshot.sha256"
+shasum -a 256 "$FAILED_VALIDATOR_ROOT/runtime-raw-dry-run-1.txt" \
+  > "$VALIDATOR_ROOT/failed-path-raw.sha256"
 python3 -m venv "$VALIDATOR_ROOT/venv"
 "$VALIDATOR_ROOT/venv/bin/python" -m pip install PyYAML
 ```
 
 Expected: the new environment is isolated, PyYAML is installed only in its
-venv, and the old stopped validator remains untouched.
+venv, and both prior validators remain untouched. Explicitly preserve the failed content-only validator and its zero-byte raw evidence.
 
 - [ ] **Step 3: Create the independent manifest and rsync-review tools**
 
 Use `apply_patch` to create
-`/tmp/chatgpt-multi-format-validator-20260713-content-only/compare_skill_trees.py`
+`/tmp/chatgpt-multi-format-validator-20260713-content-only-pathsafe/compare_skill_trees.py`
 with this complete content:
 
 ```python
@@ -1755,7 +1761,7 @@ exactly the three approved regular-file content differences; post-sync requires
 exact equality, and `capture` writes independent manifests without comparing.
 
 Then use `apply_patch` to create
-`/tmp/chatgpt-multi-format-validator-20260713-content-only/review_rsync.py`
+`/tmp/chatgpt-multi-format-validator-20260713-content-only-pathsafe/review_rsync.py`
 with this complete content:
 
 ```python
@@ -1886,7 +1892,7 @@ difference remains fail-closed through the independent comparator, raw
 snapshot, or reviewed action set.
 
 Next, use `apply_patch` to create
-`/tmp/chatgpt-multi-format-validator-20260713-content-only/snapshot_reviewed_source.py`
+`/tmp/chatgpt-multi-format-validator-20260713-content-only-pathsafe/snapshot_reviewed_source.py`
 with this complete content:
 
 ```python
@@ -2213,7 +2219,7 @@ The staging root and required parent directory are created exclusively with
 the reviewed full-manifest modes, and reviewed parent directory modes match source-pre-2.
 
 Finally, use `apply_patch` to create
-`/tmp/chatgpt-multi-format-validator-20260713-content-only/pressure_sync.py`
+`/tmp/chatgpt-multi-format-validator-20260713-content-only-pathsafe/pressure_sync.py`
 with this complete content:
 
 ```python
@@ -2332,7 +2338,8 @@ def run_openrsync_case(root: Path, comparator: Path, reviewer: Path) -> None:
     raw_path = scenario / "raw.txt"
     raw = subprocess.run(
         [
-            "rsync",
+            "/usr/bin/rsync",
+            "--rsync-path=/usr/bin/rsync",
             "-rlpcni",
             "--delete",
             "--out-format=%i %n%L",
@@ -2343,7 +2350,7 @@ def run_openrsync_case(root: Path, comparator: Path, reviewer: Path) -> None:
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
         check=True,
-        env={**os.environ, "LC_ALL": "C"},
+        env={"LC_ALL": "C", "PATH": "/usr/bin:/bin"},
     )
     raw_path.write_text(raw.stdout, encoding="utf-8")
     if ".f..T.... agents/openai.yaml\n" not in raw.stdout:
@@ -2351,7 +2358,8 @@ def run_openrsync_case(root: Path, comparator: Path, reviewer: Path) -> None:
 
     stats = subprocess.run(
         [
-            "rsync",
+            "/usr/bin/rsync",
+            "--rsync-path=/usr/bin/rsync",
             "-rlpcni",
             "--delete",
             "--stats",
@@ -2363,7 +2371,7 @@ def run_openrsync_case(root: Path, comparator: Path, reviewer: Path) -> None:
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
         check=True,
-        env={**os.environ, "LC_ALL": "C"},
+        env={"LC_ALL": "C", "PATH": "/usr/bin:/bin"},
     )
     count_lines = [
         line
@@ -2635,6 +2643,7 @@ def snapshot_binding_pressure(
     initial_transport = subprocess.run(
         [
             "/usr/bin/rsync",
+            "--rsync-path=/usr/bin/rsync",
             "-rlpcni",
             f"--files-from={allowlist}",
             "--out-format=%i %n%L",
@@ -2645,7 +2654,7 @@ def snapshot_binding_pressure(
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
         check=True,
-        env={**os.environ, "LC_ALL": "C"},
+        env={"LC_ALL": "C", "PATH": "/usr/bin:/bin"},
     )
     transport_lines = initial_transport.stdout.splitlines()
     transport_paths = {
@@ -2686,6 +2695,7 @@ def snapshot_binding_pressure(
     transport = subprocess.run(
         [
             "/usr/bin/rsync",
+            "--rsync-path=/usr/bin/rsync",
             "-rlpcni",
             f"--files-from={allowlist}",
             f"{staging}/",
@@ -2695,7 +2705,7 @@ def snapshot_binding_pressure(
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
         check=True,
-        env={**os.environ, "LC_ALL": "C"},
+        env={"LC_ALL": "C", "PATH": "/usr/bin:/bin"},
     )
     if "source-only-after-pre-2.md" in transport.stdout:
         raise SystemExit("allowlist transport exposed a source-only addition")
@@ -2742,6 +2752,40 @@ def snapshot_binding_pressure(
     if result.returncode == 0 or "staging manifest does not match" not in result.stderr:
         raise SystemExit("staging mutation was not rejected")
     print("staging mutation: REJECTED")
+
+
+def poisoned_path_pressure(root: Path) -> None:
+    scenario = root / "poisoned-path"
+    source = scenario / "source"
+    runtime = scenario / "runtime"
+    write(source / "sample.txt", "source\n")
+    write(runtime / "sample.txt", "runtime\n")
+    base = ["/usr/bin/rsync", "-rlpcni"]
+    poisoned_env = {"LC_ALL": "C", "PATH": "/nonexistent"}
+    rejected = subprocess.run(
+        [*base, f"{source}/", f"{runtime}/"],
+        text=True,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        check=False,
+        env=poisoned_env,
+    )
+    if rejected.returncode != 14 or "rsync" not in rejected.stderr:
+        raise SystemExit(
+            f"poisoned unpinned peer did not fail as expected: {rejected!r}"
+        )
+    print("poisoned PATH without peer pin: REJECTED")
+    pinned = subprocess.run(
+        [*base, "--rsync-path=/usr/bin/rsync", f"{source}/", f"{runtime}/"],
+        text=True,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        check=False,
+        env=poisoned_env,
+    )
+    if pinned.returncode != 0:
+        raise SystemExit(f"poisoned pinned peer failed: {pinned.stderr!r}")
+    print("poisoned PATH with peer pin: PASS")
 
 
 def main() -> None:
@@ -2841,6 +2885,7 @@ def main() -> None:
     run_openrsync_case(root, comparator, reviewer)
     reviewer_pressure(root, reviewer)
     snapshot_binding_pressure(root, comparator, snapshotter)
+    poisoned_path_pressure(root)
 
 
 if __name__ == "__main__":
@@ -2851,7 +2896,7 @@ Mark all four scripts executable only after `apply_patch` succeeds:
 
 ```bash
 set -euo pipefail
-VALIDATOR_ROOT="/tmp/chatgpt-multi-format-validator-20260713-content-only"
+VALIDATOR_ROOT="/tmp/chatgpt-multi-format-validator-20260713-content-only-pathsafe"
 test -f "$VALIDATOR_ROOT/compare_skill_trees.py"
 test -f "$VALIDATOR_ROOT/review_rsync.py"
 test -f "$VALIDATOR_ROOT/snapshot_reviewed_source.py"
@@ -2870,7 +2915,7 @@ never use it as the validator, repository source, or installed runtime:
 
 ```bash
 set -euo pipefail
-VALIDATOR_ROOT="/tmp/chatgpt-multi-format-validator-20260713-content-only"
+VALIDATOR_ROOT="/tmp/chatgpt-multi-format-validator-20260713-content-only-pathsafe"
 PRESSURE_ROOT="/tmp/chatgpt-multi-format-sync-pressure-20260713-content-only"
 test ! -e "$PRESSURE_ROOT"
 RSYNC_IDENTITY="$(/usr/bin/rsync --version | sed -n '1,2p')"
@@ -2878,6 +2923,12 @@ EXPECTED_RSYNC_IDENTITY="$(printf '%s\n%s' \
   'openrsync: protocol version 29' \
   'rsync version 2.6.9 compatible')"
 test "$RSYNC_IDENTITY" = "$EXPECTED_RSYNC_IDENTITY"
+PATH_BEFORE_LOOP="$PATH"
+for evidence_path in alpha beta
+do
+  test -n "$evidence_path"
+done
+test "$PATH" = "$PATH_BEFORE_LOOP"
 "$VALIDATOR_ROOT/venv/bin/python" "$VALIDATOR_ROOT/pressure_sync.py" \
   --root "$PRESSURE_ROOT" \
   --comparator "$VALIDATOR_ROOT/compare_skill_trees.py" \
@@ -2912,6 +2963,8 @@ source-only addition after pre-2: PASS
 runtime-root identity mismatch: REJECTED
 staging mutation: REJECTED
 transport contains exactly three regular-file actions and no directory metadata action
+poisoned PATH without peer pin: REJECTED
+poisoned PATH with peer pin: PASS
 Skill is valid!
 ```
 
@@ -2922,29 +2975,36 @@ pseudo-record while retaining exactly three reviewed content updates.
 `/usr/bin/rsync` must match the tested openrsync protocol and itemized format
 above. A different implementation stops the workflow and requires fresh raw-
 format pressure validation before any transport or mutation command.
+Pressure subprocesses use the explicit equivalent of `PATH=/usr/bin:/bin` and
+do not inherit the ambient command search path.
 
 - [ ] **Step 5: Bind two pre-sync evidence sets to reviewed staging**
 
 Capture dry-run 1. Every output path uses exclusive creation, so a collision
 stops the run:
+The prior `rsync -rlpcni --delete` structural intent is retained, with the
+mandatory peer-path pin added to the executable command.
+The prior `/usr/bin/rsync -rlpcni --files-from="$ALLOWLIST"` and
+`/usr/bin/rsync -rlpc --files-from="$ALLOWLIST" \` shapes are likewise retained
+semantically, with `--rsync-path=/usr/bin/rsync` inserted before the allowlist.
 
 ```bash
 set -euo pipefail
 set -C
-VALIDATOR_ROOT="/tmp/chatgpt-multi-format-validator-20260713-content-only"
+VALIDATOR_ROOT="/tmp/chatgpt-multi-format-validator-20260713-content-only-pathsafe"
 SOURCE="skills/chatgpt-collaboration-harness"
 RUNTIME="$HOME/.codex/skills/chatgpt-collaboration-harness"
 STAGING="$VALIDATOR_ROOT/reviewed-source"
 ALLOWLIST="$VALIDATOR_ROOT/reviewed-allowlist.txt"
 STAGING_MANIFEST="$VALIDATOR_ROOT/reviewed-source-manifest.json"
-for path in \
+for evidence_path in \
   "$VALIDATOR_ROOT/source-pre-1.json" \
   "$VALIDATOR_ROOT/runtime-pre-1.json" \
   "$VALIDATOR_ROOT/runtime-raw-dry-run-1.txt" \
   "$VALIDATOR_ROOT/runtime-reviewed-dry-run-1.txt" \
   "$VALIDATOR_ROOT/runtime-transfer-count-1.txt"
 do
-  test ! -e "$path"
+  test ! -e "$evidence_path"
 done
 "$VALIDATOR_ROOT/venv/bin/python" "$VALIDATOR_ROOT/compare_skill_trees.py" \
   --source "$SOURCE" \
@@ -2952,10 +3012,10 @@ done
   --source-manifest "$VALIDATOR_ROOT/source-pre-1.json" \
   --runtime-manifest "$VALIDATOR_ROOT/runtime-pre-1.json" \
   --phase pre
-LC_ALL=C /usr/bin/rsync -rlpcni --delete --out-format='%i %n%L' \
+LC_ALL=C /usr/bin/rsync -rlpcni --rsync-path=/usr/bin/rsync --delete --out-format='%i %n%L' \
   "$SOURCE/" "$RUNTIME/" \
   > "$VALIDATOR_ROOT/runtime-raw-dry-run-1.txt"
-LC_ALL=C /usr/bin/rsync -rlpcni --delete --stats --out-format='' \
+LC_ALL=C /usr/bin/rsync -rlpcni --rsync-path=/usr/bin/rsync --delete --stats --out-format='' \
   "$SOURCE/" "$RUNTIME/" \
   | awk '/^Number of files transferred:/{print}' \
   > "$VALIDATOR_ROOT/runtime-transfer-count-1.txt"
@@ -2968,7 +3028,7 @@ LC_ALL=C /usr/bin/rsync -rlpcni --delete --stats --out-format='' \
   --phase pre
 cat "$VALIDATOR_ROOT/runtime-reviewed-dry-run-1.txt"
 cat "$VALIDATOR_ROOT/runtime-transfer-count-1.txt"
-for path in \
+for evidence_path in \
   "$STAGING" \
   "$ALLOWLIST" \
   "$STAGING_MANIFEST" \
@@ -2976,7 +3036,7 @@ for path in \
   "$VALIDATOR_ROOT/transport-reviewed-dry-run-1.txt" \
   "$VALIDATOR_ROOT/transport-transfer-count-1.txt"
 do
-  test ! -e "$path"
+  test ! -e "$evidence_path"
 done
 "$VALIDATOR_ROOT/venv/bin/python" \
   "$VALIDATOR_ROOT/snapshot_reviewed_source.py" create \
@@ -2985,10 +3045,10 @@ done
   --staging "$STAGING" \
   --allowlist "$ALLOWLIST" \
   --staging-manifest "$STAGING_MANIFEST"
-LC_ALL=C /usr/bin/rsync -rlpcni --files-from="$ALLOWLIST" \
+LC_ALL=C /usr/bin/rsync -rlpcni --rsync-path=/usr/bin/rsync --files-from="$ALLOWLIST" \
   --out-format='%i %n%L' "$STAGING/" "$RUNTIME/" \
   > "$VALIDATOR_ROOT/transport-raw-dry-run-1.txt"
-LC_ALL=C /usr/bin/rsync -rlpcni --files-from="$ALLOWLIST" \
+LC_ALL=C /usr/bin/rsync -rlpcni --rsync-path=/usr/bin/rsync --files-from="$ALLOWLIST" \
   --stats --out-format='' "$STAGING/" "$RUNTIME/" \
   | awk '/^Number of files transferred:/{print}' \
   > "$VALIDATOR_ROOT/transport-transfer-count-1.txt"
@@ -3014,13 +3074,13 @@ reviewed, stable-count, and independent-manifest evidence:
 ```bash
 set -euo pipefail
 set -C
-VALIDATOR_ROOT="/tmp/chatgpt-multi-format-validator-20260713-content-only"
+VALIDATOR_ROOT="/tmp/chatgpt-multi-format-validator-20260713-content-only-pathsafe"
 SOURCE="skills/chatgpt-collaboration-harness"
 RUNTIME="$HOME/.codex/skills/chatgpt-collaboration-harness"
 STAGING="$VALIDATOR_ROOT/reviewed-source"
 ALLOWLIST="$VALIDATOR_ROOT/reviewed-allowlist.txt"
 STAGING_MANIFEST="$VALIDATOR_ROOT/reviewed-source-manifest.json"
-for path in \
+for evidence_path in \
   "$VALIDATOR_ROOT/source-pre-2.json" \
   "$VALIDATOR_ROOT/runtime-pre-2.json" \
   "$VALIDATOR_ROOT/runtime-raw-dry-run-2.txt" \
@@ -3030,7 +3090,7 @@ for path in \
   "$VALIDATOR_ROOT/transport-reviewed-dry-run-2.txt" \
   "$VALIDATOR_ROOT/transport-transfer-count-2.txt"
 do
-  test ! -e "$path"
+  test ! -e "$evidence_path"
 done
 "$VALIDATOR_ROOT/venv/bin/python" "$VALIDATOR_ROOT/compare_skill_trees.py" \
   --source "$SOURCE" \
@@ -3038,10 +3098,10 @@ done
   --source-manifest "$VALIDATOR_ROOT/source-pre-2.json" \
   --runtime-manifest "$VALIDATOR_ROOT/runtime-pre-2.json" \
   --phase pre
-LC_ALL=C /usr/bin/rsync -rlpcni --delete --out-format='%i %n%L' \
+LC_ALL=C /usr/bin/rsync -rlpcni --rsync-path=/usr/bin/rsync --delete --out-format='%i %n%L' \
   "$SOURCE/" "$RUNTIME/" \
   > "$VALIDATOR_ROOT/runtime-raw-dry-run-2.txt"
-LC_ALL=C /usr/bin/rsync -rlpcni --delete --stats --out-format='' \
+LC_ALL=C /usr/bin/rsync -rlpcni --rsync-path=/usr/bin/rsync --delete --stats --out-format='' \
   "$SOURCE/" "$RUNTIME/" \
   | awk '/^Number of files transferred:/{print}' \
   > "$VALIDATOR_ROOT/runtime-transfer-count-2.txt"
@@ -3068,10 +3128,10 @@ cmp -- "$VALIDATOR_ROOT/runtime-transfer-count-1.txt" \
   --allowlist "$ALLOWLIST" \
   --source-manifest "$VALIDATOR_ROOT/source-pre-2.json" \
   --staging-manifest "$STAGING_MANIFEST"
-LC_ALL=C /usr/bin/rsync -rlpcni --files-from="$ALLOWLIST" \
+LC_ALL=C /usr/bin/rsync -rlpcni --rsync-path=/usr/bin/rsync --files-from="$ALLOWLIST" \
   --out-format='%i %n%L' "$STAGING/" "$RUNTIME/" \
   > "$VALIDATOR_ROOT/transport-raw-dry-run-2.txt"
-LC_ALL=C /usr/bin/rsync -rlpcni --files-from="$ALLOWLIST" \
+LC_ALL=C /usr/bin/rsync -rlpcni --rsync-path=/usr/bin/rsync --files-from="$ALLOWLIST" \
   --stats --out-format='' "$STAGING/" "$RUNTIME/" \
   | awk '/^Number of files transferred:/{print}' \
   > "$VALIDATOR_ROOT/transport-transfer-count-2.txt"
@@ -3108,18 +3168,18 @@ Binding contract: mutation source is the reviewed staging snapshot; staging mani
 
 ```bash
 set -euo pipefail
-VALIDATOR_ROOT="/tmp/chatgpt-multi-format-validator-20260713-content-only"
+VALIDATOR_ROOT="/tmp/chatgpt-multi-format-validator-20260713-content-only-pathsafe"
 SOURCE="skills/chatgpt-collaboration-harness"
 RUNTIME="$HOME/.codex/skills/chatgpt-collaboration-harness"
 STAGING="$VALIDATOR_ROOT/reviewed-source"
 ALLOWLIST="$VALIDATOR_ROOT/reviewed-allowlist.txt"
 STAGING_MANIFEST="$VALIDATOR_ROOT/reviewed-source-manifest.json"
-for path in \
+for evidence_path in \
   "$VALIDATOR_ROOT/source-pre-final.json" \
   "$VALIDATOR_ROOT/runtime-pre-final.json" \
   "$VALIDATOR_ROOT/runtime-root-before-sync.json"
 do
-  test ! -e "$path"
+  test ! -e "$evidence_path"
 done
 "$VALIDATOR_ROOT/venv/bin/python" "$VALIDATOR_ROOT/compare_skill_trees.py" \
   --source "$SOURCE" \
@@ -3145,7 +3205,7 @@ cmp -- "$VALIDATOR_ROOT/runtime-pre-2.json" \
   "$VALIDATOR_ROOT/snapshot_reviewed_source.py" check-identity \
   --root "$RUNTIME" \
   --expected "$VALIDATOR_ROOT/runtime-root-before-sync.json"
-/usr/bin/rsync -rlpc --files-from="$ALLOWLIST" \
+/usr/bin/rsync -rlpc --rsync-path=/usr/bin/rsync --files-from="$ALLOWLIST" \
   "$STAGING/" "$RUNTIME/"
 ```
 
@@ -3164,13 +3224,13 @@ stable count:
 set -euo pipefail
 set -C
 OLD_VALIDATOR_ROOT="/tmp/chatgpt-multi-format-validator-20260713"
-VALIDATOR_ROOT="/tmp/chatgpt-multi-format-validator-20260713-content-only"
+VALIDATOR_ROOT="/tmp/chatgpt-multi-format-validator-20260713-content-only-pathsafe"
 SOURCE="skills/chatgpt-collaboration-harness"
 RUNTIME="$HOME/.codex/skills/chatgpt-collaboration-harness"
 STAGING="$VALIDATOR_ROOT/reviewed-source"
 ALLOWLIST="$VALIDATOR_ROOT/reviewed-allowlist.txt"
 STAGING_MANIFEST="$VALIDATOR_ROOT/reviewed-source-manifest.json"
-for path in \
+for evidence_path in \
   "$VALIDATOR_ROOT/source-post.json" \
   "$VALIDATOR_ROOT/runtime-post.json" \
   "$VALIDATOR_ROOT/runtime-root-after-sync.json" \
@@ -3178,7 +3238,7 @@ for path in \
   "$VALIDATOR_ROOT/transport-reviewed-post.txt" \
   "$VALIDATOR_ROOT/transport-transfer-count-post.txt"
 do
-  test ! -e "$path"
+  test ! -e "$evidence_path"
 done
 "$VALIDATOR_ROOT/venv/bin/python" \
   "$VALIDATOR_ROOT/snapshot_reviewed_source.py" identity \
@@ -3208,10 +3268,10 @@ cmp -- "$VALIDATOR_ROOT/source-pre-2.json" \
   "$VALIDATOR_ROOT/source-post.json"
 cmp -- "$VALIDATOR_ROOT/source-post.json" \
   "$VALIDATOR_ROOT/runtime-post.json"
-LC_ALL=C /usr/bin/rsync -rlpcni --files-from="$ALLOWLIST" \
+LC_ALL=C /usr/bin/rsync -rlpcni --rsync-path=/usr/bin/rsync --files-from="$ALLOWLIST" \
   --out-format='%i %n%L' "$STAGING/" "$RUNTIME/" \
   > "$VALIDATOR_ROOT/transport-raw-post.txt"
-LC_ALL=C /usr/bin/rsync -rlpcni --files-from="$ALLOWLIST" \
+LC_ALL=C /usr/bin/rsync -rlpcni --rsync-path=/usr/bin/rsync --files-from="$ALLOWLIST" \
   --stats --out-format='' "$STAGING/" "$RUNTIME/" \
   | awk '/^Number of files transferred:/{print}' \
   > "$VALIDATOR_ROOT/transport-transfer-count-post.txt"
