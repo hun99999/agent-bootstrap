@@ -248,22 +248,25 @@ Expected: one test-only commit; pre-commit hooks run normally.
 - [ ] **Step 1: Resolve and isolate the bundled artifact runtimes**
 
 Call the workspace dependency resolver and use only its returned bundled
-Python executable, bundled Node executable, and bundled `node_modules`
-directory. Also set `DOCUMENTS_SKILL_DIR` and `PRESENTATIONS_SKILL_DIR` from the
-absolute directories of the currently loaded installed skills; do not guess or
-hardcode a versioned cache path. Confirm the required files and imports without
-installing anything:
+Python executable, bundled Node executable, bundled `node_modules` directory,
+and bundled executable override directory. Also set `DOCUMENTS_SKILL_DIR` and
+`PRESENTATIONS_SKILL_DIR` from the absolute directories of the currently loaded
+installed skills; do not guess or hardcode a versioned cache path. Confirm the
+required files and imports without installing anything:
 
 ```bash
 set -euo pipefail
 : "${BUNDLED_PYTHON:?workspace dependency loader did not return bundled Python}"
 : "${BUNDLED_NODE:?workspace dependency loader did not return bundled Node}"
 : "${BUNDLED_NODE_MODULES:?workspace dependency loader did not return node_modules}"
+: "${BUNDLED_BIN:?workspace dependency loader did not return bundled executables}"
 : "${DOCUMENTS_SKILL_DIR:?loaded documents skill directory is required}"
 : "${PRESENTATIONS_SKILL_DIR:?loaded presentations skill directory is required}"
 test -x "$BUNDLED_PYTHON"
 test -x "$BUNDLED_NODE"
 test -d "$BUNDLED_NODE_MODULES"
+test -d "$BUNDLED_BIN"
+test -x "$BUNDLED_BIN/pdftoppm"
 test -f "$DOCUMENTS_SKILL_DIR/render_docx.py"
 test -f "$PRESENTATIONS_SKILL_DIR/container_tools/setup_artifact_tool_workspace.mjs"
 test -f "$PRESENTATIONS_SKILL_DIR/container_tools/slides_test.py"
@@ -930,14 +933,22 @@ Run the format-specific render gates:
 ```bash
 set -euo pipefail
 : "${BUNDLED_PYTHON:?workspace dependency loader did not return bundled Python}"
+: "${BUNDLED_BIN:?workspace dependency loader did not return bundled executables}"
 : "${DOCUMENTS_SKILL_DIR:?loaded documents skill directory is required}"
 : "${PRESENTATIONS_SKILL_DIR:?loaded presentations skill directory is required}"
+unset FONTCONFIG_FILE FONTCONFIG_PATH
 RUN_SUFFIX="${RUN_SUFFIX:-20260713}"
 FIXTURE_ROOT="/tmp/chatgpt-multi-format-smoke-${RUN_SUFFIX}"
 QA_ROOT="/tmp/chatgpt-multi-format-qa-${RUN_SUFFIX}"
 VALIDATED_ROOT_FILE="/tmp/chatgpt-multi-format-validated-root-${RUN_SUFFIX}.txt"
 PPTX_OVERFLOW_OUTPUT="$QA_ROOT/pptx/slides-test.txt"
+PDF_RENDER_LOG="$QA_ROOT/pdf/pdftoppm.log"
+BUNDLED_RUNTIME_ROOT="$(cd "$BUNDLED_BIN/../.." && pwd -P)"
+PDFTOPPM="$BUNDLED_BIN/pdftoppm"
 test -x "$BUNDLED_PYTHON"
+test -d "$BUNDLED_BIN"
+test -d "$BUNDLED_RUNTIME_ROOT/native/poppler"
+test -x "$PDFTOPPM"
 test -f "$DOCUMENTS_SKILL_DIR/render_docx.py"
 test -f "$PRESENTATIONS_SKILL_DIR/container_tools/slides_test.py"
 test -d "$FIXTURE_ROOT"
@@ -946,14 +957,25 @@ test -d "$QA_ROOT/pptx"
 test ! -e "$QA_ROOT/docx"
 test ! -e "$QA_ROOT/pdf"
 test ! -e "$PPTX_OVERFLOW_OUTPUT"
+test ! -e "$PDF_RENDER_LOG"
 test ! -e "$VALIDATED_ROOT_FILE"
 test ! -L "$VALIDATED_ROOT_FILE"
+FONTCONFIG_OUTPUT="$(
+  find "$BUNDLED_RUNTIME_ROOT/native/poppler" \
+    -type f -path '*/etc/fonts/fonts.conf' -print
+)" || exit 1
+test -n "$FONTCONFIG_OUTPUT"
+test "$(printf '%s\n' "$FONTCONFIG_OUTPUT" | wc -l | tr -d ' ')" = "1"
+FONTCONFIG_FILE="$FONTCONFIG_OUTPUT"
+test -f "$FONTCONFIG_FILE"
+test -r "$FONTCONFIG_FILE"
 mkdir "$QA_ROOT/docx" "$QA_ROOT/pdf"
 "$BUNDLED_PYTHON" "$DOCUMENTS_SKILL_DIR/render_docx.py" \
   "$FIXTURE_ROOT/sample.docx" --output_dir "$QA_ROOT/docx"
-PDFTOPPM="$(command -v pdftoppm)"
-test -x "$PDFTOPPM"
-"$PDFTOPPM" -png "$FIXTURE_ROOT/sample.pdf" "$QA_ROOT/pdf/sample"
+FONTCONFIG_FILE="$FONTCONFIG_FILE" \
+  "$PDFTOPPM" -png "$FIXTURE_ROOT/sample.pdf" "$QA_ROOT/pdf/sample" \
+  2>&1 | tee "$PDF_RENDER_LOG"
+test ! -s "$PDF_RENDER_LOG"
 "$BUNDLED_PYTHON" "$PRESENTATIONS_SKILL_DIR/container_tools/slides_test.py" \
   "$FIXTURE_ROOT/sample.pptx" 2>&1 | tee "$PPTX_OVERFLOW_OUTPUT"
 if grep -Fq "ERROR:" "$PPTX_OVERFLOW_OUTPUT"; then
@@ -976,7 +998,65 @@ cmp "$QA_ROOT/pptx/sample.pptx" "$FIXTURE_ROOT/sample.pptx"
 Expected: the displayed and captured slide-test output contains the exact line
 `Test passed. No overflow detected.` and contains no `ERROR:` record. Either a
 missing success line or any error record fails the gate even if the helper
-process exits zero.
+process exits zero. The displayed and captured `pdftoppm` output is exactly
+empty. Any Fontconfig warning, other warning, or error is a render-gate failure;
+an output PNG alone is not sufficient. Ambient Fontconfig variables are cleared;
+the discovered `FONTCONFIG_FILE` remains unexported and is supplied only to the
+bundled `pdftoppm` command.
+
+Run this one-time Poppler pressure scenario outside the primary QA root to
+prove the environment requirement. These pressure outputs are evidence only
+and must never become browser fixtures:
+
+```bash
+set -euo pipefail
+: "${BUNDLED_BIN:?workspace dependency loader did not return bundled executables}"
+unset FONTCONFIG_FILE FONTCONFIG_PATH
+RUN_SUFFIX="${RUN_SUFFIX:-20260713}"
+FIXTURE_ROOT="/tmp/chatgpt-multi-format-smoke-${RUN_SUFFIX}"
+POPLER_PRESSURE_ROOT="/tmp/chatgpt-multi-format-poppler-pressure-${RUN_SUFFIX}"
+NO_ENV_ROOT="$POPLER_PRESSURE_ROOT/no-env"
+CONFIGURED_ROOT="$POPLER_PRESSURE_ROOT/configured"
+NO_ENV_LOG="$NO_ENV_ROOT/pdftoppm.log"
+CONFIGURED_LOG="$CONFIGURED_ROOT/pdftoppm.log"
+BUNDLED_RUNTIME_ROOT="$(cd "$BUNDLED_BIN/../.." && pwd -P)"
+PDFTOPPM="$BUNDLED_BIN/pdftoppm"
+test -d "$BUNDLED_BIN"
+test -d "$BUNDLED_RUNTIME_ROOT/native/poppler"
+test -x "$PDFTOPPM"
+test -f "$FIXTURE_ROOT/sample.pdf"
+test ! -e "$POPLER_PRESSURE_ROOT"
+FONTCONFIG_OUTPUT="$(
+  find "$BUNDLED_RUNTIME_ROOT/native/poppler" \
+    -type f -path '*/etc/fonts/fonts.conf' -print
+)" || exit 1
+test -n "$FONTCONFIG_OUTPUT"
+test "$(printf '%s\n' "$FONTCONFIG_OUTPUT" | wc -l | tr -d ' ')" = "1"
+FONTCONFIG_FILE="$FONTCONFIG_OUTPUT"
+test -f "$FONTCONFIG_FILE"
+test -r "$FONTCONFIG_FILE"
+mkdir "$POPLER_PRESSURE_ROOT" "$NO_ENV_ROOT" "$CONFIGURED_ROOT"
+env -u FONTCONFIG_FILE -u FONTCONFIG_PATH \
+  "$PDFTOPPM" -png "$FIXTURE_ROOT/sample.pdf" "$NO_ENV_ROOT/sample" \
+  2>&1 | tee "$NO_ENV_LOG"
+grep -Fxq \
+  "Fontconfig error: Cannot load default config file: File not found" \
+  "$NO_ENV_LOG"
+test "$(wc -l < "$NO_ENV_LOG" | tr -d ' ')" = "1"
+FONTCONFIG_FILE="$FONTCONFIG_FILE" \
+  "$PDFTOPPM" -png "$FIXTURE_ROOT/sample.pdf" "$CONFIGURED_ROOT/sample" \
+  2>&1 | tee "$CONFIGURED_LOG"
+test ! -s "$CONFIGURED_LOG"
+test -s "$NO_ENV_ROOT/sample-1.png"
+test -s "$CONFIGURED_ROOT/sample-1.png"
+cmp "$NO_ENV_ROOT/sample-1.png" "$CONFIGURED_ROOT/sample-1.png"
+```
+
+Expected: the no-environment path is RED with exactly the one Fontconfig line
+above; the dynamically discovered config path is GREEN with pristine empty
+output; and `cmp` proves the two rendered PNGs are byte-identical. Preserve the
+fresh pressure root through final reporting without copying it into the primary
+QA or fixture roots.
 
 Use the host image-viewing capability at 100% zoom on all four render outputs:
 
