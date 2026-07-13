@@ -210,6 +210,7 @@ with these tests:
 Run:
 
 ```bash
+set -euo pipefail
 python3 -m unittest discover -s tests -p 'test_skill_catalog.py' -v
 ```
 
@@ -224,6 +225,7 @@ Inspect the failure output and confirm that every failure points to the missing
 multi-format contract rather than a syntax, fixture, or path error. Then run:
 
 ```bash
+set -euo pipefail
 git status --short
 git add tests/test_skill_catalog.py
 git commit -m "test: define multi-format attachment contract"
@@ -251,6 +253,12 @@ hardcode a versioned cache path. Confirm the required files and imports without
 installing anything:
 
 ```bash
+set -euo pipefail
+: "${BUNDLED_PYTHON:?workspace dependency loader did not return bundled Python}"
+: "${BUNDLED_NODE:?workspace dependency loader did not return bundled Node}"
+: "${BUNDLED_NODE_MODULES:?workspace dependency loader did not return node_modules}"
+: "${DOCUMENTS_SKILL_DIR:?loaded documents skill directory is required}"
+: "${PRESENTATIONS_SKILL_DIR:?loaded presentations skill directory is required}"
 test -x "$BUNDLED_PYTHON"
 test -x "$BUNDLED_NODE"
 test -d "$BUNDLED_NODE_MODULES"
@@ -263,14 +271,26 @@ test -f "$PRESENTATIONS_SKILL_DIR/container_tools/slides_test.py"
 Before creating anything, require every disposable top-level path to be absent:
 
 ```bash
-GENERATOR="/tmp/chatgpt-multi-format-generate-20260713.py"
-BUILD_ROOT="/tmp/chatgpt-multi-format-artifact-workspace-20260713"
-FIXTURE_ROOT="/tmp/chatgpt-multi-format-smoke-20260713"
-QA_ROOT="/tmp/chatgpt-multi-format-qa-20260713"
+set -euo pipefail
+: "${BUNDLED_PYTHON:?workspace dependency loader did not return bundled Python}"
+: "${BUNDLED_NODE:?workspace dependency loader did not return bundled Node}"
+: "${BUNDLED_NODE_MODULES:?workspace dependency loader did not return node_modules}"
+: "${PRESENTATIONS_SKILL_DIR:?loaded presentations skill directory is required}"
+RUN_SUFFIX="${RUN_SUFFIX:-20260713}"
+GENERATOR="/tmp/chatgpt-multi-format-generate-${RUN_SUFFIX}.py"
+BUILD_ROOT="/tmp/chatgpt-multi-format-artifact-workspace-${RUN_SUFFIX}"
+FIXTURE_ROOT="/tmp/chatgpt-multi-format-smoke-${RUN_SUFFIX}"
+QA_ROOT="/tmp/chatgpt-multi-format-qa-${RUN_SUFFIX}"
+VALIDATED_ROOT_FILE="/tmp/chatgpt-multi-format-validated-root-20260713.txt"
+test -x "$BUNDLED_PYTHON"
+test -x "$BUNDLED_NODE"
+test -d "$BUNDLED_NODE_MODULES"
+test -f "$PRESENTATIONS_SKILL_DIR/container_tools/setup_artifact_tool_workspace.mjs"
 test ! -e "$GENERATOR"
 test ! -e "$BUILD_ROOT"
 test ! -e "$FIXTURE_ROOT"
 test ! -e "$QA_ROOT"
+test ! -e "$VALIDATED_ROOT_FILE"
 mkdir "$BUILD_ROOT"
 mkdir "$BUILD_ROOT/xlsx" "$BUILD_ROOT/pptx"
 ln -s "$BUNDLED_NODE_MODULES" "$BUILD_ROOT/xlsx/node_modules"
@@ -860,6 +880,23 @@ existing fixture.
 Run:
 
 ```bash
+set -euo pipefail
+: "${BUNDLED_PYTHON:?workspace dependency loader did not return bundled Python}"
+: "${BUNDLED_NODE:?workspace dependency loader did not return bundled Node}"
+RUN_SUFFIX="${RUN_SUFFIX:-20260713}"
+GENERATOR="/tmp/chatgpt-multi-format-generate-${RUN_SUFFIX}.py"
+BUILD_ROOT="/tmp/chatgpt-multi-format-artifact-workspace-${RUN_SUFFIX}"
+FIXTURE_ROOT="/tmp/chatgpt-multi-format-smoke-${RUN_SUFFIX}"
+QA_ROOT="/tmp/chatgpt-multi-format-qa-${RUN_SUFFIX}"
+VALIDATED_ROOT_FILE="/tmp/chatgpt-multi-format-validated-root-20260713.txt"
+test -x "$BUNDLED_PYTHON"
+test -x "$BUNDLED_NODE"
+test -f "$GENERATOR"
+test -d "$BUILD_ROOT/xlsx"
+test -d "$BUILD_ROOT/pptx"
+test ! -e "$FIXTURE_ROOT"
+test ! -e "$QA_ROOT"
+test ! -e "$VALIDATED_ROOT_FILE"
 "$BUNDLED_NODE" --check "$BUILD_ROOT/xlsx/build-xlsx.mjs"
 "$BUNDLED_NODE" --check "$BUILD_ROOT/pptx/build-pptx.mjs"
 "$BUNDLED_PYTHON" "$GENERATOR" "$FIXTURE_ROOT"
@@ -887,6 +924,25 @@ integrity test.
 Run the format-specific render gates:
 
 ```bash
+set -euo pipefail
+: "${BUNDLED_PYTHON:?workspace dependency loader did not return bundled Python}"
+: "${DOCUMENTS_SKILL_DIR:?loaded documents skill directory is required}"
+: "${PRESENTATIONS_SKILL_DIR:?loaded presentations skill directory is required}"
+RUN_SUFFIX="${RUN_SUFFIX:-20260713}"
+FIXTURE_ROOT="/tmp/chatgpt-multi-format-smoke-${RUN_SUFFIX}"
+QA_ROOT="/tmp/chatgpt-multi-format-qa-${RUN_SUFFIX}"
+VALIDATED_ROOT_FILE="/tmp/chatgpt-multi-format-validated-root-20260713.txt"
+PPTX_OVERFLOW_OUTPUT="$QA_ROOT/pptx/slides-test.txt"
+test -x "$BUNDLED_PYTHON"
+test -f "$DOCUMENTS_SKILL_DIR/render_docx.py"
+test -f "$PRESENTATIONS_SKILL_DIR/container_tools/slides_test.py"
+test -d "$FIXTURE_ROOT"
+test -d "$QA_ROOT/xlsx"
+test -d "$QA_ROOT/pptx"
+test ! -e "$QA_ROOT/docx"
+test ! -e "$QA_ROOT/pdf"
+test ! -e "$PPTX_OVERFLOW_OUTPUT"
+test ! -e "$VALIDATED_ROOT_FILE"
 mkdir "$QA_ROOT/docx" "$QA_ROOT/pdf"
 "$BUNDLED_PYTHON" "$DOCUMENTS_SKILL_DIR/render_docx.py" \
   "$FIXTURE_ROOT/sample.docx" --output_dir "$QA_ROOT/docx"
@@ -894,7 +950,11 @@ PDFTOPPM="$(command -v pdftoppm)"
 test -x "$PDFTOPPM"
 "$PDFTOPPM" -png "$FIXTURE_ROOT/sample.pdf" "$QA_ROOT/pdf/sample"
 "$BUNDLED_PYTHON" "$PRESENTATIONS_SKILL_DIR/container_tools/slides_test.py" \
-  "$FIXTURE_ROOT/sample.pptx"
+  "$FIXTURE_ROOT/sample.pptx" 2>&1 | tee "$PPTX_OVERFLOW_OUTPUT"
+if grep -Fq "ERROR:" "$PPTX_OVERFLOW_OUTPUT"; then
+  exit 1
+fi
+grep -Fxq "Test passed. No overflow detected." "$PPTX_OVERFLOW_OUTPUT"
 test -s "$QA_ROOT/docx/page-1.png"
 test -s "$QA_ROOT/pdf/sample-1.png"
 test -s "$QA_ROOT/xlsx/sample.xlsx"
@@ -907,6 +967,11 @@ test -s "$QA_ROOT/pptx/pptx-layout.json"
 cmp "$QA_ROOT/xlsx/sample.xlsx" "$FIXTURE_ROOT/sample.xlsx"
 cmp "$QA_ROOT/pptx/sample.pptx" "$FIXTURE_ROOT/sample.pptx"
 ```
+
+Expected: the displayed and captured slide-test output contains the exact line
+`Test passed. No overflow detected.` and contains no `ERROR:` record. Either a
+missing success line or any error record fails the gate even if the helper
+process exits zero.
 
 Use the host image-viewing capability at 100% zoom on all four render outputs:
 
@@ -923,11 +988,33 @@ must show its title and marker with clean margins; the spreadsheet must show
 both cells, full marker text, and legible styling; the slide must preserve the
 selected Codex Grid hierarchy, show the full 80px title and 32px marker, and
 contain no overlap, overflow, out-of-bounds content, or ignored layout warning.
-Any visual or layout defect is a failure. Preserve the failed evidence,
-allocate a new absent suffix for build, fixture, and QA roots, create the
-corrected builder under that new build root with `apply_patch`, and re-run the
-full generation/render/inspection gate. Do not overwrite or delete the first
-attempt, and do not use a different authoring library as a fallback.
+Any visual or layout defect is a failure. Stop and report it without creating
+another fixture set in this approved run. Do not overwrite or delete the failed
+evidence, and do not use a different authoring library as a fallback. If Hun
+separately approves a new generation run, choose a single new suffix and apply
+it through the same explicit `RUN_SUFFIX` value on every standalone shell
+block, deriving fresh build, fixture, and QA roots together before doing any
+work. Do not override those roots independently. Leave the validated-root file
+absent until that new root passes every gate.
+
+Only after the render, image, inspection, and layout gates above all pass, run:
+
+```bash
+set -euo pipefail
+RUN_SUFFIX="${RUN_SUFFIX:-20260713}"
+FIXTURE_ROOT="/tmp/chatgpt-multi-format-smoke-${RUN_SUFFIX}"
+QA_ROOT="/tmp/chatgpt-multi-format-qa-${RUN_SUFFIX}"
+VALIDATED_ROOT_FILE="/tmp/chatgpt-multi-format-validated-root-20260713.txt"
+test -d "$FIXTURE_ROOT"
+test -d "$QA_ROOT"
+test ! -e "$VALIDATED_ROOT_FILE"
+VALIDATED_FIXTURE_ROOT="$FIXTURE_ROOT"
+printf '%s\n' "$VALIDATED_FIXTURE_ROOT" > "$VALIDATED_ROOT_FILE"
+test "$(cat "$VALIDATED_ROOT_FILE")" = "$VALIDATED_FIXTURE_ROOT"
+```
+
+This is the only step that defines `VALIDATED_FIXTURE_ROOT`. If it does not
+complete, browser staging must not begin.
 
 Keep the fixture, build, and QA directories until final reporting. They are
 disposable and synthetic, but do not delete them automatically, copy them into
@@ -940,10 +1027,27 @@ the documented browser-client route, and read the complete selected-browser
 documentation plus `file-uploads` documentation. Use a Codex-owned ChatGPT tab
 or a new clean composer, and do not reuse the stale chooser from before the
 permission change. Define the exact fixture inventory in the JavaScript browser
-session using the fixed fixture root from Step 3:
+session by reading the exact root serialized after Step 3. Never substitute a
+default fixture path:
 
 ```js
-const fixtureRoot = "/tmp/chatgpt-multi-format-smoke-20260713";
+const {
+  readFileSync: readValidatedRootFileSync,
+  readdirSync,
+  statSync,
+} = await import("node:fs");
+const { isAbsolute } = await import("node:path");
+const validatedRootFile =
+  "/tmp/chatgpt-multi-format-validated-root-20260713.txt";
+const serializedRoot = readValidatedRootFileSync(validatedRootFile, "utf8");
+const rootLines = serializedRoot.trim().split(/\r?\n/);
+if (rootLines.length !== 1 || !isAbsolute(rootLines[0])) {
+  throw new Error("validated fixture root is missing or ambiguous");
+}
+const fixtureRoot = rootLines[0];
+if (!statSync(fixtureRoot).isDirectory()) {
+  throw new Error("validated fixture root is not a directory");
+}
 const fixtures = [
   { format: "PNG", name: "sample.png", mimeType: "image/png" },
   { format: "JPEG/JPG", name: "sample.jpg", mimeType: "image/jpeg" },
@@ -960,6 +1064,11 @@ const fixtures = [
   ...fixture,
   path: `${fixtureRoot}/${fixture.name}`,
 }));
+const expectedFixtureNames = fixtures.map(({ name }) => name).sort();
+const actualFixtureNames = readdirSync(fixtureRoot).sort();
+if (JSON.stringify(actualFixtureNames) !== JSON.stringify(expectedFixtureNames)) {
+  throw new Error("validated fixture root does not contain the exact inventory");
+}
 ```
 
 Confirm all of the following before the first fixture:
@@ -1245,6 +1354,7 @@ default and an original basename only when separately approved.
 Run:
 
 ```bash
+set -euo pipefail
 python3 -m unittest discover -s tests -p 'test_skill_catalog.py' -v
 git diff --check
 python3 scripts/check_private_paths.py
@@ -1262,6 +1372,7 @@ claim stronger than composer staging. Confirm the source files match Task 2's
 frozen evidence, then run:
 
 ```bash
+set -euo pipefail
 git status --short
 git add skills/chatgpt-collaboration-harness/SKILL.md \
   skills/chatgpt-collaboration-harness/references/chrome-chatgpt-pro.md \
@@ -1282,6 +1393,7 @@ Expected: one skill implementation commit with hooks preserved.
 Run:
 
 ```bash
+set -euo pipefail
 python3 -m unittest discover -s tests -p 'test_*.py'
 python3 scripts/check_private_paths.py
 python3 scripts/audit_agent_stack.py
@@ -1297,7 +1409,9 @@ check emits nothing. Any failure is in scope and must be resolved before sync.
 Run:
 
 ```bash
-VALIDATOR_ROOT="$(mktemp -d /tmp/chatgpt-multi-format-validator.XXXXXX)"
+set -euo pipefail
+VALIDATOR_ROOT="/tmp/chatgpt-multi-format-validator-20260713"
+test ! -e "$VALIDATOR_ROOT"
 python3 -m venv "$VALIDATOR_ROOT/venv"
 "$VALIDATOR_ROOT/venv/bin/python" -m pip install PyYAML
 ```
@@ -1310,6 +1424,9 @@ system Python.
 Run:
 
 ```bash
+set -euo pipefail
+VALIDATOR_ROOT="/tmp/chatgpt-multi-format-validator-20260713"
+test -d "$VALIDATOR_ROOT/venv"
 "$VALIDATOR_ROOT/venv/bin/python" \
   ~/.codex/skills/.system/skill-creator/scripts/quick_validate.py \
   skills/chatgpt-collaboration-harness
@@ -1322,6 +1439,10 @@ Expected: `Skill is valid!`.
 Run the first snapshot:
 
 ```bash
+set -euo pipefail
+VALIDATOR_ROOT="/tmp/chatgpt-multi-format-validator-20260713"
+test -d "$VALIDATOR_ROOT"
+test ! -e "$VALIDATOR_ROOT/runtime-dry-run-1.txt"
 rsync -acni --delete \
   skills/chatgpt-collaboration-harness/ \
   ~/.codex/skills/chatgpt-collaboration-harness/ \
@@ -1343,6 +1464,10 @@ authorization.
 Immediately before sync, run:
 
 ```bash
+set -euo pipefail
+VALIDATOR_ROOT="/tmp/chatgpt-multi-format-validator-20260713"
+test -s "$VALIDATOR_ROOT/runtime-dry-run-1.txt"
+test ! -e "$VALIDATOR_ROOT/runtime-dry-run-2.txt"
 rsync -acni --delete \
   skills/chatgpt-collaboration-harness/ \
   ~/.codex/skills/chatgpt-collaboration-harness/ \
@@ -1359,6 +1484,7 @@ prior deletion approval.
 Only after the reviewed dry runs are identical, run:
 
 ```bash
+set -euo pipefail
 rsync -ac \
   skills/chatgpt-collaboration-harness/ \
   ~/.codex/skills/chatgpt-collaboration-harness/
@@ -1373,6 +1499,9 @@ remove any other path.
 Run:
 
 ```bash
+set -euo pipefail
+VALIDATOR_ROOT="/tmp/chatgpt-multi-format-validator-20260713"
+test -d "$VALIDATOR_ROOT/venv"
 "$VALIDATOR_ROOT/venv/bin/python" \
   ~/.codex/skills/.system/skill-creator/scripts/quick_validate.py \
   ~/.codex/skills/chatgpt-collaboration-harness
@@ -1450,6 +1579,7 @@ For each accepted behavior correction:
 Use this exact staging set only for files that actually changed:
 
 ```bash
+set -euo pipefail
 git status --short
 git add tests/test_skill_catalog.py \
   docs/superpowers/plans/2026-07-13-chatgpt-multi-format-attachments.md \
@@ -1469,6 +1599,7 @@ a fresh snapshot. Prior snapshots and deletion approvals are invalid.
 Run:
 
 ```bash
+set -euo pipefail
 python3 -m unittest discover -s tests -p 'test_*.py'
 python3 scripts/check_private_paths.py
 python3 scripts/audit_agent_stack.py
@@ -1501,6 +1632,7 @@ for action-time protected-branch approval.
 After approval, run:
 
 ```bash
+set -euo pipefail
 git worktree list --porcelain
 git status --short --branch
 ```
@@ -1513,6 +1645,7 @@ Run the second status command in both the feature worktree and the primary
 Run only in the primary worktree where `main` is checked out:
 
 ```bash
+set -euo pipefail
 git pull --ff-only origin main
 git merge --ff-only codex/chatgpt-upload-fallback
 python3 -m unittest discover -s tests -p 'test_*.py'
@@ -1530,6 +1663,7 @@ changed incompatibly. Preserve every hook.
 Run:
 
 ```bash
+set -euo pipefail
 git fetch origin
 git rev-parse HEAD
 git rev-parse origin/main
