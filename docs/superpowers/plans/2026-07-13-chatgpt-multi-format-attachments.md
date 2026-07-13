@@ -1575,7 +1575,23 @@ def regular_digest(path: str, expected: os.stat_result) -> tuple[int, str]:
         opened = os.fstat(descriptor)
         if not stat.S_ISREG(opened.st_mode):
             fail(f"regular file changed type while opening: {path}")
-        if (opened.st_dev, opened.st_ino) != (expected.st_dev, expected.st_ino):
+        expected_identity = (
+            expected.st_dev,
+            expected.st_ino,
+            expected.st_size,
+            stat.S_IMODE(expected.st_mode),
+            expected.st_mtime_ns,
+            expected.st_ctime_ns,
+        )
+        opened_identity = (
+            opened.st_dev,
+            opened.st_ino,
+            opened.st_size,
+            stat.S_IMODE(opened.st_mode),
+            opened.st_mtime_ns,
+            opened.st_ctime_ns,
+        )
+        if opened_identity != expected_identity:
             fail(f"regular file changed identity while opening: {path}")
         digest = hashlib.sha256()
         size = 0
@@ -1586,11 +1602,15 @@ def regular_digest(path: str, expected: os.stat_result) -> tuple[int, str]:
             size += len(chunk)
             digest.update(chunk)
         finished = os.fstat(descriptor)
-        if (
-            finished.st_size != opened.st_size
-            or finished.st_mtime_ns != opened.st_mtime_ns
-            or stat.S_IMODE(finished.st_mode) != stat.S_IMODE(opened.st_mode)
-        ):
+        finished_identity = (
+            finished.st_dev,
+            finished.st_ino,
+            finished.st_size,
+            stat.S_IMODE(finished.st_mode),
+            finished.st_mtime_ns,
+            finished.st_ctime_ns,
+        )
+        if finished_identity != opened_identity:
             fail(f"regular file changed while hashing: {path}")
         return size, digest.hexdigest()
     finally:
@@ -1685,6 +1705,8 @@ def compare(
             if source_content != runtime_content:
                 content_differences.add(relative_path)
 
+    if phase == "capture":
+        return
     expected = ALLOWED_CONTENT_DIFFERENCES if phase == "pre" else set()
     if content_differences != expected:
         fail(
@@ -1699,7 +1721,9 @@ def main() -> None:
     parser.add_argument("--runtime", required=True)
     parser.add_argument("--source-manifest", required=True)
     parser.add_argument("--runtime-manifest", required=True)
-    parser.add_argument("--phase", choices=("pre", "post"), required=True)
+    parser.add_argument(
+        "--phase", choices=("pre", "post", "capture"), required=True
+    )
     arguments = parser.parse_args()
 
     source = inventory(arguments.source)
@@ -1720,10 +1744,15 @@ if __name__ == "__main__":
 This comparator uses `os.lstat` for every entry, `stat.S_IMODE` for modes,
 `hashlib.sha256` plus byte size for regular files, and `os.readlink` for
 symlink targets. Its `os.walk(..., followlinks=False)` inventory has an exact
-relative path set, rejects special files, writes stable sorted JSON, and never
-resolves or follows a path inside either tree. mtime is intentionally excluded
-from the manifest and equality decision. Pre-sync accepts exactly the three
-approved regular-file content differences; post-sync requires exact equality.
+relative path set, rejects special files, and writes stable sorted JSON. This is
+cooperative drift detection, not an adversarial race-proof no-follow guarantee:
+path-based traversal and final-component `O_NOFOLLOW` cannot defeat malicious
+concurrent parent or root replacement. mtime is intentionally excluded from
+the manifest equality decision, while mtime, `st_ctime_ns`, device, inode, size,
+and mode participate in the per-read race check. The immutable reviewed staging
+snapshot and exact allowlist are the mutation safety boundary. Pre-sync accepts
+exactly the three approved regular-file content differences; post-sync requires
+exact equality, and `capture` writes independent manifests without comparing.
 
 Then use `apply_patch` to create
 `/tmp/chatgpt-multi-format-validator-20260713-content-only/review_rsync.py`
@@ -1856,6 +1885,309 @@ deletion, creation, type, mode, symlink, special-file, or unplanned-path
 difference remains fail-closed through the independent comparator, raw
 snapshot, or reviewed action set.
 
+Next, use `apply_patch` to create
+`/tmp/chatgpt-multi-format-validator-20260713-content-only/snapshot_reviewed_source.py`
+with this complete content:
+
+```python
+from __future__ import annotations
+
+import argparse
+import hashlib
+import json
+import os
+import stat
+from typing import Any
+
+
+APPROVED_PATHS = (
+    "SKILL.md",
+    "references/chrome-chatgpt-pro.md",
+    "references/file-artifact-exchange.md",
+)
+ALLOWLIST_BYTES = (
+    b"SKILL.md\n"
+    b"references/chrome-chatgpt-pro.md\n"
+    b"references/file-artifact-exchange.md\n"
+)
+ALLOWLIST_SHA256 = (
+    "7e36fc01e0b8390bfcfeb93bf4fb2e88cf4180fa8714968ce968d41507274c8f"
+)
+
+
+def fail(message: str) -> None:
+    raise SystemExit(message)
+
+
+def stable_identity(metadata: os.stat_result) -> tuple[int, int, int, int, int, int]:
+    return (
+        metadata.st_dev,
+        metadata.st_ino,
+        metadata.st_size,
+        stat.S_IMODE(metadata.st_mode),
+        metadata.st_mtime_ns,
+        metadata.st_ctime_ns,
+    )
+
+
+def read_regular(path: str) -> tuple[bytes, dict[str, Any]]:
+    before = os.lstat(path)
+    if not stat.S_ISREG(before.st_mode):
+        fail(f"reviewed source entry is not regular: {path}")
+    descriptor = os.open(path, os.O_RDONLY | os.O_NOFOLLOW)
+    try:
+        opened = os.fstat(descriptor)
+        if not stat.S_ISREG(opened.st_mode):
+            fail(f"reviewed source entry changed type: {path}")
+        if stable_identity(opened) != stable_identity(before):
+            fail(f"reviewed source entry changed while opening: {path}")
+        chunks: list[bytes] = []
+        while True:
+            chunk = os.read(descriptor, 1024 * 1024)
+            if not chunk:
+                break
+            chunks.append(chunk)
+        after_fd = os.fstat(descriptor)
+    finally:
+        os.close(descriptor)
+    after_path = os.lstat(path)
+    if (
+        stable_identity(after_fd) != stable_identity(opened)
+        or stable_identity(after_path) != stable_identity(opened)
+    ):
+        fail(f"reviewed source entry changed while reading: {path}")
+    content = b"".join(chunks)
+    record = {
+        "path": "",
+        "type": "regular",
+        "mode": f"{stat.S_IMODE(opened.st_mode):04o}",
+        "size": len(content),
+        "sha256": hashlib.sha256(content).hexdigest(),
+    }
+    return content, record
+
+
+def load_object(path: str) -> dict[str, Any]:
+    with open(path, encoding="utf-8") as input_file:
+        value = json.load(input_file)
+    if not isinstance(value, dict):
+        fail(f"JSON object required: {path}")
+    return value
+
+
+def write_json_exclusive(path: str, value: dict[str, Any], mode: int = 0o600) -> None:
+    content = (json.dumps(value, indent=2, sort_keys=True) + "\n").encode()
+    write_bytes_exclusive(path, content, mode)
+
+
+def write_bytes_exclusive(path: str, content: bytes, mode: int) -> None:
+    exclusive_flags = os.O_CREAT | os.O_EXCL | os.O_NOFOLLOW
+    descriptor = os.open(path, os.O_WRONLY | exclusive_flags, mode)
+    try:
+        os.fchmod(descriptor, mode)
+        position = 0
+        while position < len(content):
+            position += os.write(descriptor, content[position:])
+        os.fsync(descriptor)
+        written = os.fstat(descriptor)
+        if not stat.S_ISREG(written.st_mode):
+            fail(f"exclusive output changed type: {path}")
+        if written.st_size != len(content):
+            fail(f"exclusive output size mismatch: {path}")
+        if stat.S_IMODE(written.st_mode) != mode:
+            fail(f"exclusive output mode mismatch: {path}")
+    finally:
+        os.close(descriptor)
+
+
+def approved_subset(full_manifest: dict[str, Any]) -> dict[str, dict[str, Any]]:
+    subset: dict[str, dict[str, Any]] = {}
+    for relative_path in APPROVED_PATHS:
+        entry = full_manifest.get(relative_path)
+        if not isinstance(entry, dict) or entry.get("type") != "regular":
+            fail(f"approved manifest entry is not regular: {relative_path}")
+        subset[relative_path] = entry
+    return subset
+
+
+def validate_allowlist(path: str) -> None:
+    content, record = read_regular(path)
+    if content != ALLOWLIST_BYTES:
+        fail("allowlist bytes are not the exact three-path allowlist")
+    if hashlib.sha256(content).hexdigest() != ALLOWLIST_SHA256:
+        fail("allowlist SHA-256 mismatch")
+    if record["mode"] != "0600":
+        fail("allowlist mode must be 0600")
+    lines = content.decode("ascii").splitlines()
+    if tuple(lines) != APPROVED_PATHS:
+        fail("allowlist ordering or path set changed")
+    for line in lines:
+        components = line.split("/")
+        if (
+            not line
+            or line.startswith("/")
+            or ".." in components
+            or any(character in line for character in "*?[")
+        ):
+            fail(f"unsafe allowlist path: {line!r}")
+
+
+def create_snapshot(
+    source: str,
+    source_manifest_path: str,
+    staging: str,
+    allowlist: str,
+    staging_manifest_path: str,
+) -> None:
+    full_manifest = load_object(source_manifest_path)
+    expected = approved_subset(full_manifest)
+    os.mkdir(staging, 0o700)
+    os.mkdir(os.path.join(staging, "references"), 0o700)
+    actual: dict[str, dict[str, Any]] = {}
+    for relative_path in APPROVED_PATHS:
+        source_path = os.path.join(source, *relative_path.split("/"))
+        content, record = read_regular(source_path)
+        record["path"] = relative_path
+        if record != expected[relative_path]:
+            fail(f"live source no longer matches reviewed manifest: {relative_path}")
+        destination = os.path.join(staging, *relative_path.split("/"))
+        write_bytes_exclusive(destination, content, int(record["mode"], 8))
+        actual[relative_path] = record
+    write_bytes_exclusive(allowlist, ALLOWLIST_BYTES, 0o600)
+    write_json_exclusive(staging_manifest_path, actual)
+    verify_snapshot(staging, allowlist, source_manifest_path, staging_manifest_path)
+
+
+def scan_staging(staging: str) -> dict[str, dict[str, Any]]:
+    root = os.lstat(staging)
+    references = os.lstat(os.path.join(staging, "references"))
+    if not stat.S_ISDIR(root.st_mode) or not stat.S_ISDIR(references.st_mode):
+        fail("staging root and references parent must be real directories")
+    observed_paths: set[str] = set()
+    for current, dirnames, filenames in os.walk(staging, followlinks=False):
+        dirnames.sort()
+        filenames.sort()
+        for name in [*dirnames, *filenames]:
+            relative_path = os.path.relpath(
+                os.path.join(current, name), staging
+            ).replace(os.sep, "/")
+            observed_paths.add(relative_path)
+    expected_paths = {*APPROVED_PATHS, "references"}
+    if observed_paths != expected_paths:
+        fail(
+            f"staging path set changed: expected={sorted(expected_paths)!r}, "
+            f"actual={sorted(observed_paths)!r}"
+        )
+    actual: dict[str, dict[str, Any]] = {}
+    for relative_path in APPROVED_PATHS:
+        content, record = read_regular(
+            os.path.join(staging, *relative_path.split("/"))
+        )
+        record["path"] = relative_path
+        if record["size"] != len(content):
+            fail(f"staging size mismatch: {relative_path}")
+        actual[relative_path] = record
+    return actual
+
+
+def verify_snapshot(
+    staging: str,
+    allowlist: str,
+    source_manifest_path: str,
+    staging_manifest_path: str,
+) -> None:
+    validate_allowlist(allowlist)
+    expected = approved_subset(load_object(source_manifest_path))
+    recorded = load_object(staging_manifest_path)
+    actual = scan_staging(staging)
+    if recorded != expected or actual != expected:
+        fail("staging manifest does not match the reviewed source subset")
+    print("staging manifest matches the reviewed allowlisted subset")
+
+
+def root_identity(root: str) -> dict[str, Any]:
+    metadata = os.lstat(root)
+    if not stat.S_ISDIR(metadata.st_mode):
+        fail("runtime root is not a real directory")
+    return {
+        "device": metadata.st_dev,
+        "inode": metadata.st_ino,
+        "mode": f"{stat.S_IMODE(metadata.st_mode):04o}",
+        "type": "directory",
+    }
+
+
+def capture_identity(root: str, output: str) -> None:
+    write_json_exclusive(output, root_identity(root))
+
+
+def check_identity(root: str, expected_path: str) -> None:
+    if root_identity(root) != load_object(expected_path):
+        fail("runtime root identity mismatch")
+    print("runtime root identity is unchanged")
+
+
+def main() -> None:
+    parser = argparse.ArgumentParser()
+    subparsers = parser.add_subparsers(dest="command", required=True)
+
+    create = subparsers.add_parser("create")
+    create.add_argument("--source", required=True)
+    create.add_argument("--source-manifest", required=True)
+    create.add_argument("--staging", required=True)
+    create.add_argument("--allowlist", required=True)
+    create.add_argument("--staging-manifest", required=True)
+
+    verify = subparsers.add_parser("verify")
+    verify.add_argument("--staging", required=True)
+    verify.add_argument("--allowlist", required=True)
+    verify.add_argument("--source-manifest", required=True)
+    verify.add_argument("--staging-manifest", required=True)
+
+    identity = subparsers.add_parser("identity")
+    identity.add_argument("--root", required=True)
+    identity.add_argument("--output", required=True)
+
+    check = subparsers.add_parser("check-identity")
+    check.add_argument("--root", required=True)
+    check.add_argument("--expected", required=True)
+
+    arguments = parser.parse_args()
+    if arguments.command == "create":
+        create_snapshot(
+            arguments.source,
+            arguments.source_manifest,
+            arguments.staging,
+            arguments.allowlist,
+            arguments.staging_manifest,
+        )
+    elif arguments.command == "verify":
+        verify_snapshot(
+            arguments.staging,
+            arguments.allowlist,
+            arguments.source_manifest,
+            arguments.staging_manifest,
+        )
+    elif arguments.command == "identity":
+        capture_identity(arguments.root, arguments.output)
+    else:
+        check_identity(arguments.root, arguments.expected)
+
+
+if __name__ == "__main__":
+    main()
+```
+
+The snapshot builder reads each approved live source file with
+`O_NOFOLLOW`/`fstat` and checks device, inode, size, mode, `st_mtime_ns`, and
+`st_ctime_ns` before and after the read. It requires a regular file whose
+bytes, SHA-256, size, and mode exactly match the reviewed full manifest. It
+creates parents and files exclusively, uses
+`O_CREAT | os.O_EXCL | os.O_NOFOLLOW`, writes and `fsync`s the reviewed bytes,
+and never copies a symlink or special file. The exclusive allowlist is exactly
+three ASCII relative paths with no blank, absolute, `..`, or glob entry; its
+bytes, SHA-256, and `0600` mode are validated on every gate.
+
 Finally, use `apply_patch` to create
 `/tmp/chatgpt-multi-format-validator-20260713-content-only/pressure_sync.py`
 with this complete content:
@@ -1864,6 +2196,7 @@ with this complete content:
 from __future__ import annotations
 
 import argparse
+import json
 import os
 import shutil
 import subprocess
@@ -2046,15 +2379,326 @@ def run_openrsync_case(root: Path, comparator: Path, reviewer: Path) -> None:
     print("openrsync raw/review: PASS")
 
 
+def write_json(path: Path, value: object) -> None:
+    path.write_text(
+        json.dumps(value, indent=2, sort_keys=True) + "\n",
+        encoding="utf-8",
+    )
+
+
+def reviewer_case(
+    root: Path,
+    reviewer: Path,
+    name: str,
+    *,
+    raw: str,
+    count: int,
+    phase: str,
+    source_manifest: dict[str, object],
+    runtime_manifest: dict[str, object],
+    should_pass: bool,
+    expected_error: str = "",
+) -> None:
+    scenario = root / f"reviewer-{name}"
+    scenario.mkdir()
+    write(scenario / "raw.txt", raw)
+    write(scenario / "count.txt", f"Number of files transferred: {count}\n")
+    write_json(scenario / "source.json", source_manifest)
+    write_json(scenario / "runtime.json", runtime_manifest)
+    result = subprocess.run(
+        [
+            sys.executable,
+            str(reviewer),
+            "--raw",
+            str(scenario / "raw.txt"),
+            "--count",
+            str(scenario / "count.txt"),
+            "--source-manifest",
+            str(scenario / "source.json"),
+            "--runtime-manifest",
+            str(scenario / "runtime.json"),
+            "--reviewed",
+            str(scenario / "reviewed.txt"),
+            "--phase",
+            phase,
+        ],
+        text=True,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        check=False,
+    )
+    if (result.returncode == 0) != should_pass:
+        raise SystemExit(
+            f"reviewer {name}: unexpected result "
+            f"rc={result.returncode}, stdout={result.stdout!r}, stderr={result.stderr!r}"
+        )
+    if not should_pass and expected_error not in result.stderr:
+        raise SystemExit(
+            f"reviewer {name}: expected {expected_error!r}, got {result.stderr!r}"
+        )
+    print(f"{name}: {'PASS' if should_pass else 'REJECTED'}")
+
+
+def reviewer_pressure(root: Path, reviewer: Path) -> None:
+    equal = {
+        "agents/openai.yaml": {
+            "type": "regular",
+            "mode": "0644",
+            "size": 4,
+            "sha256": "same",
+        }
+    }
+    unequal = {
+        "agents/openai.yaml": {
+            "type": "regular",
+            "mode": "0644",
+            "size": 5,
+            "sha256": "different",
+        }
+    }
+    reviewer_case(
+        root,
+        reviewer,
+        "unequal-manifest pseudo-record",
+        raw=".f..T.... agents/openai.yaml\n",
+        count=3,
+        phase="pre",
+        source_manifest=equal,
+        runtime_manifest=unequal,
+        should_pass=False,
+        expected_error="lacks equal regular-file size, SHA-256, and mode",
+    )
+    reviewer_case(
+        root,
+        reviewer,
+        "non-pseudo T record",
+        raw=(
+            ">fcsT.... SKILL.md\n"
+            ">fcsT.... references/chrome-chatgpt-pro.md\n"
+            ">fcsT.... references/file-artifact-exchange.md\n"
+        ),
+        count=3,
+        phase="pre",
+        source_manifest={},
+        runtime_manifest={},
+        should_pass=True,
+    )
+    reviewer_case(
+        root,
+        reviewer,
+        "unknown raw line",
+        raw="unexpected output\n",
+        count=3,
+        phase="pre",
+        source_manifest={},
+        runtime_manifest={},
+        should_pass=False,
+        expected_error="unrecognized raw rsync output",
+    )
+    reviewer_case(
+        root,
+        reviewer,
+        "transfer-count mismatch",
+        raw=(
+            ">fcsT.... SKILL.md\n"
+            ">fcsT.... references/chrome-chatgpt-pro.md\n"
+            ">fcsT.... references/file-artifact-exchange.md\n"
+        ),
+        count=2,
+        phase="pre",
+        source_manifest={},
+        runtime_manifest={},
+        should_pass=False,
+        expected_error="unstable transfer-count evidence",
+    )
+    reviewer_case(
+        root,
+        reviewer,
+        "deletion or creation record",
+        raw="*deleting runtime-only.md\n",
+        count=3,
+        phase="pre",
+        source_manifest={},
+        runtime_manifest={},
+        should_pass=False,
+        expected_error="reviewed pre-sync actions are not exact",
+    )
+    reviewer_case(
+        root,
+        reviewer,
+        "post-sync action",
+        raw=">fcsT.... SKILL.md\n",
+        count=0,
+        phase="post",
+        source_manifest={},
+        runtime_manifest={},
+        should_pass=False,
+        expected_error="post-sync reviewed dry run is not empty",
+    )
+    reviewer_case(
+        root,
+        reviewer,
+        "duplicate or unapproved action",
+        raw=(
+            ">fcsT.... SKILL.md\n"
+            ">fcsT.... SKILL.md\n"
+            ">fcsT.... unapproved.md\n"
+        ),
+        count=3,
+        phase="pre",
+        source_manifest={},
+        runtime_manifest={},
+        should_pass=False,
+        expected_error="reviewed pre-sync actions are not exact",
+    )
+
+
+def run_snapshot(
+    snapshotter: Path,
+    *arguments: str,
+) -> subprocess.CompletedProcess[str]:
+    return subprocess.run(
+        [sys.executable, str(snapshotter), *arguments],
+        text=True,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        check=False,
+    )
+
+
+def snapshot_binding_pressure(
+    root: Path,
+    comparator: Path,
+    snapshotter: Path,
+) -> None:
+    scenario = root / "snapshot-binding"
+    source = scenario / "source"
+    runtime = scenario / "runtime"
+    make_tree(source)
+    shutil.copytree(source, runtime, symlinks=True)
+    for relative_path in ALLOWED:
+        write(source / relative_path, f"reviewed {relative_path}\n")
+    result = invoke_comparator(
+        comparator,
+        scenario,
+        source,
+        runtime,
+        phase="pre",
+    )
+    if result.returncode != 0:
+        raise SystemExit(f"snapshot comparator failed: {result.stderr!r}")
+
+    staging = scenario / "reviewed-source"
+    allowlist = scenario / "reviewed-allowlist.txt"
+    staging_manifest = scenario / "staging.json"
+    result = run_snapshot(
+        snapshotter,
+        "create",
+        "--source",
+        str(source),
+        "--source-manifest",
+        str(scenario / "source.json"),
+        "--staging",
+        str(staging),
+        "--allowlist",
+        str(allowlist),
+        "--staging-manifest",
+        str(staging_manifest),
+    )
+    if result.returncode != 0:
+        raise SystemExit(f"snapshot creation failed: {result.stderr!r}")
+
+    reviewed_skill = (staging / "SKILL.md").read_bytes()
+    write(source / "SKILL.md", "mutated live source\n")
+    result = run_snapshot(
+        snapshotter,
+        "verify",
+        "--staging",
+        str(staging),
+        "--allowlist",
+        str(allowlist),
+        "--source-manifest",
+        str(scenario / "source.json"),
+        "--staging-manifest",
+        str(staging_manifest),
+    )
+    if result.returncode != 0 or (staging / "SKILL.md").read_bytes() != reviewed_skill:
+        raise SystemExit("reviewed staging changed after live-source mutation")
+    print("live-source mutation after pre-2: PASS")
+
+    write(source / "source-only-after-pre-2.md", "must not transport\n")
+    transport = subprocess.run(
+        [
+            "/usr/bin/rsync",
+            "-rlpcni",
+            f"--files-from={allowlist}",
+            f"{staging}/",
+            f"{runtime}/",
+        ],
+        text=True,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        check=True,
+        env={**os.environ, "LC_ALL": "C"},
+    )
+    if "source-only-after-pre-2.md" in transport.stdout:
+        raise SystemExit("allowlist transport exposed a source-only addition")
+    print("source-only addition after pre-2: PASS")
+
+    identity_path = scenario / "runtime-root.json"
+    result = run_snapshot(
+        snapshotter,
+        "identity",
+        "--root",
+        str(runtime),
+        "--output",
+        str(identity_path),
+    )
+    if result.returncode != 0:
+        raise SystemExit(f"identity capture failed: {result.stderr!r}")
+    runtime.rename(scenario / "runtime-replaced")
+    runtime.mkdir()
+    result = run_snapshot(
+        snapshotter,
+        "check-identity",
+        "--root",
+        str(runtime),
+        "--expected",
+        str(identity_path),
+    )
+    if result.returncode == 0 or "runtime root identity mismatch" not in result.stderr:
+        raise SystemExit("runtime-root identity mismatch was not rejected")
+    print("runtime-root identity mismatch: REJECTED")
+
+    write(staging / "SKILL.md", "mutated staging\n")
+    result = run_snapshot(
+        snapshotter,
+        "verify",
+        "--staging",
+        str(staging),
+        "--allowlist",
+        str(allowlist),
+        "--source-manifest",
+        str(scenario / "source.json"),
+        "--staging-manifest",
+        str(staging_manifest),
+    )
+    if result.returncode == 0 or "staging manifest does not match" not in result.stderr:
+        raise SystemExit("staging mutation was not rejected")
+    print("staging mutation: REJECTED")
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--root", required=True)
     parser.add_argument("--comparator", required=True)
     parser.add_argument("--reviewer", required=True)
+    parser.add_argument("--snapshotter", required=True)
     arguments = parser.parse_args()
     root = Path(arguments.root)
     comparator = Path(arguments.comparator)
     reviewer = Path(arguments.reviewer)
+    snapshotter = Path(arguments.snapshotter)
     root.mkdir(mode=0o700)
 
     structural_case(
@@ -2139,23 +2783,27 @@ def main() -> None:
         should_pass=True,
     )
     run_openrsync_case(root, comparator, reviewer)
+    reviewer_pressure(root, reviewer)
+    snapshot_binding_pressure(root, comparator, snapshotter)
 
 
 if __name__ == "__main__":
     main()
 ```
 
-Mark all three scripts executable only after `apply_patch` succeeds:
+Mark all four scripts executable only after `apply_patch` succeeds:
 
 ```bash
 set -euo pipefail
 VALIDATOR_ROOT="/tmp/chatgpt-multi-format-validator-20260713-content-only"
 test -f "$VALIDATOR_ROOT/compare_skill_trees.py"
 test -f "$VALIDATOR_ROOT/review_rsync.py"
+test -f "$VALIDATOR_ROOT/snapshot_reviewed_source.py"
 test -f "$VALIDATOR_ROOT/pressure_sync.py"
 chmod 700 \
   "$VALIDATOR_ROOT/compare_skill_trees.py" \
   "$VALIDATOR_ROOT/review_rsync.py" \
+  "$VALIDATOR_ROOT/snapshot_reviewed_source.py" \
   "$VALIDATOR_ROOT/pressure_sync.py"
 ```
 
@@ -2169,10 +2817,16 @@ set -euo pipefail
 VALIDATOR_ROOT="/tmp/chatgpt-multi-format-validator-20260713-content-only"
 PRESSURE_ROOT="/tmp/chatgpt-multi-format-sync-pressure-20260713-content-only"
 test ! -e "$PRESSURE_ROOT"
+RSYNC_IDENTITY="$(/usr/bin/rsync --version | sed -n '1,2p')"
+EXPECTED_RSYNC_IDENTITY="$(printf '%s\n%s' \
+  'openrsync: protocol version 29' \
+  'rsync version 2.6.9 compatible')"
+test "$RSYNC_IDENTITY" = "$EXPECTED_RSYNC_IDENTITY"
 "$VALIDATOR_ROOT/venv/bin/python" "$VALIDATOR_ROOT/pressure_sync.py" \
   --root "$PRESSURE_ROOT" \
   --comparator "$VALIDATOR_ROOT/compare_skill_trees.py" \
-  --reviewer "$VALIDATOR_ROOT/review_rsync.py"
+  --reviewer "$VALIDATOR_ROOT/review_rsync.py" \
+  --snapshotter "$VALIDATOR_ROOT/snapshot_reviewed_source.py"
 "$VALIDATOR_ROOT/venv/bin/python" \
   ~/.codex/skills/.system/skill-creator/scripts/quick_validate.py \
   skills/chatgpt-collaboration-harness
@@ -2190,6 +2844,17 @@ changed symlink target: REJECTED
 special-file insertion: REJECTED
 timestamp-only mismatch: PASS
 openrsync raw/review: PASS
+unequal-manifest pseudo-record: REJECTED
+non-pseudo T record: PASS
+unknown raw line: REJECTED
+transfer-count mismatch: REJECTED
+deletion or creation record: REJECTED
+post-sync action: REJECTED
+duplicate or unapproved action: REJECTED
+live-source mutation after pre-2: PASS
+source-only addition after pre-2: PASS
+runtime-root identity mismatch: REJECTED
+staging mutation: REJECTED
 Skill is valid!
 ```
 
@@ -2197,8 +2862,11 @@ The manifest must catch all structural cases, including the changed symlink
 target that this host's openrsync did not itemize. Only timestamp-only mismatch
 is ignored. The openrsync case must reproduce and safely filter the exact
 pseudo-record while retaining exactly three reviewed content updates.
+`/usr/bin/rsync` must match the tested openrsync protocol and itemized format
+above. A different implementation stops the workflow and requires fresh raw-
+format pressure validation before any transport or mutation command.
 
-- [ ] **Step 5: Capture and compare two complete pre-sync evidence sets**
+- [ ] **Step 5: Bind two pre-sync evidence sets to reviewed staging**
 
 Capture dry-run 1. Every output path uses exclusive creation, so a collision
 stops the run:
@@ -2209,6 +2877,9 @@ set -C
 VALIDATOR_ROOT="/tmp/chatgpt-multi-format-validator-20260713-content-only"
 SOURCE="skills/chatgpt-collaboration-harness"
 RUNTIME="$HOME/.codex/skills/chatgpt-collaboration-harness"
+STAGING="$VALIDATOR_ROOT/reviewed-source"
+ALLOWLIST="$VALIDATOR_ROOT/reviewed-allowlist.txt"
+STAGING_MANIFEST="$VALIDATOR_ROOT/reviewed-source-manifest.json"
 for path in \
   "$VALIDATOR_ROOT/source-pre-1.json" \
   "$VALIDATOR_ROOT/runtime-pre-1.json" \
@@ -2224,10 +2895,10 @@ done
   --source-manifest "$VALIDATOR_ROOT/source-pre-1.json" \
   --runtime-manifest "$VALIDATOR_ROOT/runtime-pre-1.json" \
   --phase pre
-LC_ALL=C rsync -rlpcni --delete --out-format='%i %n%L' \
+LC_ALL=C /usr/bin/rsync -rlpcni --delete --out-format='%i %n%L' \
   "$SOURCE/" "$RUNTIME/" \
   > "$VALIDATOR_ROOT/runtime-raw-dry-run-1.txt"
-LC_ALL=C rsync -rlpcni --delete --stats --out-format='' \
+LC_ALL=C /usr/bin/rsync -rlpcni --delete --stats --out-format='' \
   "$SOURCE/" "$RUNTIME/" \
   | awk '/^Number of files transferred:/{print}' \
   > "$VALIDATOR_ROOT/runtime-transfer-count-1.txt"
@@ -2240,6 +2911,37 @@ LC_ALL=C rsync -rlpcni --delete --stats --out-format='' \
   --phase pre
 cat "$VALIDATOR_ROOT/runtime-reviewed-dry-run-1.txt"
 cat "$VALIDATOR_ROOT/runtime-transfer-count-1.txt"
+for path in \
+  "$STAGING" \
+  "$ALLOWLIST" \
+  "$STAGING_MANIFEST" \
+  "$VALIDATOR_ROOT/transport-raw-dry-run-1.txt" \
+  "$VALIDATOR_ROOT/transport-reviewed-dry-run-1.txt" \
+  "$VALIDATOR_ROOT/transport-transfer-count-1.txt"
+do
+  test ! -e "$path"
+done
+"$VALIDATOR_ROOT/venv/bin/python" \
+  "$VALIDATOR_ROOT/snapshot_reviewed_source.py" create \
+  --source "$SOURCE" \
+  --source-manifest "$VALIDATOR_ROOT/source-pre-1.json" \
+  --staging "$STAGING" \
+  --allowlist "$ALLOWLIST" \
+  --staging-manifest "$STAGING_MANIFEST"
+LC_ALL=C /usr/bin/rsync -rlpcni --files-from="$ALLOWLIST" \
+  --out-format='%i %n%L' "$STAGING/" "$RUNTIME/" \
+  > "$VALIDATOR_ROOT/transport-raw-dry-run-1.txt"
+LC_ALL=C /usr/bin/rsync -rlpcni --files-from="$ALLOWLIST" \
+  --stats --out-format='' "$STAGING/" "$RUNTIME/" \
+  | awk '/^Number of files transferred:/{print}' \
+  > "$VALIDATOR_ROOT/transport-transfer-count-1.txt"
+"$VALIDATOR_ROOT/venv/bin/python" "$VALIDATOR_ROOT/review_rsync.py" \
+  --raw "$VALIDATOR_ROOT/transport-raw-dry-run-1.txt" \
+  --count "$VALIDATOR_ROOT/transport-transfer-count-1.txt" \
+  --source-manifest "$STAGING_MANIFEST" \
+  --runtime-manifest "$VALIDATOR_ROOT/runtime-pre-1.json" \
+  --reviewed "$VALIDATOR_ROOT/transport-reviewed-dry-run-1.txt" \
+  --phase pre
 ```
 
 Expected: the independent manifests allow
@@ -2258,12 +2960,18 @@ set -C
 VALIDATOR_ROOT="/tmp/chatgpt-multi-format-validator-20260713-content-only"
 SOURCE="skills/chatgpt-collaboration-harness"
 RUNTIME="$HOME/.codex/skills/chatgpt-collaboration-harness"
+STAGING="$VALIDATOR_ROOT/reviewed-source"
+ALLOWLIST="$VALIDATOR_ROOT/reviewed-allowlist.txt"
+STAGING_MANIFEST="$VALIDATOR_ROOT/reviewed-source-manifest.json"
 for path in \
   "$VALIDATOR_ROOT/source-pre-2.json" \
   "$VALIDATOR_ROOT/runtime-pre-2.json" \
   "$VALIDATOR_ROOT/runtime-raw-dry-run-2.txt" \
   "$VALIDATOR_ROOT/runtime-reviewed-dry-run-2.txt" \
-  "$VALIDATOR_ROOT/runtime-transfer-count-2.txt"
+  "$VALIDATOR_ROOT/runtime-transfer-count-2.txt" \
+  "$VALIDATOR_ROOT/transport-raw-dry-run-2.txt" \
+  "$VALIDATOR_ROOT/transport-reviewed-dry-run-2.txt" \
+  "$VALIDATOR_ROOT/transport-transfer-count-2.txt"
 do
   test ! -e "$path"
 done
@@ -2273,10 +2981,10 @@ done
   --source-manifest "$VALIDATOR_ROOT/source-pre-2.json" \
   --runtime-manifest "$VALIDATOR_ROOT/runtime-pre-2.json" \
   --phase pre
-LC_ALL=C rsync -rlpcni --delete --out-format='%i %n%L' \
+LC_ALL=C /usr/bin/rsync -rlpcni --delete --out-format='%i %n%L' \
   "$SOURCE/" "$RUNTIME/" \
   > "$VALIDATOR_ROOT/runtime-raw-dry-run-2.txt"
-LC_ALL=C rsync -rlpcni --delete --stats --out-format='' \
+LC_ALL=C /usr/bin/rsync -rlpcni --delete --stats --out-format='' \
   "$SOURCE/" "$RUNTIME/" \
   | awk '/^Number of files transferred:/{print}' \
   > "$VALIDATOR_ROOT/runtime-transfer-count-2.txt"
@@ -2297,26 +3005,98 @@ cmp -- "$VALIDATOR_ROOT/runtime-reviewed-dry-run-1.txt" \
   "$VALIDATOR_ROOT/runtime-reviewed-dry-run-2.txt"
 cmp -- "$VALIDATOR_ROOT/runtime-transfer-count-1.txt" \
   "$VALIDATOR_ROOT/runtime-transfer-count-2.txt"
+"$VALIDATOR_ROOT/venv/bin/python" \
+  "$VALIDATOR_ROOT/snapshot_reviewed_source.py" verify \
+  --staging "$STAGING" \
+  --allowlist "$ALLOWLIST" \
+  --source-manifest "$VALIDATOR_ROOT/source-pre-2.json" \
+  --staging-manifest "$STAGING_MANIFEST"
+LC_ALL=C /usr/bin/rsync -rlpcni --files-from="$ALLOWLIST" \
+  --out-format='%i %n%L' "$STAGING/" "$RUNTIME/" \
+  > "$VALIDATOR_ROOT/transport-raw-dry-run-2.txt"
+LC_ALL=C /usr/bin/rsync -rlpcni --files-from="$ALLOWLIST" \
+  --stats --out-format='' "$STAGING/" "$RUNTIME/" \
+  | awk '/^Number of files transferred:/{print}' \
+  > "$VALIDATOR_ROOT/transport-transfer-count-2.txt"
+"$VALIDATOR_ROOT/venv/bin/python" "$VALIDATOR_ROOT/review_rsync.py" \
+  --raw "$VALIDATOR_ROOT/transport-raw-dry-run-2.txt" \
+  --count "$VALIDATOR_ROOT/transport-transfer-count-2.txt" \
+  --source-manifest "$STAGING_MANIFEST" \
+  --runtime-manifest "$VALIDATOR_ROOT/runtime-pre-2.json" \
+  --reviewed "$VALIDATOR_ROOT/transport-reviewed-dry-run-2.txt" \
+  --phase pre
+cmp -- "$VALIDATOR_ROOT/transport-raw-dry-run-1.txt" \
+  "$VALIDATOR_ROOT/transport-raw-dry-run-2.txt"
+cmp -- "$VALIDATOR_ROOT/transport-reviewed-dry-run-1.txt" \
+  "$VALIDATOR_ROOT/transport-reviewed-dry-run-2.txt"
+cmp -- "$VALIDATOR_ROOT/transport-transfer-count-1.txt" \
+  "$VALIDATOR_ROOT/transport-transfer-count-2.txt"
 ```
 
-Expected: every `cmp --` exits zero. Any difference invalidates the review and
+Expected: every `cmp --` exits zero. The staging manifest exactly matches the
+allowlisted entries from source-pre-2.json, both transport dry runs use the
+same reviewed staging snapshot and exact three-path allowlist, their raw,
+reviewed, and stable-count evidence is byte-identical, and the count is
+`Number of files transferred: 3`. Any difference invalidates the review and
 every prior deletion approval.
 
 - [ ] **Step 6: Synchronize without blanket deletion**
 
-Only after dry-run 2 and every comparison succeed, synchronize content and
-permissions without timestamps and without deletion:
+Only after dry-run 2 and every comparison succeed, recapture the full live
+source/runtime manifests, revalidate the reviewed subset, record the runtime
+root identity, and synchronize from staging. The mutation source is the
+reviewed staging snapshot, never the live source tree:
+
+Binding contract: mutation source is the reviewed staging snapshot; staging manifest exactly matches the allowlisted entries from source-pre-2.json; immutable reviewed staging snapshot and exact allowlist are the mutation safety boundary. The legacy `rsync -rlpc \` live-source form is forbidden.
 
 ```bash
 set -euo pipefail
-rsync -rlpc \
-  skills/chatgpt-collaboration-harness/ \
-  ~/.codex/skills/chatgpt-collaboration-harness/
+VALIDATOR_ROOT="/tmp/chatgpt-multi-format-validator-20260713-content-only"
+SOURCE="skills/chatgpt-collaboration-harness"
+RUNTIME="$HOME/.codex/skills/chatgpt-collaboration-harness"
+STAGING="$VALIDATOR_ROOT/reviewed-source"
+ALLOWLIST="$VALIDATOR_ROOT/reviewed-allowlist.txt"
+STAGING_MANIFEST="$VALIDATOR_ROOT/reviewed-source-manifest.json"
+for path in \
+  "$VALIDATOR_ROOT/source-pre-final.json" \
+  "$VALIDATOR_ROOT/runtime-pre-final.json" \
+  "$VALIDATOR_ROOT/runtime-root-before-sync.json"
+do
+  test ! -e "$path"
+done
+"$VALIDATOR_ROOT/venv/bin/python" "$VALIDATOR_ROOT/compare_skill_trees.py" \
+  --source "$SOURCE" \
+  --runtime "$RUNTIME" \
+  --source-manifest "$VALIDATOR_ROOT/source-pre-final.json" \
+  --runtime-manifest "$VALIDATOR_ROOT/runtime-pre-final.json" \
+  --phase pre
+cmp -- "$VALIDATOR_ROOT/source-pre-2.json" \
+  "$VALIDATOR_ROOT/source-pre-final.json"
+cmp -- "$VALIDATOR_ROOT/runtime-pre-2.json" \
+  "$VALIDATOR_ROOT/runtime-pre-final.json"
+"$VALIDATOR_ROOT/venv/bin/python" \
+  "$VALIDATOR_ROOT/snapshot_reviewed_source.py" verify \
+  --staging "$STAGING" \
+  --allowlist "$ALLOWLIST" \
+  --source-manifest "$VALIDATOR_ROOT/source-pre-2.json" \
+  --staging-manifest "$STAGING_MANIFEST"
+"$VALIDATOR_ROOT/venv/bin/python" \
+  "$VALIDATOR_ROOT/snapshot_reviewed_source.py" identity \
+  --root "$RUNTIME" \
+  --output "$VALIDATOR_ROOT/runtime-root-before-sync.json"
+"$VALIDATOR_ROOT/venv/bin/python" \
+  "$VALIDATOR_ROOT/snapshot_reviewed_source.py" check-identity \
+  --root "$RUNTIME" \
+  --expected "$VALIDATOR_ROOT/runtime-root-before-sync.json"
+/usr/bin/rsync -rlpc --files-from="$ALLOWLIST" \
+  "$STAGING/" "$RUNTIME/"
 ```
 
-Do not add `-t`, `-a`, or the deletion flag. If an exact runtime-only path was
-separately approved for deletion, revalidate only that path immediately before
-removing it; do not remove any other path.
+Do not add `-t`, `-a`, or the deletion flag. Do not substitute `$SOURCE/` for
+`$STAGING/`; the actual mutation must consume the exact bytes reviewed in the
+staging manifest. If an exact runtime-only path was separately approved for
+deletion, revalidate only that path immediately before removing it; do not
+remove any other path.
 
 - [ ] **Step 7: Validate the installed copy and exact equality**
 
@@ -2330,40 +3110,64 @@ OLD_VALIDATOR_ROOT="/tmp/chatgpt-multi-format-validator-20260713"
 VALIDATOR_ROOT="/tmp/chatgpt-multi-format-validator-20260713-content-only"
 SOURCE="skills/chatgpt-collaboration-harness"
 RUNTIME="$HOME/.codex/skills/chatgpt-collaboration-harness"
+STAGING="$VALIDATOR_ROOT/reviewed-source"
+ALLOWLIST="$VALIDATOR_ROOT/reviewed-allowlist.txt"
+STAGING_MANIFEST="$VALIDATOR_ROOT/reviewed-source-manifest.json"
 for path in \
   "$VALIDATOR_ROOT/source-post.json" \
   "$VALIDATOR_ROOT/runtime-post.json" \
-  "$VALIDATOR_ROOT/runtime-raw-post.txt" \
-  "$VALIDATOR_ROOT/runtime-reviewed-post.txt" \
-  "$VALIDATOR_ROOT/runtime-transfer-count-post.txt"
+  "$VALIDATOR_ROOT/runtime-root-after-sync.json" \
+  "$VALIDATOR_ROOT/transport-raw-post.txt" \
+  "$VALIDATOR_ROOT/transport-reviewed-post.txt" \
+  "$VALIDATOR_ROOT/transport-transfer-count-post.txt"
 do
   test ! -e "$path"
 done
+"$VALIDATOR_ROOT/venv/bin/python" \
+  "$VALIDATOR_ROOT/snapshot_reviewed_source.py" identity \
+  --root "$RUNTIME" \
+  --output "$VALIDATOR_ROOT/runtime-root-after-sync.json"
+cmp -- "$VALIDATOR_ROOT/runtime-root-before-sync.json" \
+  "$VALIDATOR_ROOT/runtime-root-after-sync.json"
+"$VALIDATOR_ROOT/venv/bin/python" \
+  "$VALIDATOR_ROOT/snapshot_reviewed_source.py" check-identity \
+  --root "$RUNTIME" \
+  --expected "$VALIDATOR_ROOT/runtime-root-before-sync.json"
 "$VALIDATOR_ROOT/venv/bin/python" "$VALIDATOR_ROOT/compare_skill_trees.py" \
   --source "$SOURCE" \
   --runtime "$RUNTIME" \
   --source-manifest "$VALIDATOR_ROOT/source-post.json" \
   --runtime-manifest "$VALIDATOR_ROOT/runtime-post.json" \
-  --phase post
-LC_ALL=C rsync -rlpcni --delete --out-format='%i %n%L' \
-  "$SOURCE/" "$RUNTIME/" \
-  > "$VALIDATOR_ROOT/runtime-raw-post.txt"
-LC_ALL=C rsync -rlpcni --delete --stats --out-format='' \
-  "$SOURCE/" "$RUNTIME/" \
-  | awk '/^Number of files transferred:/{print}' \
-  > "$VALIDATOR_ROOT/runtime-transfer-count-post.txt"
-"$VALIDATOR_ROOT/venv/bin/python" "$VALIDATOR_ROOT/review_rsync.py" \
-  --raw "$VALIDATOR_ROOT/runtime-raw-post.txt" \
-  --count "$VALIDATOR_ROOT/runtime-transfer-count-post.txt" \
-  --source-manifest "$VALIDATOR_ROOT/source-post.json" \
-  --runtime-manifest "$VALIDATOR_ROOT/runtime-post.json" \
-  --reviewed "$VALIDATOR_ROOT/runtime-reviewed-post.txt" \
-  --phase post
-test ! -s "$VALIDATOR_ROOT/runtime-reviewed-post.txt"
-grep -Fx "Number of files transferred: 0" \
-  "$VALIDATOR_ROOT/runtime-transfer-count-post.txt"
+  --phase capture
+cmp -- "$VALIDATOR_ROOT/source-pre-2.json" \
+  "$VALIDATOR_ROOT/runtime-post.json"
+"$VALIDATOR_ROOT/venv/bin/python" \
+  "$VALIDATOR_ROOT/snapshot_reviewed_source.py" verify \
+  --staging "$STAGING" \
+  --allowlist "$ALLOWLIST" \
+  --source-manifest "$VALIDATOR_ROOT/source-pre-2.json" \
+  --staging-manifest "$STAGING_MANIFEST"
+cmp -- "$VALIDATOR_ROOT/source-pre-2.json" \
+  "$VALIDATOR_ROOT/source-post.json"
 cmp -- "$VALIDATOR_ROOT/source-post.json" \
   "$VALIDATOR_ROOT/runtime-post.json"
+LC_ALL=C /usr/bin/rsync -rlpcni --files-from="$ALLOWLIST" \
+  --out-format='%i %n%L' "$STAGING/" "$RUNTIME/" \
+  > "$VALIDATOR_ROOT/transport-raw-post.txt"
+LC_ALL=C /usr/bin/rsync -rlpcni --files-from="$ALLOWLIST" \
+  --stats --out-format='' "$STAGING/" "$RUNTIME/" \
+  | awk '/^Number of files transferred:/{print}' \
+  > "$VALIDATOR_ROOT/transport-transfer-count-post.txt"
+"$VALIDATOR_ROOT/venv/bin/python" "$VALIDATOR_ROOT/review_rsync.py" \
+  --raw "$VALIDATOR_ROOT/transport-raw-post.txt" \
+  --count "$VALIDATOR_ROOT/transport-transfer-count-post.txt" \
+  --source-manifest "$STAGING_MANIFEST" \
+  --runtime-manifest "$VALIDATOR_ROOT/runtime-post.json" \
+  --reviewed "$VALIDATOR_ROOT/transport-reviewed-post.txt" \
+  --phase post
+test ! -s "$VALIDATOR_ROOT/transport-reviewed-post.txt"
+grep -Fx "Number of files transferred: 0" \
+  "$VALIDATOR_ROOT/transport-transfer-count-post.txt"
 "$VALIDATOR_ROOT/venv/bin/python" \
   ~/.codex/skills/.system/skill-creator/scripts/quick_validate.py \
   "$RUNTIME"
@@ -2372,10 +3176,16 @@ shasum -a 256 -c "$VALIDATOR_ROOT/old-red-snapshot.sha256"
 test -s "$OLD_VALIDATOR_ROOT/runtime-dry-run-1.txt"
 ```
 
-Expected: the post-sync reviewed dry run is empty, the stable count is
+Expected: the runtime full manifest equals the reviewed source-pre-2 full manifest
+before any live-source comparison; staging still equals the approved subset;
+live source still equals source-pre-2; runtime root identity is unchanged.
+The post-sync reviewed dry run is empty, the stable count is
 `Number of files transferred: 0`, post-sync manifests are exactly equal,
 `quick_validate.py` reports `Skill is valid!`, `diff -ru` has no output, and
-the old stopped RED snapshot still matches its recorded hash.
+the old stopped RED snapshot still matches its recorded hash. If live source
+drifted during synchronization, the live-source comparison and final diff fail,
+but the earlier runtime-versus-reviewed comparison proves that installed bytes
+still came from the reviewed staging payload.
 
 ### Task 5: Pressure-Test, Review, And Correct The Final Branch
 
@@ -2455,9 +3265,10 @@ git commit -m "fix: address multi-format attachment review"
 If any installed skill source changes, preserve every prior validator and
 snapshot, choose a fresh collision-checked content-only validator suffix, and
 repeat Task 4's independent manifests, pressure cases, two raw/reviewed/count
-pre-sync evidence sets, `rsync -rlpc` synchronization, post-sync validator,
-exact manifest equality, and recursive diff. Prior snapshots and deletion
-approvals are invalid.
+pre-sync evidence sets, exclusive reviewed staging snapshot, exact allowlist,
+staging-bound transport dry runs and mutation, runtime-root identity checks,
+post-sync validator, exact manifest equality, and recursive diff. Prior
+snapshots and deletion approvals are invalid.
 
 - [ ] **Step 5: Run final branch verification**
 
