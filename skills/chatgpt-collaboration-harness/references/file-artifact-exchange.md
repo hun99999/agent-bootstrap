@@ -39,6 +39,11 @@ Large bundles, full source files, private repository material, Git URLs, reposit
 | CSV | text/csv | `unsupported-in-current-smoke` | `verified-staging` | Direct: fresh chooser event failed with `Timed out after 3000ms waiting for file chooser.` before chooser/isMultiple/setFiles; no preview. Clipboard: fresh exact-MIME write and paste fulfilled; exactly one visible `clipboard.csv` preview, with no error or pending state. |
 | ZIP | application/zip | `user-verified` | `verified-staging` | Direct: Hun-confirmed attachment capability; the fresh chooser event failed with `Timed out after 3000ms waiting for file chooser.` before chooser/isMultiple/setFiles and produced no preview. Clipboard: fresh exact-MIME write and paste fulfilled; exactly one visible `clipboard.zip` preview, with no error or pending state. |
 
+The smoke requested a 10000ms chooser wait, but the current browser-client
+runtime clamps the effective chooser wait to 3000ms. These classifications are
+current-runtime smoke only, not categorical Chrome or product-support claims;
+revalidate if the browser-client runtime changes.
+
 - `verified-staging`: that transport passed its complete composer-staging rule
   for the exact format/MIME pair in this smoke.
 - `unsupported-in-current-smoke`: the attempted transport did not pass that
@@ -117,8 +122,9 @@ smoke contract.
    approved prompt, expected preview count and order, no unexpected content,
    and no error or pending state. This browser smoke is not authorized to send.
 6. On failure, do not send a partial packet. Remove only unambiguous draft
-   attachments from the current attempt; otherwise leave a handoff and report
-   the exact state.
+   attachments from the current attempt. If cleanup is ambiguous, abandon that
+   dirty composer, establish a fresh clean composer before any continuation,
+   and leave an exact handoff that reports the unresolved state.
 7. When delivery is separately authorized, verify the persisted outgoing
    message. Composer previews prove staging, not delivery.
 

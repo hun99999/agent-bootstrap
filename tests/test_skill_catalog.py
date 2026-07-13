@@ -387,6 +387,7 @@ class SkillCatalogTests(unittest.TestCase):
             matrix_heading,
             transport_heading,
         )
+        normalized_matrix = " ".join(matrix.split())
         rows = [line for line in matrix.splitlines() if line.startswith("|")][2:]
         timeout_evidence = "Timed out after 3000ms waiting for file chooser."
         expected_rows = (
@@ -520,14 +521,20 @@ class SkillCatalogTests(unittest.TestCase):
                     self.assertIn(marker, evidence)
                 for forbidden_claim in forbidden_row_claims:
                     self.assertNotIn(forbidden_claim, evidence.lower())
-        self.assertIn("prove composer staging only", matrix)
-        self.assertIn("no Send occurred", matrix)
+        self.assertIn("prove composer staging only", normalized_matrix)
+        self.assertIn("no Send occurred", normalized_matrix)
         self.assertIn(
             "ChatGPT Library persistence or deletion was not inspected",
-            matrix,
+            normalized_matrix,
         )
-        self.assertIn("does not establish account-side cleanup", matrix)
-        self.assertIn("not a categorical product-support claim", matrix)
+        self.assertIn(
+            "does not establish account-side cleanup",
+            normalized_matrix,
+        )
+        self.assertIn(
+            "not a categorical product-support claim",
+            normalized_matrix,
+        )
         self.assertNotIn(PRIVATE_HOME_PATH, matrix)
 
     def test_chatgpt_collaboration_harness_gates_clipboard_by_exact_mime_evidence(
@@ -580,6 +587,7 @@ class SkillCatalogTests(unittest.TestCase):
             section_heading,
             next_heading,
         )
+        normalized_section = " ".join(section.split())
 
         nested_write = """const verifiedMimeType = "image/png";
    await tab.clipboard.write([
@@ -609,7 +617,7 @@ class SkillCatalogTests(unittest.TestCase):
             "leave an exact handoff",
         )
         for anchor in cleanup_anchors:
-            self.assertIn(anchor, section)
+            self.assertIn(anchor, normalized_section)
         self.assertNotIn("write([{ base64", section)
 
     def test_chatgpt_multi_format_plan_reconciles_completed_smoke_evidence(
@@ -622,6 +630,7 @@ class SkillCatalogTests(unittest.TestCase):
             / "plans"
             / "2026-07-13-chatgpt-multi-format-attachments.md"
         ).read_text(encoding="utf-8")
+        normalized_plan = " ".join(plan.split())
 
         expected_phrases = (
             "timeoutMs: 10000",
@@ -635,7 +644,7 @@ class SkillCatalogTests(unittest.TestCase):
             "Future primary QA runs must still require",
         )
         for phrase in expected_phrases:
-            self.assertIn(phrase, plan)
+            self.assertIn(phrase, normalized_plan)
 
     def test_chatgpt_collaboration_harness_runtime_sync_rechecks_itemized_snapshot(
         self,

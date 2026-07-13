@@ -1004,6 +1004,14 @@ an output PNG alone is not sufficient. Ambient Fontconfig variables are cleared;
 the discovered `FONTCONFIG_FILE` remains unexported and is supplied only to the
 bundled `pdftoppm` command.
 
+Completed-run evidence note: the primary
+`/tmp/chatgpt-multi-format-qa-20260713/pdf/pdftoppm.log` was absent, so the
+completed run does not claim that the primary command above executed exactly
+as written. Supplemental configured-render evidence is preserved at
+`/tmp/chatgpt-multi-format-qa-20260713/pdf-fontconfig-clean/pdftoppm-output.txt`;
+that log is empty, and its PNG is byte-identical to the primary PDF PNG. Future
+primary QA runs must still require the primary log to exist and be empty.
+
 Run this one-time Poppler pressure scenario outside the primary QA root to
 prove the environment requirement. These pressure outputs are evidence only
 and must never become browser fixtures:
@@ -1219,6 +1227,13 @@ if (typeof chooserAllowsMultiple !== "boolean") {
 }
 await chooser.setFiles(currentFixture.path);
 ```
+
+The completed smoke supplied `timeoutMs: 10000` as shown above. Source
+inspection found that the current browser-client runtime clamps the effective
+chooser wait to 3000ms, which matches the recorded `Timed out after 3000ms`
+error. The resulting classifications are current-runtime smoke only, not a
+categorical chooser or product-support claim; revalidate if the browser-client
+runtime changes.
 
 Classify the direct attempt with this exact rule:
 
@@ -1448,8 +1463,9 @@ write and a visible attachment preview passed the smoke contract.
    approved prompt, expected preview count and order, no unexpected content,
    and no error or pending state. This browser smoke is not authorized to send.
 6. On failure, do not send a partial packet. Remove only unambiguous draft
-   attachments from the current attempt; otherwise leave a handoff and report
-   the exact state.
+   attachments from the current attempt. If cleanup is ambiguous, abandon that
+   dirty composer, establish a fresh clean composer before any continuation,
+   and leave an exact handoff that reports the unresolved state.
 7. When delivery is separately authorized, verify the persisted outgoing
    message. Composer previews prove staging, not delivery.
 
@@ -1755,10 +1771,14 @@ cooperative drift detection, not an adversarial race-proof no-follow guarantee:
 path-based traversal and final-component `O_NOFOLLOW` cannot defeat malicious
 concurrent parent or root replacement. mtime is intentionally excluded from
 the manifest equality decision, while mtime, `st_ctime_ns`, device, inode, size,
-and mode participate in the per-read race check. The immutable reviewed staging
-snapshot and exact allowlist are the mutation safety boundary. Pre-sync accepts
-exactly the three approved regular-file content differences; post-sync requires
-exact equality, and `capture` writes independent manifests without comparing.
+and mode participate in the per-read race check. The staging tree is ordinary,
+owner-writable filesystem state, so there is a check-to-use window between its
+last verification and the separate transport command. The owner-controlled,
+repeatedly verified staging snapshot and exact allowlist are the mutation safety
+boundary for this cooperative workflow; they do not make the files OS-immutable
+or remove the documented cooperative-drift limitation. Pre-sync accepts exactly
+the three approved regular-file content differences; post-sync requires exact
+equality, and `capture` writes independent manifests without comparing.
 
 Then use `apply_patch` to create
 `/tmp/chatgpt-multi-format-validator-20260713-content-only-pathsafe/review_rsync.py`
@@ -3168,7 +3188,7 @@ source/runtime manifests, revalidate the reviewed subset, record the runtime
 root identity, and synchronize from staging. The mutation source is the
 reviewed staging snapshot, never the live source tree:
 
-Binding contract: mutation source is the reviewed staging snapshot; staging manifest exactly matches the allowlisted entries from source-pre-2.json; immutable reviewed staging snapshot and exact allowlist are the mutation safety boundary. The legacy `rsync -rlpc \` live-source form is forbidden.
+Binding contract: mutation source is the reviewed staging snapshot; staging manifest exactly matches the allowlisted entries from source-pre-2.json; the owner-controlled, repeatedly verified staging snapshot and exact allowlist are the mutation safety boundary. The staging files remain owner-writable, so a check-to-use window remains; the checks provide cooperative drift detection, not OS immutability or an adversarial race-proof no-follow guarantee. The legacy `rsync -rlpc \` live-source form is forbidden.
 
 ```bash
 set -euo pipefail
