@@ -685,6 +685,13 @@ class SkillCatalogTests(unittest.TestCase):
             "runtime-root identity mismatch",
             "reviewed parent directory modes match source-pre-2",
             "transport contains exactly three regular-file actions and no directory metadata action",
+            "/tmp/chatgpt-multi-format-validator-20260713-content-only-pathsafe",
+            "preserve the failed content-only validator and its zero-byte raw evidence",
+            "for evidence_path in",
+            "--rsync-path=/usr/bin/rsync",
+            "PATH=/usr/bin:/bin",
+            "poisoned PATH without peer pin: REJECTED",
+            "poisoned PATH with peer pin: PASS",
         )
         for phrase in expected_phrases:
             self.assertIn(phrase, task)
@@ -692,6 +699,7 @@ class SkillCatalogTests(unittest.TestCase):
         self.assertNotIn("rsync -acni", task)
         self.assertNotIn("rsync -ac \\", task)
         self.assertNotIn("rsync -a ", task)
+        self.assertNotIn("for path in", task)
         actual_sync = markdown_section(
             task,
             "- [ ] **Step 6: Synchronize without blanket deletion**",
