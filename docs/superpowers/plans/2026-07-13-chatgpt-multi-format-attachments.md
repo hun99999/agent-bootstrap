@@ -3264,7 +3264,7 @@ LC_ALL=C /usr/bin/rsync -rlpcni --rsync-path=/usr/bin/rsync --files-from="$ALLOW
 "$VALIDATOR_ROOT/venv/bin/python" "$VALIDATOR_ROOT/review_rsync.py" \
   --raw "$VALIDATOR_ROOT/transport-raw-dry-run-1.txt" \
   --count "$VALIDATOR_ROOT/transport-transfer-count-1.txt" \
-  --source-manifest "$STAGING_MANIFEST" \
+  --source-manifest "$VALIDATOR_ROOT/source-pre-1.json" \
   --runtime-manifest "$VALIDATOR_ROOT/runtime-pre-1.json" \
   --reviewed "$VALIDATOR_ROOT/transport-reviewed-dry-run-1.txt" \
   --phase pre
@@ -3276,6 +3276,11 @@ paths, and the stable count is `Number of files transferred: 3`. Any deletion,
 creation, type, mode, symlink, special-file, or unplanned-path difference stops.
 A runtime-only deletion requires Hun's exact-path approval; it never authorizes
 blanket deletion.
+
+The transport reviewer uses the corresponding full source manifest so its path
+set matches the full runtime manifest. The snapshot verifier independently
+proves that staging matches the reviewed three-path subset of that full source
+manifest.
 
 Immediately before synchronization, capture dry-run 2 and byte-compare all raw,
 reviewed, stable-count, and independent-manifest evidence:
@@ -3347,7 +3352,7 @@ LC_ALL=C /usr/bin/rsync -rlpcni --rsync-path=/usr/bin/rsync --files-from="$ALLOW
 "$VALIDATOR_ROOT/venv/bin/python" "$VALIDATOR_ROOT/review_rsync.py" \
   --raw "$VALIDATOR_ROOT/transport-raw-dry-run-2.txt" \
   --count "$VALIDATOR_ROOT/transport-transfer-count-2.txt" \
-  --source-manifest "$STAGING_MANIFEST" \
+  --source-manifest "$VALIDATOR_ROOT/source-pre-2.json" \
   --runtime-manifest "$VALIDATOR_ROOT/runtime-pre-2.json" \
   --reviewed "$VALIDATOR_ROOT/transport-reviewed-dry-run-2.txt" \
   --phase pre
@@ -3488,7 +3493,7 @@ LC_ALL=C /usr/bin/rsync -rlpcni --rsync-path=/usr/bin/rsync --files-from="$ALLOW
 "$VALIDATOR_ROOT/venv/bin/python" "$VALIDATOR_ROOT/review_rsync.py" \
   --raw "$VALIDATOR_ROOT/transport-raw-post.txt" \
   --count "$VALIDATOR_ROOT/transport-transfer-count-post.txt" \
-  --source-manifest "$STAGING_MANIFEST" \
+  --source-manifest "$VALIDATOR_ROOT/source-post.json" \
   --runtime-manifest "$VALIDATOR_ROOT/runtime-post.json" \
   --reviewed "$VALIDATOR_ROOT/transport-reviewed-post.txt" \
   --phase post

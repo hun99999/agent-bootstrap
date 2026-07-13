@@ -872,6 +872,9 @@ class SkillCatalogTests(unittest.TestCase):
             "paths != expected_updates",
             "one-file correction raw/review: PASS",
             "one to three approved regular-file content differences",
+            "transport reviewer uses the corresponding full source manifest",
+            '--source-manifest "$VALIDATOR_ROOT/source-pre-1.json"',
+            '--source-manifest "$VALIDATOR_ROOT/source-pre-2.json"',
         )
         for phrase in expected_phrases:
             self.assertIn(phrase, normalized_task)
@@ -886,6 +889,10 @@ class SkillCatalogTests(unittest.TestCase):
         )
         self.assertNotIn(
             "if len(actions) != 3 or paths != ALLOWED_UPDATES",
+            task,
+        )
+        self.assertNotIn(
+            '--source-manifest "$STAGING_MANIFEST"',
             task,
         )
 
