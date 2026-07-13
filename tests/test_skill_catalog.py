@@ -564,6 +564,28 @@ class SkillCatalogTests(unittest.TestCase):
             self.assertIn(phrase, reference)
         self.assertNotIn(PRIVATE_HOME_PATH, reference)
 
+    def test_chatgpt_collaboration_harness_separates_staging_from_library_cleanup(
+        self,
+    ) -> None:
+        reference = (
+            REPO_ROOT
+            / "skills"
+            / "chatgpt-collaboration-harness"
+            / "references"
+            / "file-artifact-exchange.md"
+        ).read_text(encoding="utf-8")
+        normalized_reference = " ".join(reference.split())
+
+        expected_phrases = (
+            "Attachment staging may create an account-side Library item even without Send.",
+            "Clearing or abandoning the composer is not account-side cleanup.",
+            "Do not stage files that must not persist in the account.",
+            "Library deletion requires Hun's action-time approval or direct user action.",
+            "https://help.openai.com/en/articles/20001052-library",
+        )
+        for phrase in expected_phrases:
+            self.assertIn(phrase, normalized_reference)
+
     def test_chatgpt_collaboration_harness_preserves_clipboard_api_order(
         self,
     ) -> None:
