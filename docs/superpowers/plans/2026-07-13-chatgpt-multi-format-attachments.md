@@ -2916,8 +2916,11 @@ never use it as the validator, repository source, or installed runtime:
 ```bash
 set -euo pipefail
 VALIDATOR_ROOT="/tmp/chatgpt-multi-format-validator-20260713-content-only-pathsafe"
-PRESSURE_ROOT="/tmp/chatgpt-multi-format-sync-pressure-20260713-content-only"
+OLD_PRESSURE_ROOT="/tmp/chatgpt-multi-format-sync-pressure-20260713-content-only"
+PRESSURE_ROOT="/tmp/chatgpt-multi-format-sync-pressure-20260713-content-only-pathsafe"
+test -d "$OLD_PRESSURE_ROOT"
 test ! -e "$PRESSURE_ROOT"
+test ! -L "$PRESSURE_ROOT"
 RSYNC_IDENTITY="$(/usr/bin/rsync --version | sed -n '1,2p')"
 EXPECTED_RSYNC_IDENTITY="$(printf '%s\n%s' \
   'openrsync: protocol version 29' \
@@ -2977,6 +2980,7 @@ above. A different implementation stops the workflow and requires fresh raw-
 format pressure validation before any transport or mutation command.
 Pressure subprocesses use the explicit equivalent of `PATH=/usr/bin:/bin` and
 do not inherit the ambient command search path.
+Explicitly preserve the old content-only pressure root and never delete, overwrite, or reuse it.
 
 - [ ] **Step 5: Bind two pre-sync evidence sets to reviewed staging**
 
@@ -3224,6 +3228,7 @@ stable count:
 set -euo pipefail
 set -C
 OLD_VALIDATOR_ROOT="/tmp/chatgpt-multi-format-validator-20260713"
+FAILED_VALIDATOR_ROOT="/tmp/chatgpt-multi-format-validator-20260713-content-only"
 VALIDATOR_ROOT="/tmp/chatgpt-multi-format-validator-20260713-content-only-pathsafe"
 SOURCE="skills/chatgpt-collaboration-harness"
 RUNTIME="$HOME/.codex/skills/chatgpt-collaboration-harness"
@@ -3291,6 +3296,11 @@ grep -Fx "Number of files transferred: 0" \
 diff -ru "$SOURCE" "$RUNTIME"
 shasum -a 256 -c "$VALIDATOR_ROOT/old-red-snapshot.sha256"
 test -s "$OLD_VALIDATOR_ROOT/runtime-dry-run-1.txt"
+test -d "$FAILED_VALIDATOR_ROOT"
+test -f "$FAILED_VALIDATOR_ROOT/runtime-raw-dry-run-1.txt"
+test ! -L "$FAILED_VALIDATOR_ROOT/runtime-raw-dry-run-1.txt"
+test ! -s "$FAILED_VALIDATOR_ROOT/runtime-raw-dry-run-1.txt"
+shasum -a 256 -c "$VALIDATOR_ROOT/failed-path-raw.sha256"
 ```
 
 Expected: the runtime full manifest equals the reviewed source-pre-2 full manifest
