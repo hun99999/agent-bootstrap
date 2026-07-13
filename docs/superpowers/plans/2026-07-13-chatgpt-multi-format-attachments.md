@@ -22,6 +22,7 @@
 - Create temporarily outside Git: `/tmp/chatgpt-multi-format-artifact-workspace-20260713/pptx/build-pptx.mjs`
 - Create temporarily outside Git: `/tmp/chatgpt-multi-format-smoke-20260713/`
 - Create temporarily outside Git: `/tmp/chatgpt-multi-format-qa-20260713/`
+- Create temporarily outside Git: `/tmp/chatgpt-multi-format-validated-root-20260713.txt` (synthetic coordination pointer; preserve it through browser staging)
 - Synchronize after repository validation: `~/.codex/skills/chatgpt-collaboration-harness/`
 
 Do not add a repository script, dependency, binary fixture, global Codex config
@@ -241,6 +242,7 @@ Expected: one test-only commit; pre-commit hooks run normally.
 - Create temporarily: `/tmp/chatgpt-multi-format-artifact-workspace-20260713/pptx/build-pptx.mjs`
 - Create temporarily: `/tmp/chatgpt-multi-format-smoke-20260713/`
 - Create temporarily: `/tmp/chatgpt-multi-format-qa-20260713/`
+- Create temporarily: `/tmp/chatgpt-multi-format-validated-root-20260713.txt` (synthetic coordination pointer; preserve it through browser staging)
 - Do not modify repository files.
 
 - [ ] **Step 1: Resolve and isolate the bundled artifact runtimes**
@@ -281,7 +283,7 @@ GENERATOR="/tmp/chatgpt-multi-format-generate-${RUN_SUFFIX}.py"
 BUILD_ROOT="/tmp/chatgpt-multi-format-artifact-workspace-${RUN_SUFFIX}"
 FIXTURE_ROOT="/tmp/chatgpt-multi-format-smoke-${RUN_SUFFIX}"
 QA_ROOT="/tmp/chatgpt-multi-format-qa-${RUN_SUFFIX}"
-VALIDATED_ROOT_FILE="/tmp/chatgpt-multi-format-validated-root-20260713.txt"
+VALIDATED_ROOT_FILE="/tmp/chatgpt-multi-format-validated-root-${RUN_SUFFIX}.txt"
 test -x "$BUNDLED_PYTHON"
 test -x "$BUNDLED_NODE"
 test -d "$BUNDLED_NODE_MODULES"
@@ -291,6 +293,7 @@ test ! -e "$BUILD_ROOT"
 test ! -e "$FIXTURE_ROOT"
 test ! -e "$QA_ROOT"
 test ! -e "$VALIDATED_ROOT_FILE"
+test ! -L "$VALIDATED_ROOT_FILE"
 mkdir "$BUILD_ROOT"
 mkdir "$BUILD_ROOT/xlsx" "$BUILD_ROOT/pptx"
 ln -s "$BUNDLED_NODE_MODULES" "$BUILD_ROOT/xlsx/node_modules"
@@ -888,7 +891,7 @@ GENERATOR="/tmp/chatgpt-multi-format-generate-${RUN_SUFFIX}.py"
 BUILD_ROOT="/tmp/chatgpt-multi-format-artifact-workspace-${RUN_SUFFIX}"
 FIXTURE_ROOT="/tmp/chatgpt-multi-format-smoke-${RUN_SUFFIX}"
 QA_ROOT="/tmp/chatgpt-multi-format-qa-${RUN_SUFFIX}"
-VALIDATED_ROOT_FILE="/tmp/chatgpt-multi-format-validated-root-20260713.txt"
+VALIDATED_ROOT_FILE="/tmp/chatgpt-multi-format-validated-root-${RUN_SUFFIX}.txt"
 test -x "$BUNDLED_PYTHON"
 test -x "$BUNDLED_NODE"
 test -f "$GENERATOR"
@@ -897,6 +900,7 @@ test -d "$BUILD_ROOT/pptx"
 test ! -e "$FIXTURE_ROOT"
 test ! -e "$QA_ROOT"
 test ! -e "$VALIDATED_ROOT_FILE"
+test ! -L "$VALIDATED_ROOT_FILE"
 "$BUNDLED_NODE" --check "$BUILD_ROOT/xlsx/build-xlsx.mjs"
 "$BUNDLED_NODE" --check "$BUILD_ROOT/pptx/build-pptx.mjs"
 "$BUNDLED_PYTHON" "$GENERATOR" "$FIXTURE_ROOT"
@@ -931,7 +935,7 @@ set -euo pipefail
 RUN_SUFFIX="${RUN_SUFFIX:-20260713}"
 FIXTURE_ROOT="/tmp/chatgpt-multi-format-smoke-${RUN_SUFFIX}"
 QA_ROOT="/tmp/chatgpt-multi-format-qa-${RUN_SUFFIX}"
-VALIDATED_ROOT_FILE="/tmp/chatgpt-multi-format-validated-root-20260713.txt"
+VALIDATED_ROOT_FILE="/tmp/chatgpt-multi-format-validated-root-${RUN_SUFFIX}.txt"
 PPTX_OVERFLOW_OUTPUT="$QA_ROOT/pptx/slides-test.txt"
 test -x "$BUNDLED_PYTHON"
 test -f "$DOCUMENTS_SKILL_DIR/render_docx.py"
@@ -943,6 +947,7 @@ test ! -e "$QA_ROOT/docx"
 test ! -e "$QA_ROOT/pdf"
 test ! -e "$PPTX_OVERFLOW_OUTPUT"
 test ! -e "$VALIDATED_ROOT_FILE"
+test ! -L "$VALIDATED_ROOT_FILE"
 mkdir "$QA_ROOT/docx" "$QA_ROOT/pdf"
 "$BUNDLED_PYTHON" "$DOCUMENTS_SKILL_DIR/render_docx.py" \
   "$FIXTURE_ROOT/sample.docx" --output_dir "$QA_ROOT/docx"
@@ -1001,16 +1006,33 @@ Only after the render, image, inspection, and layout gates above all pass, run:
 
 ```bash
 set -euo pipefail
+: "${BUNDLED_NODE:?workspace dependency loader did not return bundled Node}"
 RUN_SUFFIX="${RUN_SUFFIX:-20260713}"
 FIXTURE_ROOT="/tmp/chatgpt-multi-format-smoke-${RUN_SUFFIX}"
 QA_ROOT="/tmp/chatgpt-multi-format-qa-${RUN_SUFFIX}"
-VALIDATED_ROOT_FILE="/tmp/chatgpt-multi-format-validated-root-20260713.txt"
+VALIDATED_ROOT_FILE="/tmp/chatgpt-multi-format-validated-root-${RUN_SUFFIX}.txt"
+test -x "$BUNDLED_NODE"
 test -d "$FIXTURE_ROOT"
 test -d "$QA_ROOT"
-test ! -e "$VALIDATED_ROOT_FILE"
 VALIDATED_FIXTURE_ROOT="$FIXTURE_ROOT"
-printf '%s\n' "$VALIDATED_FIXTURE_ROOT" > "$VALIDATED_ROOT_FILE"
-test "$(cat "$VALIDATED_ROOT_FILE")" = "$VALIDATED_FIXTURE_ROOT"
+"$BUNDLED_NODE" -e '
+  const { writeFileSync } = require("node:fs");
+  const [pointerPath, validatedRoot] = process.argv.slice(1);
+  writeFileSync(pointerPath, `${validatedRoot}\n`, {
+    flag: "wx",
+    mode: 0o600,
+  });
+' "$VALIDATED_ROOT_FILE" "$VALIDATED_FIXTURE_ROOT"
+"$BUNDLED_NODE" -e '
+  const { readFileSync, statSync } = require("node:fs");
+  const [pointerPath, validatedRoot] = process.argv.slice(1);
+  if (readFileSync(pointerPath, "utf8") !== `${validatedRoot}\n`) {
+    throw new Error("validated-root pointer content mismatch");
+  }
+  if ((statSync(pointerPath).mode & 0o777) !== 0o600) {
+    throw new Error("validated-root pointer mode is not 0600");
+  }
+' "$VALIDATED_ROOT_FILE" "$VALIDATED_FIXTURE_ROOT"
 ```
 
 This is the only step that defines `VALIDATED_FIXTURE_ROOT`. If it does not
@@ -1037,8 +1059,9 @@ const {
   statSync,
 } = await import("node:fs");
 const { isAbsolute } = await import("node:path");
+const validatedRunSuffix = "20260713";
 const validatedRootFile =
-  "/tmp/chatgpt-multi-format-validated-root-20260713.txt";
+  `/tmp/chatgpt-multi-format-validated-root-${validatedRunSuffix}.txt`;
 const serializedRoot = readValidatedRootFileSync(validatedRootFile, "utf8");
 const rootLines = serializedRoot.trim().split(/\r?\n/);
 if (rootLines.length !== 1 || !isAbsolute(rootLines[0])) {
@@ -1070,6 +1093,11 @@ if (JSON.stringify(actualFixtureNames) !== JSON.stringify(expectedFixtureNames))
   throw new Error("validated fixture root does not contain the exact inventory");
 }
 ```
+
+`validatedRunSuffix` must equal the exact `RUN_SUFFIX` used by every successful
+shell block in this run. The shown value is for the initially approved run. If
+Hun separately approves a suffixed run, explicitly substitute that same suffix
+before executing this browser block; never reuse `20260713` as a fallback.
 
 Confirm all of the following before the first fixture:
 
