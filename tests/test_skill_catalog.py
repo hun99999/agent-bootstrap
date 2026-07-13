@@ -594,6 +594,75 @@ class SkillCatalogTests(unittest.TestCase):
         self.assertLess(sync_section.index(dry_run), sync_section.index(actual_sync))
         self.assertNotIn("rsync -a --delete", sync_section)
 
+    def test_chatgpt_multi_format_plan_uses_content_only_runtime_sync_evidence(
+        self,
+    ) -> None:
+        plan = (
+            REPO_ROOT
+            / "docs"
+            / "superpowers"
+            / "plans"
+            / "2026-07-13-chatgpt-multi-format-attachments.md"
+        ).read_text(encoding="utf-8")
+        task = markdown_section(plan, "### Task 4:", "### Task 5:")
+
+        expected_phrases = (
+            "/tmp/chatgpt-multi-format-validator-20260713-content-only",
+            "/tmp/chatgpt-multi-format-validator-20260713",
+            "preserve the stopped validator and its snapshots as RED evidence",
+            "os.lstat",
+            "followlinks=False",
+            "stat.S_IMODE",
+            "hashlib.sha256",
+            "os.readlink",
+            "special files",
+            "mtime is intentionally excluded",
+            "exact relative path set",
+            "stable sorted JSON",
+            "SKILL.md",
+            "references/chrome-chatgpt-pro.md",
+            "references/file-artifact-exchange.md",
+            "exactly the three approved regular-file content differences",
+            "rsync -rlpcni --delete",
+            "rsync -rlpc \\",
+            "runtime-raw-dry-run-1.txt",
+            "runtime-reviewed-dry-run-1.txt",
+            "runtime-transfer-count-1.txt",
+            "runtime-raw-dry-run-2.txt",
+            "runtime-reviewed-dry-run-2.txt",
+            "runtime-transfer-count-2.txt",
+            "Number of files transferred: 3",
+            "first field is exactly `.f..T....`",
+            "equal regular-file size, SHA-256, and mode",
+            "cmp --",
+            "post-sync reviewed dry run is empty",
+            "Number of files transferred: 0",
+            "post-sync manifests are exactly equal",
+            "quick_validate.py",
+            "diff -ru",
+            "runtime-only deletion requires Hun's exact-path approval",
+            "source-only creation",
+            "regular-file mode change",
+            "directory mode change",
+            "file-type replacement",
+            "changed symlink target",
+            "special-file insertion",
+            "timestamp-only mismatch",
+        )
+        for phrase in expected_phrases:
+            self.assertIn(phrase, task)
+
+        self.assertNotIn("rsync -acni", task)
+        self.assertNotIn("rsync -ac \\", task)
+        self.assertNotIn("rsync -a ", task)
+        actual_sync = markdown_section(
+            task,
+            "- [ ] **Step 6: Synchronize without blanket deletion**",
+            "- [ ] **Step 7: Validate the installed copy and exact equality**",
+        )
+        self.assertNotIn("--delete", actual_sync)
+        self.assertNotIn(PRIVATE_HOME_PATH, task)
+
     def test_chatgpt_upload_plan_repeats_guarded_sync_after_skill_corrections(
         self,
     ) -> None:
