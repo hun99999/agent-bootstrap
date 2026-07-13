@@ -1,4 +1,5 @@
 from pathlib import Path
+import re
 import unittest
 
 
@@ -692,6 +693,9 @@ class SkillCatalogTests(unittest.TestCase):
             "PATH=/usr/bin:/bin",
             "poisoned PATH without peer pin: REJECTED",
             "poisoned PATH with peer pin: PASS",
+            "/tmp/chatgpt-multi-format-sync-pressure-20260713-content-only-pathsafe",
+            "preserve the old content-only pressure root and never delete, overwrite, or reuse it",
+            "shasum -a 256 -c \"$VALIDATOR_ROOT/failed-path-raw.sha256\"",
         )
         for phrase in expected_phrases:
             self.assertIn(phrase, task)
@@ -700,6 +704,13 @@ class SkillCatalogTests(unittest.TestCase):
         self.assertNotIn("rsync -ac \\", task)
         self.assertNotIn("rsync -a ", task)
         self.assertNotIn("for path in", task)
+        bash_fences = re.findall(r"```bash\n(.*?)\n```", task, re.DOTALL)
+        for fence in bash_fences:
+            normalized = fence.replace("\\\n", " ")
+            for command in normalized.splitlines():
+                if "/usr/bin/rsync" not in command or "--version" in command:
+                    continue
+                self.assertIn("--rsync-path=/usr/bin/rsync", command)
         actual_sync = markdown_section(
             task,
             "- [ ] **Step 6: Synchronize without blanket deletion**",
