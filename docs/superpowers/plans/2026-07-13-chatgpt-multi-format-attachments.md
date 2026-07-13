@@ -1729,11 +1729,18 @@ def compare(
 
     if phase == "capture":
         return
-    expected = ALLOWED_CONTENT_DIFFERENCES if phase == "pre" else set()
-    if content_differences != expected:
+    if phase == "pre":
+        if not content_differences:
+            fail("pre content differences contain no approved update")
+        if not content_differences.issubset(ALLOWED_CONTENT_DIFFERENCES):
+            fail(
+                "pre content differences include an unapproved path: "
+                f"actual={sorted(content_differences)!r}"
+            )
+    elif content_differences:
         fail(
             f"{phase} content differences are not exact: "
-            f"expected={sorted(expected)!r}, actual={sorted(content_differences)!r}"
+            f"expected=[], actual={sorted(content_differences)!r}"
         )
 
 
@@ -1776,8 +1783,7 @@ owner-writable filesystem state, so there is a check-to-use window between its
 last verification and the separate transport command. The owner-controlled,
 repeatedly verified staging snapshot and exact allowlist are the mutation safety
 boundary for this cooperative workflow; they do not make the files OS-immutable
-or remove the documented cooperative-drift limitation. Pre-sync accepts exactly
-the three approved regular-file content differences; post-sync requires exact
+or remove the documented cooperative-drift limitation. Pre-sync accepts one to three approved regular-file content differences; post-sync requires exact
 equality, and `capture` writes independent manifests without comparing.
 
 Then use `apply_patch` to create
@@ -1811,6 +1817,46 @@ def read_manifest(path: str) -> dict[str, dict[str, object]]:
     if not isinstance(value, dict):
         fail(f"manifest is not an object: {path}")
     return value
+
+
+def approved_regular_updates(
+    source: dict[str, dict[str, object]],
+    runtime: dict[str, dict[str, object]],
+) -> set[str]:
+    source_paths = set(source)
+    runtime_paths = set(runtime)
+    if source_paths != runtime_paths:
+        fail(
+            "review manifests have different path sets: "
+            f"source_only={sorted(source_paths - runtime_paths)!r}, "
+            f"runtime_only={sorted(runtime_paths - source_paths)!r}"
+        )
+
+    updates: set[str] = set()
+    for relative_path in sorted(source):
+        source_entry = source[relative_path]
+        runtime_entry = runtime[relative_path]
+        if source_entry.get("type") != runtime_entry.get("type"):
+            fail(f"review manifest type differs at {relative_path}")
+        if source_entry.get("mode") != runtime_entry.get("mode"):
+            fail(f"review manifest mode differs at {relative_path}")
+        if source_entry.get("type") == "symlink":
+            if source_entry.get("target") != runtime_entry.get("target"):
+                fail(f"review manifest symlink target differs at {relative_path}")
+        elif source_entry.get("type") == "regular":
+            source_content = (source_entry.get("size"), source_entry.get("sha256"))
+            runtime_content = (
+                runtime_entry.get("size"),
+                runtime_entry.get("sha256"),
+            )
+            if source_content != runtime_content:
+                if relative_path not in ALLOWED_UPDATES:
+                    fail(f"review manifest contains unapproved update: {relative_path}")
+                updates.add(relative_path)
+
+    if not updates:
+        fail("pre-sync review manifests contain no approved regular-file update")
+    return updates
 
 
 def prove_equal_regular(
@@ -1872,9 +1918,14 @@ def main() -> None:
             else:
                 fail(f"unrecognized raw rsync output: {line!r}")
 
+    expected_updates = (
+        approved_regular_updates(source, runtime)
+        if arguments.phase == "pre"
+        else set()
+    )
     with open(arguments.count, encoding="utf-8") as input_file:
         count_lines = [line.rstrip("\n") for line in input_file]
-    expected_count = 3 if arguments.phase == "pre" else 0
+    expected_count = len(expected_updates)
     expected_count_line = f"Number of files transferred: {expected_count}"
     if count_lines != [expected_count_line]:
         fail(
@@ -1884,8 +1935,11 @@ def main() -> None:
 
     if arguments.phase == "pre":
         paths = {path for _, path, _ in actions}
-        if len(actions) != 3 or paths != ALLOWED_UPDATES:
-            fail(f"reviewed pre-sync actions are not exact: {actions!r}")
+        if len(actions) != expected_count or paths != expected_updates:
+            fail(
+                "reviewed pre-sync actions do not match manifest updates: "
+                f"expected={sorted(expected_updates)!r}, actual={actions!r}"
+            )
         for item, relative_path, _ in actions:
             if not item.startswith(">f") or "+" in item:
                 fail(f"pre-sync action is not a regular-file update: {item} {relative_path}")
@@ -2431,6 +2485,104 @@ def run_openrsync_case(root: Path, comparator: Path, reviewer: Path) -> None:
     print("openrsync raw/review: PASS")
 
 
+def run_partial_openrsync_case(
+    root: Path,
+    comparator: Path,
+    reviewer: Path,
+) -> None:
+    scenario = root / "one-file-correction"
+    source = scenario / "source"
+    runtime = scenario / "runtime"
+    make_tree(source)
+    shutil.copytree(source, runtime, symlinks=True)
+    changed_path = "references/file-artifact-exchange.md"
+    write(source / changed_path, "one reviewed correction\n")
+
+    result = invoke_comparator(
+        comparator,
+        scenario,
+        source,
+        runtime,
+        phase="pre",
+    )
+    if result.returncode != 0:
+        raise SystemExit(f"one-file comparator failed: {result.stderr!r}")
+
+    raw_path = scenario / "raw.txt"
+    raw = subprocess.run(
+        [
+            "/usr/bin/rsync",
+            "--rsync-path=/usr/bin/rsync",
+            "-rlpcni",
+            "--out-format=%i %n%L",
+            f"{source}/",
+            f"{runtime}/",
+        ],
+        text=True,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        check=True,
+        env={"LC_ALL": "C", "PATH": "/usr/bin:/bin"},
+    )
+    raw_path.write_text(raw.stdout, encoding="utf-8")
+
+    stats = subprocess.run(
+        [
+            "/usr/bin/rsync",
+            "--rsync-path=/usr/bin/rsync",
+            "-rlpcni",
+            "--stats",
+            "--out-format=",
+            f"{source}/",
+            f"{runtime}/",
+        ],
+        text=True,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        check=True,
+        env={"LC_ALL": "C", "PATH": "/usr/bin:/bin"},
+    )
+    count_lines = [
+        line
+        for line in stats.stdout.splitlines()
+        if line.startswith("Number of files transferred:")
+    ]
+    count_path = scenario / "count.txt"
+    count_path.write_text("\n".join(count_lines) + "\n", encoding="utf-8")
+
+    review_result = subprocess.run(
+        [
+            sys.executable,
+            str(reviewer),
+            "--raw",
+            str(raw_path),
+            "--count",
+            str(count_path),
+            "--source-manifest",
+            str(scenario / "source.json"),
+            "--runtime-manifest",
+            str(scenario / "runtime.json"),
+            "--reviewed",
+            str(scenario / "reviewed.txt"),
+            "--phase",
+            "pre",
+        ],
+        text=True,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        check=True,
+    )
+    expected_output = "pre rsync evidence verified: 1 reviewed actions\n"
+    if review_result.stdout != expected_output:
+        raise SystemExit(
+            f"unexpected one-file reviewer output: {review_result.stdout!r}"
+        )
+    reviewed = (scenario / "reviewed.txt").read_text(encoding="utf-8").splitlines()
+    if len(reviewed) != 1 or not reviewed[0].endswith(changed_path):
+        raise SystemExit(f"one-file reviewed action is not exact: {reviewed!r}")
+    print("one-file correction raw/review: PASS")
+
+
 def write_json(path: Path, value: object) -> None:
     path.write_text(
         json.dumps(value, indent=2, sort_keys=True) + "\n",
@@ -2492,6 +2644,26 @@ def reviewer_case(
 
 
 def reviewer_pressure(root: Path, reviewer: Path) -> None:
+    def regular(label: str) -> dict[str, object]:
+        return {
+            "type": "regular",
+            "mode": "0644",
+            "size": len(label),
+            "sha256": label,
+        }
+
+    runtime_allowed = {
+        relative_path: regular(f"runtime-{relative_path}")
+        for relative_path in ALLOWED
+    }
+    source_allowed = {
+        relative_path: regular(f"source-{relative_path}")
+        for relative_path in ALLOWED
+    }
+    source_partial = dict(runtime_allowed)
+    source_partial["references/file-artifact-exchange.md"] = regular(
+        "one-file-source"
+    )
     equal = {
         "agents/openai.yaml": {
             "type": "regular",
@@ -2523,6 +2695,17 @@ def reviewer_pressure(root: Path, reviewer: Path) -> None:
     reviewer_case(
         root,
         reviewer,
+        "one-file manifest update",
+        raw=">fcsT.... references/file-artifact-exchange.md\n",
+        count=1,
+        phase="pre",
+        source_manifest=source_partial,
+        runtime_manifest=runtime_allowed,
+        should_pass=True,
+    )
+    reviewer_case(
+        root,
+        reviewer,
         "non-pseudo T record",
         raw=(
             ">fcsT.... SKILL.md\n"
@@ -2531,8 +2714,8 @@ def reviewer_pressure(root: Path, reviewer: Path) -> None:
         ),
         count=3,
         phase="pre",
-        source_manifest={},
-        runtime_manifest={},
+        source_manifest=source_allowed,
+        runtime_manifest=runtime_allowed,
         should_pass=True,
     )
     reviewer_case(
@@ -2542,8 +2725,8 @@ def reviewer_pressure(root: Path, reviewer: Path) -> None:
         raw="unexpected output\n",
         count=3,
         phase="pre",
-        source_manifest={},
-        runtime_manifest={},
+        source_manifest=source_allowed,
+        runtime_manifest=runtime_allowed,
         should_pass=False,
         expected_error="unrecognized raw rsync output",
     )
@@ -2558,8 +2741,8 @@ def reviewer_pressure(root: Path, reviewer: Path) -> None:
         ),
         count=2,
         phase="pre",
-        source_manifest={},
-        runtime_manifest={},
+        source_manifest=source_allowed,
+        runtime_manifest=runtime_allowed,
         should_pass=False,
         expected_error="unstable transfer-count evidence",
     )
@@ -2570,10 +2753,10 @@ def reviewer_pressure(root: Path, reviewer: Path) -> None:
         raw="*deleting runtime-only.md\n",
         count=3,
         phase="pre",
-        source_manifest={},
-        runtime_manifest={},
+        source_manifest=source_allowed,
+        runtime_manifest=runtime_allowed,
         should_pass=False,
-        expected_error="reviewed pre-sync actions are not exact",
+        expected_error="do not match manifest updates",
     )
     reviewer_case(
         root,
@@ -2598,10 +2781,10 @@ def reviewer_pressure(root: Path, reviewer: Path) -> None:
         ),
         count=3,
         phase="pre",
-        source_manifest={},
-        runtime_manifest={},
+        source_manifest=source_allowed,
+        runtime_manifest=runtime_allowed,
         should_pass=False,
-        expected_error="reviewed pre-sync actions are not exact",
+        expected_error="do not match manifest updates",
     )
 
 
@@ -2903,6 +3086,7 @@ def main() -> None:
         should_pass=True,
     )
     run_openrsync_case(root, comparator, reviewer)
+    run_partial_openrsync_case(root, comparator, reviewer)
     reviewer_pressure(root, reviewer)
     snapshot_binding_pressure(root, comparator, snapshotter)
     poisoned_path_pressure(root)
@@ -2974,6 +3158,7 @@ changed symlink target: REJECTED
 special-file insertion: REJECTED
 timestamp-only mismatch: PASS
 openrsync raw/review: PASS
+one-file correction raw/review: PASS
 unequal-manifest pseudo-record: REJECTED
 non-pseudo T record: PASS
 unknown raw line: REJECTED
@@ -3415,7 +3600,9 @@ repeat Task 4's independent manifests, pressure cases, two raw/reviewed/count
 pre-sync evidence sets, exclusive reviewed staging snapshot, exact allowlist,
 staging-bound transport dry runs and mutation, runtime-root identity checks,
 post-sync validator, exact manifest equality, and recursive diff. Prior
-snapshots and deletion approvals are invalid.
+snapshots and deletion approvals are invalid. The repeated validator must
+derive one to three currently changed allowlisted files from the independent
+manifests; it must not assume that every allowlisted file changed again.
 
 - [ ] **Step 5: Run final branch verification**
 

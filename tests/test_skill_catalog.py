@@ -860,22 +860,25 @@ class SkillCatalogTests(unittest.TestCase):
         ).read_text(encoding="utf-8")
         task = markdown_section(plan, "### Task 4:", "### Task 5:")
         final_review = markdown_section(plan, "### Task 5:", "### Task 6:")
+        normalized_task = " ".join(task.split())
+        normalized_final_review = " ".join(final_review.split())
 
         expected_phrases = (
             "content_differences.issubset(ALLOWED_CONTENT_DIFFERENCES)",
             "if not content_differences",
-            "expected_updates = approved_regular_updates(source, runtime)",
+            "expected_updates = (",
+            "approved_regular_updates(source, runtime)",
             "expected_count = len(expected_updates)",
             "paths != expected_updates",
             "one-file correction raw/review: PASS",
             "one to three approved regular-file content differences",
         )
         for phrase in expected_phrases:
-            self.assertIn(phrase, task)
+            self.assertIn(phrase, normalized_task)
 
         self.assertIn(
             "one to three currently changed allowlisted files",
-            final_review,
+            normalized_final_review,
         )
         self.assertNotIn(
             'expected_count = 3 if arguments.phase == "pre" else 0',
