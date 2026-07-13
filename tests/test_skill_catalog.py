@@ -648,6 +648,41 @@ class SkillCatalogTests(unittest.TestCase):
             "changed symlink target",
             "special-file insertion",
             "timestamp-only mismatch",
+            "reviewed-source",
+            "reviewed-allowlist.txt",
+            "snapshot_reviewed_source.py",
+            "O_CREAT | os.O_EXCL | os.O_NOFOLLOW",
+            "st_ctime_ns",
+            "exact three-path allowlist",
+            "--files-from=\"$ALLOWLIST\"",
+            "/usr/bin/rsync -rlpcni --files-from=\"$ALLOWLIST\"",
+            "/usr/bin/rsync -rlpc --files-from=\"$ALLOWLIST\" \\",
+            "mutation source is the reviewed staging snapshot",
+            "staging manifest exactly matches the allowlisted entries from source-pre-2.json",
+            "transport-raw-dry-run-1.txt",
+            "transport-reviewed-dry-run-1.txt",
+            "transport-transfer-count-1.txt",
+            "transport-raw-dry-run-2.txt",
+            "transport-reviewed-dry-run-2.txt",
+            "transport-transfer-count-2.txt",
+            "runtime full manifest equals the reviewed source-pre-2 full manifest",
+            "staging still equals the approved subset",
+            "live source still equals source-pre-2",
+            "runtime root identity is unchanged",
+            "cooperative drift detection",
+            "not an adversarial race-proof no-follow guarantee",
+            "immutable reviewed staging snapshot and exact allowlist are the mutation safety boundary",
+            "unequal-manifest pseudo-record",
+            "non-pseudo T record",
+            "unknown raw line",
+            "transfer-count mismatch",
+            "deletion or creation record",
+            "post-sync action",
+            "duplicate or unapproved action",
+            "live-source mutation after pre-2",
+            "source-only addition after pre-2",
+            "staging mutation",
+            "runtime-root identity mismatch",
         )
         for phrase in expected_phrases:
             self.assertIn(phrase, task)
@@ -659,6 +694,11 @@ class SkillCatalogTests(unittest.TestCase):
             task,
             "- [ ] **Step 6: Synchronize without blanket deletion**",
             "- [ ] **Step 7: Validate the installed copy and exact equality**",
+        )
+        self.assertIn('"$STAGING/" "$RUNTIME/"', actual_sync)
+        self.assertNotIn('"$SOURCE/" "$RUNTIME/"', actual_sync)
+        self.assertNotIn(
+            "skills/chatgpt-collaboration-harness/ \\", actual_sync
         )
         self.assertNotIn("--delete", actual_sync)
         self.assertNotIn(PRIVATE_HOME_PATH, task)
