@@ -683,6 +683,8 @@ class SkillCatalogTests(unittest.TestCase):
             "source-only addition after pre-2",
             "staging mutation",
             "runtime-root identity mismatch",
+            "reviewed parent directory modes match source-pre-2",
+            "transport contains exactly three regular-file actions and no directory metadata action",
         )
         for phrase in expected_phrases:
             self.assertIn(phrase, task)
