@@ -37,8 +37,10 @@ user-invoked `handoff` skill.
   failures.
 - Vendor only `mattpocock/skills`'s `handoff` package at reviewed commit
   `2ab958093e83e0ec752e6c1c5932da465bf23e0c`, with its MIT attribution.
-- Keep `handoff` explicitly user-invoked through both
-  `disable-model-invocation: true` and `allow_implicit_invocation: false`.
+- Preserve the reviewed `handoff` instruction body and agent metadata while adapting the catalog
+  package to Codex's accepted frontmatter. Remove upstream-only `argument-hint` and
+  `disable-model-invocation`; enforce explicit user invocation through
+  `allow_implicit_invocation: false` in `agents/openai.yaml`.
 - Do not add `research`, `tdd`, `diagnosing-bugs`, `code-review`, or the Matt Pocock setup workflow.
 - After repository verification, install the reviewed `handoff` snapshot into the local Codex skill
   directory and remove only the exact local Codex Superpowers discovery symlink. Preserve the checkout
@@ -121,14 +123,17 @@ freshness checks.
 
 ## Handoff Catalog Package
 
-The tracked package is a byte-for-byte snapshot of:
+The reviewed upstream inputs are:
 
 - `skills/productivity/handoff/SKILL.md`
 - `skills/productivity/handoff/agents/openai.yaml`
 
-Add a small source record containing the upstream URL, immutable commit, source paths, license, and
-review date. Keep the upstream MIT text in the package. Do not broaden its trigger or add automatic
-agent, Git, browser, test, or repository-write behavior.
+The tracked Codex package preserves the upstream instruction body and `agents/openai.yaml`, but
+removes the upstream-only `argument-hint` and `disable-model-invocation` keys that the current Codex
+validator rejects. `allow_implicit_invocation: false` is the Codex explicit-use enforcement point.
+Add a small source record containing the upstream URL, immutable commit, source paths, license,
+review date, upstream hash, and Codex-adapted hash. Keep the upstream MIT text in the package. Do not
+broaden its trigger or add automatic agent, Git, browser, test, or repository-write behavior.
 
 The repository catalog documents installation to `~/.codex/skills/handoff`. Runtime installation is
 validated separately from the tracked snapshot.
@@ -168,4 +173,3 @@ Before that final run:
 The current long-lived Codex task may retain its initial skill snapshot. Local Superpowers
 deactivation is therefore proven by filesystem/plugin state now and by fresh-task discovery after
 this task.
-

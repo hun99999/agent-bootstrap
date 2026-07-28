@@ -98,6 +98,7 @@ class ClaudePluginTests(unittest.TestCase):
             plugins["process-first-agents"]["source"],
             "./plugins/process-first-agents",
         )
+        self.assertEqual(plugins["process-first-agents"]["version"], "1.1.0")
         self.assertEqual(
             plugins["frontend-design-pack"]["source"],
             "./plugins/frontend-design-pack",
@@ -121,7 +122,13 @@ class ClaudePluginTests(unittest.TestCase):
         settings = json.loads(PLUGIN_SETTINGS_PATH.read_text(encoding="utf-8"))
 
         self.assertEqual(manifest["name"], "process-first-agents")
-        self.assertEqual(manifest["version"], "1.0.0")
+        self.assertEqual(manifest["version"], "1.1.0")
+        marketplace = json.loads(MARKETPLACE_PATH.read_text(encoding="utf-8"))
+        plugins = {plugin["name"]: plugin for plugin in marketplace["plugins"]}
+        self.assertEqual(
+            manifest["version"],
+            plugins["process-first-agents"]["version"],
+        )
         self.assertEqual(settings, {"agent": "eng-lead"})
 
     def test_plugin_manifest_uses_hun_identity(self) -> None:

@@ -149,7 +149,7 @@ optional tool inventory 尽量只作为 read-only evidence。如果已经 clone 
 
 只应用最小有用 guardrails。如果是 TS/JS-heavy project 且我批准 Lumin Repo Lens，只把它作为 evidence tool：structural claims require evidence，absence claims require scan range，证据不完整时说 "not observed in this scan range"。
 
-行为变更使用 TDD。修改后运行项目真实 verification commands 和 post-write review。报告修改文件、执行命令、验证结果、optional tools skipped/recommended 和剩余风险。
+仅在 behavior 清晰且 testable，或 repository 明确要求时使用 test-first。根据 invalidated evidence 选择验证：narrow change 使用 focused check；只有相关 source、configuration、dependencies、toolchain、runtime inputs 未改变时才复用已有通过结果；仅对 broad、cross-cutting、high-risk、release-bound、wider-impact 工作运行 full regression。对 prose、generated output、mechanical configuration 使用相称的 structural 或 executable check。不要声称 unrun check 已通过。修改后执行 post-write review，并报告修改文件、执行命令、验证结果、optional tools skipped/recommended 和剩余风险。
 ```
 
 ## 每个提示词的使用场景
@@ -165,7 +165,7 @@ optional tool inventory 尽量只作为 read-only evidence。如果已经 clone 
 ## Guardrail 强制的内容
 
 - Pre-write lens
-- TDD write gate
+- Verification gate：仅在 behavior 清晰且 testable，或 repository-required 时使用 test-first；其他情况使用相称的 structural 或 executable check。根据 invalidated evidence 选择验证，并仅对 broad、cross-cutting、high-risk、release-bound、wider-impact 工作运行 full regression。不要声称 unrun check 已通过。
 - Coupling control
 - Error discipline
 - Test discipline

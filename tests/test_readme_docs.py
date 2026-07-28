@@ -182,6 +182,56 @@ class ReadmeDocsTests(unittest.TestCase):
             contents = (REPO_ROOT / relative).read_text(encoding="utf-8")
             self.assertIn(LANGUAGE_SWITCHER, contents)
 
+    def test_copy_paste_prompts_use_risk_proportionate_verification(self) -> None:
+        section_bounds = {
+            "README.md": (
+                "## Target Repository Claude Code Prompt",
+                "## When To Use Each Prompt",
+            ),
+            "README.ko.md": (
+                "## 대상 프로젝트용 Claude Code 프롬프트",
+                "## 프롬프트별 사용 시점",
+            ),
+            "README.ja.md": (
+                "## 対象プロジェクト用 Claude Code プロンプト",
+                "## 各プロンプトを使う場面",
+            ),
+            "README.zh-CN.md": (
+                "## 目标项目 Claude Code 提示词",
+                "## 每个提示词的使用场景",
+            ),
+        }
+        forbidden_phrases = {
+            "README.md": ("use tdd for behavior changes", "tdd write gate"),
+            "README.ko.md": ("behavior change에는 tdd를 사용", "tdd write gate"),
+            "README.ja.md": ("behavior change には tdd", "tdd write gate"),
+            "README.zh-CN.md": ("行为变更使用 tdd", "tdd write gate"),
+        }
+
+        for relative, (start_heading, end_heading) in section_bounds.items():
+            with self.subTest(relative=relative):
+                contents = (REPO_ROOT / relative).read_text(encoding="utf-8")
+                prompt = contents.split(start_heading, 1)[1].split(end_heading, 1)[0]
+                normalized = " ".join(prompt.casefold().split())
+
+                for phrase in (
+                    "test-first",
+                    "invalidated evidence",
+                    "full regression",
+                    "unrun",
+                ):
+                    self.assertIn(
+                        phrase,
+                        normalized,
+                        f"{relative} copy/paste prompt must include {phrase!r}",
+                    )
+                for phrase in forbidden_phrases[relative]:
+                    self.assertNotIn(
+                        phrase,
+                        normalized,
+                        f"{relative} copy/paste prompt must not require unconditional TDD",
+                    )
+
     def test_repo_metadata_doc_exists(self) -> None:
         metadata = (REPO_ROOT / "docs" / "repo-metadata.md").read_text(encoding="utf-8")
 

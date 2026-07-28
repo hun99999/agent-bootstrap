@@ -23,6 +23,7 @@ CLAUDE_READ_ONLY_GUARD = "\n".join(
 MARKETPLACE_OWNER = {"name": "Hun"}
 PLUGIN_AUTHOR = {"name": "Hun", "email": "48903443+hun99999@users.noreply.github.com"}
 PLUGIN_REPOSITORY = "https://github.com/hun99999/agent-bootstrap"
+PROCESS_FIRST_PLUGIN_VERSION = "1.1.0"
 FRONTEND_DESIGN_PLUGIN = {
     "name": "frontend-design-pack",
     "description": "Evidence-first frontend design router and reviewed reference corpus",
@@ -152,7 +153,7 @@ def render_marketplace(repo_root: Path) -> None:
             {
                 "name": "process-first-agents",
                 "description": "Process-first shared agents for Claude Code",
-                "version": "1.0.0",
+                "version": PROCESS_FIRST_PLUGIN_VERSION,
                 "source": "./plugins/process-first-agents",
             },
             FRONTEND_DESIGN_PLUGIN,
@@ -173,7 +174,7 @@ def render_plugin_bundle(repo_root: Path, plugin_root: Path, partner_name: str) 
     manifest = {
         "name": "process-first-agents",
         "description": "Process-first shared agents for Claude Code",
-        "version": "1.0.0",
+        "version": PROCESS_FIRST_PLUGIN_VERSION,
         "author": PLUGIN_AUTHOR,
         "repository": PLUGIN_REPOSITORY,
         "license": "MIT",

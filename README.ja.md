@@ -150,7 +150,7 @@ optional tool inventory は read-only evidence として扱ってください。
 
 必要最小限の guardrails だけ適用してください。TS/JS-heavy project で Lumin Repo Lens を承認された場合、structural claims require evidence、absence claims require scan range、部分的な evidence なら "not observed in this scan range" と言ってください。
 
-Behavior change には TDD を使い、実際の verification commands と post-write review を実行してください。変更ファイル、実行したコマンド、検証結果、optional tools skipped/recommended、残リスクを報告してください。
+behavior が明確で testable、または repository が要求する場合だけ test-first を使ってください。invalidated evidence から検証を選びます: narrow change では focused check、関連する source, configuration, dependencies, toolchain, runtime inputs が変わらない場合だけ既存の合格結果を再利用し、broad, cross-cutting, high-risk, release-bound, wider-impact の作業だけで full regression を実行します。prose, generated output, mechanical configuration には比例した structural または executable check を使います。unrun check が合格したと主張しないでください。変更後は post-write review を行い、変更ファイル、実行したコマンド、検証結果、optional tools skipped/recommended、残リスクを報告してください。
 ```
 
 ## 各プロンプトを使う場面
@@ -166,7 +166,7 @@ Behavior change には TDD を使い、実際の verification commands と post-
 ## Guardrail が強制すること
 
 - Pre-write lens
-- TDD write gate
+- Verification gate: behavior が明確で testable、または repository-required の場合だけ test-first を使い、それ以外は比例した structural または executable check を使います。invalidated evidence から検証を選び、broad, cross-cutting, high-risk, release-bound, wider-impact の作業だけで full regression を実行します。unrun check が合格したと主張しません。
 - Coupling control
 - Error discipline
 - Test discipline

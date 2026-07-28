@@ -1,6 +1,8 @@
 # Slim Core And Optional Superpowers Implementation Plan
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+> **For agentic workers:** Execute this plan task-by-task and use only process skills that are
+> available and relevant in the current runtime. Superpowers is not a dependency of this plan.
+> Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Ship a compact shared prompt corpus, make Superpowers an explicit optional install, add only Matt Pocock's explicit-use `handoff` skill, and safely apply the reviewed result to Hun's local Codex runtime.
 
@@ -23,6 +25,9 @@
 - Modify: `agents/*.md`
 - Modify: `codex-home/agents/*.md`
 - Regenerate: `plugins/process-first-agents/agents/*.md`
+- Modify: `scripts/render_claude_plugin.py`
+- Regenerate: `.claude-plugin/marketplace.json`
+- Regenerate: `plugins/process-first-agents/.claude-plugin/plugin.json`
 - Modify: `.codex/install.py`
 - Modify: `scripts/audit_agent_stack.py`
 - Modify: `tests/test_prompt_corpus_policy.py`
@@ -109,6 +114,8 @@ self.assertNotRegex(text, r"(?i)superpowers|test-driven-development|verification
 Require the verifier to contain `invalidated`, the broad-regression criteria
 `broad`, `cross-cutting`, `high-risk`, and `release`, plus a prohibition on claiming unrun checks.
 Require each role source to remain below a role-appropriate word budget.
+Require the marketplace and plugin manifest to advertise the same incremented
+`process-first-agents` version whenever the generated prompt bundle changes.
 
 - [ ] **Step 2: Run the focused role tests and observe RED**
 
@@ -136,7 +143,9 @@ Run:
 python3 scripts/render_claude_plugin.py --partner-name "Hun"
 ```
 
-Expected: deterministic generated agents contain the compact rendered shared core and slim role body.
+Expected: deterministic generated agents contain the compact rendered shared core and slim role
+body. The renderer writes the same incremented `process-first-agents` version to the marketplace and
+plugin manifest so existing installations can detect the update.
 
 - [ ] **Step 5: Run the focused prompt and renderer tests**
 
@@ -236,7 +245,8 @@ Run the same command. Expected: all state-table cases pass.
 Require the exact reviewed source files, immutable commit, MIT attribution, small word budget, and:
 
 ```python
-self.assertIn("disable-model-invocation: true", skill)
+self.assertNotIn("disable-model-invocation:", skill)
+self.assertNotIn("argument-hint:", skill)
 self.assertIn("allow_implicit_invocation: false", agent)
 self.assertNotRegex(skill, r"(?i)background agent|git commit|run tests|browser")
 ```
@@ -254,11 +264,13 @@ python3 -m unittest tests.test_skill_catalog -v
 
 Expected: the reviewed package and catalog entry are absent.
 
-- [ ] **Step 3: Add the byte-reviewed package and attribution**
+- [ ] **Step 3: Add the reviewed Codex-adapted package and attribution**
 
-Copy the two upstream files exactly from commit
-`2ab958093e83e0ec752e6c1c5932da465bf23e0c`. Add source and MIT files without changing the skill
-trigger or behavior.
+Review both upstream files at commit `2ab958093e83e0ec752e6c1c5932da465bf23e0c`.
+Preserve the instruction body and `agents/openai.yaml`, but remove upstream-only `argument-hint` and
+`disable-model-invocation` from `SKILL.md` because the current Codex validator rejects them. Keep
+explicit invocation through `allow_implicit_invocation: false`. Add source and MIT files recording
+both the upstream hash and Codex-adapted catalog hash without changing the skill behavior.
 
 - [ ] **Step 4: Document explicit installation and selection**
 
@@ -274,6 +286,11 @@ python3 -m unittest tests.test_skill_catalog tests.test_private_path_scan -v
 ```
 
 Expected: green with no private path or secret.
+
+**Implementation resolution (2026-07-28):** The current Codex validator rejected the two
+upstream-only frontmatter keys. The package therefore uses the documented Codex adaptation above
+rather than a byte-for-byte whole-file snapshot. The generated Claude prompt bundle also required a
+`process-first-agents` version bump so existing versioned plugin caches can receive it.
 
 ### Task 6: Align Setup And User Documentation
 
@@ -386,4 +403,3 @@ whitespace error.
 Inspect `git status`, `git diff --stat`, and the complete diff. Confirm historical plans/specs were not
 rewritten, live config was not overwritten, only the approved runtime link was removed, and every
 completion claim maps to fresh evidence.
-

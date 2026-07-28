@@ -191,7 +191,7 @@ If this is a TS/JS-heavy project and I approve Lumin Repo Lens, use it only as a
 - post-write machine evidence is limited to type escapes, unexpected files, scan range, and confidence changes
 - duplicate helpers, dependency drift, public API drift, and re-export drift are manual review claims that need direct evidence
 
-Use TDD for behavior changes. After changes, run this project's real verification commands and post-write review. Report files changed, commands run, verification results, optional tools skipped or recommended, and remaining risks.
+Use test-first when behavior is clear and testable or the repository requires it. Select checks from invalidated evidence: use focused checks for narrow changes; reuse a passing result only while its source, configuration, dependencies, toolchain, and runtime inputs are unchanged; run full regression only for broad, cross-cutting, high-risk, release-bound, or wider-impact work. For prose, generated output, and mechanical configuration, use proportionate structural or executable checks. Never claim an unrun check passed. After changes, perform post-write review and report files changed, commands run, verification results, optional tools skipped or recommended, and remaining risks.
 ```
 
 ## When To Use Each Prompt
@@ -211,7 +211,7 @@ Legacy prompts for older OpenCode or OpenClaw experiments may remain in git, but
 The guardrails are meant to make agent coding less forgetful and less structurally messy.
 
 - Pre-write lens: inspect module boundaries, dependency direction, public APIs, helpers, types, shapes, re-exports, tests, error boundaries, and known hotspots before editing.
-- TDD write gate: write edge-case and failure-path tests first, confirm the expected failure, then make the smallest implementation change.
+- Testing gate: use test-first when behavior is clear and testable or repository-required; otherwise use proportionate structural or executable checks. Select checks from invalidated evidence and reserve full regression for broad, cross-cutting, high-risk, release-bound, or wider-impact work. Never claim an unrun check passed.
 - Coupling control: avoid hidden imports, initialization-order contracts, duplicate shapes, unreviewed barrels, and fan-in/fan-out hotspots.
 - Error discipline: do not silently swallow errors, do not add fallback behavior unless it is a documented requirement, and keep error handling at explicit boundaries.
 - Test discipline: assert behavior and side effects; keep mocks at external boundaries instead of mocking internal implementation details.

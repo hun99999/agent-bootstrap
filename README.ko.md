@@ -179,7 +179,7 @@ TS/JS-heavy project이고 내가 Lumin Repo Lens를 승인하면 evidence tool�
 - post-write machine evidence는 type escapes, unexpected files, scan range, confidence changes로 제한된다
 - duplicate helpers, dependency drift, public API drift, re-export drift는 direct evidence가 필요한 manual review claim이다
 
-behavior change에는 TDD를 사용해라. 변경 후 이 프로젝트의 실제 verification command와 post-write review를 실행해라. 변경 파일, 실행한 명령, 검증 결과, optional tool skipped/recommended, 남은 리스크를 보고해라.
+behavior가 명확하고 테스트 가능하거나 repository가 요구할 때만 test-first를 사용해라. invalidated evidence에 따라 검증을 골라라: narrow change에는 focused check를 사용하고, 관련 source, configuration, dependency, toolchain, runtime input이 바뀌지 않았을 때만 기존 통과 결과를 재사용하며, broad, cross-cutting, high-risk, release-bound, wider-impact 작업에만 full regression을 실행해라. prose, generated output, mechanical configuration에는 비례적인 structural 또는 executable check를 사용해라. unrun check가 통과했다고 말하지 마라. 변경 후 post-write review를 수행하고 변경 파일, 실행한 명령, 검증 결과, optional tool skipped/recommended, 남은 리스크를 보고해라.
 ```
 
 ## 프롬프트별 사용 시점
@@ -199,7 +199,7 @@ behavior change에는 TDD를 사용해라. 변경 후 이 프로젝트의 실제
 Guardrail은 agent coding이 망각과 구조적 난잡함으로 흐르지 않게 하기 위한 것입니다.
 
 - Pre-write lens: 편집 전에 module boundaries, dependency direction, public APIs, helpers, types, shapes, re-exports, tests, error boundaries, known hotspots를 확인합니다.
-- TDD write gate: edge case와 failure path test를 먼저 쓰고 기대한 실패를 확인한 뒤 가장 작은 구현 변경을 합니다.
+- 검증 gate: behavior가 명확하고 테스트 가능하거나 repository가 요구할 때만 test-first를 사용하고, 나머지는 비례적인 structural 또는 executable check를 사용합니다. invalidated evidence에 따라 검증을 고르고 broad, cross-cutting, high-risk, release-bound, wider-impact 작업에만 full regression을 실행합니다. unrun check가 통과했다고 말하지 않습니다.
 - Coupling control: hidden imports, initialization-order contracts, duplicate shapes, unreviewed barrels, fan-in/fan-out hotspots를 피합니다.
 - Error discipline: 에러를 조용히 삼키지 않고, 문서화된 요구가 아니면 fallback behavior를 추가하지 않으며, error handling은 명시적 boundary에 둡니다.
 - Test discipline: behavior와 side effect를 검증하고, mock은 external boundary에만 둡니다.

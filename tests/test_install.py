@@ -770,6 +770,82 @@ class InstallScriptTests(unittest.TestCase):
             self.assertFalse((codex_home / "superpowers").exists())
             self.assertFalse((agents_home / "skills" / "superpowers").exists())
 
+    def test_skip_preserves_existing_manual_superpowers_state(self) -> None:
+        for label, skip_args in (
+            ("default", ()),
+            ("explicit", ("--superpowers-mode", "skip")),
+        ):
+            with self.subTest(mode=label), tempfile.TemporaryDirectory() as tmpdir:
+                root = Path(tmpdir)
+                codex_home = root / ".codex"
+                agents_home = root / ".agents"
+                remote, working = self.create_superpowers_remote(root)
+                expected_head = self.commit_superpowers_change(
+                    working,
+                    "skills/example/SKILL.md",
+                    "version 1\n",
+                    "Add initial skill",
+                )
+
+                install_result = self.run_installer(
+                    "--partner-name",
+                    "Hun",
+                    "--codex-home",
+                    str(codex_home),
+                    "--agents-home",
+                    str(agents_home),
+                    "--superpowers-mode",
+                    "manual",
+                    "--superpowers-remote",
+                    str(remote),
+                )
+                self.assertEqual(
+                    install_result.returncode,
+                    0,
+                    msg=install_result.stderr,
+                )
+
+                checkout = codex_home / "superpowers"
+                skills_symlink = agents_home / "skills" / "superpowers"
+                sentinel = checkout / "local-sentinel.txt"
+                sentinel_bytes = b"preserve local state\n"
+                sentinel.write_bytes(sentinel_bytes)
+                original_raw_target = skills_symlink.readlink()
+                original_resolved_target = skills_symlink.resolve()
+
+                skip_result = self.run_installer(
+                    "--partner-name",
+                    "Hun",
+                    "--codex-home",
+                    str(codex_home),
+                    "--agents-home",
+                    str(agents_home),
+                    "--superpowers-remote",
+                    str(remote),
+                    *skip_args,
+                )
+
+                self.assertEqual(
+                    skip_result.returncode,
+                    0,
+                    msg=skip_result.stderr,
+                )
+                self.assertIn(
+                    "Superpowers: skipped manual checkout and symlink",
+                    skip_result.stdout,
+                )
+                self.assertEqual(
+                    self.run_git(checkout, "rev-parse", "HEAD").stdout.strip(),
+                    expected_head,
+                )
+                self.assertEqual(sentinel.read_bytes(), sentinel_bytes)
+                self.assertTrue(skills_symlink.is_symlink())
+                self.assertEqual(skills_symlink.readlink(), original_raw_target)
+                self.assertEqual(
+                    skills_symlink.resolve(),
+                    original_resolved_target,
+                )
+
 
 if __name__ == "__main__":
     unittest.main()
