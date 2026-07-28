@@ -220,7 +220,7 @@ The repository has four layers:
   (`python3 -m unittest discover -s tests -p 'test_*.py'`)；按实际 scope 添加
   `python3 scripts/audit_agent_stack.py` 和 `python3 scripts/validate_frontend_design_stack.py --repo-root .`。
 
-下面的 Existing clone update 示例只在需要 full regression 时使用:
+Existing clone update: 下面的示例只在需要 full regression 时使用:
 
 ```bash
 git status --short --branch

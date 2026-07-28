@@ -221,7 +221,7 @@ Codex App curated Superpowers plugin と manual fallback の両方を有効に�
   release-bound, wider-impact の場合だけ実行します。必要な scope に応じて
   `python3 scripts/audit_agent_stack.py` と `python3 scripts/validate_frontend_design_stack.py --repo-root .` を追加します。
 
-Existing clone update の次の例は full regression が必要な場合だけ使います:
+Existing clone update: 次の例は full regression が必要な場合だけ使います:
 
 ```bash
 git status --short --branch
