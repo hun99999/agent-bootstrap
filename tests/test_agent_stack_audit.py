@@ -131,32 +131,111 @@ class AgentStackAuditTests(unittest.TestCase):
 
         self.assertTrue(audit.should_fail(checks, strict=False))
 
-    def test_superpowers_checkout_ok_requires_expected_skills_symlink(self) -> None:
+    def test_superpowers_state_table_allows_disabled_inactive_and_active_states(self) -> None:
+        audit = load_audit_module()
+
+        with self.subTest(state="disabled"):
+            with tempfile.TemporaryDirectory() as tmpdir:
+                root = Path(tmpdir)
+                checkout = root / "superpowers"
+                agents_home = root / ".agents"
+
+                result = audit.check_superpowers(checkout, agents_home, online=False)
+
+                self.assertEqual(result.status, "disabled", msg=result.detail)
+                self.assertFalse(result.required)
+                self.assertFalse(audit.should_fail([result], strict=False))
+                self.assertFalse(audit.should_fail([result], strict=True))
+
+        with self.subTest(state="inactive"):
+            with tempfile.TemporaryDirectory() as tmpdir:
+                root = Path(tmpdir)
+                checkout = self.create_superpowers_checkout(root)
+                agents_home = root / ".agents"
+
+                result = audit.check_superpowers(checkout, agents_home, online=False)
+
+                self.assertEqual(result.status, "inactive", msg=result.detail)
+                self.assertFalse(result.required)
+                self.assertFalse(audit.should_fail([result], strict=False))
+
+        with self.subTest(state="active"):
+            with tempfile.TemporaryDirectory() as tmpdir:
+                root = Path(tmpdir)
+                checkout = self.create_superpowers_checkout(root)
+                agents_home = self.create_agents_symlink(root, checkout / "skills")
+
+                result = audit.check_superpowers(checkout, agents_home, online=False)
+
+                self.assertEqual(result.status, "active", msg=result.detail)
+                self.assertFalse(result.required)
+                self.assertEqual(result.installed, result.latest)
+                self.assertFalse(audit.should_fail([result], strict=False))
+
+    def test_inactive_superpowers_checkout_does_not_require_remote_freshness(self) -> None:
         audit = load_audit_module()
         with tempfile.TemporaryDirectory() as tmpdir:
             root = Path(tmpdir)
             checkout = self.create_superpowers_checkout(root)
-            agents_home = self.create_agents_symlink(root, checkout / "skills")
+            working = root / "superpowers-working"
+            skill = working / "skills" / "example" / "SKILL.md"
+            skill.write_text("updated upstream skill\n", encoding="utf-8")
+            self.run_git(working, "add", "skills/example/SKILL.md")
+            self.run_git(working, "commit", "-m", "Update skill")
+            self.run_git(working, "push", "origin", "main")
+            agents_home = root / ".agents"
 
-            result = audit.check_superpowers(checkout, agents_home, online=False)
+            result = audit.check_superpowers(checkout, agents_home, online=True)
 
-            self.assertEqual(result.status, "ok", msg=result.detail)
-            self.assertEqual(result.installed, result.latest)
-            self.assertTrue(result.required)
+            self.assertEqual(result.status, "inactive", msg=result.detail)
+            self.assertFalse(result.required)
+            self.assertFalse(audit.should_fail([result], strict=False))
 
-    def test_superpowers_checkout_flags_wrong_skills_symlink(self) -> None:
+    def test_superpowers_checkout_flags_dangling_and_wrong_skills_symlinks(self) -> None:
         audit = load_audit_module()
-        with tempfile.TemporaryDirectory() as tmpdir:
-            root = Path(tmpdir)
-            checkout = self.create_superpowers_checkout(root)
-            wrong_target = root / "wrong-skills"
-            wrong_target.mkdir()
-            agents_home = self.create_agents_symlink(root, wrong_target)
 
-            result = audit.check_superpowers(checkout, agents_home, online=False)
+        for link_state in ("dangling", "wrong"):
+            with self.subTest(link_state=link_state):
+                with tempfile.TemporaryDirectory() as tmpdir:
+                    root = Path(tmpdir)
+                    checkout = self.create_superpowers_checkout(root)
+                    wrong_target = root / "wrong-skills"
+                    if link_state == "wrong":
+                        wrong_target.mkdir()
+                    agents_home = self.create_agents_symlink(root, wrong_target)
 
-            self.assertEqual(result.status, "error")
-            self.assertIn("skills symlink", result.detail)
+                    result = audit.check_superpowers(checkout, agents_home, online=False)
+
+                    self.assertEqual(result.status, "error")
+                    self.assertIn("skills symlink", result.detail)
+                    self.assertTrue(audit.should_fail([result], strict=False))
+
+    def test_active_superpowers_checkout_flags_invalid_and_dirty_checkouts(self) -> None:
+        audit = load_audit_module()
+
+        with self.subTest(checkout_state="invalid"):
+            with tempfile.TemporaryDirectory() as tmpdir:
+                root = Path(tmpdir)
+                checkout = root / "superpowers"
+                (checkout / "skills").mkdir(parents=True)
+                agents_home = self.create_agents_symlink(root, checkout / "skills")
+
+                result = audit.check_superpowers(checkout, agents_home, online=False)
+
+                self.assertEqual(result.status, "error")
+                self.assertTrue(audit.should_fail([result], strict=False))
+
+        with self.subTest(checkout_state="dirty"):
+            with tempfile.TemporaryDirectory() as tmpdir:
+                root = Path(tmpdir)
+                checkout = self.create_superpowers_checkout(root)
+                agents_home = self.create_agents_symlink(root, checkout / "skills")
+                (checkout / "dirty.txt").write_text("dirty\n", encoding="utf-8")
+
+                result = audit.check_superpowers(checkout, agents_home, online=False)
+
+                self.assertEqual(result.status, "dirty")
+                self.assertTrue(audit.should_fail([result], strict=False))
 
     def test_claude_generated_bundle_matches_renderer(self) -> None:
         audit = load_audit_module()

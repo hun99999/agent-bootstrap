@@ -199,45 +199,56 @@ def check_superpowers_symlink(superpowers_path: Path, agents_home: Path) -> str 
 
 def check_superpowers(superpowers_path: Path, agents_home: Path, online: bool) -> CheckResult:
     path = superpowers_path.expanduser()
+    link_path = agents_home.expanduser() / "skills" / "superpowers"
+    link_present = link_path.exists() or link_path.is_symlink()
+
     if not path.exists():
+        if link_present:
+            return CheckResult(
+                name="superpowers",
+                status="error",
+                required=False,
+                detail=f"skills symlink exists without a checkout: {link_path}",
+            )
         return CheckResult(
             name="superpowers",
-            status="missing",
-            required=True,
-            detail=f"{path} does not exist",
+            status="disabled",
+            required=False,
+            detail="manual checkout and skills symlink are absent",
         )
 
     if shutil.which("git") is None:
         return CheckResult(
             name="superpowers",
             status="error",
-            required=True,
+            required=False,
             detail="git is not installed or not on PATH",
         )
+
+    if link_present:
+        symlink_error = check_superpowers_symlink(path, agents_home)
+        if symlink_error is not None:
+            return CheckResult(
+                name="superpowers",
+                status="error",
+                required=False,
+                detail=symlink_error,
+            )
 
     status_result = run_command(("git", "-C", str(path), "status", "--short"))
     if status_result.returncode != 0:
         return CheckResult(
             name="superpowers",
             status="error",
-            required=True,
+            required=False,
             detail=(status_result.stderr or status_result.stdout).strip(),
         )
-    if status_result.stdout.strip():
+    if link_present and status_result.stdout.strip():
         return CheckResult(
             name="superpowers",
             status="dirty",
-            required=True,
+            required=False,
             detail=f"{path} has uncommitted changes",
-        )
-
-    symlink_error = check_superpowers_symlink(path, agents_home)
-    if symlink_error is not None:
-        return CheckResult(
-            name="superpowers",
-            status="error",
-            required=True,
-            detail=symlink_error,
         )
 
     local_result = run_command(("git", "-C", str(path), "rev-parse", "HEAD"))
@@ -245,17 +256,29 @@ def check_superpowers(superpowers_path: Path, agents_home: Path, online: bool) -
         return CheckResult(
             name="superpowers",
             status="error",
-            required=True,
+            required=False,
             detail=(local_result.stderr or local_result.stdout).strip(),
         )
 
     local_sha = local_result.stdout.strip()
+    if not link_present:
+        detail = "manual checkout is present but the skills symlink is inactive"
+        if status_result.stdout.strip():
+            detail += "; checkout has uncommitted changes"
+        return CheckResult(
+            name="superpowers",
+            status="inactive",
+            required=False,
+            installed=local_sha,
+            detail=detail,
+        )
+
     remote_sha = read_online_origin_head(path) if online else read_offline_origin_head(path)
     if remote_sha is None:
         return CheckResult(
             name="superpowers",
-            status="ok",
-            required=True,
+            status="active",
+            required=False,
             installed=local_sha,
             detail="Could not read origin HEAD; checked local cleanliness and skills symlink only",
         )
@@ -264,7 +287,7 @@ def check_superpowers(superpowers_path: Path, agents_home: Path, online: bool) -
         return CheckResult(
             name="superpowers",
             status="update-available",
-            required=True,
+            required=False,
             installed=local_sha,
             latest=remote_sha,
             detail="Fast-forward ~/.codex/superpowers to origin/HEAD",
@@ -272,8 +295,8 @@ def check_superpowers(superpowers_path: Path, agents_home: Path, online: bool) -
 
     return CheckResult(
         name="superpowers",
-        status="ok",
-        required=True,
+        status="active",
+        required=False,
         installed=local_sha,
         latest=remote_sha,
     )

@@ -53,8 +53,8 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--superpowers-mode",
         choices=("manual", "skip"),
-        default="manual",
-        help="Control manual Superpowers checkout and symlink installation. Defaults to manual.",
+        default="skip",
+        help="Control the optional manual Superpowers checkout and symlink. Defaults to skip.",
     )
     return parser.parse_args()
 

@@ -134,6 +134,8 @@ class InstallScriptTests(unittest.TestCase):
                 str(codex_home),
                 "--agents-home",
                 str(agents_home),
+                "--superpowers-mode",
+                "manual",
                 "--dry-run",
             )
 
@@ -156,6 +158,8 @@ class InstallScriptTests(unittest.TestCase):
                 str(codex_home),
                 "--agents-home",
                 str(agents_home),
+                "--superpowers-mode",
+                "manual",
                 "--dry-run",
             )
 
@@ -183,6 +187,8 @@ class InstallScriptTests(unittest.TestCase):
                 str(codex_home),
                 "--agents-home",
                 str(agents_home),
+                "--superpowers-mode",
+                "manual",
                 "--superpowers-remote",
                 str(remote),
             )
@@ -219,6 +225,8 @@ class InstallScriptTests(unittest.TestCase):
                 str(codex_home),
                 "--agents-home",
                 str(agents_home),
+                "--superpowers-mode",
+                "manual",
                 "--superpowers-remote",
                 str(remote),
             )
@@ -264,6 +272,8 @@ class InstallScriptTests(unittest.TestCase):
                 str(codex_home),
                 "--agents-home",
                 str(agents_home),
+                "--superpowers-mode",
+                "manual",
                 "--superpowers-remote",
                 str(remote),
                 "--repo-root",
@@ -283,6 +293,8 @@ class InstallScriptTests(unittest.TestCase):
                 str(codex_home),
                 "--agents-home",
                 str(agents_home),
+                "--superpowers-mode",
+                "manual",
                 "--superpowers-remote",
                 str(remote),
                 "--repo-root",
@@ -314,6 +326,8 @@ class InstallScriptTests(unittest.TestCase):
                 str(codex_home),
                 "--agents-home",
                 str(agents_home),
+                "--superpowers-mode",
+                "manual",
                 "--superpowers-remote",
                 str(remote),
                 "--repo-root",
@@ -331,6 +345,8 @@ class InstallScriptTests(unittest.TestCase):
                 str(codex_home),
                 "--agents-home",
                 str(agents_home),
+                "--superpowers-mode",
+                "manual",
                 "--superpowers-remote",
                 str(remote),
                 "--repo-root",
@@ -362,6 +378,8 @@ class InstallScriptTests(unittest.TestCase):
                 str(codex_home),
                 "--agents-home",
                 str(agents_home),
+                "--superpowers-mode",
+                "manual",
                 "--superpowers-remote",
                 str(remote),
                 "--repo-root",
@@ -384,6 +402,8 @@ class InstallScriptTests(unittest.TestCase):
                 str(codex_home),
                 "--agents-home",
                 str(agents_home),
+                "--superpowers-mode",
+                "manual",
                 "--superpowers-remote",
                 str(remote),
                 "--repo-root",
@@ -422,6 +442,8 @@ class InstallScriptTests(unittest.TestCase):
                 str(codex_home),
                 "--agents-home",
                 str(agents_home),
+                "--superpowers-mode",
+                "manual",
                 "--superpowers-remote",
                 str(remote),
                 "--repo-root",
@@ -444,6 +466,8 @@ class InstallScriptTests(unittest.TestCase):
                 str(codex_home),
                 "--agents-home",
                 str(agents_home),
+                "--superpowers-mode",
+                "manual",
                 "--superpowers-remote",
                 str(remote),
                 "--repo-root",
@@ -484,6 +508,8 @@ class InstallScriptTests(unittest.TestCase):
                 str(codex_home),
                 "--agents-home",
                 str(agents_home),
+                "--superpowers-mode",
+                "manual",
                 "--superpowers-remote",
                 str(remote),
             )
@@ -515,6 +541,8 @@ class InstallScriptTests(unittest.TestCase):
                 str(codex_home),
                 "--agents-home",
                 str(agents_home),
+                "--superpowers-mode",
+                "manual",
                 "--superpowers-remote",
                 str(remote),
                 "--repo-root",
@@ -547,6 +575,8 @@ class InstallScriptTests(unittest.TestCase):
                 str(codex_home),
                 "--agents-home",
                 str(agents_home),
+                "--superpowers-mode",
+                "manual",
                 "--superpowers-remote",
                 str(remote),
                 "--repo-root",
@@ -582,6 +612,8 @@ class InstallScriptTests(unittest.TestCase):
                 str(codex_home),
                 "--agents-home",
                 str(agents_home),
+                "--superpowers-mode",
+                "manual",
                 "--superpowers-remote",
                 str(remote),
                 "--repo-root",
@@ -604,6 +636,8 @@ class InstallScriptTests(unittest.TestCase):
                 str(codex_home),
                 "--agents-home",
                 str(agents_home),
+                "--superpowers-mode",
+                "manual",
                 "--superpowers-remote",
                 str(remote),
                 "--repo-root",
@@ -636,6 +670,8 @@ class InstallScriptTests(unittest.TestCase):
                 str(codex_home),
                 "--agents-home",
                 str(agents_home),
+                "--superpowers-mode",
+                "manual",
                 "--superpowers-remote",
                 str(remote),
             )
@@ -666,6 +702,8 @@ class InstallScriptTests(unittest.TestCase):
                 str(codex_home),
                 "--agents-home",
                 str(agents_home),
+                "--superpowers-mode",
+                "manual",
                 "--superpowers-remote",
                 str(remote),
             )
@@ -680,6 +718,35 @@ class InstallScriptTests(unittest.TestCase):
             )
             self.assertTrue(skills_symlink.is_symlink())
             self.assertEqual(skills_symlink.resolve(), (codex_home / "superpowers" / "skills").resolve())
+
+    def test_install_defaults_to_skipping_manual_superpowers_install(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            root = Path(tmpdir)
+            codex_home = root / ".codex"
+            agents_home = root / ".agents"
+            remote, working = self.create_superpowers_remote(root)
+            self.commit_superpowers_change(
+                working,
+                "skills/example/SKILL.md",
+                "version 1\n",
+                "Add initial skill",
+            )
+
+            result = self.run_installer(
+                "--partner-name",
+                "Hun",
+                "--codex-home",
+                str(codex_home),
+                "--agents-home",
+                str(agents_home),
+                "--superpowers-remote",
+                str(remote),
+            )
+
+            self.assertEqual(result.returncode, 0, msg=result.stderr)
+            self.assertIn("Superpowers: skipped manual checkout and symlink", result.stdout)
+            self.assertFalse((codex_home / "superpowers").exists())
+            self.assertFalse((agents_home / "skills" / "superpowers").exists())
 
     def test_install_can_skip_manual_superpowers_install(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
