@@ -17,8 +17,9 @@ The shared core defines the behavior once:
 - repository-level docs and prompts that explain the operating model
 
 These files provide the process-first constitution, role prompts, source of
-truth ordering, high-risk approval boundary, TDD expectation, review habits, and
-privacy rules that Codex and Claude Code adapters consume.
+truth ordering, high-risk approval boundary, risk-proportionate test-first and
+verification guidance, review habits, and privacy rules that Codex and Claude
+Code adapters consume.
 
 ## Harness Adapters
 
@@ -89,6 +90,7 @@ The public skill model is deliberately small:
 
 - `skills/karpathy-guidelines/` is the public default base skill.
 - `skills/chatgpt-collaboration-harness/` is an optional Codex collaboration skill, not a Claude Code default.
+- `skills/handoff/` is an explicit-use skill for preparing durable task handoffs.
 - `skills/hun-engineering-loop/` is a Hun-local wrapper, not part of the public default install set.
 - `skills/_template/` is a template for future project workflow skills.
 
@@ -140,17 +142,44 @@ python3 scripts/check_private_paths.py
 
 ## Update Flow
 
-Use this flow after pulling repo changes or changing shared prompts, metadata,
+Start this flow after pulling repo changes or changing shared prompts, metadata,
 docs, skills, or generated plugin output:
 
 ```bash
 git status --short --branch
+```
+
+Render only generated surfaces whose authored inputs changed:
+
+```bash
 python3 scripts/render_claude_plugin.py --partner-name "<chosen-name>"
+```
+
+Choose checks from invalidated evidence. Run focused tests or structural checks
+for narrow changes and rerun prior evidence only when relevant source,
+configuration, dependencies, toolchain, runtime inputs, or generated state
+changed. Reuse passing evidence only when its relevant inputs and target state
+are unchanged.
+
+Run full regression only for broad, cross-cutting, high-risk, release-bound, or
+wider-impact changes, or when a focused check reveals wider impact:
+
+```bash
 python3 -m unittest discover -s tests -p 'test_*.py'
+```
+
+Run the stack audit when shared source, rendered output, installer behavior, or
+runtime state is in scope. Run design validation when design material is in
+scope, and run the private-path check when tracked public content or generated
+output changed:
+
+```bash
 python3 scripts/audit_agent_stack.py
 python3 scripts/validate_frontend_design_stack.py --repo-root .
 python3 scripts/check_private_paths.py
 ```
+
+Never claim an unrun check passed. Report skipped or blocked checks and why.
 
 Use `<chosen-name>` instead of a public default when rendering local identity. If design source or
 the generated design plugin changed, validate the tracked plugin and resolve the live Codex and Claude runtime roots.
@@ -189,5 +218,5 @@ Before calling a change complete:
 - Generated frontend design plugin output matches its renderer, source locks, and provenance.
 - Each live runtime root is resolved and validated; a tracked local Codex root is not conflated with
   a distinct cached install.
-- Tests pass.
+- Every check reported as passing was run against current relevant inputs; unrun or blocked checks are identified plainly.
 - No private paths or secrets are present.

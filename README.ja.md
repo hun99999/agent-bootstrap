@@ -26,7 +26,7 @@ docs/frontend-design-stack.md を読んでください。tracked frontend-design
 
 選択したスコープを最後まで設定してください:
 - このリポジトリに文書化されたコマンドで shared core を install または render する
-- 現在のハーネスに文書化された経路だけで upstream superpowers を入れる
+- upstream Superpowers は optional として扱う。Codex installer の default は `skip` のままにし、私が明示的に選択した場合だけ `--superpowers-mode manual` を使う
 - shared prompts や metadata が変わった場合は Claude plugin output を再生成する
 - public default base skill は karpathy-guidelines にする
 - hun-engineering-loop は明示承認がない限り Hun local runtime wrapper として扱う
@@ -40,7 +40,7 @@ docs/frontend-design-stack.md を読んでください。tracked frontend-design
 
 Codex と Claude Code 向けの process-first AI coding environment bootstrap です。
 
-`agent-bootstrap` は、`superpowers` workflow、role-based subagents、token-efficient な作業習慣、詳細なセットアップ文書、`karpathy-guidelines` ベースの public-safe skill model を新しい clone に提供します。
+`agent-bootstrap` は、薄い process-first core、role-based subagents、token-efficient な作業習慣、詳細なセットアップ文書、`karpathy-guidelines` ベースの public-safe skill model、optional な `superpowers` 経路を新しい clone に提供します。
 
 ## 現在のサポート対象
 
@@ -55,9 +55,10 @@ auto-eva のような private project skill はこの public repository にコ�
 ## コアモデル
 
 - `karpathy-guidelines` が public default base skill です。assumption、simplicity、surgical diff、verifiable success criteria を重視します。
-- `superpowers` は brainstorming, planning, TDD, debugging, verification, review の reusable workflow library です。
+- `superpowers` は brainstorming, planning, TDD, debugging, verification, review の optional workflow library です。薄い process-first core は Superpowers を必要としません。
 - `hun-engineering-loop` は Hun local wrapper です。memory preflight, source-of-truth ordering, high-risk approval boundary, artifact-first execution, QA evidence contract を加えますが、public default install set ではありません。
 - `chatgpt-collaboration-harness` は Codex 側の ChatGPT Pro collaboration skill です。Claude Code にはデフォルトで入れません。
+- `handoff` は explicit-use catalog skill です。別の agent や session に現在の作業状態を渡すようユーザーが明示的に求めた場合だけ使い、[skills/README.md](skills/README.md)、[docs/codex-skills.md](docs/codex-skills.md)、[prompts/setup-codex-skills.md](prompts/setup-codex-skills.md) から確認します。
 
 Memory は recall layer であり source of truth ではありません。現在の user instruction、repo docs、scripts、tests、`AGENTS.md`、observed runtime output が優先されます。
 
@@ -85,14 +86,17 @@ Memory は recall layer であり source of truth ではありません。現在
    - Codex: [docs/README.codex.md](docs/README.codex.md)
    - Claude Code: [docs/README.claude.md](docs/README.claude.md)
 
-4. 変更前後に検証します。
+4. 変更で無効になった evidence に合わせて検証を選びます。広範囲、cross-cutting、
+   high-risk、release-bound の変更だけで次の full regression を使います。
 
    ```bash
    python3 -m unittest discover -s tests -p 'test_*.py'
    python3 scripts/audit_agent_stack.py
    ```
 
-5. 既存 clone を更新するときは pull 後に必要な generated artifact を再生成します。
+5. 既存 clone を更新するときは pull 後に影響を受けた generated artifact と無効になった
+   check だけを再実行します。focused result が wider impact を示した場合も full
+   regression に広げます。
 
    ```bash
    git pull --ff-only
@@ -188,13 +192,21 @@ The repository has four layers:
 - shared core: `AGENTS.md`, `agents/*.md`, `shared/agent-metadata.json`
 - reviewed frontend design source: `design-stack/`
 - first-class harness adapters: `.codex/`, `.claude-plugin/`, `plugins/process-first-agents/`, `plugins/frontend-design-pack/`
-- reusable public-safe skills: `skills/karpathy-guidelines/`, `skills/chatgpt-collaboration-harness/`, `skills/hun-engineering-loop/`, `skills/_template/`
+- reusable public-safe skills: `skills/karpathy-guidelines/`, `skills/chatgpt-collaboration-harness/`, `skills/handoff/`, `skills/hun-engineering-loop/`, `skills/_template/`
 
 詳細は [docs/agent-bootstrap-structure.md](docs/agent-bootstrap-structure.md) を読んでください。
 
 ## Superpowers 統合
 
-Codex App curated Superpowers plugin を使えます。Codex installer は manual ~/.codex/superpowers fallback もサポートします。Claude Code は official marketplace の upstream `superpowers` と、この repository の generated `process-first-agents` plugin を使います。両方の Codex discovery path を有効にすると、重複する skill 項目 が出る可能性があります。
+薄い process-first core は Superpowers なしでも動作します。Superpowers は Codex と Claude Code のどちらでも optional で、ユーザーが選択するものです。
+
+- Codex installer の default は `skip` です。manual checkout を明示的に選んだ場合だけ `--superpowers-mode manual` を使います。
+- `skip` は Superpowers の既存状態を変更しません。既存の curated または manual discovery を無効化したり削除したりしません。
+- model と reasoning の選択は Superpowers の選択から独立しています。`skip` または `manual` を選んでも model や reasoning level は選択・固定・変更されません。
+- Codex App curated Superpowers plugin は別に利用でき、installer は local skill discovery 用の manual ~/.codex/superpowers fallback をサポートします。
+- Claude Superpowers も optional で、この repository の generated `process-first-agents` plugin とは別です。ユーザーが明示的に選択した場合だけ install または update し、`process-first-agents` は Superpowers を必要としません。
+
+Codex App curated Superpowers plugin と manual fallback の両方を有効にすると、重複する skill 項目 が生じる可能性があります。意図しない場合は discovery path を一つだけ使います。
 
 ## このリポジトリの保守
 
@@ -204,9 +216,12 @@ Codex App curated Superpowers plugin を使えます。Codex installer は manua
 - Claude renderer: `scripts/render_claude_plugin.py`
 - Frontend design source and router: `design-stack/`
 - Frontend design renderer: `scripts/render_frontend_design_plugin.py`; do not edit `plugins/frontend-design-pack/` by hand
-- Verification: `python3 -m unittest discover -s tests -p 'test_*.py'`, `python3 scripts/audit_agent_stack.py`, `python3 scripts/validate_frontend_design_stack.py --repo-root .`
+- Verification: narrow change では invalidated focused checks を使います。full regression
+  (`python3 -m unittest discover -s tests -p 'test_*.py'`) は broad, cross-cutting, high-risk,
+  release-bound, wider-impact の場合だけ実行します。必要な scope に応じて
+  `python3 scripts/audit_agent_stack.py` と `python3 scripts/validate_frontend_design_stack.py --repo-root .` を追加します。
 
-Existing clone update:
+Existing clone update の次の例は full regression が必要な場合だけ使います:
 
 ```bash
 git status --short --branch
@@ -226,7 +241,7 @@ session で discovery を確認します。
 
 ## Agent Stack Audit
 
-Codex, Claude Code, Superpowers state, generated Claude plugin bundle を確認します。
+Codex, Claude Code, optional Superpowers state, generated Claude plugin bundle を確認します。
 
 ```bash
 python3 scripts/audit_agent_stack.py
@@ -235,6 +250,10 @@ python3 scripts/audit_agent_stack.py
 Default audit is offline/read-only. OpenCode は default supported surface ではありません。
 
 ## テスト
+
+次の full command は変更または release boundary が full regression を必要とする場合だけ
+使います。narrow change では関連する test module や structural check を実行し、入力が
+変わっていない passing evidence は繰り返しません。
 
 ```bash
 python3 -m unittest discover -s tests -p 'test_*.py'

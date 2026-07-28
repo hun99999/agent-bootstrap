@@ -1,3 +1,4 @@
+import re
 import unittest
 from pathlib import Path
 
@@ -7,6 +8,123 @@ LANGUAGE_SWITCHER = "[English](README.md) | [한국어](README.ko.md) | [日本�
 
 
 class ReadmeDocsTests(unittest.TestCase):
+    def assert_contains_any(
+        self,
+        contents: str,
+        alternatives: tuple[str, ...],
+        *,
+        message: str,
+    ) -> None:
+        normalized = " ".join(contents.casefold().split())
+        self.assertTrue(
+            any(alternative.casefold() in normalized for alternative in alternatives),
+            message,
+        )
+
+    def assert_codex_superpowers_choice_contract(
+        self,
+        contents: str,
+        *,
+        relative: str,
+    ) -> None:
+        paragraphs = [
+            " ".join(paragraph.casefold().split())
+            for paragraph in re.split(r"\n\s*\n", contents)
+        ]
+        context = " ".join(
+            paragraph
+            for paragraph in paragraphs
+            if "superpowers" in paragraph
+            or "--superpowers-mode" in paragraph
+            or "skip" in paragraph
+        )
+
+        self.assertIn("superpowers", context, relative)
+        self.assert_contains_any(
+            context,
+            ("optional", "opt-in", "user choice"),
+            message=f"{relative} must describe Superpowers as optional",
+        )
+        self.assertRegex(
+            context,
+            r"(default|by default).{0,120}\bskip\b|\bskip\b.{0,120}(default|by default)",
+            f"{relative} must make skip the Codex default",
+        )
+        self.assertIn(
+            "--superpowers-mode manual",
+            context,
+            f"{relative} must document the explicit manual opt-in",
+        )
+        self.assert_contains_any(
+            context,
+            (
+                "does not deactivate",
+                "does not disable",
+                "does not remove",
+                "leaves existing discovery unchanged",
+                "preserves existing discovery",
+                "non-mutating",
+            ),
+            message=(
+                f"{relative} must explain that skip does not deactivate existing discovery"
+            ),
+        )
+        self.assertIn("model", context, f"{relative} must mention model selection")
+        self.assertIn("reasoning", context, f"{relative} must mention reasoning selection")
+        self.assert_contains_any(
+            context,
+            (
+                "independent of the superpowers",
+                "independent from the superpowers",
+                "superpowers choice does not select",
+                "superpowers choice does not pin",
+                "superpowers choice does not change",
+            ),
+            message=(
+                f"{relative} must keep model and reasoning selection independent "
+                "from the Superpowers choice"
+            ),
+        )
+        for phrase in ("curated", "manual", "duplicate"):
+            self.assertIn(
+                phrase,
+                context,
+                f"{relative} must retain the curated/manual duplicate warning",
+            )
+
+    def assert_claude_superpowers_choice_contract(
+        self,
+        contents: str,
+        *,
+        relative: str,
+    ) -> None:
+        normalized = " ".join(contents.casefold().split())
+
+        for phrase in ("claude", "superpowers", "process-first-agents"):
+            self.assertIn(
+                phrase,
+                normalized,
+                f"{relative} must distinguish the Claude setup surfaces",
+            )
+        self.assert_contains_any(
+            normalized,
+            ("optional", "user choice", "ask the user", "user-approved"),
+            message=f"{relative} must make Claude Superpowers a user choice",
+        )
+        self.assert_contains_any(
+            normalized,
+            (
+                "separate from",
+                "independent of",
+                "independent from",
+                "without superpowers",
+                "does not require superpowers",
+            ),
+            message=(
+                f"{relative} must separate Claude Superpowers from process-first-agents"
+            ),
+        )
+
     def test_main_readme_has_language_switcher_and_value_props(self) -> None:
         readme = (REPO_ROOT / "README.md").read_text(encoding="utf-8")
 
@@ -83,6 +201,48 @@ class ReadmeDocsTests(unittest.TestCase):
             for phrase in expected_phrases:
                 self.assertIn(phrase, contents)
 
+    def test_codex_docs_and_setup_prompts_define_optional_superpowers_policy(self) -> None:
+        for relative in (
+            "README.md",
+            "docs/README.codex.md",
+            "docs/global-guardrail-setup.md",
+            ".codex/INSTALL.md",
+            "prompts/fresh-install.md",
+            "prompts/setup-codex-current-harness.md",
+        ):
+            with self.subTest(relative=relative):
+                contents = (REPO_ROOT / relative).read_text(encoding="utf-8")
+                self.assert_codex_superpowers_choice_contract(
+                    contents,
+                    relative=relative,
+                )
+
+    def test_shared_setup_prompt_treats_superpowers_as_a_user_choice(self) -> None:
+        prompt = (REPO_ROOT / "prompts" / "setup-shared-core.md").read_text(
+            encoding="utf-8"
+        )
+
+        self.assertIn("superpowers", prompt.casefold())
+        self.assert_contains_any(
+            prompt,
+            ("optional", "ask the user", "user choice", "user-approved"),
+            message="the shared setup prompt must not auto-install Superpowers",
+        )
+
+    def test_claude_docs_and_setup_prompt_keep_superpowers_separate(self) -> None:
+        for relative in (
+            "README.md",
+            "docs/README.claude.md",
+            "docs/global-guardrail-setup.md",
+            "prompts/setup-claude-current-harness.md",
+        ):
+            with self.subTest(relative=relative):
+                contents = (REPO_ROOT / relative).read_text(encoding="utf-8")
+                self.assert_claude_superpowers_choice_contract(
+                    contents,
+                    relative=relative,
+                )
+
     def test_docs_explain_agent_stack_audit_command(self) -> None:
         for relative in (
             "README.md",
@@ -105,6 +265,41 @@ class ReadmeDocsTests(unittest.TestCase):
         for relative, phrase in expected_phrases.items():
             contents = (REPO_ROOT / relative).read_text(encoding="utf-8")
             self.assertIn(phrase, contents)
+
+    def test_translated_readmes_preserve_optional_superpowers_semantics(self) -> None:
+        locale_markers = {
+            "README.ko.md": {
+                "optional": ("optional", "선택", "선택 사항"),
+                "default": ("default", "기본"),
+            },
+            "README.ja.md": {
+                "optional": ("optional", "任意", "選択"),
+                "default": ("default", "デフォルト", "既定"),
+            },
+            "README.zh-CN.md": {
+                "optional": ("optional", "可选", "选择"),
+                "default": ("default", "默认"),
+            },
+        }
+
+        for relative, markers in locale_markers.items():
+            with self.subTest(relative=relative):
+                contents = (REPO_ROOT / relative).read_text(encoding="utf-8")
+                normalized = " ".join(contents.casefold().split())
+
+                self.assertIn("superpowers", normalized)
+                self.assertIn("skip", normalized)
+                self.assertIn("--superpowers-mode manual", normalized)
+                self.assert_contains_any(
+                    normalized,
+                    markers["optional"],
+                    message=f"{relative} must preserve optional semantics",
+                )
+                self.assert_contains_any(
+                    normalized,
+                    markers["default"],
+                    message=f"{relative} must preserve default-skip semantics",
+                )
 
     def test_readme_links_vibe_coding_guardrails(self) -> None:
         readme = (REPO_ROOT / "README.md").read_text(encoding="utf-8")
@@ -208,6 +403,29 @@ class ReadmeDocsTests(unittest.TestCase):
 
         self.assertIn("docs/agent-bootstrap-structure.md", readme)
         self.assertIn("prompts/update-agent-bootstrap.md", readme)
+
+    def test_readme_routes_explicit_handoffs_through_the_skill_catalog(self) -> None:
+        readme = (REPO_ROOT / "README.md").read_text(encoding="utf-8")
+        normalized = " ".join(readme.casefold().split())
+
+        for relative in (
+            "skills/README.md",
+            "docs/codex-skills.md",
+            "prompts/setup-codex-skills.md",
+        ):
+            self.assertIn(relative.casefold(), normalized)
+
+        handoff_context = " ".join(
+            paragraph
+            for paragraph in re.split(r"\n\s*\n", normalized)
+            if "handoff" in paragraph
+        )
+        self.assertTrue(handoff_context, "README.md must catalog the handoff skill")
+        self.assert_contains_any(
+            handoff_context,
+            ("explicit-use", "explicit use", "only when explicitly", "use only when"),
+            message="README.md must describe handoff as an explicit-use skill",
+        )
 
     def test_korean_readme_links_repo_structure_and_update_prompt(self) -> None:
         readme = (REPO_ROOT / "README.ko.md").read_text(encoding="utf-8")

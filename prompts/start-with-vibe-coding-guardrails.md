@@ -16,12 +16,12 @@ Before implementation, run a pre-write lens:
 - capture pre-write intent as names, shapes, files, dependencies, and plannedTypeEscapes
 - read the invocation-specific pre-write advisory when one is produced
 
-Use TDD:
-- write the failing test first
-- include edge cases before happy-path-only coverage
+Choose the testing approach from the change:
+- use test-first work when a behavior change is clear and testable or the repository requires it
+- include relevant edge cases instead of happy-path-only coverage
 - keep mocks at external boundaries
 - do not mock internal behavior
-- run the test and confirm the expected failure before production changes
+- use proportionate executable or structural checks for prose, generated output, and mechanical configuration changes
 
 During implementation:
 - make the smallest reasonable change
@@ -35,6 +35,10 @@ After implementation, run post-write review:
 - check for duplicate helpers, duplicate shapes, dead code, commented-out code, hidden coupling, initialization order dependencies, global state, unmanaged re-exports, fan-in/fan-out hotspots, and weak tests
 - compare the diff against the pre-write advisory or local evidence index, and check Lumin machine evidence for `silent-new` type escapes, planned-not-observed type escapes, unexpected new files, and degraded scan confidence
 - keep duplicate helpers, dependency drift, public API drift, and re-export drift as manual review claims backed by direct evidence
-- run the repository's real verification commands
+- for narrow changes, run focused checks that cover the changed behavior and relevant edge cases
+- choose checks from invalidated evidence: rerun a prior result when relevant source, configuration, dependencies, toolchain, runtime inputs, or generated state changed
+- reuse passing evidence only when the relevant inputs and target state are unchanged
+- run full regression only for broad, cross-cutting, high-risk, release, or wider-impact changes
+- never claim an unrun check passed; report skipped or blocked checks and why
 - report exact commands, results, files changed, and remaining risks
 ```

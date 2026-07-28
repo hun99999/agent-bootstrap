@@ -119,9 +119,34 @@ class VibeCodingGuardrailsDocsTests(unittest.TestCase):
                 prompt = prompt_path.read_text(encoding="utf-8")
                 self.assertIn("pre-write", prompt.lower())
                 self.assertIn("post-write", prompt.lower())
-                self.assertIn("TDD", prompt)
+                self.assertIn("invalidated evidence", prompt.lower())
+                self.assertIn("full regression", prompt.lower())
                 self.assertIn("edge cases", prompt)
                 self.assertIn("do not commit", prompt.lower())
+
+    def test_copy_paste_prompts_use_risk_proportionate_verification(self) -> None:
+        prompt_paths = (
+            REPO_ROOT / "prompts" / "apply-vibe-coding-guardrails.md",
+            REPO_ROOT / "prompts" / "start-with-vibe-coding-guardrails.md",
+        )
+
+        for prompt_path in prompt_paths:
+            with self.subTest(prompt=prompt_path.name):
+                prompt = prompt_path.read_text(encoding="utf-8")
+                normalized = " ".join(prompt.lower().replace("-", " ").split())
+
+                for phrase in (
+                    "invalidated evidence",
+                    "full regression",
+                    "broad",
+                    "cross cutting",
+                    "high risk",
+                    "release",
+                    "wider impact",
+                ):
+                    self.assertIn(phrase, normalized)
+                self.assertNotIn("use tdd for any behavior changes", normalized)
+                self.assertNotIn("follow tdd for every", normalized)
 
     def test_apply_prompt_requires_optional_tool_inventory_before_install(self) -> None:
         prompt_path = REPO_ROOT / "prompts" / "apply-vibe-coding-guardrails.md"

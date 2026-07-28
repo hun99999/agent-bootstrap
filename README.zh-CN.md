@@ -26,7 +26,7 @@
 
 完整设置所选范围:
 - 使用本仓库文档中的命令 install 或 render shared core
-- 只通过当前 harness 文档化的路径安装 upstream superpowers
+- 将 upstream Superpowers 视为 optional；Codex installer 的 default 保持为 `skip`，只有我明确选择时才使用 `--superpowers-mode manual`
 - 如果 shared prompts 或 metadata 改变，重新生成 Claude plugin output
 - public default base skill 使用 karpathy-guidelines
 - 除非我明确批准，hun-engineering-loop 只作为 Hun local runtime wrapper
@@ -40,7 +40,7 @@
 
 面向 Codex 和 Claude Code 的流程优先 AI 编程环境引导仓库。
 
-`agent-bootstrap` 为新的 clone 提供共享 `superpowers` workflow、role-based subagents、token-efficient 工作习惯、详细设置文档，以及基于 `karpathy-guidelines` 的 public-safe skill model。
+`agent-bootstrap` 为新的 clone 提供精简的 process-first core、role-based subagents、token-efficient 工作习惯、详细设置文档、基于 `karpathy-guidelines` 的 public-safe skill model，以及 optional `superpowers` 路径。
 
 ## 当前支持范围
 
@@ -55,9 +55,10 @@ OpenCode 和 OpenClaw 是 legacy/reference material，不是 active service targ
 ## 核心模型
 
 - `karpathy-guidelines` 是 public default base skill，用来强调 assumptions、simplicity、surgical diff 和 verifiable success criteria。
-- `superpowers` 是 brainstorming、planning、TDD、debugging、verification、review 的 reusable workflow library。
+- `superpowers` 是 brainstorming、planning、TDD、debugging、verification、review 的 optional workflow library。精简的 process-first core 不依赖 Superpowers。
 - `hun-engineering-loop` 是 Hun local wrapper，加入 memory preflight、source-of-truth ordering、high-risk approval boundary、artifact-first execution 和 QA evidence contract，但不属于 public default install set。
 - `chatgpt-collaboration-harness` 是 Codex 侧的 ChatGPT Pro collaboration skill，不默认安装到 Claude Code。
+- `handoff` 是 explicit-use catalog skill。只有用户明确要求把当前任务状态交给另一个 agent 或 session 时才使用，并通过 [skills/README.md](skills/README.md)、[docs/codex-skills.md](docs/codex-skills.md)、[prompts/setup-codex-skills.md](prompts/setup-codex-skills.md) 查看。
 
 Memory 是 recall layer，不是 source of truth。当前 user instruction、repo docs、scripts、tests、`AGENTS.md` 和 observed runtime output 优先。
 
@@ -85,14 +86,16 @@ Memory 是 recall layer，不是 source of truth。当前 user instruction、rep
    - Codex: [docs/README.codex.md](docs/README.codex.md)
    - Claude Code: [docs/README.claude.md](docs/README.claude.md)
 
-4. 修改前后运行验证。
+4. 根据变更使哪些 evidence 失效来选择验证。只有 broad、cross-cutting、high-risk 或
+   release-bound 变更才运行下面的 full regression。
 
    ```bash
    python3 -m unittest discover -s tests -p 'test_*.py'
    python3 scripts/audit_agent_stack.py
    ```
 
-5. 更新已有 clone 时，先 fast-forward pull，再重新生成必要的 generated artifact。
+5. 更新已有 clone 时，先 fast-forward pull，再只重新生成受影响的 artifact 并重跑失效的
+   check。focused result 显示 wider impact 时才扩大到 full regression。
 
    ```bash
    git pull --ff-only
@@ -188,13 +191,21 @@ The repository has four layers:
 - shared core: `AGENTS.md`, `agents/*.md`, `shared/agent-metadata.json`
 - reviewed frontend design source: `design-stack/`
 - first-class harness adapters: `.codex/`, `.claude-plugin/`, `plugins/process-first-agents/`, `plugins/frontend-design-pack/`
-- reusable public-safe skills: `skills/karpathy-guidelines/`, `skills/chatgpt-collaboration-harness/`, `skills/hun-engineering-loop/`, `skills/_template/`
+- reusable public-safe skills: `skills/karpathy-guidelines/`, `skills/chatgpt-collaboration-harness/`, `skills/handoff/`, `skills/hun-engineering-loop/`, `skills/_template/`
 
 详细结构请阅读 [docs/agent-bootstrap-structure.md](docs/agent-bootstrap-structure.md)。
 
 ## Superpowers 集成
 
-Codex 可以使用 Codex App curated Superpowers plugin。Codex installer 也支持 manual ~/.codex/superpowers fallback。Claude Code 使用 official marketplace 的 upstream `superpowers`，再安装本仓库 generated `process-first-agents` plugin。同时启用两条 Codex discovery path 可能产生重复的 skill 条目。
+精简的 process-first core 即使没有 Superpowers 也能工作。Superpowers 在 Codex 和 Claude Code 中都是 optional，必须由用户选择。
+
+- Codex installer 的 default 是 `skip`。只有明确选择 manual checkout 时才使用 `--superpowers-mode manual`。
+- `skip` 不会改变现有 Superpowers 状态，也不会停用或删除现有 curated 或 manual discovery。
+- model 和 reasoning 的选择独立于 Superpowers 选择。选择 `skip` 或 `manual` 不会选择、固定或更改 model 或 reasoning level。
+- Codex 可以单独使用 Codex App curated Superpowers plugin；installer 也支持用于 local skill discovery 的 manual ~/.codex/superpowers fallback。
+- Claude Superpowers 也是 optional，并且与本仓库 generated `process-first-agents` plugin 相互独立。只有用户明确选择时才安装或更新；`process-first-agents` 不依赖 Superpowers。
+
+同时启用 Codex App curated Superpowers plugin 和 manual fallback 可能产生重复的 skill 条目。若非有意，请只使用一条 discovery path。
 
 ## 维护这个仓库
 
@@ -204,9 +215,12 @@ Codex 可以使用 Codex App curated Superpowers plugin。Codex installer 也支
 - Claude renderer: `scripts/render_claude_plugin.py`
 - Frontend design source and router: `design-stack/`
 - Frontend design renderer: `scripts/render_frontend_design_plugin.py`; do not edit `plugins/frontend-design-pack/` by hand
-- Verification: `python3 -m unittest discover -s tests -p 'test_*.py'`, `python3 scripts/audit_agent_stack.py`, `python3 scripts/validate_frontend_design_stack.py --repo-root .`
+- Verification: narrow change 使用 invalidated focused checks。只有 broad、cross-cutting、
+  high-risk、release-bound 或 wider-impact 时才运行 full regression
+  (`python3 -m unittest discover -s tests -p 'test_*.py'`)；按实际 scope 添加
+  `python3 scripts/audit_agent_stack.py` 和 `python3 scripts/validate_frontend_design_stack.py --repo-root .`。
 
-Existing clone update:
+下面的 Existing clone update 示例只在需要 full regression 时使用:
 
 ```bash
 git status --short --branch
@@ -225,7 +239,7 @@ plugin root；cached install 也可能位于其他位置。替换 cached install
 
 ## Agent Stack Audit
 
-检查 Codex、Claude Code、Superpowers state 和 generated Claude plugin bundle:
+检查 Codex、Claude Code、optional Superpowers state 和 generated Claude plugin bundle:
 
 ```bash
 python3 scripts/audit_agent_stack.py
@@ -234,6 +248,9 @@ python3 scripts/audit_agent_stack.py
 Default audit is offline/read-only。OpenCode 不再是 default supported surface。
 
 ## 测试
+
+只有变更或 release boundary 需要 full regression 时才使用下面的 full command。narrow
+change 应运行相关 test module 或 structural check，并复用输入未变化的 passing evidence。
 
 ```bash
 python3 -m unittest discover -s tests -p 'test_*.py'

@@ -26,7 +26,7 @@ Choose the smallest valid scope:
 
 Set up the selected scope end to end:
 - install or render the shared core using this repository's documented commands
-- install upstream superpowers only through the documented path for the current harness
+- treat upstream Superpowers as optional: keep the Codex installer default at `skip`, and use `--superpowers-mode manual` only after I explicitly opt in
 - regenerate Claude plugin output if shared prompts or metadata changed
 - use karpathy-guidelines as the public default base skill
 - keep hun-engineering-loop local to Hun-specific runtime setups unless I explicitly approve publishing that wrapper into a project
@@ -40,7 +40,7 @@ Set up the selected scope end to end:
 
 Bootstrap a process-first AI coding environment for Codex and Claude Code.
 
-`agent-bootstrap` gives a fresh clone a shared `superpowers` workflow, role-based subagents, token-efficient execution habits, detailed setup docs, and a public-safe skill model based on `karpathy-guidelines`.
+`agent-bootstrap` gives a fresh clone a thin process-first core, role-based subagents, token-efficient execution habits, detailed setup docs, a public-safe skill model based on `karpathy-guidelines`, and an optional path to `superpowers`.
 
 ## Current Supported Surfaces
 
@@ -78,9 +78,10 @@ Do not commit private project skills such as auto-eva to this public repository.
 The public baseline is deliberately thin.
 
 - `karpathy-guidelines` is the public default base skill. It keeps coding agents focused on assumptions, simplicity, surgical diffs, and verifiable success criteria.
-- `superpowers` provides the reusable workflow library for brainstorming, planning, TDD, debugging, verification, and review.
+- `superpowers` is an optional workflow library for brainstorming, planning, TDD, debugging, verification, and review. The thin process-first core does not require it.
 - `hun-engineering-loop` is a Hun-local wrapper around `karpathy-guidelines`. It adds memory preflight, source-of-truth ordering, high-risk approval boundaries, artifact-first execution, and QA evidence contracts. It is useful in Hun's local runtime, but it is not part of the public default install set.
 - `chatgpt-collaboration-harness` is a Codex-side collaboration skill for carefully scoped ChatGPT Pro work. It is not installed into Claude Code by default.
+- `handoff` is an explicit-use catalog skill. Use it only when the user explicitly asks to package current task state for another agent or session; review it through [skills/README.md](skills/README.md), [docs/codex-skills.md](docs/codex-skills.md), and [prompts/setup-codex-skills.md](prompts/setup-codex-skills.md).
 
 Memory and prior summaries are recall layers, not sources of truth. Current user instructions, repo docs, scripts, tests, `AGENTS.md`, and observed runtime output win when they conflict.
 
@@ -110,14 +111,17 @@ Choose the scope first. Most failed setup work starts by configuring too much: a
    - Codex: follow [docs/README.codex.md](docs/README.codex.md).
    - Claude Code: follow [docs/README.claude.md](docs/README.claude.md).
 
-4. Run verification before and after changes.
+4. Choose verification from the evidence the change invalidates. For a broad, cross-cutting,
+   high-risk, or release-bound change, the full-regression path is:
 
    ```bash
    python3 -m unittest discover -s tests -p 'test_*.py'
    python3 scripts/audit_agent_stack.py
    ```
 
-5. If you are updating an existing clone, pull first, regenerate generated artifacts when needed, then rerun the same verification.
+5. If you are updating an existing clone, pull first, regenerate only affected artifacts, and rerun
+   only invalidated checks. Use the full-regression command below only when the update meets the
+   criteria above or a focused result reveals wider impact.
 
    ```bash
    git pull --ff-only
@@ -252,6 +256,7 @@ The repository is split into four practical layers:
 - reusable public-safe skills
   - `skills/karpathy-guidelines/`
   - `skills/chatgpt-collaboration-harness/`
+  - `skills/handoff/`
   - `skills/hun-engineering-loop/`
   - `skills/_template/`
 
@@ -259,11 +264,13 @@ The shared core defines the operating model once. Codex and Claude Code adapters
 
 ## Superpowers Integration
 
-This bootstrap is centered on upstream `obra/superpowers`.
+The thin process-first core works without Superpowers. Superpowers is optional and opt-in for both supported harnesses.
 
-- Codex can use the Codex App curated Superpowers plugin.
-- The Codex installer also supports a manual ~/.codex/superpowers fallback for environments that rely on local skill discovery.
-- Claude Code should install upstream `superpowers` from Anthropic's official plugin marketplace, then install this repository's generated `process-first-agents` plugin.
+- Codex installation defaults to `skip`. Opt in to the documented manual checkout only with `--superpowers-mode manual`.
+- `skip` is non-mutating for Superpowers: it does not deactivate, disable, or remove existing curated or manual discovery.
+- Model and reasoning selection is independent of the Superpowers choice. Choosing `skip` or `manual` does not select, pin, or change a model or reasoning level.
+- Codex can separately use the Codex App curated Superpowers plugin, while the installer supports a manual ~/.codex/superpowers fallback for local skill discovery.
+- Claude Superpowers is also optional and is separate from this repository's generated `process-first-agents` plugin. Install or update it only after an explicit user choice; `process-first-agents` does not require Superpowers.
 
 Avoid enabling both the Codex App curated Superpowers plugin and the manual fallback unless duplicate skill entries are intentional.
 
@@ -279,13 +286,16 @@ Use [docs/agent-bootstrap-structure.md](docs/agent-bootstrap-structure.md) as th
 - Render the frontend design plugin with `scripts/render_frontend_design_plugin.py`; do not edit
   `plugins/frontend-design-pack/` by hand.
 - Regenerate Claude plugin output with `python3 scripts/render_claude_plugin.py --partner-name "<Name>"` after shared prompt or metadata changes.
-- Verify design changes with `python3 scripts/validate_frontend_design_stack.py --repo-root .` in
-  addition to the full tests, agent-stack audit, and private-path check.
+- Verify design changes with `python3 scripts/validate_frontend_design_stack.py --repo-root .` and
+  the focused tests invalidated by the change. Add full regression, agent-stack audit, and the
+  private-path check when the changed scope or release boundary warrants them.
 - Keep generated Claude plugin output in sync. Do not edit generated Claude plugin agents by hand.
 
 ## Pull And Update Workflow
 
-For an existing clone:
+For an existing clone, render affected output and run focused invalidated checks. The following
+full-regression example applies only to broad, cross-cutting, high-risk, release-bound, or
+wider-impact updates:
 
 ```bash
 git status --short --branch
@@ -306,7 +316,7 @@ If `git status --short --branch` is not clean, stop and decide whether the local
 
 ## Agent Stack Audit
 
-Run the local audit before or after updates to check Codex, Claude Code, Superpowers state, and the generated Claude plugin bundle:
+Run the local audit before or after updates to check Codex, Claude Code, optional Superpowers state, and the generated Claude plugin bundle:
 
 ```bash
 python3 scripts/audit_agent_stack.py
@@ -325,5 +335,8 @@ Installer, metadata, README expectations, skill catalog expectations, and genera
 ```bash
 python3 -m unittest discover -s tests -p 'test_*.py'
 ```
+
+Use that full command only when the change or release boundary warrants full regression. For narrow
+changes, run the relevant test module or structural check and reuse unchanged passing evidence.
 
 Run `python3 scripts/check_private_paths.py` before publishing changes that touch README files, skills, prompts, docs, generated plugin output, or setup scripts.

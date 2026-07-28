@@ -35,10 +35,14 @@ When documenting the daily workflow:
 - check Lumin machine evidence for `silent-new` type escapes, planned-not-observed type escapes, unexpected new files, and degraded scan confidence
 - check duplicate helpers, changed dependencies, public API drift, and re-export drift as manual post-write review claims backed by direct evidence
 
-Use TDD for any behavior changes. Tests must cover edge cases, failure paths, and side effects. Mocks belong at external boundaries only; do not mock internal implementation details.
+Use test-first work when a behavior change is clear and testable or the repository requires it. Tests should cover relevant edge cases, failure paths, and side effects. Mocks belong at external boundaries only; do not mock internal implementation details.
 
 After setup:
-- run the repository's real verification commands
+- for narrow changes, run focused checks that cover the changed behavior and relevant edge cases
+- choose checks from invalidated evidence: rerun a prior result when relevant source, configuration, dependencies, toolchain, runtime inputs, or generated state changed
+- reuse passing evidence only when the relevant inputs and target state are unchanged
+- run full regression only for broad, cross-cutting, high-risk, release, or wider-impact changes
+- never claim an unrun check passed; report skipped or blocked checks and why
 - run post-write review for duplicate helpers, hidden coupling, swallowed errors, unmanaged re-exports, fan-in/fan-out hotspots, and weak tests
 - commit in small, reviewable commits
 - summarize the evidence, commands run, files changed, and remaining risks

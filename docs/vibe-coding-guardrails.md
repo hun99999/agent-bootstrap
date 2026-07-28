@@ -24,7 +24,7 @@ This section maps the original vibe-coding problem checklist to concrete artifac
 | --- | --- |
 | agent memory is not continuous | `docs/agent-setup-playbook.md` and `docs/local-project-knowledge-template.md` tell agents to build persistent project maps instead of rediscovering helpers, types, shapes, commands, and boundaries every session. |
 | hidden coupling | `AGENTS.md`, this guide, and role prompts require pre-write checks for module boundaries, dependency direction, hidden imports, initialization order, global state, and side effects. |
-| weak tests | `AGENTS.md` requires TDD; this guide requires behavior, failure-path, edge-case, and side-effect tests instead of string-only checks. |
+| weak tests | `AGENTS.md` requires test-first work when behavior is clear and testable or the repository requires it; this guide requires relevant behavior, failure-path, edge-case, and side-effect coverage instead of string-only checks. |
 | edge cases | The write gate requires empty input, null or missing values, boundary values, failure paths, side effects, and concurrency checks when relevant. |
 | deep nesting | `AGENTS.md` tells agents to use guard clauses or early returns when nesting grows past two or three levels. |
 | god functions | This guide tells agents to avoid god functions and god files, and the post-write review checks whether responsibility concentrated in one file. |
@@ -62,7 +62,7 @@ Do not treat tool output as a decision. Treat it as evidence.
 
 During implementation:
 
-- follow TDD for every feature, bugfix, and refactor
+- use test-first work when a behavior change is clear and testable or the repository requires it
 - write edge cases first: empty input, null or missing values, boundary values, failure paths, side effects, and concurrency when relevant
 - search for existing helpers, types, shapes, and public APIs before creating new ones
 - keep mocks at external boundaries; do not mock internal implementation details
@@ -91,6 +91,14 @@ After implementation, review the change before calling it complete:
 - do tests validate behavior, failure paths, and side effects?
 - are local evidence artifacts such as `.audit/` intentionally untracked?
 
+### Verification
+
+Choose checks from invalidated evidence. For a narrow change, run the focused tests or structural checks that cover the changed behavior, relevant edge cases, and affected generated output. Rerun a prior result when relevant source, configuration, dependencies, toolchain, runtime inputs, or generated state changed.
+
+Reuse passing evidence only when its relevant inputs and target state are unchanged. Record its scope and age. Run full regression only for broad, cross-cutting, high-risk, release-bound, or wider-impact changes, or when a focused check reveals wider impact.
+
+Never claim an unrun check passed or imply broader coverage than the evidence supports. Report skipped or blocked checks, unverified areas, and the reason plainly.
+
 ## macOS Setup
 
 Ask the user what name the active agent should use before rendering local defaults. Keep the chosen name local.
@@ -98,7 +106,7 @@ Substitute it for `<chosen-name>`, and do not commit the chosen name or any rend
 that contains it. Inspect the active runtime's models and reasoning levels. Do not hard-code a latest
 model or paid-plan ceiling.
 
-For this repository:
+For a fresh-clone baseline in a release or other full-regression case:
 
 ```bash
 git clone https://github.com/hun99999/agent-bootstrap.git
@@ -136,7 +144,7 @@ Add-Content -Path .gitignore -Value ".audit/"
 git diff -- .gitignore
 ```
 
-For a Python-tested clone of this repository:
+For a Python-tested fresh-clone baseline in a release or other full-regression case:
 
 ```powershell
 git clone https://github.com/hun99999/agent-bootstrap.git
@@ -155,7 +163,7 @@ When applying these guardrails in Codex, ask Codex to:
 3. Read `docs/local-project-knowledge-template.md`.
 4. Inspect the target repository's current tooling before adding lint or dependency rules.
 5. Run a pre-write lens pass and summarize evidence.
-6. Follow TDD for each code change.
+6. Use test-first work when the behavior is clear and testable or the repository requires it.
 7. Run post-write review before final verification.
 
 Codex users can optionally install Lumin Repo Lens as a Codex skill wrapper. The upstream project documents this Codex-native install:
@@ -178,7 +186,7 @@ When applying these guardrails in Claude Code, ask Claude Code to:
 1. Read `AGENTS.md`.
 2. Read this guide.
 3. Read `docs/local-project-knowledge-template.md`.
-4. Use the planning and TDD workflow before code changes.
+4. Use the planning workflow and choose test-first work when the behavior is clear and testable or the repository requires it.
 5. Use a reviewer pass that prioritizes hidden coupling, duplicate replacement, swallowed errors, re-export drift, fan-in/fan-out hotspots, and tests that mock internal behavior.
 
 Optional Lumin Repo Lens commands documented by the upstream project:
@@ -255,7 +263,7 @@ For a scoped code task:
 1. Build the pre-write intent from the requested change. Track `names`, `shapes`, `files`, `dependencies`, and `plannedTypeEscapes`.
 2. Run the approved Lumin pre-write flow or native equivalent.
 3. Read the invocation-specific `pre-write-advisory` before editing. Do not rely only on a `latest` pointer when a specific advisory path exists.
-4. Implement with TDD and the write gate in this guide.
+4. Implement with the testing approach selected by the write gate in this guide.
 5. Run the matching `post-write-delta` against the same advisory.
 6. Lumin post-write machine evidence covers `silent-new` type escapes, planned-not-observed type escapes, unexpected new files outside the intent, scan range changes, and degraded confidence.
 
@@ -309,10 +317,10 @@ Use [../prompts/start-with-vibe-coding-guardrails.md](../prompts/start-with-vibe
 The agent should:
 
 - run the pre-write lens
-- write or update tests before implementation
+- write or update tests before implementation when the behavior is clear and testable or the repository requires it
 - implement the smallest reasonable change
 - run post-write review
-- run final verification commands
+- run focused verification selected from invalidated evidence, widening only when the change or results justify it
 - report evidence and remaining risk
 
 ## Privacy Boundaries

@@ -10,7 +10,11 @@ It does not mean every repository receives committed guardrail files. Repositori
 - Project layer: project-local knowledge, local commands, architecture notes, and optional `.audit/` evidence.
 - Session layer: the currently running agent context.
 
-The global layer gives every new session the same engineering rules: pre-write lens, TDD write gate, post-write review, search before creating helpers, no silent fallback, mocks only at external boundaries, and no private local artifacts in commits.
+The global layer gives every new session the same engineering baseline: a pre-write lens; test-first
+work when a behavior change is clear and testable or the repository requires it; proportionate
+executable or structural checks for prose, generated output, and mechanical configuration;
+post-write review; search before creating helpers; no silent fallback; mocks only at external
+boundaries; and no private local artifacts in commits.
 
 The project layer gives the agent facts that are unique to one repository: module boundaries, source-of-truth types, commands, error boundaries, and known hotspots.
 
@@ -21,17 +25,33 @@ In short: install globally for new sessions, then use project-local knowledge fo
 Before running an installer or renderer, stop. Ask the user what name the active agent should use.
 Keep the chosen name local. Substitute it for `<chosen-name>`, and do not commit the chosen name or
 any rendered identity file that contains it. Inspect the active runtime's models and reasoning
-levels. Do not hard-code a latest model or paid-plan ceiling.
+levels. Do not hard-code a latest model or paid-plan ceiling. Model and reasoning selection is
+independent of the optional Superpowers choice.
 
 ## Codex Global Setup
 
-Codex uses `~/.codex` for user-level defaults and `~/.agents/skills/superpowers` for shared Superpowers skill discovery.
+Codex uses `~/.codex` for user-level defaults. Manual Superpowers discovery through
+`~/.agents/skills/superpowers` is optional and opt-in.
 
 Run this from the repository root:
 
 ```bash
 bash .codex/install.sh --partner-name "<chosen-name>"
 python3 scripts/audit_agent_stack.py
+```
+
+The installer default is `skip`. Ask first, and use `--superpowers-mode manual` only after the user
+chooses the manual checkout. `skip` is non-mutating: it does not deactivate, disable, or remove an
+existing checkout, symlink, or curated discovery. Model and reasoning selection is independent of
+the Superpowers choice. Codex can instead use the curated plugin; enabling both curated and manual
+discovery can create duplicate skill entries.
+
+Approved manual example:
+
+```bash
+bash .codex/install.sh \
+  --partner-name "<chosen-name>" \
+  --superpowers-mode manual
 ```
 
 The Codex installer writes:
@@ -41,15 +61,15 @@ The Codex installer writes:
 - `~/.codex/config.toml`
 - `~/.codex/agents/*.md`
 - `~/.codex/agents/*.toml`
-- `~/.codex/superpowers`
-- `~/.agents/skills/superpowers`
+- in approved manual mode only, `~/.codex/superpowers`
+- in approved manual mode only, `~/.agents/skills/superpowers`
 
 Those files are the user-level defaults for new Codex sessions. After installing, start new Codex sessions for the cleanest pickup.
 
 For existing sessions, paste this short instruction:
 
 ```text
-Use the global vibe-coding guardrails now installed from agent-bootstrap. Before continuing, apply the pre-write lens, TDD write gate, and post-write review rules from the updated global AGENTS.md. Search before creating helpers/types/shapes, do not add silent fallback behavior, keep mocks at external boundaries, and do not commit local evidence artifacts or private paths.
+Use the global vibe-coding guardrails now installed from agent-bootstrap. Before continuing, apply the pre-write lens and post-write review rules from the updated global AGENTS.md. Use test-first work for clear, testable behavior changes or when the repository requires it, and use proportionate executable or structural checks for other changes. Search before creating helpers/types/shapes, do not add silent fallback behavior, keep mocks at external boundaries, and do not commit local evidence artifacts or private paths.
 ```
 
 ## Claude Code Global Setup
@@ -58,11 +78,15 @@ Claude Code uses a Claude Code plugin to provide user-level defaults for the sha
 
 Recommended setup:
 
-1. Install the upstream Superpowers plugin from Claude Code's official marketplace.
+1. Ask whether the user wants the optional upstream Superpowers plugin; install it from Claude
+   Code's official marketplace only after explicit approval.
 2. Clone this repository.
 3. Render this repository's Claude Code plugin bundle.
 4. Add this repository as a Claude Code plugin marketplace.
 5. Install the `process-first-agents` Claude Code plugin.
+
+Claude Superpowers is separate from `process-first-agents`. The shared agent prompts can be
+installed and used without Superpowers.
 
 Commands from the repository root:
 
@@ -226,7 +250,9 @@ Claude Code plugin installation happens inside Claude Code after rendering the p
 
 ## Windows PowerShell
 
-For this repository's Python tests:
+For this repository's Python tests, start with the focused module or structural check invalidated by
+the change. Use the full command below only for broad, cross-cutting, high-risk, release-bound, or
+wider-impact changes, or when a focused result reveals wider impact:
 
 ```powershell
 python -m unittest discover -s tests -p "test_*.py"
@@ -250,7 +276,9 @@ python3 scripts/render_claude_plugin.py --partner-name "<chosen-name>"
 python3 scripts/audit_agent_stack.py
 ```
 
-Run only the installers for the harnesses you actually use.
+The bare Codex installer command keeps the default `skip` choice. Add
+`--superpowers-mode manual` only after confirming the user still wants that optional manual
+integration. Run only the installers for the harnesses you actually use.
 
 ## What To Tell Other Sessions
 

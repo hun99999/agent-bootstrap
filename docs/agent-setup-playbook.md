@@ -15,7 +15,7 @@ A setup pass is successful only when the agent can report all of these with evid
 - optional installations were approved before they happened
 - private paths, credentials, MCP endpoints, auth state, browser profiles, and machine-specific trust settings were kept out of tracked files
 - the selected setup path was executed with documented commands
-- real verification commands were run
+- the selected real verification commands were run
 - post-write review was completed
 - remaining risks were reported plainly
 
@@ -55,7 +55,7 @@ Choose the smallest valid scope that satisfies the user's request.
 | Inside Claude Code and user says "set this up" | Claude Code current-harness-only | Render/install the Claude Code plugin path. Do not configure Codex unless requested. |
 | Harness is unclear | shared-core-only | Apply only shared operating guidance and ask before harness-specific setup. |
 | User points at an application repository | project guardrails | Add project-local knowledge guidance and repo-appropriate checks. Do not install global harness defaults unless requested. |
-| User says this repository was updated | agent-bootstrap maintenance | Read the structure doc, regenerate generated output when needed, verify tests and audit. |
+| User says this repository was updated | agent-bootstrap maintenance | Read the structure doc, regenerate affected output, and run risk-proportionate tests and audits selected from invalidated evidence. |
 | User asks what Codex skills are available in this repository | skill catalog review | Read `skills/README.md` and `docs/codex-skills.md`. Compare selected skills with `~/.codex/skills`, then ask before installing or overwriting anything. |
 | User asks for OpenCode or OpenClaw | legacy/reference path | Explain that those surfaces are not current first-class targets. Proceed only if the user explicitly wants legacy migration or restoration work. |
 
@@ -253,20 +253,28 @@ Expected project-local work:
 
 ## Verification Matrix
 
-Run verification that matches the work performed.
+Run verification that matches the work performed and the evidence invalidated by
+the change.
 
 | Work performed | Required verification |
 | --- | --- |
-| README or docs changed | Relevant documentation tests, then full test suite if practical |
-| Shared `AGENTS.md` or `agents/*.md` changed | Full tests, Claude plugin render check, generated bundle drift check |
+| README or docs changed | Focused documentation tests and applicable structural or private-path checks |
+| Shared `AGENTS.md` or `agents/*.md` changed | Focused prompt-policy tests, affected renderer checks, and generated bundle drift checks |
 | Claude plugin renderer changed | `python3 -m unittest tests.test_claude_plugin -v` and `python3 scripts/audit_agent_stack.py` |
-| Codex installer changed | Codex install tests and full tests |
-| Legacy installer changed | The relevant legacy tests and full tests |
+| Codex installer changed | Focused Codex install tests and the affected install audit |
+| Legacy installer changed | The relevant focused legacy tests |
 | Global local install performed | `python3 scripts/audit_agent_stack.py` after install |
 | Optional tool installed | Tool-specific version or health check plus a note about what state changed |
-| Target project guardrails applied | Target repo's real test/lint/type/build commands, plus post-write review |
+| Target project guardrails applied | Focused target-repo test, lint, type, or build commands that cover the change, plus post-write review |
 
-For this repository, the standard full verification is:
+Choose checks from invalidated evidence. Rerun a prior result when relevant
+source, configuration, dependencies, toolchain, runtime inputs, or generated
+state changed. Reuse passing evidence only when its relevant inputs and target
+state are unchanged.
+
+Run full regression only for broad, cross-cutting, high-risk, release-bound, or
+wider-impact changes, or when a focused check reveals wider impact. When it
+applies to this repository, use:
 
 ```bash
 python3 -m unittest discover -s tests -p 'test_*.py'
@@ -274,7 +282,8 @@ python3 scripts/audit_agent_stack.py
 git diff --check
 ```
 
-Do not claim completion if these commands were skipped. Say what was skipped and why.
+Never claim an unrun check passed or imply broader coverage than the evidence
+supports. Say what was skipped or blocked and why.
 
 ## Post-Write Review
 
@@ -362,4 +371,4 @@ Remaining risks:
 - follow-up:
 ```
 
-If no files changed, say that. If no install happened, say that. If a verification command could not run, include the exact reason.
+If no files changed, say that. If no install happened, say that. If a verification command could not run, include the exact reason. Never claim an unrun check passed.

@@ -14,11 +14,15 @@ Follow these rules exactly:
    user's account and organization actually support. Do not hard-code a latest model or paid plan.
 4. Configure Claude Code only.
 5. Do not configure another harness unless the user explicitly asks.
-6. Install or update the Claude-side `superpowers` and shared agent/subagent prompts using
-   `--partner-name "<chosen-name>"` when rendering.
-7. Review public-safe skills before installing anything into `~/.claude/skills`.
-8. Install only user-approved selected skills; do not auto-install the full catalog.
-9. Validate the tracked frontend design plugin with
+6. Render and install or update the shared `process-first-agents` prompts using
+   `--partner-name "<chosen-name>"`.
+7. Separately ask whether the user wants the optional upstream Claude Superpowers plugin.
+   - Do not install or update Superpowers automatically.
+   - Install it through the official Claude marketplace only after explicit user approval.
+   - `process-first-agents` is separate from Superpowers and remains usable without Superpowers.
+8. Review public-safe skills before installing anything into `~/.claude/skills`.
+9. Install only user-approved selected skills; do not auto-install the full catalog.
+10. Validate the tracked frontend design plugin with
    `python3 scripts/validate_frontend_design_stack.py --repo-root .`.
    - Inspect current Claude plugin state and report whether `frontend-design-pack` and Figma are
      available without authenticating Figma, changing accounts, or opening private files.
@@ -27,13 +31,14 @@ Follow these rules exactly:
      validate it separately with `--claude-runtime-root`.
    - Start a fresh Claude Code session and run a read-only discovery check before claiming that the
      skill or any approved companion skill is available.
-10. Preserve unrelated Claude Code state.
-11. Summarize:
+11. Preserve unrelated Claude Code state.
+12. Summarize:
    - chosen partner name
    - model and reasoning inheritance decision
    - files changed
    - backups created
    - selected skills installed or skipped
+   - whether the separate Superpowers option was approved, declined, or left unchanged
    - tracked plugin and installed runtime validation
    - Figma availability without authentication changes
    - anything that still needs manual follow-up

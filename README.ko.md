@@ -22,11 +22,11 @@ docs/frontend-design-stack.md를 읽어라. tracked frontend-design-pack을 검�
 - 이미 Claude Code 안에 있다면 내가 Codex까지 명시적으로 요구하지 않는 한 Claude Code만 세팅해라.
 - 지원되는 하네스가 분명하지 않다면 어떤 하네스를 세팅할지 물어봐라.
 - 애플리케이션 레포라면 프로젝트 guardrail을 적용하고 project-local knowledge guidance를 만들어라.
-- 언급됐다는 이유만으로 선택 도구를 설치하지 마십시오.
+- 선택 도구는 판단 후 사용해라. 언급됐다는 이유만으로 선택 도구를 설치하지 마십시오.
 
 선택한 범위를 끝까지 세팅해라:
 - 이 레포에 문서화된 명령으로 shared core를 설치하거나 렌더링해라
-- 현재 하네스의 문서화된 경로로만 upstream superpowers를 설치해라
+- upstream Superpowers는 optional로 취급해라. Codex installer의 default는 `skip`으로 유지하고, 내가 명시적으로 선택한 경우에만 `--superpowers-mode manual`을 사용해라
 - shared prompt나 metadata가 바뀌었다면 Claude plugin output을 다시 생성해라
 - public default base skill은 karpathy-guidelines로 둬라
 - hun-engineering-loop은 내가 명시적으로 승인하지 않는 한 Hun의 로컬 runtime wrapper로만 둬라
@@ -40,7 +40,9 @@ docs/frontend-design-stack.md를 읽어라. tracked frontend-design-pack을 검�
 
 Codex와 Claude Code를 위한 프로세스 중심 AI 코딩 환경 부트스트랩입니다.
 
-`agent-bootstrap`은 새로 clone한 사용자가 `superpowers` workflow, role-based subagents, token-efficient 실행 습관, 자세한 설치 문서, `karpathy-guidelines` 기반 public-safe skill 모델을 함께 적용할 수 있게 해줍니다.
+`agent-bootstrap`은 새로 clone한 사용자에게 얇은 process-first core, role-based subagents, token-efficient 실행 습관, 자세한 설치 문서, `karpathy-guidelines` 기반 public-safe skill 모델, optional `superpowers` 경로를 제공합니다.
+
+이 bootstrap 업데이트/재점검에는 [prompts/update-agent-bootstrap.md](prompts/update-agent-bootstrap.md)의 조건부 검증 절차를 사용합니다.
 
 ## 현재 지원 표면
 
@@ -64,9 +66,10 @@ auto-eva 같은 private project skill은 이 public repository에 커밋하지 �
 공개 기본값은 얇게 유지합니다.
 
 - `karpathy-guidelines`가 public default base skill입니다. 에이전트가 가정을 숨기지 않고, 단순하게 구현하고, 넓은 diff를 피하고, 성공 기준을 검증 가능하게 만들도록 잡아줍니다.
-- `superpowers`는 brainstorming, planning, TDD, debugging, verification, review에 쓰는 reusable workflow library입니다.
+- `superpowers`는 brainstorming, planning, TDD, debugging, verification, review에 쓰는 optional workflow library입니다. 얇은 process-first core는 Superpowers를 요구하지 않습니다.
 - `hun-engineering-loop`은 `karpathy-guidelines` 위에 Hun 로컬 운영 방식을 얹은 wrapper입니다. memory preflight, source-of-truth ordering, high-risk approval boundary, artifact-first execution, QA evidence contract를 추가합니다. Hun의 로컬 runtime에서는 유용하지만 public default install set에는 포함하지 않습니다.
 - `chatgpt-collaboration-harness`는 Codex 쪽에서 ChatGPT Pro와 협업할 때 쓰는 선택 skill입니다. Claude Code에는 기본 설치하지 않습니다.
+- `handoff`는 explicit-use catalog skill입니다. 사용자가 다른 agent나 session으로 현재 작업 상태를 전달해 달라고 명시적으로 요청할 때만 사용하며, [skills/README.md](skills/README.md), [docs/codex-skills.md](docs/codex-skills.md), [prompts/setup-codex-skills.md](prompts/setup-codex-skills.md)를 통해 검토합니다.
 
 Memory와 이전 요약은 recall layer일 뿐 source of truth가 아닙니다. 충돌하면 현재 사용자 지시, repo docs, scripts, tests, `AGENTS.md`, 실제 runtime output이 이깁니다.
 
@@ -96,14 +99,17 @@ Memory와 이전 요약은 recall layer일 뿐 source of truth가 아닙니다. 
    - Codex: [docs/README.codex.md](docs/README.codex.md)를 따릅니다.
    - Claude Code: [docs/README.claude.md](docs/README.claude.md)를 따릅니다.
 
-4. 변경 전후로 검증합니다.
+4. 변경으로 무효화된 증거에 맞춰 검증을 고릅니다. 광범위하거나 cross-cutting, high-risk,
+   release-bound인 변경에서만 다음 전체 회귀 경로를 사용합니다.
 
    ```bash
    python3 -m unittest discover -s tests -p 'test_*.py'
    python3 scripts/audit_agent_stack.py
    ```
 
-5. 기존 clone을 업데이트한다면 먼저 fast-forward pull을 하고, 필요한 generated artifact를 다시 만든 뒤 같은 검증을 돌립니다.
+5. 기존 clone을 업데이트한다면 먼저 fast-forward pull을 하고, 영향을 받은 generated
+   artifact와 무효화된 검사만 다시 실행합니다. 아래 전체 회귀 명령은 위 조건에 해당하거나
+   focused 결과가 더 넓은 영향을 드러낸 경우에만 사용합니다.
 
    ```bash
    git pull --ff-only
@@ -238,6 +244,7 @@ Optional tool은 workflow를 보조해야지 workflow 자체가 되면 안 됩�
 - reusable public-safe skills
   - `skills/karpathy-guidelines/`
   - `skills/chatgpt-collaboration-harness/`
+  - `skills/handoff/`
   - `skills/hun-engineering-loop/`
   - `skills/_template/`
 
@@ -245,11 +252,13 @@ shared core는 operating model을 한 번만 정의합니다. Codex와 Claude Co
 
 ## Superpowers 통합
 
-이 bootstrap은 upstream `obra/superpowers`를 중심으로 둡니다.
+얇은 process-first core는 Superpowers 없이도 동작합니다. Superpowers는 Codex와 Claude Code 모두에서 optional이며 사용자가 선택해야 합니다.
 
-- Codex는 Codex App curated Superpowers plugin을 사용할 수 있습니다.
-- Codex installer는 local skill discovery가 필요한 환경을 위해 manual ~/.codex/superpowers fallback도 지원합니다.
-- Claude Code는 Anthropic official plugin marketplace에서 upstream `superpowers`를 설치하고, 이 레포의 generated `process-first-agents` plugin을 설치합니다.
+- Codex installer의 default는 `skip`입니다. 사용자가 manual checkout을 명시적으로 선택한 경우에만 `--superpowers-mode manual`을 사용합니다.
+- `skip`은 Superpowers 상태를 바꾸지 않습니다. 기존 curated 또는 manual discovery를 비활성화하거나 제거하지 않습니다.
+- model과 reasoning 선택은 Superpowers 선택과 독립적입니다. `skip` 또는 `manual`을 선택해도 model이나 reasoning level을 선택·고정·변경하지 않습니다.
+- Codex는 별도로 Codex App curated Superpowers plugin을 사용할 수 있고, installer는 local skill discovery를 위한 manual ~/.codex/superpowers fallback을 지원합니다.
+- Claude Superpowers도 optional이며 이 레포의 generated `process-first-agents` plugin과 별개입니다. 사용자가 명시적으로 선택한 경우에만 설치하거나 업데이트하며, `process-first-agents`는 Superpowers를 요구하지 않습니다.
 
 Codex App curated Superpowers plugin과 manual fallback을 동시에 켜면 중복 skill 항목이 생길 수 있습니다. 의도한 게 아니라면 discovery path는 하나만 사용합니다.
 
@@ -265,13 +274,16 @@ Codex App curated Superpowers plugin과 manual fallback을 동시에 켜면 중�
 - frontend design plugin은 `scripts/render_frontend_design_plugin.py`로 생성하며
   `plugins/frontend-design-pack/`을 손으로 편집하지 않습니다.
 - Shared prompt나 metadata가 바뀌면 `python3 scripts/render_claude_plugin.py --partner-name "<Name>"`로 Claude plugin output을 다시 만듭니다.
-- 디자인 변경은 전체 테스트와 audit에 더해
-  `python3 scripts/validate_frontend_design_stack.py --repo-root .`로 검증합니다.
+- 디자인 변경은 `python3 scripts/validate_frontend_design_stack.py --repo-root .`와 변경으로
+  무효화된 focused 검사로 검증합니다. 변경 범위나 release boundary가 정당화할 때만 전체
+  회귀, agent-stack audit, private-path 검사를 추가합니다.
 - Generated Claude plugin output은 항상 sync합니다. Generated Claude plugin agent를 손으로 편집하지 않습니다.
 
 ## Pull And Update Workflow
 
-기존 clone에서는 다음 순서로 업데이트합니다.
+기존 clone에서는 영향을 받은 output을 렌더링하고 무효화된 focused 검사를 실행합니다.
+다음 전체 회귀 예시는 광범위하거나 cross-cutting, high-risk, release-bound,
+wider-impact인 업데이트에만 적용합니다.
 
 ```bash
 git status --short --branch
@@ -293,7 +305,7 @@ discovery를 확인합니다.
 
 ## Agent Stack Audit
 
-업데이트 전후에 로컬 Codex, Claude Code, Superpowers state, generated Claude plugin bundle을 확인하려면 다음을 실행합니다.
+업데이트 전후에 로컬 Codex, Claude Code, optional Superpowers state, generated Claude plugin bundle을 확인하려면 다음을 실행합니다.
 
 ```bash
 python3 scripts/audit_agent_stack.py
@@ -312,5 +324,9 @@ Installer, metadata, README expectation, skill catalog expectation, generated pl
 ```bash
 python3 -m unittest discover -s tests -p 'test_*.py'
 ```
+
+이 전체 명령은 변경 범위나 release boundary가 전체 회귀를 정당화할 때만 사용합니다. 좁은
+변경에서는 관련 test module이나 structural check를 실행하고, 입력이 바뀌지 않은 통과
+증거는 반복하지 않습니다.
 
 README, skills, prompts, docs, generated plugin output, setup script를 바꿨다면 publish 전에 `python3 scripts/check_private_paths.py`도 실행합니다.

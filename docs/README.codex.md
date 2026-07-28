@@ -35,12 +35,20 @@ This is a global Codex setup for the current user. It writes user-level defaults
 ## What It Does
 
 - renders `AGENTS.md`, `local.md`, `config.toml`, and `agents/*.md` into `~/.codex`
-- syncs the latest upstream `obra/superpowers` into `~/.codex/superpowers`
-- creates `~/.agents/skills/superpowers` as a symlink to `~/.codex/superpowers/skills`
+- when the user explicitly selects `--superpowers-mode manual`, syncs upstream
+  `obra/superpowers` into `~/.codex/superpowers`
+- in that manual mode, creates `~/.agents/skills/superpowers` as a symlink to
+  `~/.codex/superpowers/skills`
 
 These user-level defaults are the global layer. Project-specific structure still belongs in project-local knowledge such as `local.md`, an untracked note, or a private Obsidian page. New Codex sessions should pick up the installed defaults; existing sessions may need a restart or a short manual instruction to apply the new guardrails.
 
-Codex App can use the Codex App curated Superpowers plugin; the installer still supports the manual ~/.codex/superpowers fallback for local skill discovery. Avoid enabling both discovery paths unless duplicate skill entries are intentional.
+Superpowers is optional and opt-in. The installer default is `skip`; use
+`--superpowers-mode manual` only after the user chooses the manual checkout. `skip` is non-mutating:
+it does not deactivate, disable, or remove an existing checkout, symlink, or curated discovery.
+Model and reasoning selection is independent of the Superpowers choice. Codex can use the
+Codex App curated Superpowers plugin; the installer still supports the
+manual ~/.codex/superpowers fallback for local skill discovery. Avoid enabling both discovery paths
+unless duplicate skill entries are intentional.
 
 ## Re-run
 
@@ -48,6 +56,9 @@ Codex App can use the Codex App curated Superpowers plugin; the installer still 
 git pull
 bash .codex/install.sh --partner-name "<chosen-name>"
 ```
+
+The bare command preserves the default `skip` choice. Add `--superpowers-mode manual` only after the
+user explicitly opts in to installing or updating the manual fallback.
 
 ## Audit
 
@@ -62,7 +73,7 @@ The default audit is offline and read-only. It checks the local Codex CLI, Claud
 The public Codex templates do not pin a model, reasoning level, verbosity, or paid-plan ceiling.
 Inspect what the active Codex and Claude runtimes actually support, report the result, and let each
 runtime inherit its available selection. If the supported ceiling cannot be discovered, ask instead
-of guessing.
+of guessing. This choice is independent of the optional Superpowers mode.
 
 ## Frontend Design Pack
 

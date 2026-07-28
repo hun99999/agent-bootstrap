@@ -2,9 +2,12 @@
 
 This repository supports Claude Code in three layers:
 
-- install Anthropic's official `superpowers` plugin for the skills library
-- install this repository's `process-first-agents` plugin for the shared agent prompts
+- optionally install Anthropic's official `superpowers` plugin when the user chooses it
+- install this repository's `process-first-agents` plugin independently for the shared agent prompts
 - optionally install this repository's `frontend-design-pack` for the reviewed frontend router
+
+Claude Superpowers is a separate optional user choice. Ask before installing or updating it; do not
+auto-install it. `process-first-agents` can be installed and used without Superpowers.
 
 ## Default Scope
 
@@ -18,7 +21,8 @@ OpenCode and OpenClaw are not current first-class setup targets for this reposit
 
 ## Recommended Setup
 
-1. Install upstream `superpowers` from the official Claude marketplace.
+1. Ask whether the user wants upstream `superpowers`. Install it from the official Claude
+   marketplace only after explicit approval.
 2. Clone this repository locally.
 3. Run `git status --short --branch` and stop if there is uncommitted or untracked user work.
 4. Ask the user what name Claude Code should use. Keep the chosen name local, substitute it for
@@ -64,7 +68,8 @@ apply newly installed guardrails.
 
 The public templates carry no model, reasoning, verbosity, or paid-plan pin. Inspect the current
 Claude Code runtime and let it inherit the supported selection and organization ceiling. If the
-available ceiling cannot be discovered, ask the user instead of guessing.
+available ceiling cannot be discovered, ask the user instead of guessing. Model and reasoning
+selection does not depend on the optional Superpowers choice.
 
 ## Frontend Design Pack
 
@@ -124,9 +129,13 @@ After pulling new repo changes:
 git status --short --branch
 git pull --ff-only
 python3 scripts/render_claude_plugin.py --partner-name "<chosen-name>"
-python3 -m unittest discover -s tests -p 'test_*.py'
 python3 scripts/audit_agent_stack.py
 ```
+
+Run the narrowest checks invalidated by the changed renderer, docs, or plugin surface. Run
+`python3 -m unittest discover -s tests -p 'test_*.py'` only for broad, cross-cutting, high-risk, or
+release-bound updates, or when a focused result reveals wider impact. Reuse an unchanged passing
+result instead of repeating it.
 
 Then read `docs/frontend-design-stack.md`. If its tracked source or generated plugin changed, run
 `python3 scripts/validate_frontend_design_stack.py --repo-root .`, inspect the installed runtime,

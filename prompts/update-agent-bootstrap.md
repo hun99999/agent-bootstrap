@@ -54,13 +54,17 @@ changed:
 - after an approved install or replacement, validate the resolved live root; start a fresh task or session
   for a read-only discovery check
 
-Use TDD for behavior, installer, renderer, policy, and prompt-contract changes. Write the failing test first, confirm the expected failure, implement the smallest change, and rerun the test.
+Use test-first work when a behavior change is clear and testable or the repository requires it. Use proportionate executable or structural checks for prose, generated output, and mechanical configuration changes.
 
 After changes:
-- run python3 -m unittest discover -s tests -p 'test_*.py'
-- run python3 scripts/audit_agent_stack.py
+- for narrow changes, run the focused tests or structural checks that cover the affected source and generated output
+- choose checks from invalidated evidence: rerun a prior result when relevant source, configuration, dependencies, toolchain, runtime inputs, or generated state changed
+- reuse passing evidence only when its relevant inputs and target state are unchanged
+- run full regression only for broad, cross-cutting, high-risk, release, or wider-impact changes; when it applies, run python3 -m unittest discover -s tests -p 'test_*.py'
+- run python3 scripts/audit_agent_stack.py when shared source, renderer output, installer behavior, or runtime state is in scope
 - run python3 scripts/validate_frontend_design_stack.py --repo-root . when design material is in scope
-- run python3 scripts/check_private_paths.py
+- run python3 scripts/check_private_paths.py when tracked public content or generated output changed
+- never claim an unrun check passed; report skipped or blocked checks and why
 - run post-write review for duplicate prompt rules, generated output drift, hidden coupling, swallowed errors, unmanaged compatibility behavior, weak tests, and private path leakage
 - do not commit private paths, credentials, tokens, MCP endpoints, auth state, browser profile paths, or machine-specific trust settings
 - commit in small reviewable commits
