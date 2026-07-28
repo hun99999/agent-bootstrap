@@ -104,7 +104,8 @@ class SkillCatalogTests(unittest.TestCase):
         openai = openai_path.read_text(encoding="utf-8")
         self.assertLessEqual(len(skill.split()), 200)
         self.assertIn("name: handoff", skill)
-        self.assertIn("disable-model-invocation: true", skill)
+        self.assertNotIn("argument-hint:", skill)
+        self.assertNotIn("disable-model-invocation:", skill)
         self.assertIn("allow_implicit_invocation: false", openai)
 
     def test_handoff_does_not_add_broad_automatic_workflows(self) -> None:
