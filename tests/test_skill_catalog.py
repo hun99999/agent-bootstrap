@@ -1,10 +1,18 @@
 from pathlib import Path
 import re
+import subprocess
 import unittest
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 PRIVATE_HOME_PATH = "/" + "Users/hooooonje"
+MATT_POCOCK_SKILLS_COMMIT = "2ab958093e83e0ec752e6c1c5932da465bf23e0c"
+HANDOFF_CATALOG_FILES = (
+    "skills/handoff/SKILL.md",
+    "skills/handoff/agents/openai.yaml",
+    "skills/handoff/SOURCE.md",
+    "skills/handoff/LICENSE",
+)
 
 
 def markdown_section(document: str, heading: str, next_heading: str) -> str:
@@ -54,6 +62,119 @@ class SkillCatalogTests(unittest.TestCase):
         self.assertIn("2c606141936f1eeef17fa3043a72095b4765b9c2", source)
         self.assertIn("MIT", source)
         self.assertNotIn(PRIVATE_HOME_PATH, source)
+
+    def test_handoff_catalog_source_files_are_tracked(self) -> None:
+        result = subprocess.run(
+            ["git", "ls-files"],
+            cwd=REPO_ROOT,
+            check=True,
+            stdout=subprocess.PIPE,
+            text=True,
+        )
+        tracked_files = set(result.stdout.splitlines())
+
+        self.assertEqual(set(), set(HANDOFF_CATALOG_FILES) - tracked_files)
+
+    def test_handoff_preserves_reviewed_source_and_mit_attribution(self) -> None:
+        skill_root = REPO_ROOT / "skills" / "handoff"
+        source_path = skill_root / "SOURCE.md"
+        license_path = skill_root / "LICENSE"
+
+        self.assertTrue(source_path.is_file(), source_path)
+        self.assertTrue(license_path.is_file(), license_path)
+
+        source = source_path.read_text(encoding="utf-8")
+        license_text = license_path.read_text(encoding="utf-8")
+        self.assertIn("https://github.com/mattpocock/skills", source)
+        self.assertIn(MATT_POCOCK_SKILLS_COMMIT, source)
+        self.assertIn("MIT", source)
+        self.assertIn("Matt Pocock", source)
+        self.assertIn("MIT License", license_text)
+        self.assertIn("Copyright (c) 2026 Matt Pocock", license_text)
+
+    def test_handoff_is_compact_and_explicit_only(self) -> None:
+        skill_root = REPO_ROOT / "skills" / "handoff"
+        skill_path = skill_root / "SKILL.md"
+        openai_path = skill_root / "agents" / "openai.yaml"
+
+        self.assertTrue(skill_path.is_file(), skill_path)
+        self.assertTrue(openai_path.is_file(), openai_path)
+
+        skill = skill_path.read_text(encoding="utf-8")
+        openai = openai_path.read_text(encoding="utf-8")
+        self.assertLessEqual(len(skill.split()), 200)
+        self.assertIn("name: handoff", skill)
+        self.assertIn("disable-model-invocation: true", skill)
+        self.assertIn("allow_implicit_invocation: false", openai)
+
+    def test_handoff_does_not_add_broad_automatic_workflows(self) -> None:
+        skill_root = REPO_ROOT / "skills" / "handoff"
+        skill_path = skill_root / "SKILL.md"
+        openai_path = skill_root / "agents" / "openai.yaml"
+
+        self.assertTrue(skill_path.is_file(), skill_path)
+        self.assertTrue(openai_path.is_file(), openai_path)
+
+        workflow = (
+            skill_path.read_text(encoding="utf-8")
+            + "\n"
+            + openai_path.read_text(encoding="utf-8")
+        ).lower()
+        forbidden_phrases = (
+            "background agent",
+            "spawn_agent",
+            "sub-agent",
+            "subagent",
+            "agent tool",
+            "git status",
+            "git diff",
+            "git log",
+            "git commit",
+            "git push",
+            "browser",
+            "playwright",
+            "run tests",
+            "test suite",
+            "test command",
+            "npm test",
+            "pytest",
+            "```bash",
+        )
+        for phrase in forbidden_phrases:
+            with self.subTest(phrase=phrase):
+                self.assertNotIn(phrase, workflow)
+
+    def test_catalog_documents_only_handoff_from_matt_pocock_subset(self) -> None:
+        catalog = (REPO_ROOT / "skills" / "README.md").read_text(encoding="utf-8")
+        guide = (REPO_ROOT / "docs" / "codex-skills.md").read_text(encoding="utf-8")
+
+        for document in (catalog, guide):
+            self.assertIn("Matt Pocock", document)
+            self.assertIn("only `handoff`", document)
+            self.assertIn("`~/.codex/skills/handoff`", document)
+
+        self.assertIn("### handoff", catalog)
+        for excluded_skill in ("tdd", "diagnosing-bugs", "research", "code-review"):
+            with self.subTest(excluded_skill=excluded_skill):
+                self.assertNotIn(f"### {excluded_skill}", catalog)
+                self.assertNotIn(
+                    f"~/.codex/skills/{excluded_skill}",
+                    catalog + "\n" + guide,
+                )
+
+    def test_handoff_catalog_files_do_not_contain_private_absolute_paths(self) -> None:
+        paths = tuple(REPO_ROOT / relative for relative in HANDOFF_CATALOG_FILES) + (
+            REPO_ROOT / "skills" / "README.md",
+            REPO_ROOT / "docs" / "codex-skills.md",
+        )
+
+        for path in paths:
+            with self.subTest(path=path.relative_to(REPO_ROOT)):
+                self.assertTrue(path.is_file(), path)
+                self.assertNotIn(
+                    PRIVATE_HOME_PATH,
+                    path.read_text(encoding="utf-8"),
+                )
 
     def test_hun_engineering_loop_wraps_karpathy_with_local_policy(self) -> None:
         skill_root = REPO_ROOT / "skills" / "hun-engineering-loop"

@@ -18,6 +18,7 @@ installed skill.
 - Use `karpathy-guidelines` as the public default base skill.
 - Treat `hun-engineering-loop` as a Hun-local operational wrapper, not part of the public default install set.
 - Treat `chatgpt-collaboration-harness` as an optional Codex collaboration skill, not a Claude Code default.
+- From Matt Pocock's public skills, this catalog intentionally includes only `handoff`.
 - Do not copy private paths, credentials, MCP endpoints, auth state, browser profiles, or machine-specific trust settings into tracked files.
 - Run the skill validator after installing or syncing a skill.
 - Preserve original catalog/vendor skills separately from Hun-local operational wrappers.
@@ -94,6 +95,27 @@ Catalog path: `skills/hun-engineering-loop`
 Codex runtime install target: `~/.codex/skills/hun-engineering-loop`
 
 Claude Code install: Hun-local only, not a public default.
+
+### handoff
+
+Use this explicit-use skill only when the user asks to compact the current conversation into a
+handoff for a fresh agent or session.
+
+Key policy:
+
+- This is the only `handoff` package reviewed from Matt Pocock's
+  [`mattpocock/skills`](https://github.com/mattpocock/skills) subset.
+- It cannot invoke implicitly and adds no background-agent, Git, browser, or test workflow.
+- It writes outside the workspace, references existing durable artifacts instead of duplicating
+  them, and requires sensitive information to be redacted.
+- Do not add the broader `research`, `tdd`, `diagnosing-bugs`, or `code-review` packages as global
+  defaults; their automatic workflows and dependencies are disproportionate for this catalog.
+
+Catalog path: `skills/handoff`
+
+Codex runtime install target: `~/.codex/skills/handoff`
+
+Claude Code install: optional and explicit only; review the target runtime first.
 
 ### _template
 

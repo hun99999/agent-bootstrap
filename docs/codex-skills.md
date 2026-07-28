@@ -33,6 +33,22 @@ Keep private paths, credentials, MCP endpoints, auth state, browser profiles, an
 machine-specific trust settings out of tracked files. Public docs may mention
 `~/.codex/skills`, but they must not record a personal absolute home path.
 
+## Matt Pocock Subset
+
+This catalog reviewed `mattpocock/skills` at immutable commit
+`2ab958093e83e0ec752e6c1c5932da465bf23e0c` and selected only `handoff`.
+
+Install target: `~/.codex/skills/handoff`
+
+`handoff` is explicit-use only. It is suitable when the user asks for a compact
+continuation document for a fresh session. It does not invoke implicitly and
+does not add background-agent, Git, browser, or test orchestration.
+
+The broader `research`, `tdd`, `diagnosing-bugs`, and `code-review` packages are
+not separate catalog or runtime defaults. Their automatic triggers, setup
+dependencies, and orchestration cost would recreate the global workflow burden
+this catalog is designed to avoid.
+
 Remember: memory is a recall layer, not a source of truth. If memory, ChatGPT
 Pro, or another external review conflicts with repo docs, scripts, tests,
 AGENTS files, or observed runtime output, the current project source wins.
