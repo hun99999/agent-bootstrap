@@ -2,9 +2,17 @@
 
 [English](README.md) | [한국어](README.ko.md) | [日本語](README.ja.md) | [简体中文](README.zh-CN.md)
 
+[![GitHub last commit](https://img.shields.io/github/last-commit/hun99999/agent-bootstrap)](https://github.com/hun99999/agent-bootstrap/commits/main)
+[![First-class runtimes](https://img.shields.io/badge/runtimes-Codex%20%7C%20Claude%20Code-5b5bd6)](#현재-지원-표면)
+[![Benchmark policy](https://img.shields.io/badge/skills-benchmark--gated-2f855a)](benchmarks/README.md)
+
 ## 마스터 프롬프트
 
 아래를 Codex 또는 Claude Code에 그대로 붙여넣습니다. 에이전트는 이 레포를 clone한 위치에서 시작해야 합니다.
+
+<details>
+<summary><strong>한 번에 붙여넣는 설정 프롬프트 열기</strong></summary>
+
 
 ```text
 이 레포에서 agent-bootstrap을 끝까지 세팅해줘.
@@ -38,11 +46,49 @@ docs/frontend-design-stack.md를 읽어라. tracked frontend-design-pack을 검�
 - 적절하면 작은 단위로 커밋하고, 변경 사항, 설치 내용, 실행한 명령, 검증 결과, 남은 리스크를 요약해라
 ```
 
+</details>
+
 Codex와 Claude Code를 위한 프로세스 중심 AI 코딩 환경 부트스트랩입니다.
 
 `agent-bootstrap`은 새로 clone한 사용자에게 얇은 process-first core, role-based subagents, token-efficient 실행 습관, 자세한 설치 문서, `karpathy-guidelines` 기반 public-safe skill 모델, optional `superpowers` 경로를 제공합니다.
 
 이 bootstrap 업데이트/재점검에는 [prompts/update-agent-bootstrap.md](prompts/update-agent-bootstrap.md)의 조건부 검증 절차를 사용합니다.
+
+## 에이전트에게 맡길 수 있는 일
+
+| 목표 | 시작 위치 |
+| --- | --- |
+| 전역 기본값 설치 | [전역 guardrail 설정](docs/global-guardrail-setup.md) |
+| 프로젝트에 guardrail 적용 | [프로젝트 적용 프롬프트](prompts/apply-vibe-coding-guardrails.md) |
+| guardrail이 있는 프로젝트에서 기능 작업 시작 | [작업 시작 프롬프트](prompts/start-with-vibe-coding-guardrails.md) |
+| Codex 또는 Claude Code 설정 | [Codex 가이드](docs/README.codex.md) · [Claude Code 가이드](docs/README.claude.md) |
+| 다른 AI coding CLI 적용 | [portable runtime 가이드](docs/portable-runtime-adapters.md) · [adapter 프롬프트](prompts/setup-portable-runtime.md) |
+| 모든 skill을 켜지 않고 검토 | [skill catalog](skills/README.md) · [benchmark 정책](benchmarks/README.md) |
+| 이 bootstrap 업데이트/재점검 | [업데이트 프롬프트](prompts/update-agent-bootstrap.md) · [레포 구조 지도](docs/agent-bootstrap-structure.md) |
+
+선택 도구는 판단 후 사용합니다. 설정 과정에서 skill mode, Basic Memory, Computer Use/browser
+접근을 각각 따로 묻고, model과 reasoning 선택은 대상 runtime의 로컬 설정으로 유지합니다.
+
+## 명령 처리 파이프라인
+
+기본 경로는 가장 작은 완결 결과와 가장 저렴한 직접 증거를 목표로 합니다. 서브에이전트는
+소유권이 겹치지 않는 독립 작업이 실제로 병렬화될 때만 사용합니다.
+
+```mermaid
+flowchart LR
+    U[사용자 요청] --> S[대상과 완료 조건 확정]
+    S --> E[현재 레포와 runtime 근거 확인]
+    E --> R{실행 경로}
+    R -->|단일 소유자| M[메인 에이전트]
+    R -->|독립 작업| A[범위가 제한된 서브에이전트]
+    M --> C[가장 작은 완결 변경]
+    A --> C
+    C --> V{필요한 증거}
+    V -->|좁은 변경| T[focused check]
+    V -->|광범위 또는 release| F[full regression]
+    T --> O[결과·근거·제한 보고]
+    F --> O
+```
 
 ## 현재 지원 표면
 
@@ -74,6 +120,7 @@ auto-eva 같은 private project skill은 이 public repository에 커밋하지 �
 - `hun-engineering-loop`은 `karpathy-guidelines` 위에 둔 compact Hun-local wrapper입니다. 거칠거나 추상적인 요청을 가장 작은 구체적 결과로 바꾸고, 현재 근거, 고위험 승인 경계, 효율적인 위임, 비례적인 직접 증거를 적용합니다. Hun의 로컬 runtime에서는 유용하지만 public default install set에는 포함하지 않습니다.
 - `chatgpt-collaboration-harness`는 Codex 쪽에서 ChatGPT Pro와 협업할 때 쓰는 선택 skill입니다. Claude Code에는 기본 설치하지 않습니다.
 - `handoff`는 explicit-use catalog skill입니다. 사용자가 다른 agent나 session으로 현재 작업 상태를 전달해 달라고 명시적으로 요청할 때만 사용하며, [skills/README.md](skills/README.md), [docs/codex-skills.md](docs/codex-skills.md), [prompts/setup-codex-skills.md](prompts/setup-codex-skills.md)를 통해 검토합니다.
+- `isolated-worktree`, `execute-plan`, `review-feedback-triage`, `focused-debugging`은 선별한 Superpowers workflow의 lean explicit-use adaptation입니다. 전체 upstream chain을 활성화하지 않고 필요한 workflow만 제공합니다.
 
 Memory와 이전 요약은 recall layer일 뿐 source of truth가 아닙니다. 충돌하면 현재 사용자 지시, repo docs, scripts, tests, `AGENTS.md`, 실제 runtime output이 이깁니다.
 
@@ -122,24 +169,13 @@ Memory와 이전 요약은 recall layer일 뿐 source of truth가 아닙니다. 
    python3 scripts/audit_agent_stack.py
    ```
 
-## 에이전트에게 맡길 수 있는 일
-
-이 레포는 installer만이 아니라 운영 가이드입니다.
-
-- 전역 기본값 설치: [docs/global-guardrail-setup.md](docs/global-guardrail-setup.md)를 사용해 Codex 또는 Claude Code user-level defaults에 공통 guardrail을 설치합니다.
-- 프로젝트에 guardrail 적용: 대상 레포 안의 agent session에 [prompts/apply-vibe-coding-guardrails.md](prompts/apply-vibe-coding-guardrails.md)를 붙여넣습니다.
-- guardrail이 있는 프로젝트에서 기능 작업 시작: feature, bugfix, refactor 전에 [prompts/start-with-vibe-coding-guardrails.md](prompts/start-with-vibe-coding-guardrails.md)를 붙여넣습니다.
-- optional Codex skill 검토: [skills/README.md](skills/README.md)와 [docs/codex-skills.md](docs/codex-skills.md)를 읽고, 승인된 skill만 비교/설치하려면 [prompts/setup-codex-skills.md](prompts/setup-codex-skills.md)를 사용합니다.
-- optional Claude Code skill 검토: [docs/claude-skills.md](docs/claude-skills.md)를 읽고 승인된 public-safe skill만 설치합니다.
-- 다른 AI coding CLI 적용: [docs/portable-runtime-adapters.md](docs/portable-runtime-adapters.md)를 읽고 대상 runtime에 [prompts/setup-portable-runtime.md](prompts/setup-portable-runtime.md)를 붙여넣습니다.
-- 이 bootstrap 업데이트/재점검: 새 변경을 pull한 뒤 또는 이 레포를 다시 audit하고 싶을 때 [prompts/update-agent-bootstrap.md](prompts/update-agent-bootstrap.md)를 붙여넣습니다.
-- 이 레포 구조 이해: shared prompt, installer, generated plugin output, setup docs를 바꾸기 전에 [docs/agent-bootstrap-structure.md](docs/agent-bootstrap-structure.md)를 읽습니다.
-
-선택 도구는 판단 후 사용합니다. Obsidian, Lumin Repo Lens, dependency lint, cycle detection, strict type checks, complexity limits는 대상 레포와 사용자 승인이 정당화할 때만 recommended 또는 installed가 됩니다.
-
 ## 대상 프로젝트용 Claude Code 프롬프트
 
 Claude Code를 대상 프로젝트 레포 안에서 연 뒤 아래 프롬프트를 그대로 붙여넣습니다. 공개 URL을 참조하므로 개인 로컬 경로에 의존하지 않습니다.
+
+<details>
+<summary><strong>프로젝트 guardrail 프롬프트 열기</strong></summary>
+
 
 ```text
 이 프로젝트에 agent-bootstrap 기반 vibe-coding guardrails를 적용해줘.
@@ -187,6 +223,8 @@ TS/JS-heavy project이고 내가 Lumin Repo Lens를 승인하면 evidence tool�
 behavior가 명확하고 테스트 가능하거나 repository가 요구할 때만 test-first를 사용해라. invalidated evidence에 따라 검증을 골라라: narrow change에는 focused check를 사용하고, 관련 source, configuration, dependency, toolchain, runtime input이 바뀌지 않았을 때만 기존 통과 결과를 재사용하며, broad, cross-cutting, high-risk, release-bound, wider-impact 작업에만 full regression을 실행해라. prose, generated output, mechanical configuration에는 비례적인 structural 또는 executable check를 사용해라. unrun check가 통과했다고 말하지 마라. 변경 후 post-write review를 수행하고 변경 파일, 실행한 명령, 검증 결과, optional tool skipped/recommended, 남은 리스크를 보고해라.
 ```
 
+</details>
+
 ## 프롬프트별 사용 시점
 
 - `prompts/setup-codex-current-harness.md`: Codex 안에서 현재 Codex harness에 shared core를 적용할 때 사용합니다.
@@ -229,32 +267,45 @@ Optional tool은 workflow를 보조해야지 workflow 자체가 되면 안 됩�
 - Codex·Claude Code 프론트엔드 디자인 팩: [docs/frontend-design-stack.md](docs/frontend-design-stack.md)
 - Codex skills: [docs/codex-skills.md](docs/codex-skills.md)
 - Claude Code skills: [docs/claude-skills.md](docs/claude-skills.md)
+- 기타 AI coding CLI: [docs/portable-runtime-adapters.md](docs/portable-runtime-adapters.md)
+- skill·prompt 평가: [benchmarks/README.md](benchmarks/README.md)
 
 ## 아키텍처
 
-레포는 네 층으로 나뉩니다.
+작성 원본, 생성 결과물, runtime 로컬 선택, 평가 근거를 서로 분리합니다.
 
-- shared core
-  - `AGENTS.md`
-  - `agents/*.md`
-  - `shared/agent-metadata.json`
-  - common process-first constitution and role prompt bodies
-- reviewed frontend design source
-  - `design-stack/`
-  - source registry, immutable lock, provenance, router contract, reviewed vendored material
-- first-class harness adapters
-  - `.codex/`
-  - `.claude-plugin/`
-  - `plugins/process-first-agents/`
-  - `plugins/frontend-design-pack/`
-- reusable public-safe skills
-  - `skills/karpathy-guidelines/`
-  - `skills/chatgpt-collaboration-harness/`
-  - `skills/handoff/`
-  - `skills/hun-engineering-loop/`
-  - `skills/_template/`
+```mermaid
+flowchart TB
+    CORE["공통 원본<br/>AGENTS.md · shared/agent-core.md · agents/*.md"]
+    META["역할 metadata<br/>shared/agent-metadata.json"]
+    SKILLS["public-safe skill catalog<br/>skills/"]
+    CODEX["Codex adapter<br/>.codex/ · codex-home/"]
+    RENDER["Claude renderer<br/>scripts/render_claude_plugin.py"]
+    CLAUDE["Claude Code plugin<br/>plugins/process-first-agents/"]
+    OTHER["reference adapter<br/>docs/portable-runtime-adapters.md"]
+    EVAL["동작·토큰 평가<br/>benchmarks/"]
+    LOCAL["대상 로컬 선택<br/>model · effort · memory · computer access"]
 
-shared core는 operating model을 한 번만 정의합니다. Codex와 Claude Code adapter는 그 core를 각 runtime의 native format으로 변환합니다. 자세한 project-local structure map, update flow, source-of-truth boundary, generated-artifact policy는 [docs/agent-bootstrap-structure.md](docs/agent-bootstrap-structure.md)를 읽습니다.
+    CORE --> CODEX
+    CORE --> RENDER
+    META --> CODEX
+    META --> RENDER
+    RENDER --> CLAUDE
+    CORE --> OTHER
+    SKILLS --> CODEX
+    SKILLS --> CLAUDE
+    SKILLS --> EVAL
+    LOCAL -. 보존 .-> CODEX
+    LOCAL -. 대상에서 선택 .-> CLAUDE
+    LOCAL -. 대상에서 선택 .-> OTHER
+```
+
+- `design-stack/`은 검토된 frontend-design 원본이고 `plugins/frontend-design-pack/`은 생성된 runtime package입니다.
+- `shared/agent-core.md`는 compact cross-runtime constitution이며, `AGENTS.md`가 repository와 host 동작을 덧붙입니다.
+- 네 개의 lean Superpowers adaptation은 explicit-use catalog entry이며, 성능 지향 동작은 benchmark 통과 전까지 기본값으로 승격하지 않습니다.
+- machine path, credential, model/effort 선택, Basic Memory mapping, Computer Use/browser 권한은 public repository가 아니라 대상 runtime에 둡니다.
+
+자세한 ownership, update flow, source-of-truth boundary, generated-artifact policy는 [docs/agent-bootstrap-structure.md](docs/agent-bootstrap-structure.md)를 읽습니다.
 
 ## Superpowers 통합
 
@@ -336,3 +387,7 @@ python3 -m unittest discover -s tests -p 'test_*.py'
 증거는 반복하지 않습니다.
 
 README, skills, prompts, docs, generated plugin output, setup script를 바꿨다면 publish 전에 `python3 scripts/check_private_paths.py`도 실행합니다.
+
+Skill과 prompt 동작은 [`benchmarks/README.md`](benchmarks/README.md)의 로컬 고정 benchmark
+경로로 평가합니다. deterministic smoke test는 model token을 쓰지 않으며, 실제
+`with_skill`/`without_skill` 비교는 승인된 대표 case corpus로만 실행합니다.

@@ -2,9 +2,17 @@
 
 [English](README.md) | [한국어](README.ko.md) | [日本語](README.ja.md) | [简体中文](README.zh-CN.md)
 
+[![GitHub last commit](https://img.shields.io/github/last-commit/hun99999/agent-bootstrap)](https://github.com/hun99999/agent-bootstrap/commits/main)
+[![First-class runtimes](https://img.shields.io/badge/runtimes-Codex%20%7C%20Claude%20Code-5b5bd6)](#当前支持范围)
+[![Benchmark policy](https://img.shields.io/badge/skills-benchmark--gated-2f855a)](benchmarks/README.md)
+
 ## 主提示词
 
 把下面内容原样粘贴给 Codex 或 Claude Code。代理应当在这个仓库的 clone 中开始。
+
+<details>
+<summary><strong>展开一键设置提示词</strong></summary>
+
 
 ```text
 请从这个仓库完整设置 agent-bootstrap。
@@ -38,9 +46,47 @@
 - 适当时做小的可审查 commit，并总结修改内容、安装内容、执行命令、验证结果和剩余风险
 ```
 
+</details>
+
 面向 Codex 和 Claude Code 的流程优先 AI 编程环境引导仓库。
 
 `agent-bootstrap` 为新的 clone 提供精简的 process-first core、role-based subagents、token-efficient 工作习惯、详细设置文档、基于 `karpathy-guidelines` 的 public-safe skill model，以及 optional `superpowers` 路径。
+
+## 可以让代理做什么
+
+| 目标 | 从这里开始 |
+| --- | --- |
+| 安装全局默认设置 | [Global guardrail setup](docs/global-guardrail-setup.md) |
+| 把 guardrail 应用到项目 | [应用提示词](prompts/apply-vibe-coding-guardrails.md) |
+| 在已有 guardrail 的项目中开始功能开发 | [开始工作提示词](prompts/start-with-vibe-coding-guardrails.md) |
+| 配置 Codex 或 Claude Code | [Codex 指南](docs/README.codex.md) · [Claude Code 指南](docs/README.claude.md) |
+| 适配其他 AI coding CLI | [portable runtime 指南](docs/portable-runtime-adapters.md) · [adapter 提示词](prompts/setup-portable-runtime.md) |
+| 在不启用全部 skill 的情况下评估 | [skill catalog](skills/README.md) · [benchmark policy](benchmarks/README.md) |
+| 仓库更新后重新检查 bootstrap | [update prompt](prompts/update-agent-bootstrap.md) · [repository map](docs/agent-bootstrap-structure.md) |
+
+可选工具需要根据实际情况决定。设置流程会分别询问 skill mode、Basic Memory、Computer
+Use/browser access；model 与 reasoning 选择保留在目标 runtime 本地。
+
+## 请求处理流水线
+
+默认路径追求最小完整结果和成本最低的直接证据。只有 ownership 不重叠的独立工作能够真正
+并行时，才使用 subagent。
+
+```mermaid
+flowchart LR
+    U[用户请求] --> S[确定目标与完成条件]
+    S --> E[读取当前仓库与 runtime evidence]
+    E --> R{执行路径}
+    R -->|单一 owner| M[主 agent]
+    R -->|独立工作| A[范围明确的 subagents]
+    M --> C[最小完整修改]
+    A --> C
+    C --> V{需要的 proof}
+    V -->|窄范围修改| T[focused check]
+    V -->|广泛或 release| F[full regression]
+    T --> O[结果·证据·限制]
+    F --> O
+```
 
 ## 当前支持范围
 
@@ -62,6 +108,7 @@ OpenCode 和 OpenClaw 是 legacy/reference material，不是 active service targ
 - `hun-engineering-loop` 是精简的 Hun-local wrapper：把粗略或抽象指令转换为最小的具体结果，并采用当前证据、高风险审批边界、高效委派和成比例的直接证明；它不属于 public default install set。
 - `chatgpt-collaboration-harness` 是 Codex 侧的 ChatGPT Pro collaboration skill，不默认安装到 Claude Code。
 - `handoff` 是 explicit-use catalog skill。只有用户明确要求把当前任务状态交给另一个 agent 或 session 时才使用，并通过 [skills/README.md](skills/README.md)、[docs/codex-skills.md](docs/codex-skills.md)、[prompts/setup-codex-skills.md](prompts/setup-codex-skills.md) 查看。
+- `isolated-worktree`, `execute-plan`, `review-feedback-triage`, `focused-debugging` 是经过筛选的 Superpowers workflow 的 lean explicit-use adaptation，不会顺带启用整个 upstream chain。
 
 Memory 是 recall layer，不是 source of truth。当前 user instruction、repo docs、scripts、tests、`AGENTS.md` 和 observed runtime output 优先。
 
@@ -107,20 +154,13 @@ Memory 是 recall layer，不是 source of truth。当前 user instruction、rep
    python3 scripts/audit_agent_stack.py
    ```
 
-## 可以让代理做什么
-
-- Install global defaults: 使用 [docs/global-guardrail-setup.md](docs/global-guardrail-setup.md) 把 guardrails 安装到 Codex 或 Claude Code user-level defaults。
-- Apply guardrails to a project: 在目标仓库中使用 [prompts/apply-vibe-coding-guardrails.md](prompts/apply-vibe-coding-guardrails.md)。
-- Start feature work inside a guarded project: 在 feature、bugfix、refactor 前使用 [prompts/start-with-vibe-coding-guardrails.md](prompts/start-with-vibe-coding-guardrails.md)。
-- Review optional Codex skills: 阅读 [skills/README.md](skills/README.md)、[docs/codex-skills.md](docs/codex-skills.md)，必要时使用 [prompts/setup-codex-skills.md](prompts/setup-codex-skills.md)。
-- Update this bootstrap after repository changes: pull 后使用 [prompts/update-agent-bootstrap.md](prompts/update-agent-bootstrap.md)。
-- Explain repository structure: 修改 shared prompts、installer、generated plugin output 或 setup docs 前先读 [docs/agent-bootstrap-structure.md](docs/agent-bootstrap-structure.md)。
-
-Optional tooling is decision-based。Obsidian、Lumin Repo Lens、dependency lint、cycle detection、strict type checks、complexity limits 只有在目标仓库和用户批准支持时才使用。
-
 ## 目标项目 Claude Code 提示词
 
 在目标项目仓库中打开 Claude Code，然后原样粘贴下面的提示词。它引用公开 URL，不依赖个人本地路径。
+
+<details>
+<summary><strong>展开项目 guardrail 提示词</strong></summary>
+
 
 ```text
 请把 agent-bootstrap 的 vibe-coding guardrails 应用到这个项目。
@@ -155,6 +195,8 @@ optional tool inventory 尽量只作为 read-only evidence。如果已经 clone 
 仅在 behavior 清晰且 testable，或 repository 明确要求时使用 test-first。根据 invalidated evidence 选择验证：narrow change 使用 focused check；只有相关 source、configuration、dependencies、toolchain、runtime inputs 未改变时才复用已有通过结果；仅对 broad、cross-cutting、high-risk、release-bound、wider-impact 工作运行 full regression。对 prose、generated output、mechanical configuration 使用相称的 structural 或 executable check。不要声称 unrun check 已通过。修改后执行 post-write review，并报告修改文件、执行命令、验证结果、optional tools skipped/recommended 和剩余风险。
 ```
 
+</details>
+
 ## 每个提示词的使用场景
 
 - `prompts/setup-codex-current-harness.md`: 在 Codex 中应用 shared core。
@@ -187,17 +229,45 @@ Optional tools 应支持 workflow，而不是替代 workflow。Obsidian、Lumin 
 - Codex 与 Claude Code frontend design pack: [docs/frontend-design-stack.md](docs/frontend-design-stack.md)
 - Codex skills: [docs/codex-skills.md](docs/codex-skills.md)
 - Claude Code skills: [docs/claude-skills.md](docs/claude-skills.md)
+- 其他 AI coding CLI: [docs/portable-runtime-adapters.md](docs/portable-runtime-adapters.md)
+- skill 与 prompt evaluation: [benchmarks/README.md](benchmarks/README.md)
 
 ## 架构
 
-The repository has four layers:
+仓库把 authoring source、generated artifact、runtime-local choice 和 evaluation evidence 分开。
 
-- shared core: `AGENTS.md`, `agents/*.md`, `shared/agent-metadata.json`
-- reviewed frontend design source: `design-stack/`
-- first-class harness adapters: `.codex/`, `.claude-plugin/`, `plugins/process-first-agents/`, `plugins/frontend-design-pack/`
-- reusable public-safe skills: `skills/karpathy-guidelines/`, `skills/chatgpt-collaboration-harness/`, `skills/handoff/`, `skills/hun-engineering-loop/`, `skills/_template/`
+```mermaid
+flowchart TB
+    CORE["共享 source<br/>AGENTS.md · shared/agent-core.md · agents/*.md"]
+    META["role metadata<br/>shared/agent-metadata.json"]
+    SKILLS["public-safe skill catalog<br/>skills/"]
+    CODEX["Codex adapter<br/>.codex/ · codex-home/"]
+    RENDER["Claude renderer<br/>scripts/render_claude_plugin.py"]
+    CLAUDE["Claude Code plugin<br/>plugins/process-first-agents/"]
+    OTHER["reference adapter<br/>docs/portable-runtime-adapters.md"]
+    EVAL["behavior 与 token evaluation<br/>benchmarks/"]
+    LOCAL["target-local choice<br/>model · effort · memory · computer access"]
 
-详细结构请阅读 [docs/agent-bootstrap-structure.md](docs/agent-bootstrap-structure.md)。
+    CORE --> CODEX
+    CORE --> RENDER
+    META --> CODEX
+    META --> RENDER
+    RENDER --> CLAUDE
+    CORE --> OTHER
+    SKILLS --> CODEX
+    SKILLS --> CLAUDE
+    SKILLS --> EVAL
+    LOCAL -. 保留 .-> CODEX
+    LOCAL -. 在目标中选择 .-> CLAUDE
+    LOCAL -. 在目标中选择 .-> OTHER
+```
+
+- `design-stack/` 是 reviewed frontend-design source，`plugins/frontend-design-pack/` 是 generated runtime package。
+- `shared/agent-core.md` 是 compact cross-runtime constitution；`AGENTS.md` 追加 repository 与 host behavior。
+- 四个 lean Superpowers adaptation 是 explicit-use catalog entry；performance-oriented behavior 在 benchmark 通过前不会成为默认值。
+- machine path、credential、model/effort、Basic Memory mapping、Computer Use/browser permission 保留在 target runtime。
+
+ownership、update flow、source-of-truth boundary 与 generated-artifact policy 详见 [docs/agent-bootstrap-structure.md](docs/agent-bootstrap-structure.md)。
 
 ## Superpowers 集成
 
@@ -223,6 +293,8 @@ The repository has four layers:
   high-risk、release-bound 或 wider-impact 时才运行 full regression
   (`python3 -m unittest discover -s tests -p 'test_*.py'`)；按实际 scope 添加
   `python3 scripts/audit_agent_stack.py` 和 `python3 scripts/validate_frontend_design_stack.py --repo-root .`。
+
+## Pull And Update Workflow
 
 Existing clone update: 下面的示例只在需要 full regression 时使用:
 
@@ -251,6 +323,11 @@ python3 scripts/audit_agent_stack.py
 
 Default audit is offline/read-only。OpenCode 不再是 default supported surface。
 
+## Compatibility Notes
+
+旧的 OpenCode/OpenClaw docs 或 prompt 可能为历史与 migration review 保留，但它们不是当前
+public setup path。
+
 ## 测试
 
 只有变更或 release boundary 需要 full regression 时才使用下面的 full command。narrow
@@ -260,3 +337,7 @@ change 应运行相关 test module 或 structural check，并复用输入未变�
 python3 -m unittest discover -s tests -p 'test_*.py'
 python3 scripts/check_private_paths.py
 ```
+
+skill 与 prompt behavior 通过 [`benchmarks/README.md`](benchmarks/README.md) 中的 local pinned
+benchmark path 评估。deterministic smoke test 不消耗 model token；真实
+`with_skill`/`without_skill` 对比只针对已批准的代表性 case corpus 运行。

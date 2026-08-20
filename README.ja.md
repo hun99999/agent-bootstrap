@@ -2,9 +2,17 @@
 
 [English](README.md) | [한국어](README.ko.md) | [日本語](README.ja.md) | [简体中文](README.zh-CN.md)
 
+[![GitHub last commit](https://img.shields.io/github/last-commit/hun99999/agent-bootstrap)](https://github.com/hun99999/agent-bootstrap/commits/main)
+[![First-class runtimes](https://img.shields.io/badge/runtimes-Codex%20%7C%20Claude%20Code-5b5bd6)](#現在のサポート対象)
+[![Benchmark policy](https://img.shields.io/badge/skills-benchmark--gated-2f855a)](benchmarks/README.md)
+
 ## マスタープロンプト
 
 次を Codex または Claude Code にそのまま貼り付けます。エージェントはこのリポジトリの clone 内で開始してください。
+
+<details>
+<summary><strong>ワンペーストのセットアッププロンプトを開く</strong></summary>
+
 
 ```text
 このリポジトリから agent-bootstrap を最後までセットアップしてください。
@@ -38,9 +46,47 @@ docs/frontend-design-stack.md を読んでください。tracked frontend-design
 - 適切なら小さくコミットし、変更内容、インストール内容、実行したコマンド、検証結果、残リスクを要約する
 ```
 
+</details>
+
 Codex と Claude Code 向けの process-first AI coding environment bootstrap です。
 
 `agent-bootstrap` は、薄い process-first core、role-based subagents、token-efficient な作業習慣、詳細なセットアップ文書、`karpathy-guidelines` ベースの public-safe skill model、optional な `superpowers` 経路を新しい clone に提供します。
+
+## エージェントに依頼できること
+
+| 目的 | 開始場所 |
+| --- | --- |
+| グローバル既定値を導入 | [Global guardrail setup](docs/global-guardrail-setup.md) |
+| プロジェクトへ guardrail を適用 | [適用プロンプト](prompts/apply-vibe-coding-guardrails.md) |
+| guardrail 済みプロジェクトで機能作業を開始 | [作業開始プロンプト](prompts/start-with-vibe-coding-guardrails.md) |
+| Codex または Claude Code を設定 | [Codex guide](docs/README.codex.md) · [Claude Code guide](docs/README.claude.md) |
+| 他の AI coding CLI に適用 | [portable runtime guide](docs/portable-runtime-adapters.md) · [adapter prompt](prompts/setup-portable-runtime.md) |
+| 全 skill を有効化せずに評価 | [skill catalog](skills/README.md) · [benchmark policy](benchmarks/README.md) |
+| repository 更新後に bootstrap を再点検 | [update prompt](prompts/update-agent-bootstrap.md) · [repository map](docs/agent-bootstrap-structure.md) |
+
+任意ツールは判断して使います。セットアップでは skill mode、Basic Memory、Computer
+Use/browser access を別々に確認し、model と reasoning は対象 runtime の local 設定を保ちます。
+
+## リクエスト処理パイプライン
+
+基本経路は、最小の完全な成果と最小コストの直接証拠を目指します。subagent は ownership
+が重ならない独立作業を実際に並列化できる場合だけ使います。
+
+```mermaid
+flowchart LR
+    U[ユーザー要求] --> S[対象と完了条件を確定]
+    S --> E[現在の repository と runtime evidence]
+    E --> R{実行経路}
+    R -->|単一 owner| M[メイン agent]
+    R -->|独立作業| A[範囲限定 subagents]
+    M --> C[最小の完全な変更]
+    A --> C
+    C --> V{必要な proof}
+    V -->|狭い変更| T[focused check]
+    V -->|広範囲または release| F[full regression]
+    T --> O[結果・根拠・制限]
+    F --> O
+```
 
 ## 現在のサポート対象
 
@@ -63,6 +109,7 @@ auto-eva のような private project skill はこの public repository にコ�
 - `hun-engineering-loop` は compact な Hun-local wrapper です。曖昧な依頼を最小の具体的成果に変換し、現在の根拠、高リスクの承認境界、効率的な委任、比例した直接証拠を適用しますが、public default install set ではありません。
 - `chatgpt-collaboration-harness` は Codex 側の ChatGPT Pro collaboration skill です。Claude Code にはデフォルトで入れません。
 - `handoff` は explicit-use catalog skill です。別の agent や session に現在の作業状態を渡すようユーザーが明示的に求めた場合だけ使い、[skills/README.md](skills/README.md)、[docs/codex-skills.md](docs/codex-skills.md)、[prompts/setup-codex-skills.md](prompts/setup-codex-skills.md) から確認します。
+- `isolated-worktree`, `execute-plan`, `review-feedback-triage`, `focused-debugging` は、選択した Superpowers workflow の lean explicit-use adaptation です。upstream chain 全体を有効化せず、必要な workflow だけを提供します。
 
 Memory は recall layer であり source of truth ではありません。現在の user instruction、repo docs、scripts、tests、`AGENTS.md`、observed runtime output が優先されます。
 
@@ -109,20 +156,13 @@ Memory は recall layer であり source of truth ではありません。現在
    python3 scripts/audit_agent_stack.py
    ```
 
-## エージェントに依頼できること
-
-- Install global defaults: [docs/global-guardrail-setup.md](docs/global-guardrail-setup.md) を使って Codex または Claude Code の user-level defaults に guardrails を入れます。
-- Apply guardrails to a project: [prompts/apply-vibe-coding-guardrails.md](prompts/apply-vibe-coding-guardrails.md) を対象リポジトリで使います。
-- Start feature work inside a guarded project: [prompts/start-with-vibe-coding-guardrails.md](prompts/start-with-vibe-coding-guardrails.md) を feature, bugfix, refactor の前に使います。
-- Review optional Codex skills: [skills/README.md](skills/README.md), [docs/codex-skills.md](docs/codex-skills.md), [prompts/setup-codex-skills.md](prompts/setup-codex-skills.md) を使います。
-- Update this bootstrap after repository changes: [prompts/update-agent-bootstrap.md](prompts/update-agent-bootstrap.md) を pull 後の再監査に使います。
-- Explain repository structure: [docs/agent-bootstrap-structure.md](docs/agent-bootstrap-structure.md) を先に読みます。
-
-Optional tooling is decision-based. Obsidian, Lumin Repo Lens, dependency lint, cycle detection, strict type checks, complexity limits は、対象リポジトリと承認が正当化するときだけ使います。
-
 ## 対象プロジェクト用 Claude Code プロンプト
 
 Claude Code を対象プロジェクトのリポジトリ内で開き、次を貼り付けます。公開 URL を参照するため、個人の local path に依存しません。
+
+<details>
+<summary><strong>プロジェクト guardrail プロンプトを開く</strong></summary>
+
 
 ```text
 このプロジェクトに agent-bootstrap ベースの vibe-coding guardrails を適用してください。
@@ -157,6 +197,8 @@ optional tool inventory は read-only evidence として扱ってください。
 behavior が明確で testable、または repository が要求する場合だけ test-first を使ってください。invalidated evidence から検証を選びます: narrow change では focused check、関連する source, configuration, dependencies, toolchain, runtime inputs が変わらない場合だけ既存の合格結果を再利用し、broad, cross-cutting, high-risk, release-bound, wider-impact の作業だけで full regression を実行します。prose, generated output, mechanical configuration には比例した structural または executable check を使います。unrun check が合格したと主張しないでください。変更後は post-write review を行い、変更ファイル、実行したコマンド、検証結果、optional tools skipped/recommended、残リスクを報告してください。
 ```
 
+</details>
+
 ## 各プロンプトを使う場面
 
 - `prompts/setup-codex-current-harness.md`: Codex に shared core を適用する場合。
@@ -189,17 +231,45 @@ Optional tools は workflow を支えるためのものです。Obsidian, Lumin 
 - Codex・Claude Code frontend design pack: [docs/frontend-design-stack.md](docs/frontend-design-stack.md)
 - Codex skills: [docs/codex-skills.md](docs/codex-skills.md)
 - Claude Code skills: [docs/claude-skills.md](docs/claude-skills.md)
+- その他の AI coding CLI: [docs/portable-runtime-adapters.md](docs/portable-runtime-adapters.md)
+- skill・prompt evaluation: [benchmarks/README.md](benchmarks/README.md)
 
 ## アーキテクチャ
 
-The repository has four layers:
+authoring source、generated artifact、runtime-local choice、evaluation evidence を分離します。
 
-- shared core: `AGENTS.md`, `agents/*.md`, `shared/agent-metadata.json`
-- reviewed frontend design source: `design-stack/`
-- first-class harness adapters: `.codex/`, `.claude-plugin/`, `plugins/process-first-agents/`, `plugins/frontend-design-pack/`
-- reusable public-safe skills: `skills/karpathy-guidelines/`, `skills/chatgpt-collaboration-harness/`, `skills/handoff/`, `skills/hun-engineering-loop/`, `skills/_template/`
+```mermaid
+flowchart TB
+    CORE["共有 source<br/>AGENTS.md · shared/agent-core.md · agents/*.md"]
+    META["role metadata<br/>shared/agent-metadata.json"]
+    SKILLS["public-safe skill catalog<br/>skills/"]
+    CODEX["Codex adapter<br/>.codex/ · codex-home/"]
+    RENDER["Claude renderer<br/>scripts/render_claude_plugin.py"]
+    CLAUDE["Claude Code plugin<br/>plugins/process-first-agents/"]
+    OTHER["reference adapter<br/>docs/portable-runtime-adapters.md"]
+    EVAL["behavior・token evaluation<br/>benchmarks/"]
+    LOCAL["target-local choice<br/>model · effort · memory · computer access"]
 
-詳細は [docs/agent-bootstrap-structure.md](docs/agent-bootstrap-structure.md) を読んでください。
+    CORE --> CODEX
+    CORE --> RENDER
+    META --> CODEX
+    META --> RENDER
+    RENDER --> CLAUDE
+    CORE --> OTHER
+    SKILLS --> CODEX
+    SKILLS --> CLAUDE
+    SKILLS --> EVAL
+    LOCAL -. 保持 .-> CODEX
+    LOCAL -. target で選択 .-> CLAUDE
+    LOCAL -. target で選択 .-> OTHER
+```
+
+- `design-stack/` は reviewed frontend-design source、`plugins/frontend-design-pack/` は generated runtime package です。
+- `shared/agent-core.md` は compact cross-runtime constitution で、`AGENTS.md` が repository と host の behavior を追加します。
+- 4 つの lean Superpowers adaptation は explicit-use catalog entry で、performance-oriented behavior は benchmark 合格前に default にしません。
+- machine path、credential、model/effort、Basic Memory mapping、Computer Use/browser permission は target runtime に置きます。
+
+ownership、update flow、source-of-truth boundary、generated-artifact policy の詳細は [docs/agent-bootstrap-structure.md](docs/agent-bootstrap-structure.md) を読んでください。
 
 ## Superpowers 統合
 
@@ -225,6 +295,8 @@ Codex App curated Superpowers plugin と manual fallback の両方を有効に�
   (`python3 -m unittest discover -s tests -p 'test_*.py'`) は broad, cross-cutting, high-risk,
   release-bound, wider-impact の場合だけ実行します。必要な scope に応じて
   `python3 scripts/audit_agent_stack.py` と `python3 scripts/validate_frontend_design_stack.py --repo-root .` を追加します。
+
+## Pull And Update Workflow
 
 Existing clone update: 次の例は full regression が必要な場合だけ使います:
 
@@ -254,6 +326,11 @@ python3 scripts/audit_agent_stack.py
 
 Default audit is offline/read-only. OpenCode は default supported surface ではありません。
 
+## Compatibility Notes
+
+古い OpenCode/OpenClaw の docs や prompt は履歴・migration review のために残る場合が
+ありますが、現在の public setup path ではありません。
+
 ## テスト
 
 次の full command は変更または release boundary が full regression を必要とする場合だけ
@@ -264,3 +341,7 @@ Default audit is offline/read-only. OpenCode は default supported surface で�
 python3 -m unittest discover -s tests -p 'test_*.py'
 python3 scripts/check_private_paths.py
 ```
+
+skill と prompt の behavior は [`benchmarks/README.md`](benchmarks/README.md) の local pinned
+benchmark path で評価します。deterministic smoke test は model token を使わず、実際の
+`with_skill`/`without_skill` 比較は承認済みの代表 case corpus でだけ実行します。

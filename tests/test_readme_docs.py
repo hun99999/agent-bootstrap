@@ -204,6 +204,46 @@ class ReadmeDocsTests(unittest.TestCase):
             contents = (REPO_ROOT / relative).read_text(encoding="utf-8")
             self.assertIn(LANGUAGE_SWITCHER, contents)
 
+    def test_public_readmes_share_navigation_pipeline_and_architecture_contract(self) -> None:
+        for relative in (
+            "README.md",
+            "README.ko.md",
+            "README.ja.md",
+            "README.zh-CN.md",
+        ):
+            with self.subTest(relative=relative):
+                contents = (REPO_ROOT / relative).read_text(encoding="utf-8")
+                self.assertGreaterEqual(contents.count("```mermaid"), 2)
+                self.assertIn("flowchart LR", contents)
+                self.assertIn("flowchart TB", contents)
+                for phrase in (
+                    "docs/README.codex.md",
+                    "docs/README.claude.md",
+                    "docs/portable-runtime-adapters.md",
+                    "prompts/setup-portable-runtime.md",
+                    "docs/agent-bootstrap-structure.md",
+                    "shared/agent-core.md",
+                    "benchmarks/README.md",
+                    "Basic Memory",
+                    "Computer Use",
+                ):
+                    self.assertIn(phrase, contents)
+
+    def test_public_readmes_collapse_long_copy_paste_prompts(self) -> None:
+        for relative in (
+            "README.md",
+            "README.ko.md",
+            "README.ja.md",
+            "README.zh-CN.md",
+        ):
+            with self.subTest(relative=relative):
+                contents = (REPO_ROOT / relative).read_text(encoding="utf-8")
+                self.assertGreaterEqual(contents.count("<details>"), 2)
+                self.assertEqual(
+                    contents.count("<details>"),
+                    contents.count("</details>"),
+                )
+
     def test_copy_paste_prompts_use_risk_proportionate_verification(self) -> None:
         section_bounds = {
             "README.md": (

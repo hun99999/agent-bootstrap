@@ -2,9 +2,17 @@
 
 [English](README.md) | [한국어](README.ko.md) | [日本語](README.ja.md) | [简体中文](README.zh-CN.md)
 
+[![GitHub last commit](https://img.shields.io/github/last-commit/hun99999/agent-bootstrap)](https://github.com/hun99999/agent-bootstrap/commits/main)
+[![First-class runtimes](https://img.shields.io/badge/runtimes-Codex%20%7C%20Claude%20Code-5b5bd6)](#current-supported-surfaces)
+[![Benchmark policy](https://img.shields.io/badge/skills-benchmark--gated-2f855a)](benchmarks/README.md)
+
 ## Master Prompt
 
 Paste this into Codex or Claude Code while the agent is in a clone of this repository:
+
+<details>
+<summary><strong>Open the one-paste setup prompt</strong></summary>
+
 
 ```text
 Set up agent-bootstrap end to end from this repository.
@@ -38,9 +46,47 @@ Set up the selected scope end to end:
 - commit small reviewable changes when appropriate, then summarize what changed, what was installed, commands run, verification results, and remaining risks
 ```
 
+</details>
+
 Bootstrap a process-first AI coding environment for Codex and Claude Code.
 
 `agent-bootstrap` gives a fresh clone a thin process-first core, role-based subagents, token-efficient execution habits, detailed setup docs, a public-safe skill model based on `karpathy-guidelines`, and an optional path to `superpowers`.
+
+## What You Can Ask An Agent To Do
+
+| Goal | Start here |
+| --- | --- |
+| Install global defaults | [Global guardrail setup](docs/global-guardrail-setup.md) |
+| Apply guardrails to a project | [Apply guardrails prompt](prompts/apply-vibe-coding-guardrails.md) |
+| Start feature work inside a guarded project | [Start-work prompt](prompts/start-with-vibe-coding-guardrails.md) |
+| Configure Codex or Claude Code | [Codex guide](docs/README.codex.md) · [Claude Code guide](docs/README.claude.md) |
+| Adapt another AI coding CLI | [Portable runtime guide](docs/portable-runtime-adapters.md) · [adapter prompt](prompts/setup-portable-runtime.md) |
+| Review skills without enabling everything | [Skill catalog](skills/README.md) · [benchmark policy](benchmarks/README.md) |
+| Update this bootstrap after repository changes | [Update prompt](prompts/update-agent-bootstrap.md) · [repository map](docs/agent-bootstrap-structure.md) |
+
+Optional tooling is decision-based. The setup asks separately about the skill mode, Basic Memory,
+and Computer Use/browser access. Model and reasoning selections remain target-local.
+
+## How A Request Runs
+
+The default path optimizes for a complete result with the lowest-cost direct evidence. Independent
+workers are used only when their work can proceed without overlapping ownership.
+
+```mermaid
+flowchart LR
+    U[User request] --> S[Resolve target and finish line]
+    S --> E[Read current repo and runtime evidence]
+    E --> R{Execution route}
+    R -->|One owner| M[Main agent]
+    R -->|Disjoint work| A[Bounded subagents]
+    M --> C[Smallest complete change]
+    A --> C
+    C --> V{Proof needed}
+    V -->|Narrow change| T[Focused check]
+    V -->|Broad or release| F[Full regression]
+    T --> O[Result, evidence, limitations]
+    F --> O
+```
 
 ## Current Supported Surfaces
 
@@ -58,21 +104,6 @@ This split keeps the public repo small enough to understand:
 - Claude Code gets a generated plugin bundle plus optional public-safe skill sync guidance.
 - Shared role prompts stay in `AGENTS.md`, `agents/*.md`, and `shared/agent-metadata.json`.
 - Project-specific or private workflow knowledge stays outside this public repo unless it is safe to share.
-
-## What You Can Ask An Agent To Do
-
-Use this repository as an operating guide, not only as an installer.
-
-- Install global defaults: use [docs/global-guardrail-setup.md](docs/global-guardrail-setup.md) to install the shared guardrails into Codex or Claude Code user-level defaults.
-- Apply guardrails to a project: paste [prompts/apply-vibe-coding-guardrails.md](prompts/apply-vibe-coding-guardrails.md) into an agent session inside a target repository.
-- Start feature work inside a guarded project: paste [prompts/start-with-vibe-coding-guardrails.md](prompts/start-with-vibe-coding-guardrails.md) before asking for a feature, bugfix, or refactor.
-- Review optional Codex skills: read [skills/README.md](skills/README.md) and [docs/codex-skills.md](docs/codex-skills.md), then use [prompts/setup-codex-skills.md](prompts/setup-codex-skills.md) when you want an agent to browse, compare, and install approved Codex skills.
-- Review optional Claude Code skills: read [docs/claude-skills.md](docs/claude-skills.md) and install only the public-safe skill set you approve.
-- Adapt another AI coding CLI: use [docs/portable-runtime-adapters.md](docs/portable-runtime-adapters.md) and paste [prompts/setup-portable-runtime.md](prompts/setup-portable-runtime.md) into the target runtime.
-- Update this bootstrap after repository changes: paste [prompts/update-agent-bootstrap.md](prompts/update-agent-bootstrap.md) after pulling new changes or when you want an agent to re-audit this repository.
-- Explain this repository's own structure: read [docs/agent-bootstrap-structure.md](docs/agent-bootstrap-structure.md) before editing shared prompts, installers, generated plugin output, or setup docs.
-
-Optional tooling is decision-based. Obsidian, Lumin Repo Lens, dependency lint, cycle detection, strict type checks, and complexity limits should be recommended or installed only when the target repository and user approval justify them.
 
 ## Private Project Skills
 
@@ -136,23 +167,13 @@ Choose the scope first. Most failed setup work starts by configuring too much: a
    python3 scripts/audit_agent_stack.py
    ```
 
-## Detailed Agent Request References
-
-Use this repository as an operating guide, not only as an installer.
-
-- Install global defaults: use [docs/global-guardrail-setup.md](docs/global-guardrail-setup.md) to install the shared guardrails into Codex or Claude Code user-level defaults.
-- Apply guardrails to a project: paste [prompts/apply-vibe-coding-guardrails.md](prompts/apply-vibe-coding-guardrails.md) into an agent session inside a target repository.
-- Start feature work inside a guarded project: paste [prompts/start-with-vibe-coding-guardrails.md](prompts/start-with-vibe-coding-guardrails.md) before asking for a feature, bugfix, or refactor.
-- Review optional Codex skills: read [skills/README.md](skills/README.md) and [docs/codex-skills.md](docs/codex-skills.md), then use [prompts/setup-codex-skills.md](prompts/setup-codex-skills.md) when you want an agent to browse, compare, and install approved Codex skills.
-- Review optional Claude Code skills: read [docs/claude-skills.md](docs/claude-skills.md) and install only the public-safe skill set you approve.
-- Update this bootstrap after repository changes: paste [prompts/update-agent-bootstrap.md](prompts/update-agent-bootstrap.md) after pulling new changes or when you want an agent to re-audit this repository.
-- Explain this repository's own structure: read [docs/agent-bootstrap-structure.md](docs/agent-bootstrap-structure.md) before editing shared prompts, installers, generated plugin output, or setup docs.
-
-Optional tooling is decision-based. Obsidian, Lumin Repo Lens, dependency lint, cycle detection, strict type checks, and complexity limits should be recommended or installed only when the target repository and user approval justify them.
-
 ## Target Repository Claude Code Prompt
 
 Paste this into Claude Code while Claude Code is open inside the target project repository. It tells the agent to use this public repository as the guardrail source without relying on a private local path.
+
+<details>
+<summary><strong>Open the project guardrail prompt</strong></summary>
+
 
 ```text
 Apply agent-bootstrap vibe-coding guardrails to this project.
@@ -200,6 +221,8 @@ If this is a TS/JS-heavy project and I approve Lumin Repo Lens, use it only as a
 Use test-first when behavior is clear and testable or the repository requires it. Select checks from invalidated evidence: use focused checks for narrow changes; reuse a passing result only while its source, configuration, dependencies, toolchain, and runtime inputs are unchanged; run full regression only for broad, cross-cutting, high-risk, release-bound, or wider-impact work. For prose, generated output, and mechanical configuration, use proportionate structural or executable checks. Never claim an unrun check passed. After changes, perform post-write review and report files changed, commands run, verification results, optional tools skipped or recommended, and remaining risks.
 ```
 
+</details>
+
 ## When To Use Each Prompt
 
 - `prompts/setup-codex-current-harness.md`: use inside Codex when the current Codex harness should receive the shared core.
@@ -244,32 +267,51 @@ Do not install optional tools just because they are mentioned. Inventory the cur
 - Frontend design pack for Codex and Claude Code: [docs/frontend-design-stack.md](docs/frontend-design-stack.md)
 - Codex skills: [docs/codex-skills.md](docs/codex-skills.md)
 - Claude Code skills: [docs/claude-skills.md](docs/claude-skills.md)
+- Other AI coding CLIs: [docs/portable-runtime-adapters.md](docs/portable-runtime-adapters.md)
+- Skill and prompt evaluation: [benchmarks/README.md](benchmarks/README.md)
 
 ## Architecture
 
-The repository is split into four practical layers:
+The repository keeps authored sources, generated artifacts, runtime-local choices, and evaluation
+evidence separate:
 
-- shared core
-  - `AGENTS.md`
-  - `agents/*.md`
-  - `shared/agent-metadata.json`
-  - common process-first constitution and role prompt bodies
-- reviewed frontend design source
-  - `design-stack/`
-  - source registry, immutable lock, provenance, router contracts, and reviewed vendored material
-- first-class harness adapters
-  - `.codex/`
-  - `.claude-plugin/`
-  - `plugins/process-first-agents/`
-  - `plugins/frontend-design-pack/`
-- reusable public-safe skills
-  - `skills/karpathy-guidelines/`
-  - `skills/chatgpt-collaboration-harness/`
-  - `skills/handoff/`
-  - `skills/hun-engineering-loop/`
-  - `skills/_template/`
+```mermaid
+flowchart TB
+    CORE["Shared source<br/>AGENTS.md · shared/agent-core.md · agents/*.md"]
+    META["Role metadata<br/>shared/agent-metadata.json"]
+    SKILLS["Public-safe skill catalog<br/>skills/"]
+    CODEX["Codex adapter<br/>.codex/ · codex-home/"]
+    RENDER["Claude renderer<br/>scripts/render_claude_plugin.py"]
+    CLAUDE["Claude Code plugin<br/>plugins/process-first-agents/"]
+    OTHER["Reference adapters<br/>docs/portable-runtime-adapters.md"]
+    EVAL["Behavior and token evaluation<br/>benchmarks/"]
+    LOCAL["Target-local choices<br/>model · effort · memory · computer access"]
 
-The shared core defines the operating model once. Codex and Claude Code adapters translate that core into each supported runtime's native format. For the detailed project-local structure map, update flow, source-of-truth boundaries, and generated-artifact policy, read [docs/agent-bootstrap-structure.md](docs/agent-bootstrap-structure.md).
+    CORE --> CODEX
+    CORE --> RENDER
+    META --> CODEX
+    META --> RENDER
+    RENDER --> CLAUDE
+    CORE --> OTHER
+    SKILLS --> CODEX
+    SKILLS --> CLAUDE
+    SKILLS --> EVAL
+    LOCAL -. preserved by .-> CODEX
+    LOCAL -. selected in target .-> CLAUDE
+    LOCAL -. selected in target .-> OTHER
+```
+
+- `design-stack/` is the reviewed frontend-design source; `plugins/frontend-design-pack/` is its
+  generated runtime package.
+- `shared/agent-core.md` is the compact cross-runtime constitution. `AGENTS.md` adds repository and
+  host-facing behavior around it.
+- The four lean Superpowers adaptations are explicit-use catalog entries. Performance-oriented
+  behavior remains benchmark-gated.
+- Machine paths, credentials, model/effort choices, Basic Memory mappings, and Computer Use/browser
+  permissions stay in the target runtime rather than the public repository.
+
+For detailed ownership, update flow, source-of-truth boundaries, and generated-artifact policy, read
+[docs/agent-bootstrap-structure.md](docs/agent-bootstrap-structure.md).
 
 ## Superpowers Integration
 
