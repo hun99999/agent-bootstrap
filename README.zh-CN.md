@@ -46,6 +46,9 @@
 
 只有 Codex 和 Claude Code 是 first-class setup target。
 
+其他 AI coding CLI 可以通过 [portable runtime adapter guide](docs/portable-runtime-adapters.md)
+复用 shared core，但在验证 native config 和 fresh-session discovery 之前仍属于 reference target。
+
 OpenCode 和 OpenClaw 是 legacy/reference material，不是 active service target。旧文件可能仍保留在 git 中，供历史审计或迁移参考，但新的 README、setup guide 和默认 audit 不应把它们当作普通安装路径。
 
 ## Private Project Skills
@@ -56,7 +59,7 @@ OpenCode 和 OpenClaw 是 legacy/reference material，不是 active service targ
 
 - `karpathy-guidelines` 是 public default base skill，用来强调 assumptions、simplicity、surgical diff 和 verifiable success criteria。
 - `superpowers` 是 brainstorming、planning、TDD、debugging、verification、review 的 optional workflow library。精简的 process-first core 不依赖 Superpowers。
-- `hun-engineering-loop` 是 Hun local wrapper，加入 memory preflight、source-of-truth ordering、high-risk approval boundary、artifact-first execution 和 QA evidence contract，但不属于 public default install set。
+- `hun-engineering-loop` 是精简的 Hun-local wrapper：把粗略或抽象指令转换为最小的具体结果，并采用当前证据、高风险审批边界、高效委派和成比例的直接证明；它不属于 public default install set。
 - `chatgpt-collaboration-harness` 是 Codex 侧的 ChatGPT Pro collaboration skill，不默认安装到 Claude Code。
 - `handoff` 是 explicit-use catalog skill。只有用户明确要求把当前任务状态交给另一个 agent 或 session 时才使用，并通过 [skills/README.md](skills/README.md)、[docs/codex-skills.md](docs/codex-skills.md)、[prompts/setup-codex-skills.md](prompts/setup-codex-skills.md) 查看。
 
@@ -156,6 +159,7 @@ optional tool inventory 尽量只作为 read-only evidence。如果已经 clone 
 
 - `prompts/setup-codex-current-harness.md`: 在 Codex 中应用 shared core。
 - `prompts/setup-claude-current-harness.md`: 设置 Claude Code plugin 和 shared role prompts。
+- `prompts/setup-portable-runtime.md`: 将 shared core 适配到其他已确认的 AI coding CLI。
 - `prompts/setup-shared-core.md`: 目标环境不清楚，最好只阅读 shared prompt guidance。
 - `prompts/setup-codex-skills.md`: 检查 optional Codex skill catalog，只安装批准的 skill。
 - `prompts/apply-vibe-coding-guardrails.md`: 给应用仓库应用 guardrails。

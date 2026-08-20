@@ -39,6 +39,11 @@ Current first-class harness adapters are:
   - `scripts/render_frontend_design_plugin.py` renders it from reviewed design source and routing
     metadata.
 
+Other AI coding CLIs use `docs/portable-runtime-adapters.md` and
+`prompts/setup-portable-runtime.md` as a reference adaptation path. They remain non-first-class until
+their native configuration and fresh-session discovery are validated. Do not copy Codex TOML or
+Claude plugin output into another runtime.
+
 ## Frontend Design Source
 
 The reviewed design source is separate from generated runtime output:

@@ -18,6 +18,8 @@ installed skill.
 - Use `karpathy-guidelines` as the public default base skill.
 - Treat `hun-engineering-loop` as a Hun-local operational wrapper, not part of the public default install set.
 - Treat `chatgpt-collaboration-harness` as an optional Codex collaboration skill, not a Claude Code default.
+- Keep `karpathy-guidelines` and the compact Hun-local `hun-engineering-loop` eligible for implicit use in Hun's runtime; measure their combined cost against vanilla.
+- Treat the four Superpowers adaptations as explicit-use workflows. Install them selectively without enabling the full upstream workflow chain.
 - From Matt Pocock's public skills, this catalog intentionally includes only `handoff`.
 - Do not copy private paths, credentials, MCP endpoints, auth state, browser profiles, or machine-specific trust settings into tracked files.
 - Run the skill validator after installing or syncing a skill.
@@ -36,7 +38,11 @@ Claude Code installation flow, and runtime-copy verification are documented in
 
 ## Skill QA Contract
 
-Treat skill changes as tested workflow code. Start with a failing test or explicit pressure scenario when possible, run the skill validator, run relevant repo tests, check for private paths and secrets, and verify the installed runtime copy separately from the repo catalog source before calling the skill ready.
+Classify a skill as workflow or performance work, define its result and stop condition, and run the
+skill validator plus the lowest-cost direct behavioral evidence. A performance skill needs a paired
+vanilla comparison; a workflow skill needs one deterministic capability case when practical. Scan
+shareable artifacts when the changed surface can carry private data, and compare a runtime copy only
+when installation or synchronization is part of the result.
 
 ### karpathy-guidelines
 
@@ -48,6 +54,7 @@ Key policy:
 - Keep upstream attribution and the MIT license note in `skills/karpathy-guidelines/references/SOURCE.md`.
 - Do not add Hun-specific local workflow rules to this skill.
 - Use this as the public default base skill for Codex and Claude Code.
+- Keep implicit invocation enabled while benchmark results are collected; retain it only while its quality value justifies its token and latency cost.
 
 Catalog path: `skills/karpathy-guidelines`
 
@@ -82,13 +89,15 @@ Use this for Hun-specific non-trivial engineering work across planning, implemen
 
 Key policy:
 
-- This is the Hun-local operational wrapper around `karpathy-guidelines`, repo rules, memory preflight, and executable verification.
+- This is a compact Hun-local result router layered over `karpathy-guidelines` and current project evidence.
 - It is useful in Hun's local Codex runtime, but it is not part of the public default install set.
 - Memory is a recall layer, not a source of truth.
 - Current repo docs, scripts, tests, `AGENTS.md`, and observed runtime output beat memory and external advice.
 - Broad access is allowed only as capability; high-risk actions still require a stop/ask approval boundary.
-- Every project skill should name a concrete QA evidence contract instead of saying only "test it".
+- It turns rough or abstract instructions into the smallest concrete outcome, keeps approval boundaries, and selects direct evidence proportionate to the finish line.
 - Use permission profiles, hooks, or approval layers when the host supports them, but do not treat them as a replacement for judgment.
+- Keep this wrapper as a compact local delta instead of repeating the global prompt or the `karpathy-guidelines` body.
+- Hun's runtime may invoke it implicitly; it remains outside the public default install set.
 
 Catalog path: `skills/hun-engineering-loop`
 
@@ -116,6 +125,52 @@ Catalog path: `skills/handoff`
 Codex runtime install target: `~/.codex/skills/handoff`
 
 Claude Code install: optional and explicit only; review the target runtime first.
+
+## Lean Superpowers Adaptations
+
+These adaptations preserve useful workflow outcomes from `obra/superpowers` `v6.2.0` while removing automatic planning, review, test, delegation, and branch-finishing chains. Each one is compact, explicit-use only, and licensed under the upstream MIT terms recorded in its directory.
+
+Benchmark behavior-oriented guidance as `vanilla -> upstream -> lean adaptation`. Keep a performance-oriented skill only when repeated task quality justifies its token and latency cost. Workflow skills may remain available because explicit invocation provides a capability the vanilla runtime does not provide automatically.
+
+### isolated-worktree
+
+Use only when the user requests an isolated Git worktree or approves isolation for overlapping writable work.
+
+Catalog path: `skills/isolated-worktree`
+
+Codex invocation: `$isolated-worktree`
+
+Claude Code invocation: `/isolated-worktree`
+
+### execute-plan
+
+Use only when the user asks to execute an existing written or approved implementation plan.
+
+Catalog path: `skills/execute-plan`
+
+Codex invocation: `$execute-plan`
+
+Claude Code invocation: `/execute-plan`
+
+### review-feedback-triage
+
+Use only when the user asks to evaluate or apply concrete review feedback.
+
+Catalog path: `skills/review-feedback-triage`
+
+Codex invocation: `$review-feedback-triage`
+
+Claude Code invocation: `/review-feedback-triage`
+
+### focused-debugging
+
+Use only when the user requests bounded diagnosis of a non-obvious or repeated failure whose cause is unknown.
+
+Catalog path: `skills/focused-debugging`
+
+Codex invocation: `$focused-debugging`
+
+Claude Code invocation: `/focused-debugging`
 
 ### _template
 

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+import ast
 import re
 import shutil
 import subprocess
@@ -14,6 +15,15 @@ CODEX_TEMPLATE_ROOT = ".codex/templates"
 PLACEHOLDER_PATTERN = re.compile(r"\{\{([A-Z0-9_]+)\}\}")
 DEFAULT_SUPERPOWERS_REMOTE = "https://github.com/obra/superpowers.git"
 BACKUP_NAMESPACE = ("backups", "agent-bootstrap", "codex")
+ROLE_REASONING_EFFORT_PATTERN = re.compile(
+    r'(?m)^\s*model_reasoning_effort\s*=\s*"(none|minimal|low|medium|high|xhigh|max|ultra)"\s*$'
+)
+TOML_HEADER_PATTERN = re.compile(r"^\s*(\[\[?[^\]]+\]\]?)\s*(?:#.*)?$")
+TOML_KEY_PART = r'(?:[A-Za-z0-9_-]+|"(?:\\.|[^"\\])*"|\'[^\']*\')'
+TOML_ASSIGNMENT_PATTERN = re.compile(
+    rf"^\s*({TOML_KEY_PART}(?:\s*\.\s*{TOML_KEY_PART})*)\s*="
+)
+TOML_KEY_PART_PATTERN = re.compile(TOML_KEY_PART)
 
 
 def parse_args() -> argparse.Namespace:
@@ -85,6 +95,152 @@ def shared_source_files(repo_root: Path) -> list[tuple[Path, Path]]:
         for agent_path in sorted((template_root / "agents").glob("*.toml"))
     )
     return files
+
+
+def existing_role_reasoning_efforts(
+    target_root: Path,
+    relative_paths: list[Path],
+) -> dict[Path, str]:
+    efforts: dict[Path, str] = {}
+    for relative in relative_paths:
+        if relative.parent != Path("agents") or relative.suffix != ".toml":
+            continue
+        destination = target_root / relative
+        if not destination.is_file():
+            continue
+        match = ROLE_REASONING_EFFORT_PATTERN.search(destination.read_text(encoding="utf-8"))
+        if match is not None:
+            efforts[relative] = match.group(1)
+    return efforts
+
+
+def apply_role_reasoning_effort(rendered: str, effort: str | None) -> str:
+    if effort is None:
+        return rendered
+    without_existing = ROLE_REASONING_EFFORT_PATTERN.sub("", rendered).rstrip()
+    return f'{without_existing}\nmodel_reasoning_effort = "{effort}"\n'
+
+
+def existing_machine_local_config(target_root: Path) -> str | None:
+    config_path = target_root / "config.toml"
+    if not config_path.is_file():
+        return None
+    return config_path.read_text(encoding="utf-8")
+
+
+def split_toml_sections(text: str) -> tuple[list[str], list[tuple[str, list[str]]]]:
+    preamble: list[str] = []
+    sections: list[tuple[str, list[str]]] = []
+    current_header: str | None = None
+    current_lines: list[str] = []
+
+    for line in text.splitlines():
+        match = TOML_HEADER_PATTERN.match(line)
+        if match is not None:
+            if current_header is None:
+                preamble.extend(current_lines)
+            else:
+                sections.append((current_header, current_lines))
+            current_header = match.group(1)
+            current_lines = [line]
+            continue
+        current_lines.append(line)
+
+    if current_header is None:
+        preamble.extend(current_lines)
+    else:
+        sections.append((current_header, current_lines))
+    return preamble, sections
+
+
+def canonical_toml_key(raw_key: str) -> tuple[str, ...]:
+    parts: list[str] = []
+    for match in TOML_KEY_PART_PATTERN.finditer(raw_key):
+        part = match.group(0)
+        if part.startswith('"'):
+            parts.append(ast.literal_eval(part))
+        elif part.startswith("'"):
+            parts.append(part[1:-1])
+        else:
+            parts.append(part)
+    return tuple(parts)
+
+
+def assignment_chunks(lines: list[str]) -> list[tuple[tuple[str, ...], list[str]]]:
+    chunks: list[tuple[tuple[str, ...], list[str]]] = []
+    current_key: tuple[str, ...] | None = None
+    current_lines: list[str] = []
+
+    for line in lines:
+        match = TOML_ASSIGNMENT_PATTERN.match(line)
+        if match is not None:
+            if current_key is not None:
+                chunks.append((current_key, current_lines))
+            current_key = canonical_toml_key(match.group(1))
+            current_lines = [line]
+            continue
+        if current_key is not None:
+            current_lines.append(line)
+
+    if current_key is not None:
+        chunks.append((current_key, current_lines))
+    return chunks
+
+
+def merge_assignment_bodies(template_lines: list[str], existing_lines: list[str]) -> list[str]:
+    template_chunks = assignment_chunks(template_lines)
+    template_keys = {key for key, _ in template_chunks}
+    existing_chunks = [
+        lines
+        for key, lines in assignment_chunks(existing_lines)
+        if key not in template_keys
+    ]
+    merged = [line for _, lines in template_chunks for line in lines]
+    if merged and existing_chunks and merged[-1].strip():
+        merged.append("")
+    for index, lines in enumerate(existing_chunks):
+        if index and merged and merged[-1].strip():
+            merged.append("")
+        merged.extend(lines)
+    return merged
+
+
+def apply_machine_local_config(
+    rendered: str,
+    existing: str | None,
+) -> str:
+    if existing is None:
+        return rendered
+
+    template_preamble, template_sections = split_toml_sections(rendered)
+    existing_preamble, existing_sections = split_toml_sections(existing)
+    merged_preamble = merge_assignment_bodies(template_preamble, existing_preamble)
+
+    existing_by_header: dict[str, list[list[str]]] = {}
+    for header, lines in existing_sections:
+        existing_by_header.setdefault(header, []).append(lines)
+
+    merged_sections: list[list[str]] = []
+    for header, template_lines in template_sections:
+        matching = existing_by_header.pop(header, [])
+        if header.startswith("[[") or not matching:
+            merged_sections.append(template_lines)
+            continue
+        existing_lines = matching[0]
+        merged_body = merge_assignment_bodies(
+            template_lines[1:],
+            existing_lines[1:],
+        )
+        merged_sections.append([template_lines[0], *merged_body])
+        if len(matching) > 1:
+            merged_sections.extend(matching[1:])
+
+    for _, sections in existing_by_header.items():
+        merged_sections.extend(sections)
+
+    blocks = ["\n".join(merged_preamble).strip()]
+    blocks.extend("\n".join(lines).strip() for lines in merged_sections)
+    return "\n\n".join(block for block in blocks if block).rstrip() + "\n"
 
 
 def copy_to_backup(source: Path, destination: Path) -> None:
@@ -364,6 +520,8 @@ def main() -> int:
     files = [source for source, _ in managed_sources]
     relative_paths = [relative for _, relative in managed_sources]
     managed_paths = [target_root / relative for relative in relative_paths]
+    role_reasoning_efforts = existing_role_reasoning_efforts(target_root, relative_paths)
+    machine_local_config = existing_machine_local_config(target_root)
 
     if args.dry_run:
         print_install_plan(
@@ -389,6 +547,15 @@ def main() -> int:
         destination = target_root / relative
         destination.parent.mkdir(parents=True, exist_ok=True)
         rendered = render_template(source.read_text(encoding="utf-8"), replacements, source)
+        rendered = apply_role_reasoning_effort(
+            rendered,
+            role_reasoning_efforts.get(relative),
+        )
+        if relative == Path("config.toml"):
+            rendered = apply_machine_local_config(
+                rendered,
+                machine_local_config,
+            )
         destination.write_text(rendered, encoding="utf-8")
 
     superpowers_backup_root = None
@@ -432,6 +599,10 @@ def main() -> int:
         print(f"- skills symlink: {agents_home / 'skills' / 'superpowers'}")
     else:
         print("Superpowers: skipped manual checkout and symlink")
+    if machine_local_config is None:
+        print("Runtime policy: inherited target defaults; the public template pins no model or effort")
+    else:
+        print("Runtime policy: preserved target model, effort, profiles, and unmanaged settings")
     print("Managed files:")
     for relative in relative_paths:
         print(f"- {target_root / relative}")

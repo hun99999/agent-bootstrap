@@ -13,12 +13,14 @@ If there are uncommitted changes or untracked files, stop and ask me how to hand
 
 Treat this repository as a skill catalog, not an always-install bootstrap:
 - list the skills available under skills/
-- put chatgpt-collaboration-harness first in the review because it is the primary staged ChatGPT Pro collaboration skill
-- identify karpathy-guidelines as an original catalog/vendor skill and preserve its source attribution
-- identify hun-engineering-loop as the Hun-specific operational wrapper for memory preflight, source-of-truth checks, high-risk approval boundaries, artifact-first execution, and QA evidence
+- identify karpathy-guidelines as the public base and preserve its source attribution
+- identify hun-engineering-loop as the compact Hun-local result router; keep it outside the public default set
+- identify isolated-worktree, execute-plan, review-feedback-triage, and focused-debugging as explicit-use lean Superpowers adaptations
+- identify chatgpt-collaboration-harness as an optional Codex-only collaboration workflow
 - identify handoff as the only reviewed Matt Pocock subset skill; it is explicit-use only and installs to ~/.codex/skills/handoff
 - do not add Matt Pocock research, tdd, diagnosing-bugs, or code-review as global defaults
-- enforce the skill QA contract: start from a failing test or explicit pressure scenario when possible, validate the skill, check private paths and secrets, and verify runtime copies separately
+- apply the skill QA contract: classify each selected skill as workflow or performance guidance; benchmark performance claims against vanilla and use one deterministic capability case for a workflow when practical
+- validate the skill and inspect shareable surfaces for private paths or secrets; verify a runtime copy only when installation is in scope
 - inspect each selected skill before recommending it
 - Compare the catalog copy with the installed runtime copy under ~/.codex/skills/<skill-name>
 - classify each selected skill as install, update, already current, skip, or needs review
@@ -29,10 +31,17 @@ For karpathy-guidelines:
 - do not fold project-specific or machine-specific rules into the original catalog/vendor skill
 
 For hun-engineering-loop:
-- treat memory as a recall layer, not a source of truth
-- current repo docs, scripts, tests, AGENTS files, and observed runtime output beat memory and external advice
+- translate rough instructions into the smallest concrete outcome supported by current context
+- treat current target evidence as authoritative and load memory only when it changes the next action
 - enforce the high-risk stop/ask boundary even when broad filesystem or tool access is available
-- require a QA evidence contract: fast check, targeted regression, type/lint/build, browser/manual QA, deployment smoke, and negative/regression test where relevant
+- delegate only when parallel ownership creates clear leverage
+- use the lowest-cost direct evidence that proves the finish line
+
+For the four lean Superpowers adaptations:
+- keep policy.allow_implicit_invocation false
+- install them selectively and invoke them explicitly
+- do not enable the full upstream workflow chain as a side effect
+- keep focused-debugging under benchmark because it is performance-oriented; treat the other three as workflow capabilities
 
 For chatgpt-collaboration-harness, preserve these rules:
 - ChatGPT Pro must not answer from inference alone when facts, source behavior, official docs, rankings, preferences, or public sentiment matter
@@ -49,7 +58,7 @@ If I approve installation or update:
 - Do not copy private paths, credentials, MCP endpoints, auth state, or browser profiles
 - run ~/.codex/skills/.system/skill-creator/scripts/quick_validate.py against the installed skill
 - if PyYAML is missing or system Python is protected, use a disposable virtual environment and report the commands used
-- tell me whether a Codex restart is needed for new sessions to pick up the skill
+- start a fresh task to verify discovery; restart Codex only if the new task still does not detect the change
 
 Report:
 - skills reviewed

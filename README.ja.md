@@ -46,6 +46,10 @@ Codex と Claude Code 向けの process-first AI coding environment bootstrap �
 
 Codex と Claude Code だけが first-class setup target です。
 
+その他の AI coding CLI は [portable runtime adapter guide](docs/portable-runtime-adapters.md)
+から shared core を再利用できますが、native config と fresh-session discovery を検証する
+までは reference target として扱います。
+
 OpenCode と OpenClaw は legacy/reference material であり active service target ではありません。古いファイルは履歴や移行確認のために git に残る場合がありますが、新しい README、setup guide、default audit では通常の install path として扱いません。
 
 ## Private Project Skills
@@ -56,7 +60,7 @@ auto-eva のような private project skill はこの public repository にコ�
 
 - `karpathy-guidelines` が public default base skill です。assumption、simplicity、surgical diff、verifiable success criteria を重視します。
 - `superpowers` は brainstorming, planning, TDD, debugging, verification, review の optional workflow library です。薄い process-first core は Superpowers を必要としません。
-- `hun-engineering-loop` は Hun local wrapper です。memory preflight, source-of-truth ordering, high-risk approval boundary, artifact-first execution, QA evidence contract を加えますが、public default install set ではありません。
+- `hun-engineering-loop` は compact な Hun-local wrapper です。曖昧な依頼を最小の具体的成果に変換し、現在の根拠、高リスクの承認境界、効率的な委任、比例した直接証拠を適用しますが、public default install set ではありません。
 - `chatgpt-collaboration-harness` は Codex 側の ChatGPT Pro collaboration skill です。Claude Code にはデフォルトで入れません。
 - `handoff` は explicit-use catalog skill です。別の agent や session に現在の作業状態を渡すようユーザーが明示的に求めた場合だけ使い、[skills/README.md](skills/README.md)、[docs/codex-skills.md](docs/codex-skills.md)、[prompts/setup-codex-skills.md](prompts/setup-codex-skills.md) から確認します。
 
@@ -157,6 +161,7 @@ behavior が明確で testable、または repository が要求する場合だ�
 
 - `prompts/setup-codex-current-harness.md`: Codex に shared core を適用する場合。
 - `prompts/setup-claude-current-harness.md`: Claude Code plugin と shared role prompts を設定する場合。
+- `prompts/setup-portable-runtime.md`: 他の確認済み AI coding CLI に shared core を適用する場合。
 - `prompts/setup-shared-core.md`: 対象環境が不明で、install せず shared prompt guidance を読むのが安全な場合。
 - `prompts/setup-codex-skills.md`: optional Codex skill catalog を調べ、承認された skill だけ入れる場合。
 - `prompts/apply-vibe-coding-guardrails.md`: application repository に guardrails を適用する場合。

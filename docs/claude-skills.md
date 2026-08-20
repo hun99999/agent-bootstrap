@@ -31,14 +31,27 @@ The public Claude Code default skill set is intentionally small:
 - `karpathy-guidelines`: portable upstream/vendor behavior for reducing common
   coding-agent mistakes.
 
+Hun's own Claude Code runtime may also install the compact `hun-engineering-loop` and leave both core guidance skills active. Other users should keep the Hun-specific wrapper outside their default set.
+
 Do not install `hun-engineering-loop` as part of the public default. It is a
-Hun-local wrapper for memory preflight, source-of-truth ordering, high-risk
-approval boundaries, artifact-first execution, and QA evidence. It can exist in
-Hun's private runtime when Hun explicitly approves that local setup.
+compact Hun-local result router for rough instructions, current evidence,
+approval boundaries, efficient delegation, and proportionate proof. It can
+exist in Hun's private runtime when Hun explicitly approves that local setup.
 
 Do not install `chatgpt-collaboration-harness` into Claude Code. It is cataloged
 because it is useful for Codex-led ChatGPT Pro collaboration, but it assumes
 Codex-owned local validation and browser coordination.
+
+## Lean Explicit Workflows
+
+The following public-safe Superpowers adaptations may be installed selectively:
+
+- `isolated-worktree`
+- `execute-plan`
+- `review-feedback-triage`
+- `focused-debugging`
+
+Their trigger text requires explicit use. Invoke the selected skill with `/isolated-worktree`, `/execute-plan`, `/review-feedback-triage`, or `/focused-debugging`. They do not enable the full upstream Superpowers planning, test, review, delegation, or branch-finishing chain.
 
 ## Install Or Sync A Skill
 
@@ -62,8 +75,10 @@ After Hun approves installing or overwriting, copy only the selected public-safe
 skill:
 
 ```bash
-mkdir -p ~/.claude/skills
-rm -rf ~/.claude/skills/karpathy-guidelines
+SKILL_BACKUP_DIR=~/.claude/skill-backups/YYYYMMDDTHHMMSSZ
+mkdir -p "$SKILL_BACKUP_DIR" ~/.claude/skills
+test ! -e ~/.claude/skills/karpathy-guidelines || \
+  mv ~/.claude/skills/karpathy-guidelines "$SKILL_BACKUP_DIR/"
 cp -R skills/karpathy-guidelines ~/.claude/skills/karpathy-guidelines
 ```
 
@@ -78,7 +93,7 @@ disposable PyYAML environment when system Python lacks PyYAML:
 python3 -m venv /tmp/codex-skill-validate-pyyaml
 /tmp/codex-skill-validate-pyyaml/bin/python -m pip install PyYAML
 /tmp/codex-skill-validate-pyyaml/bin/python ~/.codex/skills/.system/skill-creator/scripts/quick_validate.py ~/.claude/skills/karpathy-guidelines
-python3 -m unittest discover -s tests -p 'test_*.py'
+diff -ru skills/karpathy-guidelines ~/.claude/skills/karpathy-guidelines
 ```
 
 If validation cannot run, report the exact error and do not claim the Claude

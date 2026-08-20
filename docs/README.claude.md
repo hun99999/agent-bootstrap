@@ -27,8 +27,8 @@ OpenCode and OpenClaw are not current first-class setup targets for this reposit
 3. Run `git status --short --branch` and stop if there is uncommitted or untracked user work.
 4. Ask the user what name Claude Code should use. Keep the chosen name local, substitute it for
    `<chosen-name>` below, and do not commit the chosen name or any rendered file containing it.
-5. Inspect the active runtime and inherit the models and reasoning levels the user's account and
-   organization actually support. Do not hard-code a latest model or paid-plan ceiling.
+5. Inspect the active runtime. Keep generated agents at `model: inherit` with no effort pin; use an
+   explicit session selection only when the user chooses a model and effort the account supports.
 6. Render the Claude plugin bundle with the chosen partner name.
 7. Add the local repository as a Claude plugin marketplace.
 8. Install `process-first-agents` from that marketplace.
@@ -66,10 +66,31 @@ apply newly installed guardrails.
 
 ## Models And Reasoning
 
-The public templates carry no model, reasoning, verbosity, or paid-plan pin. Inspect the current
-Claude Code runtime and let it inherit the supported selection and organization ceiling. If the
-available ceiling cannot be discovered, ask the user instead of guessing. Model and reasoning
-selection does not depend on the optional Superpowers choice.
+Every generated Claude agent uses `model: inherit` and omits `effort`. The main Claude Code session therefore supplies both the model and session effort allowed by the user's account, organization, and provider.
+
+Inspect the active runtime with `claude --help`; use `/model` and `/effort` in Claude Code when the user wants an explicit local choice. Leave the inherited selection in place when account-specific availability cannot be enumerated. Per-agent effort stays unpinned because available levels depend on the selected model.
+
+Start routine work at the inherited or medium session effort when supported, compare a lower level on representative tasks, and raise effort only for a measured quality gain. The repository carries no paid-plan ceiling, and model or reasoning selection remains independent of the optional Superpowers choice.
+
+## Target-Local Skill Mode
+
+Choose one mode for the target: lean catalog skills, full upstream Superpowers, or neither. Lean is
+the recommended starting point when prompt cost and workflow latency matter. Inspect current
+discovery first, preserve it until the user approves a change, and use the target-supported plugin or
+skill controls. Derive any path-specific entry from that target rather than copying another machine's
+configuration.
+
+Lean mode installs only selected public-safe catalog skills and keeps the four Superpowers
+adaptations explicit-use. Hun may add the compact local wrapper on Hun-owned runtimes. Full mode uses
+Anthropic's upstream Superpowers plugin only after approval. `process-first-agents`, model selection,
+and session effort remain independent of this choice.
+
+## Optional Runtime Capabilities
+
+Ask separately whether the target should use Basic Memory and whether it should use Computer Use or
+browser control. Keep MCP commands, hooks, project mappings, app paths, permissions, auth state, and
+browser profiles target-local. The shared plugin must remain usable when either capability is absent.
+Follow [portable-runtime-adapters.md](portable-runtime-adapters.md).
 
 ## Frontend Design Pack
 

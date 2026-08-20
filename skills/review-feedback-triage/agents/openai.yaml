@@ -1,0 +1,6 @@
+interface:
+  display_name: "Review Feedback Triage"
+  short_description: "Classify and act on concrete review feedback"
+  default_prompt: "Use $review-feedback-triage to classify this review feedback and act on accepted items."
+policy:
+  allow_implicit_invocation: false

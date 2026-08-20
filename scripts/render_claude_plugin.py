@@ -11,6 +11,7 @@ PLACEHOLDER_PATTERN = re.compile(r"\{\{([A-Z0-9_]+)\}\}")
 LOCAL_INCLUDE_LINE = "@local.md"
 PLUGIN_ROOT = Path("plugins/process-first-agents")
 METADATA_PATH = Path("shared/agent-metadata.json")
+SHARED_AGENT_CORE_PATH = Path("shared/agent-core.md")
 CLAUDE_READ_ONLY_DISALLOWED_TOOLS = ["Write", "Edit", "MultiEdit", "NotebookEdit"]
 CLAUDE_READ_ONLY_GUARD = "\n".join(
     [
@@ -23,7 +24,7 @@ CLAUDE_READ_ONLY_GUARD = "\n".join(
 MARKETPLACE_OWNER = {"name": "Hun"}
 PLUGIN_AUTHOR = {"name": "Hun", "email": "48903443+hun99999@users.noreply.github.com"}
 PLUGIN_REPOSITORY = "https://github.com/hun99999/agent-bootstrap"
-PROCESS_FIRST_PLUGIN_VERSION = "1.1.0"
+PROCESS_FIRST_PLUGIN_VERSION = "1.2.0"
 FRONTEND_DESIGN_PLUGIN = {
     "name": "frontend-design-pack",
     "description": "Evidence-first frontend design router and reviewed reference corpus",
@@ -97,10 +98,11 @@ def build_agent_markdown(
         raise ValueError(f"missing Claude metadata for agent '{agent_source.stem}'")
 
     replacements = {"PARTNER_NAME": partner_name}
-    constitution = render_template(
-        (repo_root / "AGENTS.md").read_text(encoding="utf-8"),
+    shared_core_path = repo_root / SHARED_AGENT_CORE_PATH
+    shared_core = render_template(
+        shared_core_path.read_text(encoding="utf-8"),
         replacements,
-        repo_root / "AGENTS.md",
+        shared_core_path,
     )
     role_body = render_template(
         agent_source.read_text(encoding="utf-8"),
@@ -129,7 +131,7 @@ def build_agent_markdown(
     frontmatter = serialize_frontmatter(frontmatter_fields)
     sections = [
         frontmatter,
-        strip_local_include(constitution).strip(),
+        shared_core.strip(),
     ]
     if metadata.get("read_only"):
         sections.append(CLAUDE_READ_ONLY_GUARD)

@@ -9,15 +9,15 @@ description = "Primary lead for day-to-day work. Stay local by default and deleg
 config_file = "agents/eng-lead.toml"
 
 [agents.orchestrator]
-description = "Compatibility alias for eng-lead with the same local-first delegation rules."
+description = "Compatibility alias for eng-lead; never spawn it alongside eng-lead."
 config_file = "agents/eng-lead.toml"
 
 [agents.planner]
-description = "Use for design, decomposition, and implementation planning before code changes."
+description = "Use only when material design or architecture ambiguity blocks implementation."
 config_file = "agents/planner.toml"
 
 [agents.researcher]
-description = "Use for read-only exploration, repository archaeology, and broad context gathering."
+description = "Use for bounded read-only discovery across a large or unfamiliar source surface."
 config_file = "agents/researcher.toml"
 
 [agents.debugger]
@@ -25,15 +25,15 @@ description = "Use for bug investigation, reproduction, evidence gathering, and 
 config_file = "agents/debugger.toml"
 
 [agents.reviewer]
-description = "Use for review-only work focused on bugs, regressions, missing tests, and operational risk."
+description = "Use for one independent, risk-justified review focused on concrete defects and regressions."
 config_file = "agents/reviewer.toml"
 
 [agents.verifier]
-description = "Use to gather objective evidence before claiming work is complete."
+description = "Use only when a material completion claim still lacks direct objective evidence."
 config_file = "agents/verifier.toml"
 
 [agents.release-manager]
-description = "Use for branch finishing, release readiness, and CI or merge gate evaluation."
+description = "Use only for release-bound branch, CI, merge-gate, or deployment-readiness decisions."
 config_file = "agents/release-manager.toml"
 
 [agents.skill-author]

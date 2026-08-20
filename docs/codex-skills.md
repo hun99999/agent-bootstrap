@@ -13,12 +13,27 @@ the installed skill.
 The public default base skill is `karpathy-guidelines`. It is the portable
 upstream/vendor skill preserved from `multica-ai/andrej-karpathy-skills`.
 
-`hun-engineering-loop` is a Hun-local wrapper around that base skill. It combines
-Karpathy-style caution with memory preflight, source-of-truth ordering, a
-high-risk stop/ask boundary, artifact-first execution, and a QA evidence
-contract. Every project skill still needs a concrete QA evidence contract.
+`hun-engineering-loop` is a compact Hun-local result router around that base
+skill. It translates rough or abstract instructions into the smallest concrete
+outcome, prefers current target evidence, keeps high-risk approval boundaries,
+delegates only for clear leverage, and selects the lowest-cost direct proof.
 Keep it local unless Hun explicitly chooses to publish or install it for a
 particular runtime.
+
+In Hun's runtime, `karpathy-guidelines` and the compact `hun-engineering-loop` remain eligible for implicit invocation. The wrapper is a small local delta rather than a second copy of the global prompt. Measure the pair against vanilla; a future benchmark result may narrow or remove implicit use.
+
+## Lean Explicit Workflows
+
+The catalog includes four compact, MIT-licensed adaptations of useful `obra/superpowers` workflows:
+
+- `isolated-worktree`
+- `execute-plan`
+- `review-feedback-triage`
+- `focused-debugging`
+
+They are explicit-use skills. Install only the selected directories and invoke them as `$isolated-worktree`, `$execute-plan`, `$review-feedback-triage`, or `$focused-debugging`. The full upstream Superpowers chain remains optional and separate.
+
+Evaluate behavior guidance with `vanilla`, exact upstream, and lean-adaptation variants. Compare task success and safety first, then total tokens, latency, tool calls, and unnecessary checks. Keep measured quality gains and remove unmeasured ceremony.
 
 ## Source Boundaries
 
@@ -79,11 +94,12 @@ operate without the same local runtime.
 
 ## Skill QA Contract
 
-Treat skill changes as tested workflow code. Start with a failing test or
-explicit pressure scenario when the host or repo can support it. Then run the
-skill validator, run relevant repo tests, check for private paths and secrets,
-and verify the installed runtime copy separately from the repo catalog source
-before calling the skill ready.
+Classify the skill as workflow or performance work. Define its result, route,
+evidence, and stop condition; then run the validator and the lowest-cost direct
+behavioral evidence. Benchmark a performance skill against vanilla under fixed
+runtime inputs. Demonstrate a workflow skill with one deterministic capability
+case when practical. Scan only shareable surfaces that can carry private data,
+and compare a runtime copy when installation or synchronization is in scope.
 
 ## Validation
 
@@ -139,10 +155,10 @@ Hun asks for another language or the deliverable requires it.
 
 ## Hun-Local Wrapper
 
-`hun-engineering-loop` is the Hun-local wrapper. Use it in Hun's own runtime
-when a task should start with memory preflight, then resolve the current source
-of truth, check the high-risk stop/ask boundary, create or update an artifact,
-verify with evidence, and report what was proven.
+`hun-engineering-loop` is the Hun-local wrapper. Use it in Hun's own runtime to
+convert a rough request into the smallest complete result, follow current target
+evidence, preserve the high-risk stop/ask boundary, use delegation only for
+clear leverage, and stop when direct evidence proves the finish line.
 
 The high-risk stop/ask boundary applies even when the host has broad access.
 Stop and ask before destructive deletion, credential or permission changes,
@@ -159,19 +175,14 @@ but do not make broad access the default recommendation in public templates.
 Use `skills/_template` for project workflow skills. Each project skill should
 include:
 
-- `Scope / Non-goals`
-- `Memory Preflight`
-- `Source Of Truth`
-- `Access And Approval Boundary`
-- `Artifact-First Execution`
-- `Verification Contract`
-- `QA / Refactor Loop`
-- `Final Report`
+- `Result`
+- `Route`
+- `Evidence`
+- `Stop`
 
-The `Verification Contract` is the important part. Replace placeholders with
-executable project evidence: fast check, targeted regression, type/lint/build,
-browser/manual QA, deployment smoke, and negative/regression test where
-relevant.
+New catalog skills default to explicit invocation. Enable implicit invocation
+only for a measured performance skill whose representative benchmark justifies
+its ongoing prompt and execution cost.
 
 ## Multi-Project Use
 

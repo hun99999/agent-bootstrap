@@ -1,0 +1,61 @@
+{
+  "schema_version": 1,
+  "candidates": [
+    {
+      "skill": "karpathy-guidelines",
+      "class": "performance",
+      "implicit": true,
+      "variants": [
+        "vanilla",
+        "karpathy"
+      ]
+    },
+    {
+      "skill": "hun-engineering-loop",
+      "class": "performance",
+      "implicit": true,
+      "variants": [
+        "vanilla",
+        "karpathy",
+        "karpathy-plus-hun"
+      ]
+    },
+    {
+      "skill": "focused-debugging",
+      "class": "performance",
+      "implicit": false,
+      "variants": [
+        "vanilla",
+        "upstream-v6.2.0",
+        "lean"
+      ]
+    },
+    {
+      "skill": "isolated-worktree",
+      "class": "workflow",
+      "implicit": false,
+      "variants": [
+        "vanilla",
+        "lean"
+      ]
+    },
+    {
+      "skill": "execute-plan",
+      "class": "workflow",
+      "implicit": false,
+      "variants": [
+        "vanilla",
+        "lean"
+      ]
+    },
+    {
+      "skill": "review-feedback-triage",
+      "class": "workflow",
+      "implicit": false,
+      "variants": [
+        "vanilla",
+        "lean"
+      ]
+    }
+  ]
+}

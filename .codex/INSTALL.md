@@ -18,6 +18,14 @@ Codex App curated Superpowers plugin; this installer still supports the
 manual ~/.codex/superpowers fallback for local skill discovery. Avoid enabling both discovery paths
 unless duplicate skill entries are intentional.
 
+Lean-mode `skills.config` paths are target-local. Resolve the current discovered skill folders from
+this machine and re-resolve them after curated plugin updates; never copy another machine's
+versioned plugin cache paths.
+
+Basic Memory and Computer Use or browser control are separate optional choices. Ask about each one
+independently and keep MCP commands, hooks, mappings, app paths, permissions, auth state, and browser
+profiles local. See [portable runtime adapters](../docs/portable-runtime-adapters.md).
+
 When manual mode is selected, the installer also manages:
 
 - `~/.codex/superpowers`

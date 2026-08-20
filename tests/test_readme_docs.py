@@ -134,6 +134,28 @@ class ReadmeDocsTests(unittest.TestCase):
         self.assertIn("subagents", readme)
         self.assertIn("token-efficient", readme)
 
+    def test_harness_docs_define_adaptive_runtime_model_policy(self) -> None:
+        codex = (REPO_ROOT / "docs" / "README.codex.md").read_text(encoding="utf-8")
+        claude = (REPO_ROOT / "docs" / "README.claude.md").read_text(encoding="utf-8")
+
+        for phrase in (
+            "Existing Codex target",
+            "Fresh Codex target",
+            "preserves",
+            "model_reasoning_effort",
+            "no model or effort pin",
+        ):
+            self.assertIn(phrase, codex)
+
+        for phrase in (
+            "`model: inherit`",
+            "omits `effort`",
+            "session effort",
+            "`/model`",
+            "`/effort`",
+        ):
+            self.assertIn(phrase, claude)
+
     def test_readmes_mark_codex_claude_as_only_first_class_surfaces(self) -> None:
         expectations = {
             "README.md": (
@@ -292,6 +314,27 @@ class ReadmeDocsTests(unittest.TestCase):
                     contents,
                     relative=relative,
                 )
+
+    def test_current_harness_setup_chooses_a_target_local_skill_mode(self) -> None:
+        for relative in (
+            "prompts/fresh-install.md",
+            "prompts/setup-codex-current-harness.md",
+            "prompts/setup-claude-current-harness.md",
+            "docs/README.codex.md",
+            "docs/README.claude.md",
+        ):
+            with self.subTest(relative=relative):
+                contents = " ".join(
+                    (REPO_ROOT / relative).read_text(encoding="utf-8").split()
+                )
+                for phrase in (
+                    "lean catalog skills",
+                    "full upstream Superpowers",
+                    "neither",
+                    "target-supported",
+                    "path-specific",
+                ):
+                    self.assertIn(phrase, contents)
 
     def test_docs_explain_agent_stack_audit_command(self) -> None:
         for relative in (
@@ -680,12 +723,14 @@ class ReadmeDocsTests(unittest.TestCase):
             "Do not install `chatgpt-collaboration-harness` into Claude Code",
             "private project skills",
             "quick_validate.py",
-            "python3 -m unittest discover -s tests -p 'test_*.py'",
+            "SKILL_BACKUP_DIR",
+            "diff -ru skills/karpathy-guidelines",
         )
         for phrase in guide_phrases:
             self.assertIn(phrase, claude_skills)
 
         self.assertNotIn("/" + "Users/hooooonje", claude_skills)
+        self.assertNotIn("rm -rf", claude_skills)
 
 
 if __name__ == "__main__":

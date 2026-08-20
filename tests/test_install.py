@@ -252,6 +252,78 @@ class InstallScriptTests(unittest.TestCase):
             self.assertIn("[agents]", config_text)
             self.assertIn("[features]", config_text)
 
+    def test_install_preserves_machine_local_runtime_policy_and_unmanaged_sections(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            root = Path(tmpdir)
+            codex_home = root / ".codex"
+            agents_home = root / ".agents"
+            role_dir = codex_home / "agents"
+            role_dir.mkdir(parents=True)
+            (codex_home / "config.toml").write_text(
+                'model = "local-model"\n'
+                'model_reasoning_effort = "medium"\n'
+                'model_reasoning_summary = "concise"\n'
+                'model_verbosity = "medium"\n'
+                'plan_mode_reasoning_effort = "medium"\n'
+                'future_runtime_key = "keep-me"\n\n'
+                'projects."/repo".trust_level = "trusted"\n'
+                'future.flag = true\n'
+                '"future.key" = "keep"\n\n'
+                '[profiles.fast]\n'
+                'model = "local-fast-model"\n'
+                'model_reasoning_effort = "low"\n\n'
+                '[features]\n'
+                'multi_agent = false\n'
+                'memories = true\n\n'
+                '[[skills.config]]\n'
+                'path = "/local/skill/SKILL.md"\n'
+                'enabled = false\n\n'
+                '[marketplaces.local]\n'
+                'source_type = "local"\n'
+                'source = "/runtime-owned/plugin"\n',
+                encoding="utf-8",
+            )
+            (role_dir / "worker.toml").write_text(
+                'model_reasoning_effort = "max"\n',
+                encoding="utf-8",
+            )
+            (role_dir / "reviewer.toml").write_text(
+                'model_reasoning_effort = "ultra"\n',
+                encoding="utf-8",
+            )
+
+            result = self.run_installer(
+                "--partner-name",
+                "Hun",
+                "--codex-home",
+                str(codex_home),
+                "--agents-home",
+                str(agents_home),
+                "--superpowers-mode",
+                "skip",
+            )
+
+            self.assertEqual(result.returncode, 0, msg=result.stderr)
+            worker = (role_dir / "worker.toml").read_text(encoding="utf-8")
+            reviewer = (role_dir / "reviewer.toml").read_text(encoding="utf-8")
+            config = (codex_home / "config.toml").read_text(encoding="utf-8")
+            self.assertIn('model_reasoning_effort = "max"', worker)
+            self.assertIn('model_reasoning_effort = "ultra"', reviewer)
+            self.assertIn('model = "local-model"', config)
+            self.assertIn('model_reasoning_summary = "concise"', config)
+            self.assertIn('future_runtime_key = "keep-me"', config)
+            self.assertIn('projects."/repo".trust_level = "trusted"', config)
+            self.assertIn('future.flag = true', config)
+            self.assertIn('"future.key" = "keep"', config)
+            self.assertIn('[profiles.fast]', config)
+            self.assertIn('model = "local-fast-model"', config)
+            self.assertIn('memories = true', config)
+            self.assertIn('multi_agent = true', config)
+            self.assertIn('path = "/local/skill/SKILL.md"', config)
+            self.assertIn('[marketplaces.local]', config)
+            self.assertIn('source = "/runtime-owned/plugin"', config)
+            self.assertIn("[agents]", config)
+
     def test_install_refuses_dirty_superpowers_checkout(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
             root = Path(tmpdir)

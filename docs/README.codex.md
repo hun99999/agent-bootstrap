@@ -70,10 +70,40 @@ The default audit is offline and read-only. It checks the local Codex CLI, Claud
 
 ## Models And Reasoning
 
-The public Codex templates do not pin a model, reasoning level, verbosity, or paid-plan ceiling.
-Inspect what the active Codex and Claude runtimes actually support, report the result, and let each
-runtime inherit its available selection. If the supported ceiling cannot be discovered, ask instead
-of guessing. This choice is independent of the optional Superpowers mode.
+The public Codex templates carry no model or effort pin.
+
+- **Existing Codex target:** the installer preserves top-level model, `model_reasoning_effort`, summary, verbosity, plan effort, named profiles, runtime-managed tables, unrecognized future settings, and per-role effort overrides. Managed agent definitions and the shared feature baseline still update from the repository.
+- **Fresh Codex target:** the installer writes no model or effort pin, so the target runtime and account choose their supported defaults.
+- **Explicit local choice:** set a model or effort only after the target runtime confirms support. Keep the choice in the target's local config rather than the public template.
+
+For Hun's current runtime, routine root and coordination work use medium effort with concise reasoning summaries and medium response verbosity. Specialist roles may use more effort where the task shape warrants it. These are machine-local selections, not repository defaults.
+
+Use medium as the balanced starting point and compare one lower level on representative tasks. Raise effort only when a repeated quality gain justifies the added tokens and latency. This policy is independent of the optional Superpowers mode.
+
+## Target-Local Skill Mode
+
+Choose one mode for the target: lean catalog skills, full upstream Superpowers, or neither. Lean is
+the recommended starting point when prompt cost and workflow latency matter. Inspect current
+discovery first, preserve it until the user approves a change, and use only the target-supported
+plugin or skill controls. Derive every path-specific skill entry from that target; another machine's
+plugin cache path and version are not portable configuration.
+
+Lean mode installs only selected catalog skills. `karpathy-guidelines` is the public base;
+`hun-engineering-loop` is Hun-local. The four Superpowers adaptations remain explicit-use. Full mode
+may use the curated plugin or the optional manual checkout after approval; running both can create
+duplicate discovery. Model and reasoning policy remains independent of this choice.
+
+Codex `skills.config` entries are target-local and identify the current skill folder. Curated plugin
+cache versions can change, so resolve the current discovered Superpowers directories again after a
+plugin update. Do not copy another machine's versioned cache paths into config. Start a fresh task
+after changing skill enablement and verify discovery once.
+
+## Optional Runtime Capabilities
+
+Ask separately whether the target should use Basic Memory and whether it should use Computer Use or
+browser control. These decisions are independent from core installation and skill mode. Do not copy
+MCP executable paths, hooks, project mappings, app paths, permissions, auth state, or browser
+profiles from another machine. Follow [portable-runtime-adapters.md](portable-runtime-adapters.md).
 
 ## Frontend Design Pack
 

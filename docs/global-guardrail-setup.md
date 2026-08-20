@@ -24,9 +24,15 @@ In short: install globally for new sessions, then use project-local knowledge fo
 
 Before running an installer or renderer, stop. Ask the user what name the active agent should use.
 Keep the chosen name local. Substitute it for `<chosen-name>`, and do not commit the chosen name or
-any rendered identity file that contains it. Inspect the active runtime's models and reasoning
-levels. Do not hard-code a latest model or paid-plan ceiling. Model and reasoning selection is
-independent of the optional Superpowers choice.
+any rendered identity file that contains it. Inspect only the active runtime. Preserve an existing
+machine-local model and reasoning selection; on a fresh target, inherit runtime defaults. Apply an
+explicit selection only when the user chooses a model and effort the target supports. Model and
+reasoning selection is independent of the optional Superpowers choice.
+
+Basic Memory and Computer Use or browser control are separate optional capabilities. Ask about each
+one independently after the core harness scope is known. Do not copy MCP paths, hook state, memory
+projects, app paths, permissions, auth state, or browser profiles from another machine. Use
+[portable-runtime-adapters.md](portable-runtime-adapters.md) for this target-local boundary.
 
 ## Codex Global Setup
 
@@ -45,6 +51,10 @@ chooses the manual checkout. `skip` is non-mutating: it does not deactivate, dis
 existing checkout, symlink, or curated discovery. Model and reasoning selection is independent of
 the Superpowers choice. Codex can instead use the curated plugin; enabling both curated and manual
 discovery can create duplicate skill entries.
+
+When lean mode disables curated Superpowers skills, derive `skills.config` paths from the current
+target. Curated plugin cache versions can change; re-resolve the installed skill folders after an
+update instead of committing a versioned cache path.
 
 Approved manual example:
 
@@ -102,6 +112,16 @@ Then inside Claude Code:
 ```
 
 The Claude Code plugin carries the same shared constitution and role prompt bodies that Codex uses. New Claude Code sessions should use those user-level defaults after the plugin is installed or updated.
+
+Basic Memory and Computer Use remain separate target-local decisions for Claude Code as well. The
+`process-first-agents` plugin does not require either capability.
+
+## Other AI Coding CLIs
+
+Use [portable-runtime-adapters.md](portable-runtime-adapters.md) and
+[setup-portable-runtime.md](../prompts/setup-portable-runtime.md). Confirm the exact client and its
+native configuration before adapting the shared core; do not present an unvalidated adapter as
+first-class support.
 
 ## Legacy Surfaces
 

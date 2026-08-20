@@ -98,7 +98,7 @@ class ClaudePluginTests(unittest.TestCase):
             plugins["process-first-agents"]["source"],
             "./plugins/process-first-agents",
         )
-        self.assertEqual(plugins["process-first-agents"]["version"], "1.1.0")
+        self.assertEqual(plugins["process-first-agents"]["version"], "1.2.0")
         self.assertEqual(
             plugins["frontend-design-pack"]["source"],
             "./plugins/frontend-design-pack",
@@ -122,7 +122,7 @@ class ClaudePluginTests(unittest.TestCase):
         settings = json.loads(PLUGIN_SETTINGS_PATH.read_text(encoding="utf-8"))
 
         self.assertEqual(manifest["name"], "process-first-agents")
-        self.assertEqual(manifest["version"], "1.1.0")
+        self.assertEqual(manifest["version"], "1.2.0")
         marketplace = json.loads(MARKETPLACE_PATH.read_text(encoding="utf-8"))
         plugins = {plugin["name"]: plugin for plugin in marketplace["plugins"]}
         self.assertEqual(
@@ -194,7 +194,7 @@ class ClaudePluginTests(unittest.TestCase):
         self.assertIn(READ_ONLY_NO_MUTATION_GUARD, planner)
         self.assertNotIn(READ_ONLY_NO_MUTATION_GUARD, worker)
 
-    def test_generated_agents_have_frontmatter_and_rendered_constitution(self) -> None:
+    def test_generated_agents_have_frontmatter_and_compact_shared_core(self) -> None:
         eng_lead = (PLUGIN_ROOT / "agents" / "eng-lead.md").read_text(encoding="utf-8")
         reviewer = (PLUGIN_ROOT / "agents" / "reviewer.md").read_text(encoding="utf-8")
 
@@ -203,8 +203,16 @@ class ClaudePluginTests(unittest.TestCase):
         self.assertIn("Hun", eng_lead)
         self.assertNotIn("{{PARTNER_NAME}}", eng_lead)
         self.assertNotIn("@local.md", eng_lead)
+        self.assertIn("## Shared outcome contract", eng_lead)
+        self.assertNotIn("After compaction", eng_lead)
         self.assertIn("name: reviewer", reviewer)
         self.assertIn("description: Review-only work focused on bugs and regressions", reviewer)
+
+    def test_generated_agent_bundle_stays_within_shared_prompt_budget(self) -> None:
+        paths = sorted((PLUGIN_ROOT / "agents").glob("*.md"))
+        total_words = sum(len(path.read_text(encoding="utf-8").split()) for path in paths)
+
+        self.assertLessEqual(total_words, 6000)
 
     def test_generated_agents_have_claude_frontmatter_policy(self) -> None:
         metadata = load_agent_metadata()
@@ -234,6 +242,7 @@ class ClaudePluginTests(unittest.TestCase):
                 frontmatter = parse_frontmatter(agent_path.read_text(encoding="utf-8"))
 
                 self.assertEqual(frontmatter.get("model"), "inherit")
+                self.assertNotIn("effort", frontmatter)
                 self.assertNotIn("hooks", frontmatter)
                 self.assertNotIn("mcpServers", frontmatter)
                 self.assertNotIn("permissionMode", frontmatter)

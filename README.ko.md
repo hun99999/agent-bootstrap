@@ -48,6 +48,10 @@ Codex와 Claude Code를 위한 프로세스 중심 AI 코딩 환경 부트스트
 
 Codex와 Claude Code만 first-class setup target입니다.
 
+다른 AI coding CLI는 [portable runtime adapter guide](docs/portable-runtime-adapters.md)를 통해
+공통 core를 재사용할 수 있지만, 해당 runtime의 native config와 fresh-session discovery가
+검증되기 전까지는 reference target으로 취급합니다.
+
 OpenCode와 OpenClaw는 legacy/reference material이며 active service target이 아닙니다. 예전 사용자의 감사나 마이그레이션을 위해 관련 파일이 git에 남아 있을 수는 있지만, 새 README, setup guide, 기본 audit은 그것들을 일반 설치 경로처럼 보여주면 안 됩니다.
 
 이 범위는 공개 레포를 이해하기 쉽게 유지하기 위한 결정입니다.
@@ -67,7 +71,7 @@ auto-eva 같은 private project skill은 이 public repository에 커밋하지 �
 
 - `karpathy-guidelines`가 public default base skill입니다. 에이전트가 가정을 숨기지 않고, 단순하게 구현하고, 넓은 diff를 피하고, 성공 기준을 검증 가능하게 만들도록 잡아줍니다.
 - `superpowers`는 brainstorming, planning, TDD, debugging, verification, review에 쓰는 optional workflow library입니다. 얇은 process-first core는 Superpowers를 요구하지 않습니다.
-- `hun-engineering-loop`은 `karpathy-guidelines` 위에 Hun 로컬 운영 방식을 얹은 wrapper입니다. memory preflight, source-of-truth ordering, high-risk approval boundary, artifact-first execution, QA evidence contract를 추가합니다. Hun의 로컬 runtime에서는 유용하지만 public default install set에는 포함하지 않습니다.
+- `hun-engineering-loop`은 `karpathy-guidelines` 위에 둔 compact Hun-local wrapper입니다. 거칠거나 추상적인 요청을 가장 작은 구체적 결과로 바꾸고, 현재 근거, 고위험 승인 경계, 효율적인 위임, 비례적인 직접 증거를 적용합니다. Hun의 로컬 runtime에서는 유용하지만 public default install set에는 포함하지 않습니다.
 - `chatgpt-collaboration-harness`는 Codex 쪽에서 ChatGPT Pro와 협업할 때 쓰는 선택 skill입니다. Claude Code에는 기본 설치하지 않습니다.
 - `handoff`는 explicit-use catalog skill입니다. 사용자가 다른 agent나 session으로 현재 작업 상태를 전달해 달라고 명시적으로 요청할 때만 사용하며, [skills/README.md](skills/README.md), [docs/codex-skills.md](docs/codex-skills.md), [prompts/setup-codex-skills.md](prompts/setup-codex-skills.md)를 통해 검토합니다.
 
@@ -127,6 +131,7 @@ Memory와 이전 요약은 recall layer일 뿐 source of truth가 아닙니다. 
 - guardrail이 있는 프로젝트에서 기능 작업 시작: feature, bugfix, refactor 전에 [prompts/start-with-vibe-coding-guardrails.md](prompts/start-with-vibe-coding-guardrails.md)를 붙여넣습니다.
 - optional Codex skill 검토: [skills/README.md](skills/README.md)와 [docs/codex-skills.md](docs/codex-skills.md)를 읽고, 승인된 skill만 비교/설치하려면 [prompts/setup-codex-skills.md](prompts/setup-codex-skills.md)를 사용합니다.
 - optional Claude Code skill 검토: [docs/claude-skills.md](docs/claude-skills.md)를 읽고 승인된 public-safe skill만 설치합니다.
+- 다른 AI coding CLI 적용: [docs/portable-runtime-adapters.md](docs/portable-runtime-adapters.md)를 읽고 대상 runtime에 [prompts/setup-portable-runtime.md](prompts/setup-portable-runtime.md)를 붙여넣습니다.
 - 이 bootstrap 업데이트/재점검: 새 변경을 pull한 뒤 또는 이 레포를 다시 audit하고 싶을 때 [prompts/update-agent-bootstrap.md](prompts/update-agent-bootstrap.md)를 붙여넣습니다.
 - 이 레포 구조 이해: shared prompt, installer, generated plugin output, setup docs를 바꾸기 전에 [docs/agent-bootstrap-structure.md](docs/agent-bootstrap-structure.md)를 읽습니다.
 
@@ -186,6 +191,7 @@ behavior가 명확하고 테스트 가능하거나 repository가 요구할 때�
 
 - `prompts/setup-codex-current-harness.md`: Codex 안에서 현재 Codex harness에 shared core를 적용할 때 사용합니다.
 - `prompts/setup-claude-current-harness.md`: Claude Code 안에서 Claude plugin과 shared role prompt를 세팅할 때 사용합니다.
+- `prompts/setup-portable-runtime.md`: 확인된 다른 AI coding CLI에 shared core를 이식하되 first-class 지원으로 과장하지 않을 때 사용합니다.
 - `prompts/setup-shared-core.md`: 대상 환경이 불분명하고 설치 없이 shared prompt guidance만 확인하는 것이 안전할 때 사용합니다.
 - `prompts/setup-codex-skills.md`: optional Codex skill catalog를 확인하고 `~/.codex/skills`와 비교한 뒤 승인된 skill만 설치할 때 사용합니다.
 - `prompts/apply-vibe-coding-guardrails.md`: structure map, edge-case-first tests, dependency-boundary checks, local project knowledge가 필요한 애플리케이션 레포에서 사용합니다.

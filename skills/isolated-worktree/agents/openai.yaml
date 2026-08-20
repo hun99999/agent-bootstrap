@@ -1,0 +1,6 @@
+interface:
+  display_name: "Isolated Worktree"
+  short_description: "Prepare a task-specific Git worktree"
+  default_prompt: "Use $isolated-worktree to prepare an isolated Git worktree for this task."
+policy:
+  allow_implicit_invocation: false

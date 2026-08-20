@@ -25,7 +25,9 @@ class FrontendDesignDocumentationTests(unittest.TestCase):
         )
         expected_phrases = (
             "Ask the user what partner name",
-            "inherit the models and reasoning levels",
+            "Preserve its existing machine-local model and effort",
+            "on a fresh target, inherit the runtime selection",
+            "intentionally carries no model pin",
             "frontend-design-pack@agent-bootstrap",
             "Ask before installing, updating, or replacing",
             "tracked plugin",
@@ -88,7 +90,9 @@ class FrontendDesignDocumentationTests(unittest.TestCase):
             with self.subTest(prompt=relative_path):
                 for phrase in (
                     "Ask the user what name",
-                    "inherits its supported selection and account ceiling",
+                    "Preserve existing machine-local selections",
+                    "leave model and reasoning unset",
+                    "user chooses one the target supports",
                     "frontend-design-pack",
                     "Ask before installing or replacing",
                     "tracked plugin",
@@ -115,8 +119,9 @@ class FrontendDesignDocumentationTests(unittest.TestCase):
                 "docs/frontend-design-stack.md",
                 "validate_frontend_design_stack.py",
                 "fresh Claude Code session",
-                "models and reasoning",
-                "Do not hard-code",
+                "model: inherit",
+                "effort",
+                "Inspect the active",
                 "Keep the chosen name local",
                 "do not commit",
             ):
@@ -155,9 +160,13 @@ class FrontendDesignDocumentationTests(unittest.TestCase):
         ):
             with self.subTest(document=relative_path):
                 contents = (REPO_ROOT / relative_path).read_text(encoding="utf-8")
-                self.assertIn("Ask the user what name", contents)
-                self.assertIn("<chosen-name>", contents)
-                self.assertIn("models and reasoning", contents)
+                normalized = " ".join(contents.split())
+                self.assertIn("Ask the user what name", normalized)
+                self.assertIn("<chosen-name>", normalized)
+                self.assertIn("machine-local model and reasoning selection", normalized)
+                self.assertIn("fresh target", normalized)
+                self.assertIn("inherit", normalized)
+                self.assertIn("explicit selection", normalized)
                 self.assertIn("Keep the chosen name local", contents)
                 self.assertIn("do not commit", contents)
                 self.assertNotIn('--partner-name "Hun"', contents)

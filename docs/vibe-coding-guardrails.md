@@ -103,8 +103,8 @@ Never claim an unrun check passed or imply broader coverage than the evidence su
 
 Ask the user what name the active agent should use before rendering local defaults. Keep the chosen name local.
 Substitute it for `<chosen-name>`, and do not commit the chosen name or any rendered identity file
-that contains it. Inspect the active runtime's models and reasoning levels. Do not hard-code a latest
-model or paid-plan ceiling.
+that contains it. Preserve an existing machine-local model and reasoning selection; on a fresh
+target, inherit the active runtime. Apply an explicit selection only after confirming support.
 
 For a fresh-clone baseline in a release or other full-regression case:
 

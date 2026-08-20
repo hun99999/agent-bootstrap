@@ -13,7 +13,7 @@ First read AGENTS.md, README.md, docs/agent-setup-playbook.md, docs/global-guard
 
 Before changing anything, run git status --short --branch. If there is uncommitted or untracked user work, stop and ask how to handle it. Identify whether the current harness is Codex or Claude Code. Identify my requested scope.
 
-Before rendering local configuration, ask what name the active agent should use to address me. Inspect the models and reasoning levels the active Codex and Claude runtimes actually support, then inherit those available selections instead of hard-coding a latest model or paid-plan assumption. Keep the chosen name local. Do not commit the chosen name or rendered files that contain it.
+Before rendering local configuration, ask what name the active agent should use to address me. Inspect only the active harness. Preserve an existing machine-local model and reasoning selection; on a fresh target, inherit the runtime defaults unless I explicitly choose a supported model or effort. Keep the chosen name local. Do not commit the chosen name or rendered files that contain it.
 
 Read docs/frontend-design-stack.md. Validate the tracked frontend-design-pack, report whether Figma is available without authenticating it, and ask before installing or replacing any runtime plugin copy. If installation is approved, validate the installed root separately and use a fresh task or session to prove discovery.
 
@@ -46,6 +46,10 @@ Bootstrap a process-first AI coding environment for Codex and Claude Code.
 
 Codex and Claude Code are the only first-class setup targets for this repository.
 
+Other AI coding CLIs may reuse the shared core through the
+[portable runtime adapter guide](docs/portable-runtime-adapters.md), but remain reference targets
+until their native configuration and fresh-session discovery are validated.
+
 OpenCode and OpenClaw are legacy/reference material, not active service targets. Their old files may remain in git so older users can audit or migrate them, but new setup docs, README guidance, and default audits should not present them as a normal installation path.
 
 This split keeps the public repo small enough to understand:
@@ -64,6 +68,7 @@ Use this repository as an operating guide, not only as an installer.
 - Start feature work inside a guarded project: paste [prompts/start-with-vibe-coding-guardrails.md](prompts/start-with-vibe-coding-guardrails.md) before asking for a feature, bugfix, or refactor.
 - Review optional Codex skills: read [skills/README.md](skills/README.md) and [docs/codex-skills.md](docs/codex-skills.md), then use [prompts/setup-codex-skills.md](prompts/setup-codex-skills.md) when you want an agent to browse, compare, and install approved Codex skills.
 - Review optional Claude Code skills: read [docs/claude-skills.md](docs/claude-skills.md) and install only the public-safe skill set you approve.
+- Adapt another AI coding CLI: use [docs/portable-runtime-adapters.md](docs/portable-runtime-adapters.md) and paste [prompts/setup-portable-runtime.md](prompts/setup-portable-runtime.md) into the target runtime.
 - Update this bootstrap after repository changes: paste [prompts/update-agent-bootstrap.md](prompts/update-agent-bootstrap.md) after pulling new changes or when you want an agent to re-audit this repository.
 - Explain this repository's own structure: read [docs/agent-bootstrap-structure.md](docs/agent-bootstrap-structure.md) before editing shared prompts, installers, generated plugin output, or setup docs.
 
@@ -79,9 +84,10 @@ The public baseline is deliberately thin.
 
 - `karpathy-guidelines` is the public default base skill. It keeps coding agents focused on assumptions, simplicity, surgical diffs, and verifiable success criteria.
 - `superpowers` is an optional workflow library for brainstorming, planning, TDD, debugging, verification, and review. The thin process-first core does not require it.
-- `hun-engineering-loop` is a Hun-local wrapper around `karpathy-guidelines`. It adds memory preflight, source-of-truth ordering, high-risk approval boundaries, artifact-first execution, and QA evidence contracts. It is useful in Hun's local runtime, but it is not part of the public default install set.
+- `hun-engineering-loop` is a compact Hun-local wrapper around `karpathy-guidelines`. It turns rough instructions into the smallest concrete outcome, follows current target evidence, preserves high-risk approval boundaries, delegates only for clear leverage, and uses proportionate direct proof. It is useful in Hun's local runtime, but it is not part of the public default install set.
 - `chatgpt-collaboration-harness` is a Codex-side collaboration skill for carefully scoped ChatGPT Pro work. It is not installed into Claude Code by default.
 - `handoff` is an explicit-use catalog skill. Use it only when the user explicitly asks to package current task state for another agent or session; review it through [skills/README.md](skills/README.md), [docs/codex-skills.md](docs/codex-skills.md), and [prompts/setup-codex-skills.md](prompts/setup-codex-skills.md).
+- `isolated-worktree`, `execute-plan`, `review-feedback-triage`, and `focused-debugging` are compact explicit-use adaptations of selected Superpowers workflows. They provide those workflows without activating the full upstream chain.
 
 Memory and prior summaries are recall layers, not sources of truth. Current user instructions, repo docs, scripts, tests, `AGENTS.md`, and observed runtime output win when they conflict.
 
@@ -198,6 +204,7 @@ Use test-first when behavior is clear and testable or the repository requires it
 
 - `prompts/setup-codex-current-harness.md`: use inside Codex when the current Codex harness should receive the shared core.
 - `prompts/setup-claude-current-harness.md`: use inside Claude Code when the Claude plugin and shared role prompts should be set up.
+- `prompts/setup-portable-runtime.md`: adapt the shared core to another identified AI coding CLI without claiming first-class support.
 - `prompts/setup-shared-core.md`: use only when the target environment is unclear and the safest answer is to inspect shared prompt guidance without installing anything.
 - `prompts/setup-codex-skills.md`: use when you want an agent to inspect this repository's optional Codex skill catalog, compare selected skills with `~/.codex/skills`, and install only approved skills.
 - `prompts/apply-vibe-coding-guardrails.md`: use in an application repository that needs structure maps, edge-case-first tests, dependency-boundary checks, and local project knowledge.
@@ -208,15 +215,17 @@ Legacy prompts for older OpenCode or OpenClaw experiments may remain in git, but
 
 ## What The Guardrails Enforce
 
-The guardrails are meant to make agent coding less forgetful and less structurally messy.
+The guardrails are meant to make agent coding finish cleanly without paying for repeated process.
 
-- Pre-write lens: inspect module boundaries, dependency direction, public APIs, helpers, types, shapes, re-exports, tests, error boundaries, and known hotspots before editing.
-- Testing gate: use test-first when behavior is clear and testable or repository-required; otherwise use proportionate structural or executable checks. Select checks from invalidated evidence and reserve full regression for broad, cross-cutting, high-risk, release-bound, or wider-impact work. Never claim an unrun check passed.
+- Outcome contract: turn rough instructions into the smallest concrete finish line, state the working assumption, and ask only when the answer materially changes the result or authority.
+- Source map: use the parent brief and current target evidence; search only boundaries that remain unresolved.
+- Evidence gate: use the lowest-cost direct proof, rerun only invalidated checks, and reserve full regression for broad, cross-cutting, high-risk, release-bound, or wider-impact work.
 - Coupling control: avoid hidden imports, initialization-order contracts, duplicate shapes, unreviewed barrels, and fan-in/fan-out hotspots.
 - Error discipline: do not silently swallow errors, do not add fallback behavior unless it is a documented requirement, and keep error handling at explicit boundaries.
 - Test discipline: assert behavior and side effects; keep mocks at external boundaries instead of mocking internal implementation details.
 - Privacy discipline: do not commit personal vault paths, private project paths, credentials, MCP endpoints, auth state, browser profiles, or machine-specific trust settings.
-- Skill discipline: treat skills as tested process code, not as casual prose. Run validators and repo tests before claiming a skill is ready.
+- Skill discipline: use workflow skills for missing procedures and retain performance skills only when representative before/after benchmarks show a net gain.
+- Delegation discipline: give disjoint workers bounded outcomes, minimal context, one owner, direct evidence, and a stop condition; use at most one assurance sidecar by default.
 
 ## Optional Tools And Installation Policy
 
@@ -340,3 +349,7 @@ Use that full command only when the change or release boundary warrants full reg
 changes, run the relevant test module or structural check and reuse unchanged passing evidence.
 
 Run `python3 scripts/check_private_paths.py` before publishing changes that touch README files, skills, prompts, docs, generated plugin output, or setup scripts.
+
+Skill and prompt behavior has a separate, locally pinned benchmark path in
+[`benchmarks/README.md`](benchmarks/README.md). Its deterministic smoke test consumes no model tokens;
+live `with_skill`/`without_skill` runs stay manual until Hun approves the case corpus and cost.

@@ -17,8 +17,8 @@ An agent setting up this repository should perform these steps in order:
 2. Ask the user what partner name Codex or Claude Code should use. Keep that value in local rendered
    output; do not commit it to this public repository. If the user has no preference, ask whether
    `Partner` is acceptable.
-3. Inspect the active runtimes and inherit the models and reasoning levels they actually support.
-   Do not assume a paid plan, a latest model name, or an unavailable reasoning tier. Shared config
+3. Inspect only the harness being configured. Preserve its existing machine-local model and effort;
+   on a fresh target, inherit the runtime selection. Shared config
    intentionally carries no model pin.
 4. Validate the tracked plugin before proposing a runtime change.
 5. Read the current plugin lists and report whether Figma is available. Do not authenticate Figma,

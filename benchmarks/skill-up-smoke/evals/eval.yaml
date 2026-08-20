@@ -1,0 +1,28 @@
+schema_version: v1alpha1
+
+environment:
+  type: none
+
+mcp:
+  servers: []
+
+engine:
+  name: codex-dotfiles-smoke
+  custom:
+    transport: local
+    response_format: session_result
+    local:
+      command: ${CUSTOM_AGENT_BIN}
+      args:
+        - ${input_file}
+
+cases:
+  files:
+    - evals/cases/smoke.yaml
+  defaults:
+    timeout_seconds: 30
+    max_turns: 1
+  parallelism: 1
+
+report:
+  formats: [json]

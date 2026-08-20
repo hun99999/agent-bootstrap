@@ -10,16 +10,32 @@ Follow these rules exactly:
    - If they have no preference, ask whether the generic name `Partner` is acceptable.
    - Keep the chosen name local and substitute it for `<chosen-name>`; do not commit the chosen
      name or any rendered file containing it.
-3. Inspect the active Claude Code runtime and inherit only the models and reasoning levels the
-   user's account and organization actually support. Do not hard-code a latest model or paid plan.
+3. Inspect the active Claude Code runtime with `claude --help` and retain `model: inherit` with no
+   per-agent `effort` pin. Use `/model` or `/effort` only when the user chooses a selection the
+   active account and model support. When availability cannot be enumerated, retain session
+   inheritance and report it.
 4. Configure Claude Code only.
 5. Do not configure another harness unless the user explicitly asks.
 6. Render and install or update the shared `process-first-agents` prompts using
    `--partner-name "<chosen-name>"`.
-7. Separately ask whether the user wants the optional upstream Claude Superpowers plugin.
+7. Resolve one target-local skill mode with the user: lean catalog skills, full upstream
+   Superpowers, or neither.
+   - Recommend lean catalog skills when lower prompt and workflow overhead is the goal.
+   - Inspect current skill and plugin discovery before changing it. Use the target-supported plugin
+     or skill controls, and derive any path-specific entry from this target.
+   - In lean mode, install only approved catalog skills; keep the four Superpowers adaptations
+     explicit-use and keep the full upstream plugin unchanged until the user approves a change.
+   - In full upstream mode, separately ask whether the user wants the optional upstream Claude
+     Superpowers plugin.
    - Do not install or update Superpowers automatically.
    - Install it through the official Claude marketplace only after explicit user approval.
    - `process-first-agents` is separate from Superpowers and remains usable without Superpowers.
+7a. Ask separately whether the user wants Basic Memory and whether the user wants Computer Use or
+    browser control.
+   - Do not install or enable either capability before its own approval.
+   - Keep MCP commands, hooks, project mappings, app paths, permissions, auth state, and browser
+     profiles target-local.
+   - `process-first-agents` and selected skills must work when either capability is absent.
 8. Review public-safe skills before installing anything into `~/.claude/skills`.
 9. Install only user-approved selected skills; do not auto-install the full catalog.
 10. Validate the tracked frontend design plugin with
@@ -34,11 +50,12 @@ Follow these rules exactly:
 11. Preserve unrelated Claude Code state.
 12. Summarize:
    - chosen partner name
-   - model and reasoning inheritance decision
+   - inherited or explicitly selected Claude model and session effort
    - files changed
    - backups created
    - selected skills installed or skipped
-   - whether the separate Superpowers option was approved, declined, or left unchanged
+   - selected target-local skill mode and whether upstream Superpowers was approved, declined, or
+     left unchanged
    - tracked plugin and installed runtime validation
    - Figma availability without authentication changes
    - anything that still needs manual follow-up

@@ -1,0 +1,36 @@
+{
+  "schema_version": 1,
+  "project": "alibaba/skill-up",
+  "version": "0.8.0",
+  "tag": "v0.8.0",
+  "commit": "5f89e640f63e0dcd270c962e89c853c2076cda2f",
+  "published_at": "2026-08-10T08:35:38Z",
+  "license": "Apache-2.0",
+  "release_base_url": "https://github.com/alibaba/skill-up/releases/download/v0.8.0",
+  "assets": {
+    "darwin-amd64": {
+      "file": "skill-up_0.8.0_darwin_amd64.tar.gz",
+      "sha256": "636bbdce82b0619d8373ba831bbd262e1640e13cf198ea2a0ddfedffa767578f"
+    },
+    "darwin-arm64": {
+      "file": "skill-up_0.8.0_darwin_arm64.tar.gz",
+      "sha256": "925e14e8b3b27f7f377ccba51228ac8aece8e53b5798f69e4fbeeada6c8b6eda"
+    },
+    "linux-amd64": {
+      "file": "skill-up_0.8.0_linux_amd64.tar.gz",
+      "sha256": "cdb3358865858e085c333d88e0130239c29eabdbb7c56d2d0b28ca6375a7a8b2"
+    },
+    "linux-arm64": {
+      "file": "skill-up_0.8.0_linux_arm64.tar.gz",
+      "sha256": "a5cf458adc3c83d90fff64ae60df1e2e41abf79b04199a885ba5e0650527c20e"
+    },
+    "windows-amd64": {
+      "file": "skill-up_0.8.0_windows_amd64.zip",
+      "sha256": "ee97b0ba68d38ef3dbe7216e959468283957f22348a78e2c976556dd36abc8d4"
+    },
+    "windows-arm64": {
+      "file": "skill-up_0.8.0_windows_arm64.zip",
+      "sha256": "5f7ace909bf8b0501a84945e2b42d8cffab566d5e40b15de26f4f52181b067a6"
+    }
+  }
+}

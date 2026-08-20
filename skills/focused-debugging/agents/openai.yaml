@@ -1,0 +1,6 @@
+interface:
+  display_name: "Focused Debugging"
+  short_description: "Diagnose a non-obvious failure with bounded evidence"
+  default_prompt: "Use $focused-debugging to diagnose this non-obvious failure with bounded evidence."
+policy:
+  allow_implicit_invocation: false

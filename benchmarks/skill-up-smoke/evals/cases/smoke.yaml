@@ -1,0 +1,8 @@
+id: smoke
+title: Deterministic custom engine reaches the report judge
+input:
+  prompt: verify the local benchmark harness
+expect:
+  exit_code: 0
+  must_contain:
+    - "skill-up-smoke-ok"

@@ -10,20 +10,19 @@ SETUP_PROMPT_PATHS = (
     REPO_ROOT / "prompts" / "fresh-install.md",
     REPO_ROOT / "prompts" / "setup-codex-current-harness.md",
 )
-ROOT_PROMPT_MAX_WORDS = 850
-ROOT_PROMPT_MAX_BYTES = 6656
+LOCAL_PROMPT_PATHS = (
+    REPO_ROOT / ".codex" / "templates" / "local.md",
+    REPO_ROOT / "codex-home" / "local.md",
+)
+ROOT_PROMPT_MAX_WORDS = 550
+ROOT_PROMPT_MAX_BYTES = 5120
 DEFAULT_ROLE_MAX_WORDS = 200
-ROLE_MAX_WORDS = {
-    "eng-lead.md": 300,
-}
 LEGACY_ABSOLUTE_MANDATES = (
     "Rule #1:",
-    "Violating the letter of the rules is violating the spirit",
     "NEVER skip steps or take shortcuts",
     "FOR EVERY NEW FEATURE OR BUGFIX",
     "ALL TEST FAILURES ARE YOUR RESPONSIBILITY",
     "Tests MUST comprehensively cover ALL functionality",
-    'The "trivial task" exception does NOT apply',
     "Always complete ALL steps including reviews even for small changes",
     "YOU MUST ALWAYS find the root cause",
     "Test output MUST BE PRISTINE TO PASS",
@@ -39,8 +38,6 @@ DIRECT_PROCESS_REFERENCE_PATTERNS = (
     r"\bfinishing-a-development-branch\b",
     r"\bwriting-skills\b",
     r"\busing-git-worktrees\b",
-    r"\buse brainstorming\b",
-    r"\buse writing-plans\b",
 )
 
 
@@ -49,233 +46,147 @@ def normalize_semantic_text(text: str) -> str:
 
 
 def full_regression_policy_lines(text: str) -> list[str]:
-    return [
-        normalize_semantic_text(line)
-        for line in text.splitlines()
-        if "full regression" in normalize_semantic_text(line)
-    ]
+    normalized = normalize_semantic_text(text)
+    start = normalized.find("full regression")
+    if start < 0:
+        return []
+    end = normalized.find(".", start)
+    return [normalized[start:] if end < 0 else normalized[start:end]]
 
 
 class PromptCorpusPolicyTests(unittest.TestCase):
     def test_setup_prompts_ask_identity_and_inherit_runtime_model_entitlements(self):
         expected_phrases = (
             "Ask the user what name",
-            "Inspect the active Codex and Claude runtimes",
-            "models and reasoning levels they actually support",
-            "Do not promise or hard-code a particular model",
-            "If support cannot be discovered, ask the user rather than guessing",
+            "Inspect the active Codex runtime",
+            "model and reasoning settings it actually supports",
+            "preserve existing machine-local selections",
+            "leave model and reasoning unset",
             "Do not commit the chosen partner name",
         )
-
         for path in SETUP_PROMPT_PATHS:
             with self.subTest(path=path.relative_to(REPO_ROOT)):
                 prompt = path.read_text(encoding="utf-8")
-
+                normalized_prompt = prompt.lower()
                 for phrase in expected_phrases:
-                    self.assertIn(phrase, prompt)
+                    self.assertIn(phrase.lower(), normalized_prompt)
                 self.assertNotIn("Hun", prompt)
+                self.assertNotIn("Inspect the active Codex and Claude runtimes", prompt)
                 self.assertNotRegex(prompt, r"\b(?:gpt-\d|claude-(?:opus|sonnet|haiku))")
 
     def test_root_prompt_stays_within_compact_size_budget(self):
         root_prompt = ROOT_PROMPT_PATH.read_text(encoding="utf-8")
-
-        self.assertLessEqual(
-            len(root_prompt.split()),
-            ROOT_PROMPT_MAX_WORDS,
-            "shared AGENTS policy exceeded the word budget",
-        )
-        self.assertLessEqual(
-            len(root_prompt.encode("utf-8")),
-            ROOT_PROMPT_MAX_BYTES,
-            "shared AGENTS policy exceeded the byte budget",
-        )
+        self.assertLessEqual(len(root_prompt.split()), ROOT_PROMPT_MAX_WORDS)
+        self.assertLessEqual(len(root_prompt.encode("utf-8")), ROOT_PROMPT_MAX_BYTES)
 
     def test_root_prompt_keeps_local_include_final(self):
         root_prompt = ROOT_PROMPT_PATH.read_text(encoding="utf-8")
-        nonempty_lines = [line.strip() for line in root_prompt.splitlines() if line.strip()]
+        nonempty = [line.strip() for line in root_prompt.splitlines() if line.strip()]
+        self.assertEqual(nonempty[-1], "@local.md")
+        self.assertEqual(nonempty.count("@local.md"), 1)
 
-        self.assertEqual(
-            nonempty_lines[-1],
-            "@local.md",
-            "@local.md must remain the final nonblank line",
-        )
-        self.assertEqual(nonempty_lines.count("@local.md"), 1)
-
-    def test_root_prompt_uses_compact_semantic_sections(self):
-        root_prompt = ROOT_PROMPT_PATH.read_text(encoding="utf-8")
+    def test_root_prompt_uses_result_oriented_sections(self):
         headings = [
             normalize_semantic_text(line.lstrip("#").strip())
-            for line in root_prompt.splitlines()
+            for line in ROOT_PROMPT_PATH.read_text(encoding="utf-8").splitlines()
             if line.startswith("#")
         ]
-        expected_heading_terms = {
-            "core contract": ("core",),
-            "source of truth and memory": ("source of truth", "memory"),
-            "scope and approval": ("scope", "approval"),
-            "implementation discipline": ("implementation",),
-            "testing, debugging, and completion": ("testing", "completion"),
-            "git and worktree safety": ("git", "worktree"),
-            "skills, delegation, and local extension": ("skills", "delegation"),
-        }
-        missing_sections = [
-            section
-            for section, terms in expected_heading_terms.items()
-            if not any(all(term in heading for term in terms) for heading in headings)
-        ]
+        expected = (
+            ("outcome",),
+            ("source of truth",),
+            ("authority", "preservation"),
+            ("execution",),
+            ("evidence", "completion"),
+            ("git", "worktree"),
+            ("skills", "delegation"),
+        )
+        self.assertEqual(
+            [terms for terms in expected if not any(all(term in heading for term in terms) for heading in headings)],
+            [],
+        )
 
-        self.assertEqual(missing_sections, [])
-
-    def test_root_prompt_preserves_compact_semantic_contract(self):
-        root_prompt = ROOT_PROMPT_PATH.read_text(encoding="utf-8")
-        normalized = normalize_semantic_text(root_prompt)
-        expected_anchors = (
-            "clarification",
+    def test_root_prompt_preserves_lean_outcome_contract(self):
+        normalized = normalize_semantic_text(ROOT_PROMPT_PATH.read_text(encoding="utf-8"))
+        expected = (
+            "smallest concrete outcome",
             "host/runtime",
-            "journal or memory",
-            "context compaction",
-            "source of truth",
-            "high risk",
+            "memory or journals",
+            "after compaction",
+            "authoritative",
             "explicit approval",
             "preserve unrelated work",
-            "smallest reasonable change",
-            "explicit boundaries",
-            "swallow errors",
-            "root cause",
-            "invalidated evidence",
-            "skill validator",
-            "private paths",
-            "runtime copy",
+            "lowest cost direct proof",
+            "fresh, minimal context",
+            "performance skills",
+            "bounded outcome",
+            "stop condition",
+            "completion claims cover only evidence actually obtained",
         )
-        missing_anchors = [
-            anchor for anchor in expected_anchors if anchor not in normalized
-        ]
+        self.assertEqual([anchor for anchor in expected if anchor not in normalized], [])
 
-        self.assertEqual(missing_anchors, [])
-        self.assertNotIn("you must always stop and ask for clarification", normalized)
-        self.assertNotIn("The last assistant was a sycophant", root_prompt)
+    def test_local_prompt_snapshot_is_equal_and_budgeted(self):
+        texts = [path.read_text(encoding="utf-8") for path in LOCAL_PROMPT_PATHS]
+        self.assertEqual(texts[0], texts[1])
+        self.assertLessEqual(len(texts[0].split()), 120)
+        self.assertLessEqual(len(texts[0].encode("utf-8")), 1024)
 
-    def test_root_prompt_never_claims_unrun_checks(self):
-        root_prompt = ROOT_PROMPT_PATH.read_text(encoding="utf-8")
-        normalized = normalize_semantic_text(root_prompt)
-        self.assertRegex(
-            normalized,
-            (
-                r"(?:never|do not) claim[^.]{0,160}"
-                r"(?:(?:unrun|not run|did not run)[^.]{0,80}checks?"
-                r"|checks?[^.]{0,80}(?:unrun|not run|did not run|ran when they did not))"
-            ),
+    def test_codex_home_prompt_and_roles_match_canonical_sources(self):
+        self.assertEqual(
+            ROOT_PROMPT_PATH.read_bytes(),
+            (REPO_ROOT / "codex-home" / "AGENTS.md").read_bytes(),
         )
-
-    def test_codex_home_prompt_matches_root_prompt(self):
-        root_prompt = ROOT_PROMPT_PATH.read_text()
-        codex_home_prompt = (REPO_ROOT / "codex-home" / "AGENTS.md").read_text()
-
-        self.assertEqual(root_prompt, codex_home_prompt)
-
-    def test_codex_home_agents_match_shared_agents(self):
-        shared_agents_dir = REPO_ROOT / "agents"
-        codex_home_agents_dir = REPO_ROOT / "codex-home" / "agents"
-
-        for shared_agent_path in shared_agents_dir.glob("*.md"):
-            with self.subTest(agent=shared_agent_path.name):
-                codex_home_agent_path = codex_home_agents_dir / shared_agent_path.name
-
-                self.assertTrue(
-                    codex_home_agent_path.exists(),
-                    f"Missing codex-home agent: {codex_home_agent_path}",
-                )
+        for source in CANONICAL_ROLE_DIR.glob("*.md"):
+            with self.subTest(agent=source.name):
                 self.assertEqual(
-                    shared_agent_path.read_text(),
-                    codex_home_agent_path.read_text(),
+                    source.read_bytes(),
+                    (REPO_ROOT / "codex-home" / "agents" / source.name).read_bytes(),
                 )
 
-    def test_delegation_roles_are_host_capability_gated(self):
-        for agent_name in ("eng-lead.md", "worker.md"):
-            with self.subTest(agent=agent_name):
-                agent_text = (REPO_ROOT / "agents" / agent_name).read_text()
+    def test_lead_delegation_has_minimal_context_ownership_and_stop_contract(self):
+        text = (CANONICAL_ROLE_DIR / "eng-lead.md").read_text(encoding="utf-8")
+        expected = (
+            "current host/runtime provides",
+            "minimal self-contained source map",
+            "fresh context",
+            "one owner",
+            "Stop or cancel work",
+            "at most one assurance sidecar",
+            "source-grounded worker evidence",
+        )
+        for phrase in expected:
+            self.assertIn(phrase, text)
 
-                self.assertIn("current host/runtime provides", agent_text)
+    def test_worker_returns_bounded_work_without_nested_delegation(self):
+        text = (CANONICAL_ROLE_DIR / "worker.md").read_text(encoding="utf-8")
+        self.assertIn("one bounded routine implementation outcome", text)
+        self.assertIn("further delegation remain with the lead", text)
+        self.assertNotIn("Delegate independent work", text)
 
     def test_debugger_can_continue_when_fix_requested(self):
-        debugger_text = (REPO_ROOT / "agents" / "debugger.md").read_text()
+        text = (CANONICAL_ROLE_DIR / "debugger.md").read_text(encoding="utf-8")
+        self.assertIn("If {{PARTNER_NAME}} requested a fix", text)
+        self.assertIn("smallest fix", text)
+        self.assertIn("supported by the evidence", text)
 
-        self.assertIn(
-            "If {{PARTNER_NAME}} asked you to fix the issue",
-            debugger_text,
-        )
-        self.assertIn("cause is proven", debugger_text)
-        self.assertIn("continue into implementation", debugger_text)
+    def test_root_and_verifier_scope_full_regression_to_wider_risk(self):
+        for path in (ROOT_PROMPT_PATH, CANONICAL_ROLE_DIR / "verifier.md"):
+            with self.subTest(path=path.relative_to(REPO_ROOT)):
+                policy = " ".join(full_regression_policy_lines(path.read_text(encoding="utf-8")))
+                for criterion in ("only", "broad", "cross cutting", "high risk", "release", "wider impact"):
+                    self.assertIn(criterion, policy)
 
-    def test_root_prompt_limits_full_regression_to_wider_risk(self):
-        root_prompt = ROOT_PROMPT_PATH.read_text(encoding="utf-8")
-        policy_lines = full_regression_policy_lines(root_prompt)
+    def test_prompts_omit_legacy_mandates_process_skill_names_and_reread_loops(self):
+        paths = [ROOT_PROMPT_PATH, *sorted(CANONICAL_ROLE_DIR.glob("*.md"))]
+        texts = [path.read_text(encoding="utf-8") for path in paths]
+        for mandate in LEGACY_ABSOLUTE_MANDATES:
+            self.assertFalse(any(mandate in text for text in texts), mandate)
+        for pattern in DIRECT_PROCESS_REFERENCE_PATTERNS:
+            self.assertFalse(any(re.search(pattern, text.casefold()) for text in texts), pattern)
+        for phrase in ("reread", "read again", "review thoroughly", "check thoroughly"):
+            self.assertFalse(any(phrase in text.casefold() for text in texts), phrase)
 
-        self.assertNotEqual(policy_lines, [], "missing full-regression scope policy")
-        policy = " ".join(policy_lines)
-        expected_criteria = (
-            "only",
-            "broad",
-            "cross cutting",
-            "high risk",
-            "release",
-            "wider impact",
-        )
-        missing_criteria = [
-            criterion for criterion in expected_criteria if criterion not in policy
-        ]
-
-        self.assertEqual(missing_criteria, [])
-
-    def test_root_prompt_omits_legacy_absolute_mandates(self):
-        root_prompt = ROOT_PROMPT_PATH.read_text(encoding="utf-8")
-        legacy_hits = [
-            mandate for mandate in LEGACY_ABSOLUTE_MANDATES if mandate in root_prompt
-        ]
-
-        self.assertEqual(legacy_hits, [])
-
-    def test_root_prompt_omits_direct_process_skill_names(self):
-        root_prompt = ROOT_PROMPT_PATH.read_text(encoding="utf-8")
-        lowered = root_prompt.lower()
-        direct_reference_hits = [
-            pattern
-            for pattern in DIRECT_PROCESS_REFERENCE_PATTERNS
-            if re.search(pattern, lowered)
-        ]
-        self.assertEqual(direct_reference_hits, [])
-
-    def test_role_agents_include_guardrail_responsibilities(self):
-        expectations = {
-            "planner.md": (
-                "module boundaries",
-                "SSOT",
-                "dependency direction",
-                "edge cases",
-            ),
-            "worker.md": (
-                "search for existing helpers",
-                "pre-write lens",
-                "failure paths",
-                "silent fallback",
-            ),
-            "reviewer.md": (
-                "hidden coupling",
-                "duplicate replacement",
-                "swallowed errors",
-                "fan-in",
-                "fan-out",
-                "internal behavior",
-            ),
-        }
-
-        for agent_name, phrases in expectations.items():
-            with self.subTest(agent=agent_name):
-                agent_text = (REPO_ROOT / "agents" / agent_name).read_text()
-                for phrase in phrases:
-                    self.assertIn(phrase, agent_text)
-
-    def test_specialist_implementation_agents_include_write_gate_guardrails(self):
-        specialist_agents = (
+    def test_specialists_search_only_unresolved_parent_brief_boundaries(self):
+        specialists = (
             "backend-engineer.md",
             "data-engineer.md",
             "frontend-engineer.md",
@@ -283,83 +194,60 @@ class PromptCorpusPolicyTests(unittest.TestCase):
             "performance-engineer.md",
             "platform-engineer.md",
             "security-engineer.md",
-            "skill-author.md",
         )
-        expected_phrases = (
-            "pre-write lens",
-            "search for existing helpers",
-            "edge cases",
-            "side effects",
-            "silent fallback",
+        for name in specialists:
+            with self.subTest(agent=name):
+                text = (CANONICAL_ROLE_DIR / name).read_text(encoding="utf-8")
+                for phrase in (
+                    "parent brief's current source map",
+                    "Search only unresolved",
+                    "side effects",
+                    "silent fallback",
+                ):
+                    self.assertIn(phrase, text)
+                self.assertRegex(text, r"edge (?:cases|states)")
+
+    def test_reviewer_retains_concrete_risk_contract(self):
+        text = (CANONICAL_ROLE_DIR / "reviewer.md").read_text(encoding="utf-8")
+        for phrase in (
+            "hidden coupling",
+            "duplicate replacement",
+            "swallowed errors",
+            "fan-in",
+            "fan-out",
+            "internal behavior",
+        ):
+            self.assertIn(phrase, text)
+
+    def test_skill_author_classifies_and_benchmarks_performance_skills(self):
+        text = (CANONICAL_ROLE_DIR / "skill-author.md").read_text(encoding="utf-8")
+        for phrase in (
+            "workflow skill",
+            "performance skill",
+            "before/after benchmarks",
+            "frequently loaded content",
+        ):
+            self.assertIn(phrase, text)
+
+    def test_verifier_uses_direct_invalidated_evidence_and_stops(self):
+        normalized = normalize_semantic_text(
+            (CANONICAL_ROLE_DIR / "verifier.md").read_text(encoding="utf-8")
         )
-
-        for agent_name in specialist_agents:
-            with self.subTest(agent=agent_name):
-                agent_text = (REPO_ROOT / "agents" / agent_name).read_text()
-                for phrase in expected_phrases:
-                    self.assertIn(phrase, agent_text)
-
-    def test_canonical_role_prompts_omit_direct_process_skill_names(self):
-        violations = {}
-        for agent_path in sorted(CANONICAL_ROLE_DIR.glob("*.md")):
-            agent_text = agent_path.read_text(encoding="utf-8").lower()
-            hits = [
-                pattern
-                for pattern in DIRECT_PROCESS_REFERENCE_PATTERNS
-                if re.search(pattern, agent_text)
-            ]
-            if hits:
-                violations[agent_path.name] = hits
-
-        self.assertEqual(violations, {})
+        for phrase in (
+            "lowest cost check",
+            "run only missing or invalidated checks",
+            "exact remaining gap",
+            "stop once the claim is proved",
+        ):
+            self.assertIn(phrase, normalized)
 
     def test_canonical_role_prompts_stay_within_pragmatic_word_budgets(self):
         violations = {}
-        for agent_path in sorted(CANONICAL_ROLE_DIR.glob("*.md")):
-            agent_text = agent_path.read_text(encoding="utf-8")
-            word_limit = ROLE_MAX_WORDS.get(agent_path.name, DEFAULT_ROLE_MAX_WORDS)
-            word_count = len(agent_text.split())
-            if word_count > word_limit:
-                violations[agent_path.name] = {
-                    "actual": word_count,
-                    "limit": word_limit,
-                }
-
+        for path in sorted(CANONICAL_ROLE_DIR.glob("*.md")):
+            words = len(path.read_text(encoding="utf-8").split())
+            if words > DEFAULT_ROLE_MAX_WORDS:
+                violations[path.name] = words
         self.assertEqual(violations, {})
-
-    def test_verifier_tracks_invalidated_evidence(self):
-        verifier_text = (CANONICAL_ROLE_DIR / "verifier.md").read_text(encoding="utf-8")
-        normalized = normalize_semantic_text(verifier_text)
-        expected_anchors = (
-            "pristine test output",
-            ".audit/",
-            "local evidence artifacts",
-            "invalidated evidence",
-        )
-        missing_anchors = [
-            anchor for anchor in expected_anchors if anchor not in normalized
-        ]
-
-        self.assertEqual(missing_anchors, [])
-
-    def test_verifier_scopes_full_regression(self):
-        verifier_text = (CANONICAL_ROLE_DIR / "verifier.md").read_text(encoding="utf-8")
-        policy_lines = full_regression_policy_lines(verifier_text)
-        self.assertNotEqual(policy_lines, [], "verifier is missing full-regression criteria")
-        policy = " ".join(policy_lines)
-        expected_criteria = (
-            "only",
-            "broad",
-            "cross cutting",
-            "high risk",
-            "release",
-            "wider impact",
-        )
-        missing_criteria = [
-            criterion for criterion in expected_criteria if criterion not in policy
-        ]
-
-        self.assertEqual(missing_criteria, [])
 
 
 if __name__ == "__main__":

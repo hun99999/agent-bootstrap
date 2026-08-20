@@ -13,6 +13,12 @@ HANDOFF_CATALOG_FILES = (
     "skills/handoff/SOURCE.md",
     "skills/handoff/LICENSE",
 )
+LEAN_WORKFLOW_SKILLS = {
+    "isolated-worktree": "using-git-worktrees",
+    "execute-plan": "executing-plans",
+    "review-feedback-triage": "receiving-code-review",
+    "focused-debugging": "systematic-debugging",
+}
 
 
 def markdown_section(document: str, heading: str, next_heading: str) -> str:
@@ -20,6 +26,82 @@ def markdown_section(document: str, heading: str, next_heading: str) -> str:
 
 
 class SkillCatalogTests(unittest.TestCase):
+    def test_lean_superpowers_adaptations_are_compact_and_explicit_only(self) -> None:
+        for skill_name, upstream_name in LEAN_WORKFLOW_SKILLS.items():
+            with self.subTest(skill=skill_name):
+                skill_root = REPO_ROOT / "skills" / skill_name
+                skill_path = skill_root / "SKILL.md"
+                openai_path = skill_root / "agents" / "openai.yaml"
+                source_path = skill_root / "SOURCE.md"
+                license_path = skill_root / "LICENSE"
+
+                for path in (skill_path, openai_path, source_path, license_path):
+                    self.assertTrue(path.is_file(), path)
+
+                skill = skill_path.read_text(encoding="utf-8")
+                openai = openai_path.read_text(encoding="utf-8")
+                source = source_path.read_text(encoding="utf-8")
+                license_text = license_path.read_text(encoding="utf-8")
+
+                self.assertLessEqual(len(skill.split()), 220)
+                self.assertIn(f"name: {skill_name}", skill)
+                self.assertRegex(skill, r"description: Use only when ")
+                self.assertIn("## Result", skill)
+                self.assertIn("## Route", skill)
+                self.assertIn("## Stop", skill)
+                self.assertIn("allow_implicit_invocation: false", openai)
+                self.assertIn(f"${skill_name}", openai)
+                self.assertIn("https://github.com/obra/superpowers", source)
+                self.assertIn("v6.2.0", source)
+                self.assertIn(f"skills/{upstream_name}/SKILL.md", source)
+                self.assertIn("adapted", source.lower())
+                self.assertIn("MIT License", license_text)
+                self.assertIn("Copyright (c) 2025 Jesse Vincent", license_text)
+
+                lowered = skill.lower()
+                for phrase in (
+                    "subagent",
+                    "review checkpoint",
+                    "finishing-a-development-branch",
+                    "verification-before-completion",
+                    "test-driven-development",
+                    "full test suite",
+                    "read every line",
+                    "read again",
+                ):
+                    self.assertNotIn(phrase, lowered)
+
+    def test_core_guidance_stays_implicit_with_a_lean_hun_wrapper(self) -> None:
+        for skill_name in ("karpathy-guidelines", "hun-engineering-loop"):
+            with self.subTest(skill=skill_name):
+                openai = (
+                    REPO_ROOT / "skills" / skill_name / "agents" / "openai.yaml"
+                ).read_text(encoding="utf-8")
+                self.assertIn("allow_implicit_invocation: true", openai)
+
+        hun_loop = (
+            REPO_ROOT / "skills" / "hun-engineering-loop" / "SKILL.md"
+        ).read_text(encoding="utf-8")
+        self.assertLessEqual(len(hun_loop.split()), 220)
+        self.assertIn("## Result", hun_loop)
+        self.assertIn("## Route", hun_loop)
+        self.assertIn("## Stop", hun_loop)
+        self.assertNotIn("## Memory Preflight", hun_loop)
+        self.assertNotIn("## QA / Refactor Loop", hun_loop)
+
+    def test_catalog_explains_lean_workflow_and_performance_boundaries(self) -> None:
+        catalog = (REPO_ROOT / "skills" / "README.md").read_text(encoding="utf-8")
+        guides = "\n".join(
+            (REPO_ROOT / relative).read_text(encoding="utf-8")
+            for relative in ("docs/codex-skills.md", "docs/claude-skills.md")
+        )
+
+        for skill_name in LEAN_WORKFLOW_SKILLS:
+            self.assertIn(f"### {skill_name}", catalog)
+            self.assertIn(f"`{skill_name}`", guides)
+        self.assertIn("explicit-use", catalog.lower())
+        self.assertIn("benchmark", catalog.lower())
+
     def test_catalog_lists_karpathy_guidelines_as_public_base_first(self) -> None:
         catalog = (REPO_ROOT / "skills" / "README.md").read_text(encoding="utf-8")
 
@@ -177,7 +259,7 @@ class SkillCatalogTests(unittest.TestCase):
                     path.read_text(encoding="utf-8"),
                 )
 
-    def test_hun_engineering_loop_wraps_karpathy_with_local_policy(self) -> None:
+    def test_hun_engineering_loop_is_a_small_local_delta(self) -> None:
         skill_root = REPO_ROOT / "skills" / "hun-engineering-loop"
 
         self.assertTrue((skill_root / "SKILL.md").exists())
@@ -185,60 +267,45 @@ class SkillCatalogTests(unittest.TestCase):
 
         skill = (skill_root / "SKILL.md").read_text(encoding="utf-8")
 
-        expected_sections = (
-            "Memory Preflight",
-            "Source Of Truth",
-            "Access And Approval Boundary",
-            "Artifact-First Execution",
-            "Verification Contract",
-            "QA / Refactor Loop",
-            "Final Report",
-        )
+        expected_sections = ("Result", "Route", "Stop")
         for section in expected_sections:
             self.assertIn(section, skill)
 
         expected_phrases = (
-            "karpathy-guidelines",
-            "memory is a recall layer, not a source of truth",
-            "high-risk stop/ask boundary",
-            "permission profiles, hooks, or approval layers",
-            "fast check",
-            "targeted regression",
-            "type/lint/build",
-            "deployment smoke",
+            "rough, abstract, or negative instruction",
+            "smallest concrete outcome",
+            "current target evidence",
+            "lowest-cost direct evidence",
+            "fresh minimal context",
         )
         for phrase in expected_phrases:
             self.assertIn(phrase, skill)
 
-    def test_project_skill_template_contains_qa_evidence_contract(self) -> None:
+    def test_project_skill_template_is_compact_result_oriented_and_explicit(self) -> None:
         template = (REPO_ROOT / "skills" / "_template" / "SKILL.md.template").read_text(
             encoding="utf-8"
         )
+        metadata = (
+            REPO_ROOT / "skills" / "_template" / "agents" / "openai.yaml.template"
+        ).read_text(encoding="utf-8")
 
-        expected_sections = (
-            "Scope / Non-goals",
-            "Memory Preflight",
-            "Source Of Truth",
-            "Access And Approval Boundary",
-            "Artifact-First Execution",
-            "Verification Contract",
-            "QA / Refactor Loop",
-            "Final Report",
-        )
+        self.assertLessEqual(len(template.split()), 240)
+        expected_sections = ("## Result", "## Route", "## Evidence", "## Stop")
         for section in expected_sections:
             self.assertIn(section, template)
 
         expected_phrases = (
-            "fast check",
-            "targeted regression",
-            "type/lint/build",
-            "browser/manual QA",
-            "deployment smoke",
-            "negative/regression test",
-            "memory is a recall layer, not a source of truth",
+            "Use only when",
+            "workflow skill",
+            "performance skill",
+            "lowest-cost direct evidence",
+            "concrete blocker",
         )
         for phrase in expected_phrases:
             self.assertIn(phrase, template)
+        self.assertNotIn("Memory Preflight", template)
+        self.assertNotIn("QA / Refactor Loop", template)
+        self.assertIn("allow_implicit_invocation: false", metadata)
 
     def test_private_project_skills_are_not_cataloged(self) -> None:
         catalog = (REPO_ROOT / "skills" / "README.md").read_text(encoding="utf-8")
@@ -1125,7 +1192,9 @@ class SkillCatalogTests(unittest.TestCase):
             "high-risk stop/ask boundary",
             "permission profiles, hooks, or approval layers",
             "source-of-truth pointer",
-            "QA evidence contract",
+            "smallest complete result",
+            "lowest-cost direct",
+            "workflow or performance",
         )
         for phrase in expected_phrases:
             self.assertIn(phrase, guide)

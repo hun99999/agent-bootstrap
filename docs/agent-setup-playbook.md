@@ -177,8 +177,8 @@ Proceed only after approval. If approval is not given, continue with the best no
 
 Ask the user what name the active agent should use before any local render. Keep the chosen name local.
 Substitute it for `<chosen-name>`, and do not commit the chosen name or any rendered identity file
-that contains it. Inspect the active runtime's models and reasoning levels. Do not hard-code a latest
-model or paid-plan ceiling.
+that contains it. Preserve an existing machine-local model and reasoning selection; on a fresh
+target, inherit the active runtime. Apply an explicit selection only after confirming support.
 
 ## Setup Paths
 
